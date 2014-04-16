@@ -59,7 +59,7 @@ gippy_module = Extension(
 
 setup(
     name='gippy',
-    version='1.0',
+    version='0.9',
     description='Python bindings for GIP library',
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
