@@ -16,7 +16,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ##############################################################################*/
-%module gippylib
+%module gippy
 %feature("autodoc", "1");
 %{
     #define SWIG_FILE_WITH_INIT

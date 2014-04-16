@@ -56,8 +56,8 @@ class GIPdevelop(develop):
 #)
 
 gippy_module = Extension(
-    name='_gippylib',
-    sources=['gippy/gippylib.i'],
+    name='_gippy',
+    sources=['gippy.i'],
     #swig_opts=['-c++', '-w509', '-IGIP', '-keyword'],
     swig_opts=['-c++', '-w509', '-IGIP'],
     include_dirs=['GIP', numpy.get_include()],
@@ -74,8 +74,8 @@ setup(
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
     ext_modules=[gippy_module],
-    packages=['gippy'],
-    py_modules=['gippylib'],
+    #packages=['gippy'],
+    py_modules=['gippy'],
     #dependency_links=['https://github.com/matthewhanson/Py6S.git'],
     #dependency_links=['https://github.com/robintw/Py6S.git'],
     #install_requires = ['Py6S','shapely==1.2.18'],
