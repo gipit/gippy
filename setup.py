@@ -30,8 +30,6 @@ from setuptools.command.develop import develop
 from copy import deepcopy
 import numpy
 
-import gippy.settings as settings
-
 
 class GIPinstall(install):
     def run(self):
@@ -69,14 +67,6 @@ gippy_module = Extension(
     #extra_compile_args=['-fPIC -std=c++0x'],
 )
 
-# console scripts
-for repo, cfg in settings['REPO'].items():
-    console_scripts = []
-    if cfg['rootpath'] != '':
-        console_scripts.append('%s = gippy.data.%s:main' % (repo, repo.lower()))
-
-print console_scripts
-
 setup(
     name='gippy',
     version='1.0',
@@ -84,14 +74,14 @@ setup(
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
     ext_modules=[gippy_module],
-    packages=['gippy', 'gippy.algorithms', 'gippy.data'],
-    py_modules=['gippy.gippylib', 'gippy.GeoVector', 'gippy.gipit'],
+    packages=['gippy'],
+    py_modules=['gippylib'],
     #dependency_links=['https://github.com/matthewhanson/Py6S.git'],
-    dependency_links=['https://github.com/robintw/Py6S.git'],
+    #dependency_links=['https://github.com/robintw/Py6S.git'],
     #install_requires = ['Py6S','shapely==1.2.18'],
-    install_requires=['Py6S', 'shapely'],
+    #install_requires=['Py6S', 'shapely'],
     #data_files=[('/usr/lib', ['GIP/bin/Release/libgip.so'])],
-    entry_points={'console_scripts': console_scripts},
+    #entry_points={'console_scripts': console_scripts},
     cmdclass={
         "develop": GIPdevelop,
         "install": GIPinstall
