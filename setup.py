@@ -47,24 +47,14 @@ class GIPdevelop(develop):
         os.system('cd GIP; make; cd ..')
         develop.run(self)
 
-#libgip = Extension(
-#    name='libgip',
-#    sources=['GIP/Atmosphere.cpp', 'GIP/GeoAlgorithms.cpp', 'GIP/GeoData.cpp',
-#             'GIP/GeoImage.cpp', 'GIP/GeoRaster.cpp', 'GIP/GeoVector.cpp'],
-#    include_dirs=['GIP'],
-#    extra_compile_args=['-std=c++0x', '-Wall', '-fexceptions', '-fPIC', '-O2']
-#)
-
 gippy_module = Extension(
     name='_gippy',
     sources=['gippy.i'],
-    #swig_opts=['-c++', '-w509', '-IGIP', '-keyword'],
-    swig_opts=['-c++', '-w509', '-IGIP'],
+    swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],
     include_dirs=['GIP', numpy.get_include()],
     libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem'],  # ,'X11'],
-    library_dirs=['GIP/bin/Release'],  # '/usr/lib','/usr/local/lib'],
+    library_dirs=['GIP/bin/Release'],
     extra_compile_args=['-fPIC'],  # , '-std=c++0x'],
-    #extra_compile_args=['-fPIC -std=c++0x'],
 )
 
 setup(
@@ -74,14 +64,8 @@ setup(
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
     ext_modules=[gippy_module],
-    #packages=['gippy'],
     py_modules=['gippy'],
-    #dependency_links=['https://github.com/matthewhanson/Py6S.git'],
-    #dependency_links=['https://github.com/robintw/Py6S.git'],
-    #install_requires = ['Py6S','shapely==1.2.18'],
-    #install_requires=['Py6S', 'shapely'],
-    #data_files=[('/usr/lib', ['GIP/bin/Release/libgip.so'])],
-    #entry_points={'console_scripts': console_scripts},
+    #install_requires = ['','numpy'],
     cmdclass={
         "develop": GIPdevelop,
         "install": GIPinstall
