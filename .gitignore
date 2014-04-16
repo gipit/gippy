@@ -1,0 +1,9 @@
+*.pyc
+*~
+*.o
+_gippylib.so
+build/
+dist/
+src/
+gippy.egg-info/
+GIP/bin/
