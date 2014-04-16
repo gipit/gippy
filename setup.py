@@ -59,10 +59,11 @@ gippy_module = Extension(
 
 setup(
     name='gippy',
-    version='0.9',
-    description='Python bindings for GIP library',
+    version='0.9.0',
+    description='Geospatial Image Processing for Python',
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
+    license='GPLv2',
     ext_modules=[gippy_module],
     py_modules=['gippy'],
     #install_requires = ['','numpy'],

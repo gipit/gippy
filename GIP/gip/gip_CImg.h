@@ -6,7 +6,7 @@
 #define cimg_display 0
 #define cimg_plugin "CImg_plugins.h"
 
-#include <CImg.h>
+#include <CImg_152.h>
 
 namespace gip {
 
