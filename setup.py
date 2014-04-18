@@ -30,18 +30,31 @@ from setuptools.command.develop import develop
 from copy import deepcopy
 import numpy
 
+from pdb import set_trace
 
-class GIPinstall(install):
+
+class gippy_install(install):
+    def finalize_options(self):
+        install.finalize_options(self)
+        gippy_module.runtime_library_dirs.append(self.install_lib)
+
     def run(self):
         os.system('cd GIP; make; cd ..')
-        shutil.copy('GIP/bin/Release/libgip.so', '/usr/lib/')
+        # ensure swig extension built before packaging
+        self.run_command('build_ext')
         install.run(self)
+        shutil.copy('GIP/bin/Release/libgip.so', self.install_lib)
+        fname = os.path.join(self.install_lib, 'gippy.py')
+        # Have GDAL register file formats on import
+        f = open(fname, 'a')
+        f.write('reg()')
+        f.close()
 
 
-class GIPdevelop(develop):
-    def initialize_options(self):
+class gippy_develop(develop):
+    def finalize_options(self):
+        develop.finalize_options(self)
         gippy_module.runtime_library_dirs = [os.path.abspath('GIP/bin/Release')]
-        develop.initialize_options(self)
 
     def run(self):
         os.system('cd GIP; make; cd ..')
@@ -68,7 +81,7 @@ setup(
     py_modules=['gippy'],
     #install_requires = ['','numpy'],
     cmdclass={
-        "develop": GIPdevelop,
-        "install": GIPinstall
+        "develop": gippy_develop,
+        "install": gippy_install,
     }
 )
