@@ -7,6 +7,7 @@
 #define cimg_plugin "CImg_plugins.h"
 
 #include <CImg_152.h>
+#include <iostream>
 
 namespace gip {
 
