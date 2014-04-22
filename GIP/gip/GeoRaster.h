@@ -319,7 +319,7 @@ namespace gip {
         template<class T> GeoRaster& WriteRaw(cimg_library::CImg<T> img, int chunknum=0);
         template<class T> GeoRaster& WriteRaw(cimg_library::CImg<T> img, iRect chunk);
         template<class T> GeoRaster& Write(cimg_library::CImg<T> img, int chunknum=0);
-        template<class T> GeoRaster& Process(const GeoRaster& raster);
+        template<class T> GeoRaster& Process(GeoRaster& raster);
 
          //! Get Saturation mask: 1's where it's saturated
         cimg_library::CImg<unsigned char> SaturationMask(int chunk=0) const {
@@ -606,21 +606,22 @@ namespace gip {
         return WriteRaw(img,chunk); 
     }
 
-    //! Process input band into this
-    template<class T> GeoRaster& GeoRaster::Process(const GeoRaster& raster) {
+    //! Process into input band "raster"
+    template<class T> GeoRaster& GeoRaster::Process(GeoRaster& raster) {
         using cimg_library::CImg;
         GDALRasterBand* band = raster.GetGDALRasterBand();
-        CopyCategoryNames(raster);
-        _GDALRasterBand->SetDescription(band->GetDescription());
-        _GDALRasterBand->SetColorInterpretation(band->GetColorInterpretation());
-        _GDALRasterBand->SetMetadata(band->GetMetadata());
-        CopyCoordinateSystem(raster);
+        raster.CopyCategoryNames(*this);
+
+        band->SetDescription(_GDALRasterBand->GetDescription());
+        band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
+        band->SetMetadata(_GDALRasterBand->GetMetadata());
+        raster.CopyCoordinateSystem(*this);
         for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-                CImg<T> cimg = raster.Read<T>(iChunk);
+                CImg<T> cimg = Read<T>(iChunk);
                 if (NoDataValue() != raster.NoDataValue()) {
-                    cimg_for(cimg,ptr,T) { if (*ptr == raster.NoDataValue()) *ptr = NoDataValue(); }
+                    cimg_for(cimg,ptr,T) { if (*ptr == NoDataValue()) *ptr = raster.NoDataValue(); }
                 }
-                Write(cimg,iChunk);
+                raster.Write(cimg,iChunk);
         }
         return *this;
     }
