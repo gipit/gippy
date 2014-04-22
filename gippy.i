@@ -257,12 +257,17 @@ namespace gip {
             }
             return *self;
         }
-        GeoRaster& Process(const GeoRaster& raster) {
+        GeoRaster& Process(GeoRaster& raster) {
             return self->Process<double>(raster);
         }
     }
 
     %extend GeoImage {
+        /*%feature("kwargs") static GeoImage New(std::string filename, const GeoImage& template=GeoImage(),
+            int xsz=0, int ysz, int bands=1, GDALDataType dt=GDT_Byte) {
+            if (template.Basename() != "") {
+            }
+        }*/
         GeoRaster __getitem__(std::string col) {
             return self->GeoImage::operator[](col);
         }
