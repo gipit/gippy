@@ -100,7 +100,7 @@ gippy_module = Extension(
     swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],
     include_dirs=['GIP', numpy.get_include()],
     libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem'],  # ,'X11'],
-    extra_compile_args=['-fPIC'],  # , '-std=c++0x'],
+    extra_compile_args=['-fPIC', '-std=c++0x'],
 )
 
 setup(
