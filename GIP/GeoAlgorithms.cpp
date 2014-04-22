@@ -831,14 +831,13 @@ namespace gip {
     }*/
 
     //! Rice detection algorithm
-    /*GeoImage RiceDetect(const GeoImage& image, string filename, vector<int> days, float th0, float th1, int dth0, int dth1) {
+    GeoImage RiceDetect(const GeoImage& image, string filename, vector<int> days, float th0, float th1, int dth0, int dth1) {
         if (Options::Verbose() > 1) cout << "RiceDetect(" << image.Basename() << ") -> " << filename << endl;
 
-        GeoImageIO<float> img(image);
-        GeoImageIO<unsigned char> imgout(GeoImage(filename, image, GDT_Byte, img.NumBands()));
+        GeoImage imgout(filename, image, GDT_Byte, image.NumBands());
         imgout.SetNoData(0);
         imgout[0].SetDescription("rice");
-        for (unsigned int b=1;b<img.NumBands();b++) {
+        for (unsigned int b=1;b<image.NumBands();b++) {
             imgout[b].SetDescription("day"+to_string(days[b]));
         }
 
@@ -846,10 +845,10 @@ namespace gip {
         CImg<unsigned char> cimg_nodata, cimg_dmask;
         CImg<int> cimg_th0, cimg_flood;
 
-        for (unsigned int iChunk=1; iChunk<=img[0].NumChunks(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << img[0].NumChunks() << endl;
-            cimg = img[0].Read(iChunk);
-            cimg_nodata = img[0].NoDataMask(iChunk);
+        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
+            if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << image[0].NumChunks() << endl;
+            cimg = image[0].Read<float>(iChunk);
+            cimg_nodata = image[0].NoDataMask(iChunk);
             int delta_day(0);
             CImg<int> DOY(cimg.width(), cimg.height(), 1, 1, 0);
             CImg<int> cimg_rice(cimg.width(), cimg.height(), 1, 1, 0);
@@ -858,8 +857,8 @@ namespace gip {
             for (unsigned int b=1;b<image.NumBands();b++) {
                 if (Options::Verbose() > 3) cout << "Day " << days[b] << endl;
                 delta_day = days[b]-days[b-1];
-                cimg = img[b].Read(iChunk);
-                cimg_nodata = img[b].NoDataMask(iChunk);
+                cimg = image[b].Read<float>(iChunk);
+                cimg_nodata = image[b].NoDataMask(iChunk);
                 cimg_th0 = cimg.get_threshold(th0)|=(cimg_nodata^1);    // >= th0 and assume nodata >= th0
 
                 DOY += delta_day;                                       // running total of days
@@ -883,7 +882,7 @@ namespace gip {
             imgout[0].Write(cimg_rice,iChunk);              // rice map count
         }
         return imgout;
-    }*/
+    }
 
     // Perform band math (hard coded subtraction)
     /*GeoImage BandMath(const GeoImage& image, string filename, int band1, int band2) {

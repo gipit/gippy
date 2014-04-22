@@ -32,8 +32,8 @@ namespace gip {
     //! Create new file with a Fmask cloud mask
     GeoImage Fmask(const GeoImage&, std::string, int=3, int=5);
 
-    //GeoImage RiceDetect(const GeoImage& img, std::string filename, std::vector<int> days,
-    //    float th0, float th1, int dth0=90, int dth1=120);
+    GeoImage RiceDetect(const GeoImage& img, std::string filename, std::vector<int> days,
+        float th0, float th1, int dth0=90, int dth1=120);
 
     // Create new file with AutoCloud algorithm
     //GeoImage AutoCloud(const GeoImage&, std::string, int=4000, float=0.2, float=14, float=0.2, int=20);
