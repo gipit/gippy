@@ -65,6 +65,10 @@ namespace gip {
 		Point<double> TopLeft() const { return GeoLoc(0,0); }
 		//! Coordinates of bottom right
 		Point<double> LowerRight() const { return GeoLoc(XSize()-1,YSize()-1); }
+		//! Return projection definition in Well Known Text format
+		std::string Projection() const {
+			return _GDALDataset->GetProjectionRef();
+		}
 
 		//! \name Metadata functions
 		//! Get metadata item
