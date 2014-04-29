@@ -217,10 +217,11 @@ namespace gip {
         //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
         papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
-        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS","ALL_CPUS");
+        //papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS","ALL_CPUS");
         //site->exportToWkt(&wkt);
         //papszOptions = CSLSetNameValue(papszOptions,"CUTLINE",wkt);
         psWarpOptions->papszWarpOptions = CSLDuplicate(papszOptions);
+        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
 
         GDALWarpOperation oOperation;
         // Perform warp for each input file
@@ -842,24 +843,29 @@ namespace gip {
         }
 
         CImg<float> cimg;
-        CImg<unsigned char> cimg_nodata, cimg_dmask;
-        CImg<int> cimg_th0, cimg_flood;
+        CImg<unsigned char> cimg_datamask, cimg_dmask;
+        CImg<int> cimg_th0, cimg_th0_prev, cimg_flood, cimg_flood_prev;
+        int delta_day;
 
         for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
             if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << image[0].NumChunks() << endl;
             cimg = image[0].Read<float>(iChunk);
-            cimg_nodata = image[0].NoDataMask(iChunk);
-            int delta_day(0);
+            cimg_datamask = image[0].DataMask(iChunk);
             CImg<int> DOY(cimg.width(), cimg.height(), 1, 1, 0);
             CImg<int> cimg_rice(cimg.width(), cimg.height(), 1, 1, 0);
-            cimg_flood = (cimg.get_threshold(th0)^=1).mul(cimg_nodata);
+            cimg_th0_prev = cimg.get_threshold(th0);
+            cimg_flood = (cimg_th0_prev^1).mul(cimg_datamask);
 
             for (unsigned int b=1;b<image.NumBands();b++) {
                 if (Options::Verbose() > 3) cout << "Day " << days[b] << endl;
                 delta_day = days[b]-days[b-1];
                 cimg = image[b].Read<float>(iChunk);
-                cimg_nodata = image[b].NoDataMask(iChunk);
-                cimg_th0 = cimg.get_threshold(th0)|=(cimg_nodata^1);    // >= th0 and assume nodata >= th0
+                cimg_datamask = image[b].DataMask(iChunk);
+                cimg_th0 = cimg.get_threshold(th0);
+                // Replace any nodata values with the last value
+                cimg_forXY(cimg_datamask, x, y) {
+                    if (cimg_datamask(x,y) == 0) { cimg_th0(x,y) = cimg_th0_prev(x,y); }
+                }
 
                 DOY += delta_day;                                       // running total of days
                 DOY.mul(cimg_flood);                                    // reset if it hasn't been flooded yet
@@ -873,11 +879,13 @@ namespace gip {
                 cimg_rice = cimg_rice + newrice;
 
                 // update flood map
-                cimg_flood |= (cimg_th0^=1);
+                cimg_flood |= (cimg_th0^1);
                 // remove new found rice pixels, and past high date
                 cimg_flood.mul(newrice^=1).mul(cimg_dmask);
 
+                //imgout[b].Write(DOY, iChunk);
                 imgout[b].Write(DOY, iChunk);
+                cimg_th0_prev = cimg_th0;
             }
             imgout[0].Write(cimg_rice,iChunk);              // rice map count
         }
