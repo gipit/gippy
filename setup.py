@@ -105,7 +105,7 @@ gippy_module = Extension(
 
 setup(
     name='gippy',
-    version='0.9.1',
+    version='0.9.2',
     description='Geospatial Image Processing for Python',
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
