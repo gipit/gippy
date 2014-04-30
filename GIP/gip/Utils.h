@@ -58,7 +58,14 @@ namespace gip {
 		//! Get verbose level
 		static int Verbose() { return _Verbose; }
 		//! Set verbose level
-		static void SetVerbose(int v) { _Verbose = v; }
+		static void SetVerbose(int v) { 
+            _Verbose = v;
+            if (v > 3) {
+                CPLPushErrorHandler(CPLDefaultErrorHandler);
+            } else {
+                CPLPushErrorHandler(CPLQuietErrorHandler);
+            }
+        }
 		//! Get workdir
 		static std::string WorkDir() { return _WorkDir; }
 		//! Set workdir

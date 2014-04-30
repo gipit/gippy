@@ -82,7 +82,9 @@ namespace gip {
             else if (col == "Blue")
                 gdalcol = GCI_BlueBand;
             else gdalcol = GCI_GrayIndex;
-            _GDALRasterBand->SetColorInterpretation(gdalcol);
+            if (_GDALDataset->GetAccess() == GA_Update) {
+                _GDALRasterBand->SetColorInterpretation(gdalcol);
+            }
         }
         //! Copy category names from another band
         void CopyCategoryNames(const GeoRaster& raster) {
