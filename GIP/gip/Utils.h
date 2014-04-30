@@ -11,19 +11,19 @@
 
 namespace gip {
 
-	// Utility functions
-	//! Print stats of a CImg
-	//template<typename T> CImg_printstats(CImg<T> img) {
+    // Utility functions
+    //! Print stats of a CImg
+    //template<typename T> CImg_printstats(CImg<T> img) {
     //    CImgStats stats()
-	//}
+    //}
 
 
-	//! Conversion function, any type to string
-	template<typename T> inline std::string to_string(const T& t) {
-		std::stringstream ss;
-		ss << t;
-		return ss.str();
-	}
+    //! Conversion function, any type to string
+    template<typename T> inline std::string to_string(const T& t) {
+        std::stringstream ss;
+        ss << t;
+        return ss.str();
+    }
 
     //! Returns GDAL Type corresponding to type passed in
     inline GDALDataType type2GDALtype(const std::type_info& info) {
@@ -43,22 +43,22 @@ namespace gip {
     class Options {
     public:
         // \name Global Options (static properties)
-		//! Get Config directory
-		//static std::string ConfigDir() { return _ConfigDir.string(); }
-		//! Set Config directory
-		//static void SetConfigDir(std::string dir) { _ConfigDir = dir; }
-		//! Default format when creating new files
-		static std::string DefaultFormat() { return _DefaultFormat; }
-		//! Set default format when creating new files
-		static void SetDefaultFormat(std::string str) { _DefaultFormat = str; }
-		//! Default chunk size when chunking an image
-		static float ChunkSize() { return _ChunkSize; }
-		//! Set chunk size, used when chunking an image
-		static void SetChunkSize(float sz) { _ChunkSize = sz; }
-		//! Get verbose level
-		static int Verbose() { return _Verbose; }
-		//! Set verbose level
-		static void SetVerbose(int v) { 
+        //! Get Config directory
+        //static std::string ConfigDir() { return _ConfigDir.string(); }
+        //! Set Config directory
+        //static void SetConfigDir(std::string dir) { _ConfigDir = dir; }
+        //! Default format when creating new files
+        static std::string DefaultFormat() { return _DefaultFormat; }
+        //! Set default format when creating new files
+        static void SetDefaultFormat(std::string str) { _DefaultFormat = str; }
+        //! Default chunk size when chunking an image
+        static float ChunkSize() { return _ChunkSize; }
+        //! Set chunk size, used when chunking an image
+        static void SetChunkSize(float sz) { _ChunkSize = sz; }
+        //! Get verbose level
+        static int Verbose() { return _Verbose; }
+        //! Set verbose level
+        static void SetVerbose(int v) { 
             _Verbose = v;
             if (v > 3) {
                 CPLPushErrorHandler(CPLDefaultErrorHandler);
@@ -66,10 +66,10 @@ namespace gip {
                 CPLPushErrorHandler(CPLQuietErrorHandler);
             }
         }
-		//! Get workdir
-		static std::string WorkDir() { return _WorkDir; }
-		//! Set workdir
-		static void SetWorkDir(std::string workdir) { _WorkDir = workdir; }
+        //! Get workdir
+        static std::string WorkDir() { return _WorkDir; }
+        //! Set workdir
+        static void SetWorkDir(std::string workdir) { _WorkDir = workdir; }
 
     private:
             // Static options
@@ -97,7 +97,7 @@ namespace gip {
     /// <returns>A list of tokens</returns>
     inline std::vector<std::string> Split(const std::string& s, const std::string& match, bool removeEmpty=false, bool fullMatch=false) {
         using std::string;
-    	typedef string::size_type (string::*find_t)(const string& delim, string::size_type offset) const;
+        typedef string::size_type (string::*find_t)(const string& delim, string::size_type offset) const;
         std::vector<string> result;                 // return container for tokens
         string::size_type start = 0,           // starting position for searches
                           skip = 1;            // positions to skip after a match
