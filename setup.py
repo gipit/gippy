@@ -32,12 +32,14 @@ from setuptools.command.develop import develop
 from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
+from version import __version__
 
 
 def add_reg(filename):
-    # Have GDAL register file formats on import
+    # Have GDAL register file formats on import and add version info
     f = open(filename, 'a')
     f.write('reg()\n')
+    f.write("__version__='%s'\n" % __version__)
     f.close()
 
 
@@ -105,7 +107,7 @@ gippy_module = Extension(
 
 setup(
     name='gippy',
-    version='0.9.3',
+    version=__version__,
     description='Geospatial Image Processing for Python',
     author='Matthew Hanson',
     author_email='mhanson@appliedgeosolutions.com',
