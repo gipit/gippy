@@ -417,7 +417,7 @@ namespace gip {
         CImg<unsigned char> nonclouds, ambclouds, clouds, mask, temp2;
         float cloudsum(0), scenesize(0);
 
-        if (Options::Verbose()) cout << image.Basename() << " - ACCA" << endl;
+        if (Options::Verbose() > 1) cout << image.Basename() << " - ACCA" << endl;
         //if (Options::Verbose()) cout << image.Basename() << " - ACCA (dev-version)" << endl;
         for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
             red = image["RED"].Read<float>(iChunk);
