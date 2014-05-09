@@ -60,7 +60,7 @@ namespace gip {
         //! Set verbose level
         static void SetVerbose(int v) { 
             _Verbose = v;
-            if (v > 3) {
+            if (v > 4) {
                 CPLPushErrorHandler(CPLDefaultErrorHandler);
             } else {
                 CPLPushErrorHandler(CPLQuietErrorHandler);
