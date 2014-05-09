@@ -26,7 +26,7 @@ namespace gip {
         //! Default constructor
         GeoData() : _GDALDataset() {}
         //! Open existing file
-        GeoData(std::string, bool=true);
+        GeoData(std::string, bool=false);
         //! Create new file on disk
         GeoData(int, int, int, GDALDataType, std::string, dictionary = dictionary());
         //! Copy constructor
