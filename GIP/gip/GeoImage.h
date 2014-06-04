@@ -21,7 +21,7 @@ namespace gip {
         //! Default constructor
         explicit GeoImage() : GeoData() {}
         //! Open file constructor
-        explicit GeoImage(std::string filename, bool update=true)
+        explicit GeoImage(std::string filename, bool update=false)
             : GeoData(filename, update) {
             LoadBands();
         }
