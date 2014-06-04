@@ -248,9 +248,9 @@ namespace gip {
             CImg<unsigned char> mask;
             CImg<int> totalpixels;
             CImg<double> band, total;
-            for (unsigned int iChunk=0; iChunk<NumChunks(); iChunk++) {
+            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
                 for (unsigned int iBand=0;iBand<NumBands();iBand++) {
-                    mask = _RasterBands[iBand].DataMask();
+                    mask = _RasterBands[iBand].DataMask(iChunk);
                     band = _RasterBands[iBand].Read<double>(iChunk).mul(mask);
                     if (iBand == 0) {
                         totalpixels = mask;
@@ -261,9 +261,9 @@ namespace gip {
                     }
                 }
                 total = total.div(totalpixels);
-                //cimg_for(total,ptr,double) {
-                //    if (*ptr != *ptr) *ptr = raster.NoData();
-                //}
+                cimg_for(total,ptr,double) {
+                    if (*ptr != *ptr) *ptr = raster.NoDataValue();
+                }
                 raster.Write(total, iChunk);
             }
             return raster;
@@ -474,7 +474,7 @@ namespace gip {
         GeoImage imgout(filename, *this, datatype);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
-            imgout[i].Process<T>((*this)[i]);
+            (*this)[i].Process<T>(imgout[i]);
         }
         Colors colors = this->GetColors();
         for (unsigned int i=0;i<this->NumBands();i++) imgout.SetColor(colors[i+1], i+1);
