@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-################################################################################
+/*##############################################################################
 #    GIPPY: Geospatial Image Processing library for Python
 #
 #    Copyright (C) 2014 Matthew A Hanson
@@ -16,7 +15,7 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
-################################################################################
+##############################################################################*/
 
 #ifndef GIP_GEODATA_H
 #define GIP_GEODATA_H

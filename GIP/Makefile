@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ################################################################################
 #    GIPPY: Geospatial Image Processing library for Python
 #
