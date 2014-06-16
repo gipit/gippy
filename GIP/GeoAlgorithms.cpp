@@ -58,350 +58,12 @@ namespace gip {
     using std::cerr;
     using std::endl;
 
-    //! Create mask based on NoData values for all bands
-    /*GeoRaster CreateMask(const GeoImage& image, string filename) {
-        typedef float T;
-
-        //CImg<T> imgchunk;
-
-        // if (filename == "") filename = image.Basename() + "_mask";
-        GeoImage mask(filename, image, GDT_Byte, 1);
-        CImg<unsigned char> imgout;
-        mask.SetNoData(0);
-        //unsigned int validpixels(0);
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            //imgchunk = imageIO[0].Read(*iChunk);
-            //imgout = Pbands[0].NoDataMask(imgchunk);
-            //for (unsigned int b=1;b<image.NumBands();b++) {
-            //        imgout &= Pbands[b].NoDataMask( Pbands[b].Read(*iChunk) );
-            //}
-            //validpixels += imgout.sum();
-            imgout = image.NoDataMask(iChunk);
-            mask[0].Write(imgout,iChunk);
-        }
-        //mask[0].SetValidSize(validpixels);
-        return mask[0];
-    }*/
-
-    //! Generate 3-band RGB image scaled to 1 byte for easy viewing
-    /*GeoImage RGB(const GeoImage& image, string filename) {
-        GeoImageIO<float> img(image);
-        img.SetUnitsOut("reflectance");
-        img.PruneToRGB();
-        GeoImageIO<unsigned char> imgout(GeoImage(filename, img, GDT_Byte));
-        imgout.SetNoData(0);
-        imgout.SetUnits("other");
-        CImg<float> stats, cimg;
-        CImg<unsigned char> mask;
-        for (unsigned int b=0;b<img.NumBands();b++) {
-            stats = img[b].Stats();
-            float lo = std::max(stats(2) - 3*stats(3), stats(0)-1);
-            float hi = std::min(stats(2) + 3*stats(3), stats(1));
-            for (unsigned int iChunk=1; iChunk<=img[b].NumChunks(); iChunk++) {
-                cimg = img[b].Read(iChunk);
-                mask = img[b].NoDataMask(iChunk);
-                ((cimg-=lo)*=(255.0/(hi-lo))).max(0.0).min(255.0);
-                //cimg_printstats(cimg,"after stretch");
-                cimg_forXY(cimg,x,y) { if (!mask(x,y)) cimg(x,y) = imgout[b].NoDataValue(); }
-                imgout[b].Write(CImg<unsigned char>().assign(cimg.round()),iChunk);
-            }
-        }
-        return imgout;
-    }*/
-
-    //! Merge images into one file and crop to vector
-    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, float xres, float yres) {
-        // TODO - pass in vector of GeoRaster's instead
-        if (Options::Verbose() > 2) {
-            cout << filename << ": CookieCutter" << endl;
-        }
-
-        // Open input images
-        vector<GeoImage> imgs;
-        vector<std::string>::const_iterator iimgs;
-        for (iimgs=imgnames.begin();iimgs!=imgnames.end();iimgs++) imgs.push_back(GeoImage(*iimgs));
-        unsigned int bsz = imgs[0].NumBands();
-        GDALDataType dtype = imgs[0].DataType();
-
-        // Create output file based on input vector
-        OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vectorname.c_str());
-        OGRLayer *poLayer = poDS->GetLayer(0);
-        OGREnvelope extent;
-        poLayer->GetExtent(&extent, true);
-        // Need to convert extent to resolution units
-        int xsize = (int)(0.5 + (extent.MaxX - extent.MinX) / xres);
-        int ysize = (int)(0.5 + (extent.MaxY - extent.MinY) / yres);
-        GeoImage imgout(filename, xsize, ysize, bsz, dtype);
-        imgout.CopyMeta(imgs[0]);
-        imgout.CopyColorTable(imgs[0]);
-        for (unsigned int b=0;b<bsz;b++) imgout[b].CopyMeta(imgs[0][b]);
-
-        double affine[6];
-        affine[0] = extent.MinX;
-        affine[1] = xres;
-        affine[2] = 0;
-        affine[3] = extent.MaxY;
-        affine[4] = 0;
-        affine[5] = -yres;
-        char* wkt = NULL;
-        poLayer->GetSpatialRef()->exportToWkt(&wkt);
-        imgout.GetGDALDataset()->SetProjection(wkt);
-        imgout.GetGDALDataset()->SetGeoTransform(affine);
-        // Compute union
-        /*OGRPolygon* site; // = new OGRPolygon();
-        OGRFeature *poFeature;
-        poLayer->ResetReading();
-        while( (poFeature = poLayer->GetNextFeature()) != NULL )
-        {
-            OGRGeometry *poGeometry;
-            poGeometry = poFeature->GetGeometryRef();
-
-            site = (OGRPolygon*)site->Union(poGeometry);
-            OGRFeature::DestroyFeature( poFeature );
-        }*/
-
-        // Combine shape geoemtries into single geometry cutline
-        OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
-        OGRGeometry* poGeometry;
-        OGRFeature *poFeature;
-        poLayer->ResetReading();
-        poFeature = poLayer->GetNextFeature();
-        site = poFeature->GetGeometryRef();
-        while( (poFeature = poLayer->GetNextFeature()) != NULL ) {
-            poGeometry = poFeature->GetGeometryRef();
-
-            if( poGeometry == NULL ) fprintf( stderr, "ERROR: Cutline feature without a geometry.\n" );
-
-            //OGRwkbGeometryType eType = wkbFlatten(poGeometry->getGeometryType());
-            site = site->Union(poGeometry);
-            /*if( eType == wkbPolygon )
-                site->addGeometry(poGeometry);
-            else if( eType == wkbMultiPolygon ) {
-                for(int iGeom = 0; iGeom < OGR_G_GetGeometryCount( poGeometry ); iGeom++ ) {
-                    site->addGeometry( poGeometry->getGeometryRef(iGeom)  );
-                }
-            }
-            else fprintf( stderr, "ERROR: Cutline not of polygon type.\n" );*/
-
-            OGRFeature::DestroyFeature( poFeature );
-        }
-        OGRDataSource::DestroyDataSource( poDS );
-
-        // Cutline transform to pixel coordinates
-        char **papszOptionsCutline = NULL;
-        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", wkt );
-        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "SRC_SRS", wkt );
-        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
-        CutlineTransformer oTransformer;
-
-        /* The cutline transformer will *invert* the hSrcImageTransformer */
-        /* so it will convert from the cutline SRS to the source pixel/line */
-        /* coordinates */
-        oTransformer.hSrcImageTransformer = GDALCreateGenImgProjTransformer2( imgout.GetGDALDataset(), NULL, papszOptionsCutline );
-        site->transform(&oTransformer);
-
-        GDALDestroyGenImgProjTransformer( oTransformer.hSrcImageTransformer );
-        CSLDestroy( papszOptionsCutline );
-
-        // Warp options
-        GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
-        
-        psWarpOptions->hDstDS = imgout.GetGDALDataset();
-        psWarpOptions->nBandCount = bsz;
-        psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
-        psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
-        psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        for (unsigned int b=0;b<bsz;b++) {
-            psWarpOptions->panSrcBands[b] = b+1;
-            psWarpOptions->panDstBands[b] = b+1;
-            psWarpOptions->padfSrcNoDataReal[b] = imgs[0][b].NoDataValue();
-            psWarpOptions->padfDstNoDataReal[b] = imgout[b].NoDataValue();
-            psWarpOptions->padfSrcNoDataImag[b] = 0.0;
-            psWarpOptions->padfDstNoDataImag[b] = 0.0;
-        }
-        if (Options::Verbose() > 2)
-            psWarpOptions->pfnProgress = GDALTermProgress;
-        else psWarpOptions->pfnProgress = GDALDummyProgress;
-        char **papszOptions = NULL;
-        //psWarpOptions->hCutline = site;
-        //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
-        papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
-        papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
-        //papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS","ALL_CPUS");
-        //site->exportToWkt(&wkt);
-        //papszOptions = CSLSetNameValue(papszOptions,"CUTLINE",wkt);
-        psWarpOptions->papszWarpOptions = CSLDuplicate(papszOptions);
-        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
-
-        GDALWarpOperation oOperation;
-        // Perform warp for each input file
-        vector<GeoImage>::iterator iimg;
-        for (iimg=imgs.begin();iimg!=imgs.end();iimg++) {
-            if (Options::Verbose() > 2) cout << iimg->Basename() << " warping " << std::flush;
-            psWarpOptions->hSrcDS = iimg->GetGDALDataset();
-            psWarpOptions->pTransformerArg =
-                GDALCreateGenImgProjTransformer( iimg->GetGDALDataset(), iimg->GetGDALDataset()->GetProjectionRef(),
-                                                imgout.GetGDALDataset(), imgout.GetGDALDataset()->GetProjectionRef(), TRUE, 0.0, 0 );
-            psWarpOptions->pfnTransformer = GDALGenImgProjTransform;
-            oOperation.Initialize( psWarpOptions );
-            //if (Options::Verbose() > 3) cout << "Error: " << CPLGetLastErrorMsg() << endl;
-            oOperation.ChunkAndWarpMulti( 0, 0, imgout.XSize(), imgout.YSize() );
-
-            GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );
-            psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
-        }
-        GDALDestroyWarpOptions( psWarpOptions );
-
-        return imgout;
-    }
-
-    //void Indices(const GeoImage& ImageIn, string basename, std::vector<std::string> products) {
-    std::map<std::string, std::string> Indices(const GeoImage& image, std::map<std::string, std::string> products) {
-        float nodataout = -32768;
-
-        std::map< string, GeoImage > imagesout;
-        std::map<string, string>::const_iterator iprod;
-        std::map<string, string> filenames;
-        string prodname;
-        for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-            //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
-            if (Options::Verbose() > 2) cout << iprod->first << ", " << iprod->second << endl;
-            prodname = iprod->first;
-            imagesout[prodname] = GeoImage(iprod->second, image, GDT_Int16, 1);
-            imagesout[prodname].SetNoData(nodataout);
-            imagesout[prodname].SetGain(0.0001);
-            imagesout[prodname].SetUnits("other");
-            imagesout[prodname][0].SetDescription(prodname);
-            filenames[prodname] = imagesout[prodname].Filename();
-        }
-        if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
-
-        std::map< string, std::vector<string> > colors;
-        colors["ndvi"] = {"NIR","RED"};
-        colors["evi"] = {"NIR","RED","BLUE"};
-        colors["lswi"] = {"NIR","SWIR1"};
-        colors["ndsi"] = {"SWIR1","GREEN"};
-        colors["bi"] = {"BLUE","NIR"};
-        colors["satvi"] = {"SWIR1","RED"};
-        // Tillage indices
-        colors["ndti"] = {"SWIR2","SWIR1"};
-        colors["crc"] = {"SWIR1","SWIR2","BLUE"};
-        colors["crcm"] = {"SWIR1","SWIR2","GREEN"};
-        colors["isti"] = {"SWIR1","SWIR2"};
-        colors["sti"] = {"SWIR1","SWIR2"};
-
-        // Figure out what colors are needed
-        std::set< string > used_colors;
-        std::set< string >::const_iterator isstr;
-        std::vector< string >::const_iterator ivstr;
-        for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-            for (ivstr=colors[iprod->first].begin();ivstr!=colors[iprod->first].end();ivstr++) {
-                used_colors.insert(*ivstr);
-            }
-        }
-        if (Options::Verbose() > 2) {
-            cout << "Colors used: ";
-            for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) cout << " " << *isstr;
-            cout << endl;
-        }
-
-        CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask;
-
-        // need to add overlap
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << image[0].NumChunks() << endl;
-            for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
-                if (*isstr == "RED") red = image["RED"].Read<float>(iChunk);
-                else if (*isstr == "GREEN") green = image["GREEN"].Read<float>(iChunk);
-                else if (*isstr == "BLUE") blue = image["BLUE"].Read<float>(iChunk);
-                else if (*isstr == "NIR") nir = image["NIR"].Read<float>(iChunk);
-                else if (*isstr == "SWIR1") swir1 = image["SWIR1"].Read<float>(iChunk);
-                else if (*isstr == "SWIR2") swir2 = image["SWIR2"].Read<float>(iChunk);
-            }
-
-            for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-                prodname = iprod->first;
-                if (Options::Verbose() > 4) cout << "Product " << prodname << endl;
-                //cout << "Products: " << prodname << std::flush;
-                //string pname = iprod->toupper();
-                if (prodname == "ndvi") {
-                    cimgout = (nir-red).div(nir+red);
-                } else if (prodname == "evi") {
-                    cimgout = 2.5*(nir-red).div(nir + 6*red - 7.5*blue + 1);
-                } else if (prodname == "lswi") {
-                    cimgout = (nir-swir1).div(nir+swir1);
-                } else if (prodname == "ndsi") {
-                    cimgout = (green-swir1).div(green+swir1);
-                } else if (prodname == "bi") {
-                    cimgout = 0.5*(blue+nir);
-                } else if (prodname == "satvi") {
-                    float L(0.5);
-                    cimgout = (((1.0+L)*(swir1 - red)).div(swir1+red+L)) - (0.5*swir2);
-                // Tillage indices
-                } else if (prodname == "ndti") {
-                    cimgout = (swir1-swir2).div(swir1+swir2);
-                } else if (prodname == "crc") {
-                    cimgout = (swir1-blue).div(swir2+blue);
-                } else if (prodname == "crcm") {
-                    cimgout = (swir1-green).div(swir2+green);
-                } else if (prodname == "isti") {
-                    cimgout = swir2.div(swir1);
-                } else if (prodname == "sti") {
-                    cimgout = swir1.div(swir2);
-                }
-                //if (Options::Verbose() > 2) cout << "Getting mask" << endl;
-                // TODO don't read mask again...create here
-                cimgmask = image.NoDataMask(iChunk, colors[prodname]);
-                cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;
-                imagesout[prodname].Write(cimgout,iChunk);
-            }
-        }
-        return filenames;
-    }
-
-    //! Auto cloud mask - toaref input
-    /*GeoImage AutoCloud(const GeoImage& image, string filename, int cheight, float minred, float maxtemp, float maxndvi, int morph) {
-        typedef float outtype;
-        GeoImageIO<float> imgin(image);
-        GeoImageIO<outtype> imgout(GeoImage(filename, image, GDT_Byte, 1));
-        imgout.SetNoData(0);
-
-        CImg<float> red, nir, temp, ndvi;
-        CImg<outtype> mask;
-
-        // need to add overlap
-        for (int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-
-            red = imgin["RED"].Ref(iChunk);
-            temp = imgin["LWIR"].Ref(iChunk);
-            nir = imgin["NIR"].Ref(iChunk);
-            ndvi = (nir-red).div(nir+red);
-
-            mask =
-                temp.threshold(maxtemp,false,true)^=1 &
-                ndvi.threshold(maxndvi,false,true)^=1 &
-                red.get_threshold(minred);
-
-            if (morph != 0) mask.dilate(morph);
-
-            imgout[0].Write(mask,iChunk);
-            //CImg<double> stats = img.get_stats();
-            //cout << "stats " << endl;
-            //for (int i=0;i<12;i++) cout << stats(i) << " ";
-            //cout << endl;
-        }
-        return imgout;
-    }*/
-
     /** ACCA (Automatic Cloud Cover Assessment). Takes in TOA Reflectance,
      * temperature, sun elevation, solar azimuth, and number of pixels to
      * dilate.
      */
     GeoImage ACCA(const GeoImage& image, std::string filename, float se_degrees,
-                  float sa_degrees, int erode, int dilate, int cloudheight ) {
+                  float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
         float th_red(0.08);
         float th_ndsi(0.7);
         float th_temp(27);
@@ -423,6 +85,7 @@ namespace gip {
         imgout[b_cloudmask].SetDescription("cloudmask");
         imgout[b_ambclouds].SetDescription("ambclouds");
         imgout[b_pass1].SetDescription("pass1");
+        imgout.SetMeta(metadata);
 
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
 
@@ -582,8 +245,159 @@ namespace gip {
         return imgout;
     }
 
+    //! Merge images into one file and crop to vector
+    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, 
+            float xres, float yres, dictionary metadata) {
+        // TODO - pass in vector of GeoRaster's instead
+        if (Options::Verbose() > 2) {
+            cout << filename << ": CookieCutter" << endl;
+        }
+
+        // Open input images
+        vector<GeoImage> imgs;
+        vector<std::string>::const_iterator iimgs;
+        for (iimgs=imgnames.begin();iimgs!=imgnames.end();iimgs++) imgs.push_back(GeoImage(*iimgs));
+        unsigned int bsz = imgs[0].NumBands();
+        GDALDataType dtype = imgs[0].DataType();
+
+        // Create output file based on input vector
+        OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vectorname.c_str());
+        OGRLayer *poLayer = poDS->GetLayer(0);
+        OGREnvelope extent;
+        poLayer->GetExtent(&extent, true);
+        // Need to convert extent to resolution units
+        int xsize = (int)(0.5 + (extent.MaxX - extent.MinX) / xres);
+        int ysize = (int)(0.5 + (extent.MaxY - extent.MinY) / yres);
+        GeoImage imgout(filename, xsize, ysize, bsz, dtype);
+        imgout.CopyMeta(imgs[0]);
+        imgout.CopyColorTable(imgs[0]);
+        for (unsigned int b=0;b<bsz;b++) imgout[b].CopyMeta(imgs[0][b]);
+        imgout.SetMeta(metadata);
+
+        double affine[6];
+        affine[0] = extent.MinX;
+        affine[1] = xres;
+        affine[2] = 0;
+        affine[3] = extent.MaxY;
+        affine[4] = 0;
+        affine[5] = -yres;
+        char* wkt = NULL;
+        poLayer->GetSpatialRef()->exportToWkt(&wkt);
+        imgout.GetGDALDataset()->SetProjection(wkt);
+        imgout.GetGDALDataset()->SetGeoTransform(affine);
+        // Compute union
+        /*OGRPolygon* site; // = new OGRPolygon();
+        OGRFeature *poFeature;
+        poLayer->ResetReading();
+        while( (poFeature = poLayer->GetNextFeature()) != NULL )
+        {
+            OGRGeometry *poGeometry;
+            poGeometry = poFeature->GetGeometryRef();
+
+            site = (OGRPolygon*)site->Union(poGeometry);
+            OGRFeature::DestroyFeature( poFeature );
+        }*/
+
+        // Combine shape geoemtries into single geometry cutline
+        OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
+        OGRGeometry* poGeometry;
+        OGRFeature *poFeature;
+        poLayer->ResetReading();
+        poFeature = poLayer->GetNextFeature();
+        site = poFeature->GetGeometryRef();
+        while( (poFeature = poLayer->GetNextFeature()) != NULL ) {
+            poGeometry = poFeature->GetGeometryRef();
+
+            if( poGeometry == NULL ) fprintf( stderr, "ERROR: Cutline feature without a geometry.\n" );
+
+            //OGRwkbGeometryType eType = wkbFlatten(poGeometry->getGeometryType());
+            site = site->Union(poGeometry);
+            /*if( eType == wkbPolygon )
+                site->addGeometry(poGeometry);
+            else if( eType == wkbMultiPolygon ) {
+                for(int iGeom = 0; iGeom < OGR_G_GetGeometryCount( poGeometry ); iGeom++ ) {
+                    site->addGeometry( poGeometry->getGeometryRef(iGeom)  );
+                }
+            }
+            else fprintf( stderr, "ERROR: Cutline not of polygon type.\n" );*/
+
+            OGRFeature::DestroyFeature( poFeature );
+        }
+        OGRDataSource::DestroyDataSource( poDS );
+
+        // Cutline transform to pixel coordinates
+        char **papszOptionsCutline = NULL;
+        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", wkt );
+        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "SRC_SRS", wkt );
+        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
+        CutlineTransformer oTransformer;
+
+        /* The cutline transformer will *invert* the hSrcImageTransformer */
+        /* so it will convert from the cutline SRS to the source pixel/line */
+        /* coordinates */
+        oTransformer.hSrcImageTransformer = GDALCreateGenImgProjTransformer2( imgout.GetGDALDataset(), NULL, papszOptionsCutline );
+        site->transform(&oTransformer);
+
+        GDALDestroyGenImgProjTransformer( oTransformer.hSrcImageTransformer );
+        CSLDestroy( papszOptionsCutline );
+
+        // Warp options
+        GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
+        
+        psWarpOptions->hDstDS = imgout.GetGDALDataset();
+        psWarpOptions->nBandCount = bsz;
+        psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
+        psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
+        psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        for (unsigned int b=0;b<bsz;b++) {
+            psWarpOptions->panSrcBands[b] = b+1;
+            psWarpOptions->panDstBands[b] = b+1;
+            psWarpOptions->padfSrcNoDataReal[b] = imgs[0][b].NoDataValue();
+            psWarpOptions->padfDstNoDataReal[b] = imgout[b].NoDataValue();
+            psWarpOptions->padfSrcNoDataImag[b] = 0.0;
+            psWarpOptions->padfDstNoDataImag[b] = 0.0;
+        }
+        if (Options::Verbose() > 2)
+            psWarpOptions->pfnProgress = GDALTermProgress;
+        else psWarpOptions->pfnProgress = GDALDummyProgress;
+        char **papszOptions = NULL;
+        //psWarpOptions->hCutline = site;
+        //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
+        papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
+        papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
+        //papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS","ALL_CPUS");
+        //site->exportToWkt(&wkt);
+        //papszOptions = CSLSetNameValue(papszOptions,"CUTLINE",wkt);
+        psWarpOptions->papszWarpOptions = CSLDuplicate(papszOptions);
+        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
+
+        GDALWarpOperation oOperation;
+        // Perform warp for each input file
+        vector<GeoImage>::iterator iimg;
+        for (iimg=imgs.begin();iimg!=imgs.end();iimg++) {
+            if (Options::Verbose() > 2) cout << iimg->Basename() << " warping " << std::flush;
+            psWarpOptions->hSrcDS = iimg->GetGDALDataset();
+            psWarpOptions->pTransformerArg =
+                GDALCreateGenImgProjTransformer( iimg->GetGDALDataset(), iimg->GetGDALDataset()->GetProjectionRef(),
+                                                imgout.GetGDALDataset(), imgout.GetGDALDataset()->GetProjectionRef(), TRUE, 0.0, 0 );
+            psWarpOptions->pfnTransformer = GDALGenImgProjTransform;
+            oOperation.Initialize( psWarpOptions );
+            //if (Options::Verbose() > 3) cout << "Error: " << CPLGetLastErrorMsg() << endl;
+            oOperation.ChunkAndWarpMulti( 0, 0, imgout.XSize(), imgout.YSize() );
+
+            GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );
+            psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
+        }
+        GDALDestroyWarpOptions( psWarpOptions );
+
+        return imgout;
+    }
+
     //! Fmask cloud mask
-    GeoImage Fmask(const GeoImage& image, string filename, int tolerance, int dilate) {
+    GeoImage Fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
         if (Options::Verbose() > 1)
             std::cout << image.Basename() << ": Fmask - dilate(" << dilate << ")" << std::endl;
 
@@ -594,6 +408,7 @@ namespace gip {
         int b_water(3); imgout[b_water].SetDescription("clearskywater");
         int b_land(4);  imgout[b_land].SetDescription("clearskyland");
         imgout.SetNoData(0);
+        imgout.SetMeta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
         GeoImage probout(filename + "_prob", image, GDT_Float32, 2);
@@ -744,29 +559,6 @@ namespace gip {
         return imgout;
     }
 
-    //! Convert lo-high of index into probability
-    /*GeoImage Index2Probability(const GeoImage& image, string filename, float min, float max) {
-        // Need method of generating new GeoImage with GeoRaster template in
-        int bandnum = 1;
-        GeoImageIO<float> imagein(image);
-        GeoImageIO<float> imageout(GeoImage(filename, image, GDT_Float32, 2));
-        float nodatain = imagein[0].NoDataValue();
-        float nodataout = -32768;
-        imageout.SetNoData(nodataout);
-
-        CImg<float> cimgin, cimgout;
-        for (unsigned int iChunk=1; iChunk<=image[bandnum-1].NumChunks(); iChunk++) {
-            cimgin = imagein[bandnum-1].Read(iChunk);
-            cimgout = (cimgin - min)/(max-min);
-            cimgout.min(1.0).max(0.0);
-            cimg_forXY(cimgin,x,y) if (cimgin(x,y) == nodatain) cimgout(x,y) = nodataout;
-            imageout[0].Write(cimgout, iChunk);
-            cimg_for(cimgout,ptr,float) if (*ptr != nodataout) *ptr = 1.0 - *ptr;
-            imageout[1].Write(cimgout, iChunk);
-        }
-        return imageout;
-    }*/
-
     //! k-means unsupervised classifier
     /*GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterations, float threshold ) {
         //if (Image.NumBands() < 2) throw GIP::Gexceptions::errInvalidParams("At least two bands must be supplied");
@@ -844,85 +636,144 @@ namespace gip {
         return imgout;
     }*/
 
-    //! Rice detection algorithm
-    GeoImage RiceDetect(const GeoImage& image, string filename, vector<int> days, float th0, float th1, int dth0, int dth1) {
-        if (Options::Verbose() > 1) cout << "RiceDetect(" << image.Basename() << ") -> " << filename << endl;
+    //void Indices(const GeoImage& ImageIn, string basename, std::vector<std::string> products) {
+    dictionary Indices(const GeoImage& image, dictionary products, dictionary metadata) {
+        float nodataout = -32768;
 
-        GeoImage imgout(filename, image, GDT_Byte, image.NumBands());
-        imgout.SetNoData(0);
-        imgout[0].SetDescription("rice");
-        for (unsigned int b=1;b<image.NumBands();b++) {
-            imgout[b].SetDescription("day"+to_string(days[b]));
+        std::map< string, GeoImage > imagesout;
+        std::map<string, string>::const_iterator iprod;
+        std::map<string, string> filenames;
+        string prodname;
+        for (iprod=products.begin(); iprod!=products.end(); iprod++) {
+            //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
+            if (Options::Verbose() > 2) cout << iprod->first << ", " << iprod->second << endl;
+            prodname = iprod->first;
+            imagesout[prodname] = GeoImage(iprod->second, image, GDT_Int16, 1);
+            imagesout[prodname].SetNoData(nodataout);
+            imagesout[prodname].SetGain(0.0001);
+            imagesout[prodname].SetUnits("other");
+            imagesout[prodname].SetMeta(metadata);
+            imagesout[prodname][0].SetDescription(prodname);
+            filenames[prodname] = imagesout[prodname].Filename();
+        }
+        if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
+
+        std::map< string, std::vector<string> > colors;
+        colors["ndvi"] = {"NIR","RED"};
+        colors["evi"] = {"NIR","RED","BLUE"};
+        colors["lswi"] = {"NIR","SWIR1"};
+        colors["ndsi"] = {"SWIR1","GREEN"};
+        colors["ndwi"] = {"GREEN","NIR"};
+        colors["bi"] = {"BLUE","NIR"};
+        colors["satvi"] = {"SWIR1","RED"};
+        colors["msavi2"] = {"NIR","RED"};
+        // Tillage indices
+        colors["ndti"] = {"SWIR2","SWIR1"};
+        colors["crc"] = {"SWIR1","SWIR2","BLUE"};
+        colors["crcm"] = {"SWIR1","SWIR2","GREEN"};
+        colors["isti"] = {"SWIR1","SWIR2"};
+        colors["sti"] = {"SWIR1","SWIR2"};
+
+        // Figure out what colors are needed
+        std::set< string > used_colors;
+        std::set< string >::const_iterator isstr;
+        std::vector< string >::const_iterator ivstr;
+        for (iprod=products.begin(); iprod!=products.end(); iprod++) {
+            for (ivstr=colors[iprod->first].begin();ivstr!=colors[iprod->first].end();ivstr++) {
+                used_colors.insert(*ivstr);
+            }
+        }
+        if (Options::Verbose() > 2) {
+            cout << "Colors used: ";
+            for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) cout << " " << *isstr;
+            cout << endl;
         }
 
-        CImg<float> cimg;
-        CImg<unsigned char> cimg_datamask, cimg_dmask;
-        CImg<int> cimg_th0, cimg_th0_prev, cimg_flood, cimg_flood_prev;
-        int delta_day;
+        CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg;
 
+        // need to add overlap
         for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
             if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << image[0].NumChunks() << endl;
-            cimg = image[0].Read<float>(iChunk);
-            cimg_datamask = image[0].DataMask(iChunk);
-            CImg<int> DOY(cimg.width(), cimg.height(), 1, 1, 0);
-            CImg<int> cimg_rice(cimg.width(), cimg.height(), 1, 1, 0);
-            cimg_th0_prev = cimg.get_threshold(th0);
-            cimg_flood = (cimg_th0_prev^1).mul(cimg_datamask);
-
-            for (unsigned int b=1;b<image.NumBands();b++) {
-                if (Options::Verbose() > 3) cout << "Day " << days[b] << endl;
-                delta_day = days[b]-days[b-1];
-                cimg = image[b].Read<float>(iChunk);
-                cimg_datamask = image[b].DataMask(iChunk);
-                cimg_th0 = cimg.get_threshold(th0);
-                // Replace any nodata values with the last value
-                cimg_forXY(cimg_datamask, x, y) {
-                    if (cimg_datamask(x,y) == 0) { cimg_th0(x,y) = cimg_th0_prev(x,y); }
-                }
-
-                DOY += delta_day;                                       // running total of days
-                DOY.mul(cimg_flood);                                    // reset if it hasn't been flooded yet
-                DOY.mul(cimg_th0);                                      // reset if in hydroperiod
-
-                cimg_dmask = DOY.get_threshold(dth1,false,true)^=1;      // mask of where past high date
-                DOY.mul(cimg_dmask);
-
-                // locate (and count) where rice criteria met
-                CImg<unsigned char> newrice = cimg.threshold(th1,false,true) & DOY.get_threshold(dth0,false,true);
-                cimg_rice = cimg_rice + newrice;
-
-                // update flood map
-                cimg_flood |= (cimg_th0^1);
-                // remove new found rice pixels, and past high date
-                cimg_flood.mul(newrice^=1).mul(cimg_dmask);
-
-                //imgout[b].Write(DOY, iChunk);
-                imgout[b].Write(DOY, iChunk);
-                cimg_th0_prev = cimg_th0;
+            for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
+                if (*isstr == "RED") red = image["RED"].Read<float>(iChunk);
+                else if (*isstr == "GREEN") green = image["GREEN"].Read<float>(iChunk);
+                else if (*isstr == "BLUE") blue = image["BLUE"].Read<float>(iChunk);
+                else if (*isstr == "NIR") nir = image["NIR"].Read<float>(iChunk);
+                else if (*isstr == "SWIR1") swir1 = image["SWIR1"].Read<float>(iChunk);
+                else if (*isstr == "SWIR2") swir2 = image["SWIR2"].Read<float>(iChunk);
             }
-            imgout[0].Write(cimg_rice,iChunk);              // rice map count
+
+            for (iprod=products.begin(); iprod!=products.end(); iprod++) {
+                prodname = iprod->first;
+                if (Options::Verbose() > 4) cout << "Product " << prodname << endl;
+                //cout << "Products: " << prodname << std::flush;
+                //string pname = iprod->toupper();
+                if (prodname == "ndvi") {
+                    cimgout = (nir-red).div(nir+red);
+                } else if (prodname == "evi") {
+                    cimgout = 2.5*(nir-red).div(nir + 6*red - 7.5*blue + 1);
+                } else if (prodname == "lswi") {
+                    cimgout = (nir-swir1).div(nir+swir1);
+                } else if (prodname == "ndsi") {
+                    cimgout = (green-swir1).div(green+swir1);
+                } else if (prodname == "ndwi") {
+                    cimgout = (green-nir).div(green+nir);
+                } else if (prodname == "bi") {
+                    cimgout = 0.5*(blue+nir);
+                } else if (prodname == "satvi") {
+                    float L(0.5);
+                    cimgout = (((1.0+L)*(swir1 - red)).div(swir1+red+L)) - (0.5*swir2);
+                } else if (prodname == "msavi2") {
+                    tmpimg = (nir*2)+1;
+                    cimgout = (tmpimg - (tmpimg.pow(2) - ((nir-red)*8).sqrt())) * 0.5;
+                // Tillage indices
+                } else if (prodname == "ndti") {
+                    cimgout = (swir1-swir2).div(swir1+swir2);
+                } else if (prodname == "crc") {
+                    cimgout = (swir1-blue).div(swir2+blue);
+                } else if (prodname == "crcm") {
+                    cimgout = (swir1-green).div(swir2+green);
+                } else if (prodname == "isti") {
+                    cimgout = swir2.div(swir1);
+                } else if (prodname == "sti") {
+                    cimgout = swir1.div(swir2);
+                }
+                //if (Options::Verbose() > 2) cout << "Getting mask" << endl;
+                // TODO don't read mask again...create here
+                cimgmask = image.NoDataMask(iChunk, colors[prodname]);
+                cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;
+                imagesout[prodname].Write(cimgout,iChunk);
+            }
         }
-        return imgout;
+        return filenames;
     }
 
-    // Perform band math (hard coded subtraction)
-    /*GeoImage BandMath(const GeoImage& image, string filename, int band1, int band2) {
-        GeoImageIO<float> imagein(image);
-        GeoImageIO<float> imageout(GeoImage(filename, image, GDT_Float32, 1));
-        float nodataout = -32768;
-        imageout.SetNoData(nodataout);
-        std::vector<bbox>::const_iterator iChunk;
-        std::vector<bbox> Chunks = image.Chunk();
-        CImg<float> cimgout;
+    //! Generate 3-band RGB image scaled to 1 byte for easy viewing
+    /*GeoImage RGB(const GeoImage& image, string filename) {
+        GeoImageIO<float> img(image);
+        img.SetUnitsOut("reflectance");
+        img.PruneToRGB();
+        GeoImageIO<unsigned char> imgout(GeoImage(filename, img, GDT_Byte));
+        imgout.SetNoData(0);
+        imgout.SetUnits("other");
+        CImg<float> stats, cimg;
         CImg<unsigned char> mask;
-        for (iChunk=Chunks.begin(); iChunk!=Chunks.end(); iChunk++) {
-            mask = imagein[band1-1].NoDataMask(*iChunk)|=(imagein[band2-1].NoDataMask(*iChunk));
-            cimgout = imagein[band1-1].Read(*iChunk) - imagein[band2-1].Read(*iChunk);
-            cimg_forXY(mask,x,y) if (mask(x,y)) cimgout(x,y) = nodataout;
-            imageout[0].WriteChunk(cimgout,*iChunk);
+        for (unsigned int b=0;b<img.NumBands();b++) {
+            stats = img[b].Stats();
+            float lo = std::max(stats(2) - 3*stats(3), stats(0)-1);
+            float hi = std::min(stats(2) + 3*stats(3), stats(1));
+            for (unsigned int iChunk=1; iChunk<=img[b].NumChunks(); iChunk++) {
+                cimg = img[b].Read(iChunk);
+                mask = img[b].NoDataMask(iChunk);
+                ((cimg-=lo)*=(255.0/(hi-lo))).max(0.0).min(255.0);
+                //cimg_printstats(cimg,"after stretch");
+                cimg_forXY(cimg,x,y) { if (!mask(x,y)) cimg(x,y) = imgout[b].NoDataValue(); }
+                imgout[b].Write(CImg<unsigned char>().assign(cimg.round()),iChunk);
+            }
         }
-        return imageout;
+        return imgout;
     }*/
+
 
     //! Spectral Matched Filter, with missing data
     /*GeoImage SMF(const GeoImage& image, string filename, CImg<double> Signature) {
@@ -934,6 +785,37 @@ namespace gip {
 
         //vector< box<point> > Chunks = ImageIn.Chunk();
         return output;
+    }*/
+
+    /*
+    CImg<double> SpectralCorrelation(const GeoImage& image, CImg<double> covariance) {
+        // Correlation matrix
+        if (covariance.size() == 0) covariance = SpectralCovariance(image);
+
+        unsigned int NumBands = image.NumBands();
+        unsigned int b;
+
+        // Subtract Mean
+        //CImg<double> means(NumBands);
+        //for (b=0; b<NumBands; b++) means(b) = image[b].Mean();
+        //covariance -= (means.get_transpose() * means);
+
+        CImg<double> stddev(NumBands);
+        for (b=0; b<NumBands; b++) stddev(b) = image[b].StdDev();
+        CImg<double> Correlation = covariance.div(stddev.get_transpose() * stddev);
+
+        if (Options::Verbose() > 0) {
+            cout << image.Basename() << " Spectral Correlation Matrix:" << endl;
+            cimg_forY(Correlation,y) {
+                cout << "\t";
+                cimg_forX(Correlation,x) {
+                    cout << std::setw(18) << Correlation(x,y);
+                }
+                cout << endl;
+            }
+        }
+
+        return Correlation;
     }*/
 
     /*CImg<double> SpectralCovariance(const GeoImage& image) {
@@ -986,66 +868,6 @@ namespace gip {
         }
         return Covariance;
     }*/
-/*
-    CImg<double> SpectralCorrelation(const GeoImage& image, CImg<double> covariance) {
-        // Correlation matrix
-        if (covariance.size() == 0) covariance = SpectralCovariance(image);
 
-        unsigned int NumBands = image.NumBands();
-        unsigned int b;
-
-        // Subtract Mean
-        //CImg<double> means(NumBands);
-        //for (b=0; b<NumBands; b++) means(b) = image[b].Mean();
-        //covariance -= (means.get_transpose() * means);
-
-        CImg<double> stddev(NumBands);
-        for (b=0; b<NumBands; b++) stddev(b) = image[b].StdDev();
-        CImg<double> Correlation = covariance.div(stddev.get_transpose() * stddev);
-
-        if (Options::Verbose() > 0) {
-            cout << image.Basename() << " Spectral Correlation Matrix:" << endl;
-            cimg_forY(Correlation,y) {
-                cout << "\t";
-                cimg_forX(Correlation,x) {
-                    cout << std::setw(18) << Correlation(x,y);
-                }
-                cout << endl;
-            }
-        }
-
-        return Correlation;
-    }*/
-
-    //! Rewrite file (applying processing, masks, etc)
-    /* GeoImage Process(const GeoImage& image) {
-        for (unsigned int i=0l i<Output.NumBands(); i++) {
-
-        }
-    }
-    // Apply a mask to existing file (where mask>0 change to NoDataValue)
-    GeoImage Process(const GeoImage& image, GeoRaster& mask) {
-        image.AddMask(mask);
-        for (unsigned int i=0; i<image.NumBands(); i++) {
-            switch (image.DataType()) {
-                case GDT_Byte: GeoRasterIO<unsigned char>(image[i]).ApplyMask(mask);
-                    break;
-                case GDT_UInt16: GeoRasterIO<unsigned short>(image[i]).ApplyMask(mask);
-                    break;
-                case GDT_Int16: GeoRasterIO<short>(image[i]).ApplyMask(mask);
-                    break;
-                case GDT_UInt32: GeoRasterIO<unsigned int>(image[i]).ApplyMask(mask);
-                    break;
-                case GDT_Int32: GeoRasterIO<int>(image[i]).ApplyMask(mask);
-                    break;
-                case GDT_Float32: GeoRasterIO<float>(image[i]).ApplyMask(mask);
-                    break;
-                case GDT_Float64: GeoRasterIO<double>(image[i]).ApplyMask(mask);
-                    break;
-                default: GeoRasterIO<unsigned char>(image[i]).ApplyMask(mask);
-            }
-        }
-        return image;
-    }   */
 
 } // namespace gip
