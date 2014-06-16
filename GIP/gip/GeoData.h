@@ -100,6 +100,13 @@ namespace gip {
             _GDALDataset->SetMetadataItem(key.c_str(),item.c_str());
             return *this;
         }
+        //! Set multiple metadata items
+        GeoData& SetMeta(std::map<std::string, std::string> items) {
+            for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
+                SetMeta(i->first, i->second);
+            }
+            return *this;
+        }
         //! Copy Meta data from input file.  Currently no error checking
         GeoData& CopyMeta(const GeoData& img);
         //! Copy coordinate system
