@@ -17,6 +17,12 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
 
+v0.9.6
+- Added NDWI and MSAVI2 to Indices function
+- Overloaded SetMeta function to take in map<string, string> for multiple items
+- Updated algorithms to all take optional metadata dictionary for output
+- cleanup of GeoAlgorithms.h and GeoAlgorithms.cpp
+
 v0.9.5
 - When opening an image default is now read-only
 - Fixed bug with Process to new image
