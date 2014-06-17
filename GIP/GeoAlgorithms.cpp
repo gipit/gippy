@@ -247,7 +247,7 @@ namespace gip {
 
     //! Merge images into one file and crop to vector
     GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, 
-            float xres, float yres, dictionary metadata) {
+            float xres, float yres, bool crop, dictionary metadata) {
         // TODO - pass in vector of GeoRaster's instead
         if (Options::Verbose() > 2) {
             cout << filename << ": CookieCutter" << endl;
@@ -263,11 +263,35 @@ namespace gip {
         // Create output file based on input vector
         OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vectorname.c_str());
         OGRLayer *poLayer = poDS->GetLayer(0);
-        OGREnvelope extent;
-        poLayer->GetExtent(&extent, true);
+        OGRSpatialReference* vSRS = poLayer->GetSpatialRef();
+        OGREnvelope _extent;
+        poLayer->GetExtent(&_extent, true);
+        Rect<double> extent(Point<double>(_extent.MinX,_extent.MinY),Point<double>(_extent.MaxX,_extent.MaxY));
+        // Crop down to minimum bounding box if crop set
+        if (crop) {
+            // Find transformed union of all raster bounding boxes
+            vector< Rect<double> > r_extents;
+            for (vector<GeoImage>::const_iterator i=imgs.begin(); i!=imgs.end(); i++) {
+                Rect<double> ext(Point<double>(i->LowerLeft()),Point<double>(i->TopRight()));
+                ext.Transform(i->SRS(), *vSRS);
+                r_extents.push_back(ext);
+            }
+            Rect<double> r_extent(r_extents[0]);
+            for (vector< Rect<double> >::const_iterator r=r_extents.begin(); r!=r_extents.end(); r++) {
+                r_extent.Union(*r);
+            }
+            // Limit to vector extent
+            r_extent.Intersect(extent);
+
+            // anchor to top left of vector (MinX, MaxY) and make multiple of resolution
+            extent = Rect<double>(
+                Point<double>(extent.x0() + std::floor((r_extent.x0()-extent.x0()) / xres) * xres, r_extent.y0()),
+                Point<double>(r_extent.x1(), extent.y1() - std::floor((extent.y1()-r_extent.y1()) / yres) * yres)
+            );
+        }
         // Need to convert extent to resolution units
-        int xsize = (int)(0.5 + (extent.MaxX - extent.MinX) / xres);
-        int ysize = (int)(0.5 + (extent.MaxY - extent.MinY) / yres);
+        int xsize = std::ceil(extent.width() / xres);
+        int ysize = std::ceil(extent.height() / yres);
         GeoImage imgout(filename, xsize, ysize, bsz, dtype);
         imgout.CopyMeta(imgs[0]);
         imgout.CopyColorTable(imgs[0]);
@@ -275,30 +299,18 @@ namespace gip {
         imgout.SetMeta(metadata);
 
         double affine[6];
-        affine[0] = extent.MinX;
+        affine[0] = extent.x0();
         affine[1] = xres;
         affine[2] = 0;
-        affine[3] = extent.MaxY;
+        affine[3] = extent.y1();
         affine[4] = 0;
-        affine[5] = -yres;
+        affine[5] = -std::abs(yres);
         char* wkt = NULL;
         poLayer->GetSpatialRef()->exportToWkt(&wkt);
         imgout.GetGDALDataset()->SetProjection(wkt);
         imgout.GetGDALDataset()->SetGeoTransform(affine);
-        // Compute union
-        /*OGRPolygon* site; // = new OGRPolygon();
-        OGRFeature *poFeature;
-        poLayer->ResetReading();
-        while( (poFeature = poLayer->GetNextFeature()) != NULL )
-        {
-            OGRGeometry *poGeometry;
-            poGeometry = poFeature->GetGeometryRef();
 
-            site = (OGRPolygon*)site->Union(poGeometry);
-            OGRFeature::DestroyFeature( poFeature );
-        }*/
-
-        // Combine shape geoemtries into single geometry cutline
+        // Combine shape geometries into single geometry cutline
         OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
         OGRGeometry* poGeometry;
         OGRFeature *poFeature;
