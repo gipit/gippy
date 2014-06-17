@@ -17,6 +17,11 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
 
+v0.9.7
+- Added untion and transform functions to Rect
+- Added additional coordinate convenience functions to GeoData
+- Added crop option to CookieCutter
+
 v0.9.6
 - Added NDWI and MSAVI2 to Indices function
 - Overloaded SetMeta function to take in map<string, string> for multiple items

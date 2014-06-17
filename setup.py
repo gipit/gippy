@@ -17,7 +17,6 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
-
 """
 setup for GIP and gippy
 """
@@ -33,7 +32,7 @@ from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
 
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 
 
 def add_reg(filename):
