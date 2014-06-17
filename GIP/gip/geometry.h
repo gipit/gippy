@@ -21,6 +21,8 @@
 #define GEOMETRY_H
 
 #include <iostream>
+//#include <gdal/ogr_srs_api.h>
+#include <gdal/ogr_spatialref.h>
 
 namespace gip {
 
@@ -128,6 +130,24 @@ namespace gip {
         Rect get_Shift(T x, T y) const {
             return Rect(*this).Shift(x,y);
         }*/
+
+        //! Transform between coordinate systems
+        Rect& Transform(OGRSpatialReference src, OGRSpatialReference dst) {
+            if (src.IsSame(&dst)) return *this;
+            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&src, &dst);
+            double x, y;
+            x = _p0.x();
+            y = _p0.y();
+            trans->Transform(1, &x, &y);
+            _p0 = Point<T>(x, y);
+            x = _p1.x();
+            y = _p1.y();
+            trans->Transform(1, &x, &y);
+            _p1 = Point<T>(x, y);
+            delete trans;
+            return *this;
+        }
+
         Rect& Pad(int pad) {
             _p0 = _p0 - Point<T>(pad,pad);
             _p1 = _p1 + Point<T>(pad,pad);
@@ -145,6 +165,16 @@ namespace gip {
         //! Returns intersection of two Rects
         Rect get_Intersect(const Rect& rect) const {
             return Rect<T>(*this).Intersect(rect);
+        }
+        // Calculates untion of Rect with argument Rect
+        Rect& Union(const Rect& rect) {
+            _p0 = Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) );
+            _p1 = Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) );
+            return *this;            
+        }
+        //! Returns outer bounding box of two rects
+        Rect get_Union(const Rect& rect) const {
+            return Rect<T>(*this).Union(rect);
         }
         friend std::ostream& operator<<(std::ostream& stream,const Rect& r) {
             return stream << r._p0 << ", " << r._p1;
