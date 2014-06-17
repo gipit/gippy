@@ -146,6 +146,7 @@ namespace std {
 %ignore gip::GeoData::operator=;
 %ignore gip::Colors::operator[];
 %ignore gip::GeoImage::operator[];
+%ignore operator<<;
 //%ignore gip::GeoRaster::operator==;
 
 // GIP headers and classes to be wrapped
