@@ -82,11 +82,34 @@ namespace gip {
         Point<double> GeoLoc(float xloc, float yloc) const;
         //! Coordinates of top left
         Point<double> TopLeft() const { return GeoLoc(0,0); }
+        //! Coordinates of lower left
+        Point<double> LowerLeft() const { return GeoLoc(0,YSize()-1); }
+        //! Coordinates of top right
+        Point<double> TopRight() const { return GeoLoc(XSize()-1,0); }
         //! Coordinates of bottom right
         Point<double> LowerRight() const { return GeoLoc(XSize()-1,YSize()-1); }
+        //! Minimum Coordinates of X and Y
+        Point<double> MinXY() const { 
+            Point<double> pt1(TopLeft()), pt2(LowerRight());
+            double MinX(std::min(pt1.x(), pt2.x()));
+            double MinY(std::min(pt1.y(), pt2.y()));
+            return Point<double>(MinX, MinY);
+        }
+        //! Maximum Coordinates of X and Y
+        Point<double> MaxXY() const { 
+            Point<double> pt1(TopLeft()), pt2(LowerRight());
+            double MaxX(std::max(pt1.x(), pt2.x()));
+            double MaxY(std::max(pt1.y(), pt2.y()));
+            return Point<double>(MaxX, MaxY);
+        }
         //! Return projection definition in Well Known Text format
         std::string Projection() const {
             return _GDALDataset->GetProjectionRef();
+        }
+        //! Return projection as OGRSpatialReference
+        OGRSpatialReference SRS() const {
+            std::string s(Projection());
+            return OGRSpatialReference(s.c_str());
         }
 
         //! \name Metadata functions
