@@ -17,6 +17,9 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
 
+v0.9.8
+- Added LinearTransform algorithm
+
 v0.9.7
 - Added untion and transform functions to Rect
 - Added additional coordinate convenience functions to GeoData

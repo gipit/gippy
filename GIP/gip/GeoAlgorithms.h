@@ -25,6 +25,11 @@
 #include <initializer_list>
 
 namespace gip {
+    /*cimg_library::CImg<float> _test(cimg_library::CImg<float> cimg) {
+        cimg_print(cimg);
+        return CImg<float>(2,2,1,1,10);
+    }*/
+
     //! Create cloudmask using ACCA
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
@@ -40,6 +45,9 @@ namespace gip {
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
     dictionary Indices(const GeoImage&, dictionary, dictionary=dictionary());
+
+    //! Create output based on linear combinations of input
+    GeoImage LinearTransform(const GeoImage&, std::string filename, cimg_library::CImg<float> coef);
 
     //! Stretch image into byte
     //GeoImage RGB(const GeoImage&, std::string);

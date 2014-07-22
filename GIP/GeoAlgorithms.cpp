@@ -760,6 +760,33 @@ namespace gip {
         return filenames;
     }
 
+    //! Perform linear transform with given coefficients (e.g., PC transform)
+    GeoImage LinearTransform(const GeoImage& img, string filename, cimg_library::CImg<float> coef) {
+        // Verify size of array
+        unsigned int numbands = img.NumBands();
+        if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))
+            throw std::runtime_error("Coefficient array needs to be of size NumBands x NumBands!");
+        float nodataout = -32768;
+        GeoImage imgout(filename, img, GDT_Float32);
+        imgout.SetNoData(nodataout);
+        //imgout.SetGain(0.0001);
+        imgout.CopyMeta(img);
+        CImg<float> cimg, mask;
+        for (unsigned int bout=0; bout<numbands; bout++) {
+            //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
+            for (unsigned int iChunk=1; iChunk<=imgout[bout].NumChunks(); iChunk++) {
+                cimg = imgout[bout].Read<float>(iChunk);
+                for (unsigned int bin=0; bin<numbands; bin++) {
+                    cimg += (img[bin].Read<float>(iChunk) * coef(bin, bout));
+                }
+                mask = img.NoDataMask(iChunk);
+                cimg_forXY(cimg,x,y) if (mask(x,y)) cimg(x,y) = nodataout;
+                imgout[bout].Write(cimg, iChunk);
+            }
+        }
+        return imgout;
+    }
+
     //! Generate 3-band RGB image scaled to 1 byte for easy viewing
     /*GeoImage RGB(const GeoImage& image, string filename) {
         GeoImageIO<float> img(image);
