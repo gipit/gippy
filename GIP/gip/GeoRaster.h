@@ -272,6 +272,14 @@ namespace gip {
         //friend GeoRaster operator/(const double &val, const GeoRaster& raster) {
         //    return raster.pow(-1)*val;
         //}
+        //! Pointwise max operator
+        GeoRaster max(const double &val) const {
+            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double>(&CImg<double>::max), _1, val));
+        }
+        //! Pointwise min operator
+        GeoRaster min(const double &val) const {
+            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double>(&CImg<double>::min), _1, val));
+        }
 
         //! Exponent
         GeoRaster pow(const double &val) const {
@@ -289,9 +297,18 @@ namespace gip {
         GeoRaster log10() const {
             return GeoRaster(*this, boost::bind(&CImg<double>::log10, _1));
         }
+        //! Exponential
+        GeoRaster exp() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::exp, _1));
+        }
+
         //! Absolute value
         GeoRaster abs() const {
             return GeoRaster(*this, boost::bind(&CImg<double>::abs, _1));
+        }
+        //! Compute sign (-1 if < 0, +1 if > 0, 0 if 0)
+        GeoRaster sign() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::sign, _1));
         }
 
         // Cosine
@@ -306,6 +323,35 @@ namespace gip {
         GeoRaster tan() const {
             return GeoRaster(*this, boost::bind(&CImg<double>::tan, _1));
         }
+        //! arccosine
+        GeoRaster acos() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::acos, _1));
+        }
+        //! arccosine
+        GeoRaster asin() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::asin, _1));
+        }
+        //! arctangent
+        GeoRaster atan() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::atan, _1));
+        }
+        //! Hyperbolic cosine
+        GeoRaster cosh() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::cosh, _1));
+        }
+        //! Hyperbolic sine
+        GeoRaster sinh() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::sinh, _1));
+        }
+        //! Hyperbolic tagent
+        GeoRaster tanh() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::tanh, _1));
+        }
+        //! Sinc
+        GeoRaster sinc() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::sinc, _1));
+        }
+
 
         // Statistics - should these be stored?
         //double Min() const { return (GetGDALStats())[0]; }

@@ -18,6 +18,7 @@
 ################################################################################
 
 v0.9.8
+- Added additional operators on GeoRaster: min, max, exp, sign, acos, etc.
 - Added LinearTransform algorithm
 
 v0.9.7
