@@ -771,13 +771,14 @@ namespace gip {
         imgout.SetNoData(nodataout);
         //imgout.SetGain(0.0001);
         imgout.CopyMeta(img);
-        CImg<float> cimg, mask;
+        CImg<float> cimg;
+        CImg<unsigned char> mask;
         for (unsigned int bout=0; bout<numbands; bout++) {
             //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
             for (unsigned int iChunk=1; iChunk<=imgout[bout].NumChunks(); iChunk++) {
-                cimg = imgout[bout].Read<float>(iChunk);
-                for (unsigned int bin=0; bin<numbands; bin++) {
-                    cimg += (img[bin].Read<float>(iChunk) * coef(bin, bout));
+                cimg = img[0].Read<float>(iChunk) * coef(0, bout);;
+                for (unsigned int bin=1; bin<numbands; bin++) {
+                    cimg = cimg + (img[bin].Read<float>(iChunk) * coef(bin, bout));
                 }
                 mask = img.NoDataMask(iChunk);
                 cimg_forXY(cimg,x,y) if (mask(x,y)) cimg(x,y) = nodataout;
