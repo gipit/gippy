@@ -338,7 +338,7 @@ namespace gip {
                 int lowi, highi;
                 float y0, y1, x0, x1;
                 for (int c=1; c<cimg.spectrum()-1;c++) {
-                    if (Options::Verbose() > 3) cimg_print(C, "days vector");
+                    if (Options::Verbose() > 2) cimg_print(C, "days vector");
                     cimg_forXY(cimg,x,y) {
                         if (cimg(x,y,c) == nodata) {
                             // Find next lowest point
@@ -371,7 +371,7 @@ namespace gip {
             cimg_library::CImg<T> cimg;
             long count = 0;
 
-            for (int iChunk=1; iChunk<=NumChunks(); iChunk++) {
+            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
                 cmask = mask.Read<unsigned char>(iChunk);
                 cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
             }
@@ -379,7 +379,7 @@ namespace gip {
             count = 0;
             int ch(0);
             unsigned int c;
-            for (int iChunk=1; iChunk<=NumChunks(); iChunk++) {
+            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
                 cimg = Read<T>(iChunk);
                 cmask = mask.Read<unsigned char>(iChunk);
                 cimg_forXY(cimg,x,y) {
