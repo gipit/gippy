@@ -25,10 +25,10 @@
 #include <initializer_list>
 
 namespace gip {
-    /*cimg_library::CImg<float> _test(cimg_library::CImg<float> cimg) {
-        cimg_print(cimg);
-        return CImg<float>(2,2,1,1,10);
-    }*/
+    cimg_library::CImg<float> _test(cimg_library::CImg<float> cimg) {
+        cimg_print(cimg, "Input vector as CImg: ");
+        return cimg;
+    }
 
     //! Create cloudmask using ACCA
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
