@@ -81,11 +81,16 @@
         return arr;
     }
 
-    // Convert numpy array into CImg...currently 2-D only
+    // Convert numpy array into CImg
     template<typename T> cimg_library::CImg<T> ArrToCImg(PyObject* arr) {
         PyArrayObject* _arr = (PyArrayObject*)arr;
-        cimg_library::CImg<T> cimg((T*)_arr->data, _arr->dimensions[1], _arr->dimensions[0]);
-        return cimg;
+        if (_arr->nd == 1) {
+            return cimg_library::CImg<T>((T*)_arr->data, _arr->dimensions[0]);
+        } else if (_arr->nd == 2) {
+            return cimg_library::CImg<T>((T*)_arr->data, _arr->dimensions[1], _arr->dimensions[0]);
+        } else {
+            throw(std::exception());
+        }
     }
 
     namespace gip {
