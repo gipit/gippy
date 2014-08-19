@@ -331,13 +331,13 @@ namespace gip {
         }
 
         //! Extract, and interpolate, time series (C is time axis)
-        template<class T> cimg_library::CImg<T> TimeSeries(cimg_library::CImg<double> C) {
+        template<class T, class t> cimg_library::CImg<T> TimeSeries(cimg_library::CImg<t> times) {
             cimg_library::CImg<T> cimg = Read<T>();
             T nodata = _RasterBands[0].NoDataValue();
             if (cimg.spectrum() > 2) {
                 int lowi, highi;
                 float y0, y1, x0, x1;
-                if (Options::Verbose() > 2) cimg_print(C, "requested time vector: ");
+                if (Options::Verbose() > 2) cimg_print(times, "requested time vector: ");
                 for (int c=1; c<cimg.spectrum()-1;c++) {
                     cimg_forXY(cimg,x,y) {
                         if (cimg(x,y,c) == nodata) {
@@ -347,10 +347,10 @@ namespace gip {
                             while ((cimg(x,y,c+highi) == nodata) && (c+highi < cimg.spectrum()-1) ) highi++;
                             y0 = cimg(x,y,c-lowi);
                             y1 = cimg(x,y,c+highi);
-                            x0 = C(c-lowi);
-                            x1 = C(c+highi);
+                            x0 = times(c-lowi);
+                            x1 = times(c+highi);
                             if ((y0 != nodata) && (y1 != nodata)) {
-                                cimg(x,y,c) = y0 + (y1-y0) * ((C(c)-x0)/(x1-x0));
+                                cimg(x,y,c) = y0 + (y1-y0) * ((times(c)-x0)/(x1-x0));
                             }
                         } else if (cimg(x,y,c-1) == nodata) {
                             T val = cimg(x,y,c);
