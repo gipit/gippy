@@ -25,8 +25,12 @@
 #include <initializer_list>
 
 namespace gip {
-    cimg_library::CImg<float> _test(cimg_library::CImg<float> cimg) {
-        cimg_print(cimg, "Input vector as CImg: ");
+    template<class T> cimg_library::CImg<T> _test(cimg_library::CImg<T> cimg) {
+        //std::cout << "GIPPY CImg input/output test" << std::endl;
+        //std::cout << "typeid = " << typeid(T) << std::endl;
+        cimg_printinfo(cimg);
+        cimg_printstats(cimg);
+        cimg_print(cimg);
         return cimg;
     }
 
