@@ -20,16 +20,13 @@
 %feature("autodoc", "1");
 %{
     #define SWIG_FILE_WITH_INIT
-    //#include "gip/Colors.h"
-    //#include "gip/GeoData.h"
-    //#include "gip/GeoRaster.h"
-    #include "gip/GeoImage.h"
-    #include "gip/GeoAlgorithms.h"
-    //#include "gdal/gdal_priv.h"
+    #include <gip/GeoImage.h>
+    #include <gip/GeoAlgorithms.h>
     #include <python2.7/Python.h>
     #include <numpy/arrayobject.h>
     #include <iostream>
-    #include "gip/gip_CImg.h"
+    #include <gip/gip_CImg.h>
+    #include <stdint.h>
 
     using namespace gip;
 
@@ -39,7 +36,7 @@
         }
     }
 
-    template<typename T> int numpytype() {
+    /*template<typename T> int numpytype() {
         int typenum;
         if (typeid(T) == typeid(unsigned char)) typenum = NPY_UINT8;
         else if (typeid(T) == typeid(char)) typenum = NPY_INT8;
@@ -50,19 +47,20 @@
         else if (typeid(T) == typeid(float)) typenum = NPY_FLOAT32;
         else if (typeid(T) == typeid(double)) typenum = NPY_FLOAT64;
         else throw(std::exception());
-    }
+        return typenum;
+    }*/
 
     // Convert CImg into numpy array
     template<typename T> PyObject* CImgToArr(cimg_library::CImg<T> cimg) {
         int typenum;
-        if (typeid(T) == typeid(unsigned char)) typenum = NPY_UINT8;
-        else if (typeid(T) == typeid(char)) typenum = NPY_INT8;
-        else if (typeid(T) == typeid(unsigned short)) typenum = NPY_UINT16;
-        else if (typeid(T) == typeid(short)) typenum = NPY_INT16;
-        else if (typeid(T) == typeid(unsigned int)) typenum = NPY_UINT32;
-        else if (typeid(T) == typeid(int)) typenum = NPY_INT32;
-        //else if (typeid(T) == typeid(unsigned long)) typenum = NPY_UINT64;
-        //else if (typeid(T) == typeid(long)) typenum = NPY_INT64;
+        if (typeid(T) == typeid(uint8_t)) typenum = NPY_UINT8;
+        else if (typeid(T) == typeid(int8_t)) typenum = NPY_INT8;
+        else if (typeid(T) == typeid(uint16_t)) typenum = NPY_UINT16;
+        else if (typeid(T) == typeid(int16_t)) typenum = NPY_INT16;
+        else if (typeid(T) == typeid(uint32_t)) typenum = NPY_UINT32;
+        else if (typeid(T) == typeid(int32_t)) typenum = NPY_INT32;
+        else if (typeid(T) == typeid(uint64_t)) typenum = NPY_UINT64;
+        else if (typeid(T) == typeid(int64_t)) typenum = NPY_INT64;
         else if (typeid(T) == typeid(float)) typenum = NPY_FLOAT32;
         else if (typeid(T) == typeid(double)) typenum = NPY_FLOAT64;
         else throw(std::exception());
@@ -89,6 +87,26 @@
         cimg_library::CImg<T> cimg((T*)_arr->data, _arr->dimensions[1], _arr->dimensions[0]);
         return cimg;
     }
+
+    namespace gip {
+    PyObject* test(PyObject* arr) {
+        //return CImgToArr(_test(ArrToCImg<float>(arr)));
+        switch(((PyArrayObject*)arr)->descr->type_num) {
+            case NPY_UINT8: return CImgToArr(_test(ArrToCImg<uint8_t>(arr)));
+            case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(arr)));
+            case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(arr)));
+            case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(arr)));
+            case NPY_UINT32: return CImgToArr(_test(ArrToCImg<uint32_t>(arr)));
+            case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(arr)));
+            case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(arr)));
+            case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(arr)));
+            case NPY_FLOAT32: return CImgToArr(_test(ArrToCImg<float>(arr)));
+            case NPY_FLOAT64: return CImgToArr(_test(ArrToCImg<double>(arr)));
+            default:
+                throw(std::exception());
+        }
+    }
+}
 
 %}
 
@@ -117,26 +135,29 @@ namespace std {
 }
 
 // CImg -> numpy
-%typemap (out) cimg_library::CImg<unsigned char> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<char> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<unsigned short> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<short> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<unsigned int> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<int> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<unsigned long> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<long> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<uint8_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<int8_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<uint16_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<int16_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<uint32_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<int32_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<uint64_t> { return CImgToArr($1); }
+%typemap (out) cimg_library::CImg<int64_t> { return CImgToArr($1); }
 %typemap (out) cimg_library::CImg<float> { return CImgToArr($1); }
 %typemap (out) cimg_library::CImg<double> { return CImgToArr($1); }
 
 // numpy -> CImg
-%typemap (in) cimg_library::CImg<unsigned char> { $1 = ArrToCImg<unsigned char>($input); }
-%typemap (in) cimg_library::CImg<char> { $1 = ArrToCImg<char>($input); }
-%typemap (in) cimg_library::CImg<unsigned short> { 1 = ArrToCImg<unsigned short>($input); }
-%typemap (in) cimg_library::CImg<short> { $1 = ArrToCImg<short>($input); }
-%typemap (in) cimg_library::CImg<unsigned int> { $1 = ArrToCImg<unsigned int>($input); }
-%typemap (in) cimg_library::CImg<int> { $1 = ArrToCImg<int>($input); }
+%typemap (in) cimg_library::CImg<uint8_t> { $1 = ArrToCImg<uint8_t>($input); }
+%typemap (in) cimg_library::CImg<int8_t> { $1 = ArrToCImg<int8_t>($input); }
+%typemap (in) cimg_library::CImg<uint16_t> { $1 = ArrToCImg<uint16_t>($input); }
+%typemap (in) cimg_library::CImg<int16_t> { $1 = ArrToCImg<int16_t>($input); }
+%typemap (in) cimg_library::CImg<uint32_t> { $1 = ArrToCImg<uint32_t>($input); }
+%typemap (in) cimg_library::CImg<int32_t> { $1 = ArrToCImg<int32_t>($input); }
+%typemap (in) cimg_library::CImg<uint64_t> { $1 = ArrToCImg<uint64_t>($input); }
+%typemap (in) cimg_library::CImg<int64_t> { $1 = ArrToCImg<int64_t>($input); }
 %typemap (in) cimg_library::CImg<float> { $1 = ArrToCImg<float>($input); }
 %typemap (in) cimg_library::CImg<double> { $1 = ArrToCImg<double>($input); }
+
 
 // TODO - Was trying to quiet warnings...didn't work
 //%typemap(typecheck) PyArrayObject * = cimg_library::CImg<unsigned char> ;
@@ -164,10 +185,15 @@ enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GD
     #GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
 //enum UNITS { RAW, RADIANCE, REFLECTIVITY };
 
+
+
 namespace gip {
 
     // Register file formats with GDAL
     void reg();
+    PyObject* test(PyObject* arr);
+    //%template(testint) _test<int>;
+
 
     %template(iRect) Rect<int>;
 
@@ -195,11 +221,6 @@ namespace gip {
         }
     }
 
-    /*%extend Rect {
-        std::string __str__() {
-            return self->operator<<();
-        }
-    }*/
 
     %extend GeoRaster {
         // Processing functions
