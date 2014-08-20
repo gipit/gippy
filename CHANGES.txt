@@ -17,6 +17,11 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
 
+v0.9.9:
+- Added TimeSeries, Extract, GetRandomPixels, GetPixelClasses functions to GeoImage python bindings
+- Standardized datatypes using stdint.h for better interoperability
+- 1-d Numpy to CImg conversion fixed
+
 v0.9.8
 - Added additional operators on GeoRaster: min, max, exp, sign, acos, etc.
 - Added LinearTransform algorithm
