@@ -88,10 +88,11 @@ namespace gip {
         void SetDescription(std::string desc) {
             _GDALRasterBand->SetDescription(desc.c_str());
             // Also set description in dataset metadata since band desc doesn't work at least in GTiff
-            this->SetMeta("Band "+to_string(_GDALRasterBand->GetBand()), desc);
+            //this->SetMeta("Band "+to_string(_GDALRasterBand->GetBand()), desc);
         }
         //! Set Color Interp
         void SetColor(std::string col) {
+            SetDescription(col);
             // Is this used in other GDAL aware programs?
             GDALColorInterp gdalcol;
             if (col == "Red")

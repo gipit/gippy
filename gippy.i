@@ -170,7 +170,6 @@ namespace std {
 // GIP functions to ignore (suppresses warnings)
 // These operators are redefined below
 %ignore gip::GeoData::operator=;
-%ignore gip::Colors::operator[];
 %ignore gip::GeoImage::operator[];
 %ignore operator<<;
 //%ignore gip::GeoRaster::operator==;
@@ -181,8 +180,6 @@ namespace std {
 %include "gip/GeoImage.h"
 %include "gip/GeoAlgorithms.h"
 %include "gip/geometry.h"
-// TODO - Not sure this really needs to be wrapped
-%include "gip/Colors.h"
 
 // TODO - improve enums.  C++0x scoped enums ?
 enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32,
@@ -216,16 +213,6 @@ namespace gip {
         static std::string WorkDir();
         static void SetWorkDir(std::string workdir);
     };
-
-    %extend Colors {
-        int __getitem__(std::string col) {
-            return self->Colors::operator[](col);
-        }
-        std::string __getitem__(int col) {
-            return self->Colors::operator[](col);
-        }
-    }
-
 
     %extend GeoRaster {
         // Processing functions

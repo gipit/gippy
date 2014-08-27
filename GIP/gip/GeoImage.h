@@ -20,7 +20,6 @@
 #ifndef GIP_GEOIMAGE_H
 #define GIP_GEOIMAGE_H
 
-#include <gip/Colors.h>
 #include <gip/GeoData.h>
 #include <gip/GeoRaster.h>
 
@@ -58,7 +57,6 @@ namespace gip {
             //CopyMeta(image);
             CopyCoordinateSystem(image);
             LoadBands();
-            //_Colors = image.GetColors();
         }
         //! Constructor for creating new file with same properties (xsize, ysize, bsize) as existing file
         explicit GeoImage(std::string filename, const GeoImage& image, GDALDataType datatype) :
@@ -67,7 +65,6 @@ namespace gip {
             //CopyMeta(image);
             CopyCoordinateSystem(image);
             LoadBands();
-            _Colors = image.GetColors();
         }
         //! Constructor for creating new file with given properties (xsize, ysize, bsize,datatype) as existing file
         explicit GeoImage(std::string filename, const GeoImage& image) :
@@ -76,7 +73,6 @@ namespace gip {
             //CopyMeta(image);
             CopyCoordinateSystem(image);
             LoadBands();
-            //_Colors = image.GetColors();
         }
 
         // Factory functions to support keywords in python bindings
@@ -125,45 +121,68 @@ namespace gip {
         //! \name Bands and colors
         //! Get vector of band names
         std::vector<std::string> BandNames() const;
+        //! Set band name
+        void SetColor(std::string desc, int bandnum) {
+            std::cout << "GIPPY Deprecation Warning: SetColor replaced with SetBandName" << std::endl;
+            SetBandName(desc, bandnum);
+        }
+        //! Set a band name
+        void SetBandName(std::string desc, int bandnum) {
+            try {
+                // Test if color already exists
+                (*this)[desc];
+                throw std::out_of_range ("Band " + desc + " already exists in GeoImage!");
+            } catch(...) {
+                _RasterBands[bandnum-1].SetColor(desc);
+            }            
+        }
+
+        //! Get band index for provided band name
+        int BandIndex(std::string name) const {
+            for (unsigned int i=0; i<_RasterBands.size(); i++) {
+                if (name == _RasterBands[i].Description()) return i;
+            }
+            return -1;
+        }
+        bool BandExists(std::string desc) const {
+            try {
+                (*this)[desc];
+                return true;
+            } catch(...) {
+                return false;
+            } 
+        }
+        bool BandsExist(std::vector<std::string> desc) const {
+            for (std::vector<std::string>::const_iterator i=desc.begin(); i!=desc.end(); i++) {
+                if (!BandExists(*i)) return false;
+            }
+            return true;            
+        }
+
         //! Get raster band (0-based index)
         GeoRaster& operator[](int band) { return _RasterBands[band]; }
         //! Get raster band, const version
         const GeoRaster& operator[](int band) const { return _RasterBands[band]; }
-        //! Get raster band by color
-        GeoRaster& operator[](std::string col) {
+        //! Get raster band by description
+        GeoRaster& operator[](std::string desc) {
             // Call const version
-            return const_cast<GeoRaster&>(static_cast<const GeoImage&>(*this)[col]);
+            return const_cast<GeoRaster&>(static_cast<const GeoImage&>(*this)[desc]);
         }
-        //! Get raster band by color, const version
-        const GeoRaster& operator[](std::string col) const;
-        //! Adds a band, at position bandnum (0-based)
-        GeoImage& AddBand(const GeoRaster& band); //, unsigned int bandnum=0);
+        //! Get raster band by description, const version
+        const GeoRaster& operator[](std::string desc) const;
+
+        //! Adds a band (as last band)
+        GeoImage& AddBand(GeoRaster band);
         //! Remove band
         GeoImage& RemoveBand(unsigned int bandnum);
-        //! Prune bands to only provided colors
+        //! Prune bands to only provided names
         GeoImage& PruneBands(std::vector<std::string>);
         //! Prune bands to RGB
         GeoImage& PruneToRGB() {
-            // TODO - get initializer_list working (c++11 standard)
-            std::vector<std::string> cols; cols.push_back("Red"); cols.push_back("Green"); cols.push_back("Blue");
+            std::vector<std::string> cols({"RED","GREEN","BLUE"});
             return PruneBands(cols);
         }
-        //! Retrieve colors class
-        Colors GetColors() const { return _Colors; }
-        //! Set a color
-        void SetColor(std::string col,int bandnum) {
-            _Colors.SetColor(col,bandnum);
-            // Set color on individual band
-            _RasterBands[bandnum-1].SetColor(col);
-            _RasterBands[bandnum-1].SetDescription(col);
-        }
-        // TODO - dictionary?
-        /*void SetColors(int blue, int green, int red, int nir=0) {
-            SetColor("Blue",blue);
-            SetColor("Green",green);
-            SetColor("Red",red);
-            if (nir > 0) SetColor("NIR",nir);
-        }*/
+
         //! Copy color table from another image
         void CopyColorTable(const GeoImage& raster) {
             if (NumBands() == 1) {
@@ -455,9 +474,6 @@ namespace gip {
         //! Vector of raster bands
         std::vector< GeoRaster > _RasterBands;
 
-        //! Map indicating which bands are what colors
-        Colors _Colors;
-
         //! Loads Raster Bands of this GDALDataset into _RasterBands vector
         void LoadBands();
 
@@ -466,16 +482,19 @@ namespace gip {
             std::vector<int> ibands;
             std::vector<int>::const_iterator b;
             if (bands.empty()) {
+                // If no bands specified then defaults to all bands
                 for (unsigned int c=0; c<NumBands(); c++) ibands.push_back(c);
             } else {
-                for (std::vector<std::string>::const_iterator i=bands.begin(); i!=bands.end(); i++) {
-                    ibands.push_back(_Colors[*i]-1);
+                for (std::vector<std::string>::const_iterator name=bands.begin(); name!=bands.end(); name++) {
+                    ibands.push_back( BandIndex(*name) );
                 }
             }
             return ibands;
         }
 
     }; // class GeoImage
+
+    // GeoImage template function definitions
 
     template<class T> GeoImage& GeoImage::Process() {
         for (unsigned int i=0; i<NumBands(); i++) {
@@ -495,8 +514,8 @@ namespace gip {
             imgout[i].CopyMeta((*this)[i]);
             (*this)[i].Process<T>(imgout[i]);
         }
-        Colors colors = this->GetColors();
-        for (unsigned int i=0;i<this->NumBands();i++) imgout.SetColor(colors[i+1], i+1);
+        // Don't think this is needed since description is used directly as band name/color
+        //for (unsigned int i=0;i<this->NumBands();i++) imgout.SetColor(colors[i+1], i+1);
         imgout.CopyColorTable(*this);
         return imgout;
     }
