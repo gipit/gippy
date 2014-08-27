@@ -57,6 +57,7 @@ namespace gip {
     using std::cout;
     using std::cerr;
     using std::endl;
+    using cimg_library::CImg;
 
     /** ACCA (Automatic Cloud Cover Assessment). Takes in TOA Reflectance,
      * temperature, sun elevation, solar azimuth, and number of pixels to
@@ -677,7 +678,7 @@ namespace gip {
         colors["ndsi"] = {"SWIR1","GREEN"};
         colors["ndwi"] = {"GREEN","NIR"};
         colors["bi"] = {"BLUE","NIR"};
-        colors["satvi"] = {"SWIR1","RED"};
+        colors["satvi"] = {"SWIR1","RED", "SWIR2"};
         colors["msavi2"] = {"NIR","RED"};
         // Tillage indices
         colors["ndti"] = {"SWIR2","SWIR1"};
@@ -788,31 +789,33 @@ namespace gip {
         return imgout;
     }
 
-    //! Generate 3-band RGB image scaled to 1 byte for easy viewing
-    /*GeoImage RGB(const GeoImage& image, string filename) {
-        GeoImageIO<float> img(image);
-        img.SetUnitsOut("reflectance");
-        img.PruneToRGB();
-        GeoImageIO<unsigned char> imgout(GeoImage(filename, img, GDT_Byte));
-        imgout.SetNoData(0);
-        imgout.SetUnits("other");
-        CImg<float> stats, cimg;
-        CImg<unsigned char> mask;
-        for (unsigned int b=0;b<img.NumBands();b++) {
-            stats = img[b].Stats();
-            float lo = std::max(stats(2) - 3*stats(3), stats(0)-1);
-            float hi = std::min(stats(2) + 3*stats(3), stats(1));
-            for (unsigned int iChunk=1; iChunk<=img[b].NumChunks(); iChunk++) {
-                cimg = img[b].Read(iChunk);
-                mask = img[b].NoDataMask(iChunk);
-                ((cimg-=lo)*=(255.0/(hi-lo))).max(0.0).min(255.0);
-                //cimg_printstats(cimg,"after stretch");
-                cimg_forXY(cimg,x,y) { if (!mask(x,y)) cimg(x,y) = imgout[b].NoDataValue(); }
-                imgout[b].Write(CImg<unsigned char>().assign(cimg.round()),iChunk);
-            }
+    //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
+    std::string BrowseImage(const GeoImage& image, int quality) {
+        GeoImage img(image);
+        if (img.BandsExist({"RED","GREEN","BLUE"})) {
+            img.PruneToRGB();
+        } else {
+            img.PruneBands({img[0].Description()});
         }
-        return imgout;
-    }*/
+        std::string filename = img.Path().replace_extension().string() + ".jpg";;
+
+        CImg<double> stats;
+        float lo, hi;
+        for (unsigned int b=0; b<img.NumBands(); b++) {
+            stats = img[b].Stats();
+            lo = std::max(stats(2) - 3*stats(3), stats(0));
+            hi = std::min(stats(2) + 3*stats(3), stats(1));
+            img[b] = ((img[b] - lo) * (255.0/(hi-lo))).max(0.0).min(255.0);
+        }
+        CImg<double> cimg(img.Read<double>());
+        // TODO - alpha channel?
+        cimg_for(cimg, ptr, double) { if (*ptr == img[0].NoDataValue()) *ptr = 0; }
+
+        cimg.round().save_jpeg(filename.c_str(), quality);
+
+        if (Options::Verbose() > 1) cout << "BrowseImage written to " << filename << endl;
+        return filename;
+    }
 
 
     //! Spectral Matched Filter, with missing data
