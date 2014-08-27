@@ -54,7 +54,7 @@ namespace gip {
     GeoImage LinearTransform(const GeoImage&, std::string filename, cimg_library::CImg<float> coef);
 
     //! Stretch image into byte
-    //GeoImage RGB(const GeoImage&, std::string);
+    std::string BrowseImage(const GeoImage&, int quality=75);
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);
