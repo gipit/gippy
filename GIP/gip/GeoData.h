@@ -56,8 +56,9 @@ namespace gip {
         ~GeoData();
 
         //! \name File Information
+        //! Boost filesystem path
+        boost::filesystem::path Path() const { return _Filename; }
         //! Full filename of dataset
-        //boost::filesystem::path Filename() const { return _Filename; }
         std::string Filename() const { return _Filename.string(); }
         //! Filename without path
         std::string Basename() const { return _Filename.stem().string(); }
