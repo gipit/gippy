@@ -33,9 +33,7 @@ namespace gip {
         int bandnum(2);
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
             GeoImage img(*f);
-            if (_RasterBands[0].Description() == img[0].Description()) {
-                img[0].SetDescription(to_string(bandnum));
-            }
+            img[0].SetDescription(to_string(bandnum));
             for (unsigned int b=0;b<img.NumBands(); b++) {
                 AddBand(img[b]);
             }
