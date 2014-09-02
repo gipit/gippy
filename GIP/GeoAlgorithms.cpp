@@ -58,6 +58,7 @@ namespace gip {
     using std::cerr;
     using std::endl;
     using cimg_library::CImg;
+    namespace fs = boost::filesystem;
 
     /** ACCA (Automatic Cloud Cover Assessment). Takes in TOA Reflectance,
      * temperature, sun elevation, solar azimuth, and number of pixels to
@@ -244,6 +245,40 @@ namespace gip {
             // TODO - add in snow mask
         }
         return imgout;
+    }
+
+    //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
+    std::string BrowseImage(const GeoImage& image, int quality) {
+        GeoImage img(image);
+        if (img.BandsExist({"RED","GREEN","BLUE"})) {
+            img.PruneToRGB();
+        } else {
+            img.PruneBands({img[0].Description()});
+        }
+        boost::filesystem::path dir(img.Path().parent_path() / "browse");
+        if (!fs::is_directory(dir)) {
+            if(!boost::filesystem::create_directory(dir)) 
+                throw std::runtime_error("Could not create browse directory " + dir.string());
+        }
+        std::string filename = (dir / img.Path().stem()).string() + ".jpg";
+
+        CImg<double> stats;
+        float lo, hi;
+        for (unsigned int b=0; b<img.NumBands(); b++) {
+            stats = img[b].Stats();
+            lo = std::max(stats(2) - 3*stats(3), stats(0));
+            hi = std::min(stats(2) + 3*stats(3), stats(1));
+            if ((lo == hi) && (lo == 1)) lo = 0;
+            img[b] = ((img[b] - lo) * (255.0/(hi-lo))).max(0.0).min(255.0);
+        }
+        CImg<double> cimg(img.Read<double>());
+        // TODO - alpha channel?
+        cimg_for(cimg, ptr, double) { if (*ptr == img[0].NoDataValue()) *ptr = 0; }
+
+        cimg.round().save_jpeg(filename.c_str(), quality);
+
+        if (Options::Verbose() > 1) cout << "BrowseImage written to " << filename << endl;
+        return filename;
     }
 
     //! Merge images into one file and crop to vector
@@ -788,35 +823,6 @@ namespace gip {
         }
         return imgout;
     }
-
-    //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
-    std::string BrowseImage(const GeoImage& image, int quality) {
-        GeoImage img(image);
-        if (img.BandsExist({"RED","GREEN","BLUE"})) {
-            img.PruneToRGB();
-        } else {
-            img.PruneBands({img[0].Description()});
-        }
-        std::string filename = img.Path().replace_extension().string() + ".jpg";;
-
-        CImg<double> stats;
-        float lo, hi;
-        for (unsigned int b=0; b<img.NumBands(); b++) {
-            stats = img[b].Stats();
-            lo = std::max(stats(2) - 3*stats(3), stats(0));
-            hi = std::min(stats(2) + 3*stats(3), stats(1));
-            img[b] = ((img[b] - lo) * (255.0/(hi-lo))).max(0.0).min(255.0);
-        }
-        CImg<double> cimg(img.Read<double>());
-        // TODO - alpha channel?
-        cimg_for(cimg, ptr, double) { if (*ptr == img[0].NoDataValue()) *ptr = 0; }
-
-        cimg.round().save_jpeg(filename.c_str(), quality);
-
-        if (Options::Verbose() > 1) cout << "BrowseImage written to " << filename << endl;
-        return filename;
-    }
-
 
     //! Spectral Matched Filter, with missing data
     /*GeoImage SMF(const GeoImage& image, string filename, CImg<double> Signature) {
