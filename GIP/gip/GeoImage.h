@@ -356,7 +356,7 @@ namespace gip {
             if (cimg.spectrum() > 2) {
                 int lowi, highi;
                 float y0, y1, x0, x1;
-                if (Options::Verbose() > 2) cimg_print(times, "requested time vector: ");
+                //if (Options::Verbose() > 2) cimg_print(times, "requested time vector: ");
                 for (int c=1; c<cimg.spectrum()-1;c++) {
                     cimg_forXY(cimg,x,y) {
                         if (cimg(x,y,c) == nodata) {
