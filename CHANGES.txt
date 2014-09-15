@@ -16,8 +16,12 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
+v1.0.0
+- Added BrowseImage for creating an RGB or single band JPG image from a GeoImage for easy viewing
+- Refactored color management (removed class, uses band descriptions directly)
+- misc fixes
 
-v0.9.9:
+v0.9.9
 - Added TimeSeries, Extract, GetRandomPixels, GetPixelClasses functions to GeoImage python bindings
 - Standardized datatypes using stdint.h for better interoperability
 - 1-d Numpy to CImg conversion fixed
@@ -27,7 +31,7 @@ v0.9.8
 - Added LinearTransform algorithm
 
 v0.9.7
-- Added untion and transform functions to Rect
+- Added union and transform functions to Rect
 - Added additional coordinate convenience functions to GeoData
 - Added crop option to CookieCutter
 
