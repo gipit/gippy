@@ -30,11 +30,16 @@ namespace gip {
         : GeoData(filenames[0]) {
         vector<string>::const_iterator f;
         LoadBands();
+        unsigned int b;
+        for (b=0; b<NumBands(); b++) {
+            _RasterBands[b].SetDescription("1 " + _RasterBands[0].Description());
+        }
         int bandnum(2);
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
             GeoImage img(*f);
-            img[0].SetDescription(to_string(bandnum));
-            for (unsigned int b=0;b<img.NumBands(); b++) {
+            //std::cout << *f << " - " << img[0].Description() << std::endl;
+            for (b=0; b<img.NumBands(); b++) {
+                img[b].SetDescription(to_string(bandnum) + " " + img[b].Description());
                 AddBand(img[b]);
             }
             bandnum++;
@@ -97,7 +102,7 @@ namespace gip {
     GeoImage& GeoImage::AddBand(GeoRaster band) { //, unsigned int bandnum) {
         std::string name = (band.Description() == "") ? to_string(_RasterBands.size()+1) : band.Description();
         if (BandExists(name)) {
-            throw std::exception(); //"Band already exists in GeoImage!");
+            throw std::runtime_error("Band already exists in GeoImage!");
         }
         band.SetColor(name);
         _RasterBands.push_back(band);
