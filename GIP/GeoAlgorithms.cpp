@@ -715,6 +715,8 @@ namespace gip {
         colors["bi"] = {"BLUE","NIR"};
         colors["satvi"] = {"SWIR1","RED", "SWIR2"};
         colors["msavi2"] = {"NIR","RED"};
+        colors["vari"] = {"RED","GREEN","BLUE"};
+        colors["brgt"] = {"RED","GREEN","BLUE","NIR"};
         // Tillage indices
         colors["ndti"] = {"SWIR2","SWIR1"};
         colors["crc"] = {"SWIR1","SWIR2","BLUE"};
@@ -774,6 +776,10 @@ namespace gip {
                 } else if (prodname == "msavi2") {
                     tmpimg = (nir*2)+1;
                     cimgout = (tmpimg - (tmpimg.pow(2) - ((nir-red)*8).sqrt())) * 0.5;
+                } else if (prodname == "vari") {
+                    cimgout = (green-red).div(green+red-blue);
+                } else if (prodname == "brgt") {
+                    cimgout = (0.3*blue + 0.3*red + 0.1*nir + 0.3*green);
                 // Tillage indices
                 } else if (prodname == "ndti") {
                     cimgout = (swir1-swir2).div(swir1+swir2);

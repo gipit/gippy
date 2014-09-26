@@ -22,7 +22,6 @@ setup for GIP and gippy
 """
 
 import os
-import shutil
 import glob
 from setuptools import setup, Extension
 from setuptools.extension import Library
@@ -32,7 +31,7 @@ from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
 
-__version__ = '1.0.0rc1'
+__version__ = '1.0.0rc2'
 
 
 def add_reg(filename):
