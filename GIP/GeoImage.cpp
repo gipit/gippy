@@ -119,7 +119,7 @@ namespace gip {
     GeoImage& GeoImage::PruneBands(vector<string> names) {
         bool keep;
         vector<int> inds = Descriptions2Indices(names);
-        for (int b=NumBands(); b>0; b--) {
+        for (int b=NumBands(); b>=0; b--) {
             keep = false;
             for (vector<int>::const_iterator i=inds.begin(); i!=inds.end(); i++) if (*i == b) keep = true;
             if (!keep) RemoveBand(b+1);
