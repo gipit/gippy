@@ -215,6 +215,8 @@ namespace gip {
             _Masks.clear();
             return *this;
         }
+        //! Apply a mask directly to a file (inplace)
+        GeoRaster& ApplyMask(CImg<unsigned char> mask, int chunk=0);
 
         GeoRaster& AddFunction(func f) {
             _ValidStats = false;
@@ -359,19 +361,19 @@ namespace gip {
         //double Max() const { return (GetGDALStats())[1]; }
         //double Mean() const { return (GetGDALStats())[2]; }
         //double StdDev() const { return (GetGDALStats())[3]; }
-        cimg_library::CImg<float> Stats() const;
+        CImg<float> Stats() const;
 
-        cimg_library::CImg<float> Histogram(int bins=100, bool cumulative=false) const;
+        CImg<float> Histogram(int bins=100, bool cumulative=false) const;
 
         float Percentile(float p) const;
 
         // TODO - If RAW then can use GDAL Statistics, but compare speeds
         // Compute Statistics
-        /*cimg_library::CImg<double> ComputeGDALStats() const {
+        /*CImg<double> ComputeGDALStats() const {
             double min, max, mean, stddev;
             _GDALRasterBand->GetStatistics(false, true, &min, &max, &mean, &stddev);
             _GDALRasterBand->ComputeStatistics(false, &min, &max, &mean, &stddev, NULL, NULL);
-            cimg_library::CImg<double> stats(4);
+            CImg<double> stats(4);
             stats(0) = min;
             stats(1) = max;
             stats(2) = mean;
@@ -380,17 +382,17 @@ namespace gip {
         }*/
 
         //! \name File I/O
-        template<class T> cimg_library::CImg<T> ReadRaw(int chunknum=0) const;
-        template<class T> cimg_library::CImg<T> ReadRaw(iRect chunk) const;
-        template<class T> cimg_library::CImg<T> Read(int chunknum=0) const;
-        template<class T> cimg_library::CImg<T> Read(iRect chunk) const;
-        template<class T> GeoRaster& WriteRaw(cimg_library::CImg<T> img, int chunknum=0);
-        template<class T> GeoRaster& WriteRaw(cimg_library::CImg<T> img, iRect chunk);
-        template<class T> GeoRaster& Write(cimg_library::CImg<T> img, int chunknum=0);
+        template<class T> CImg<T> ReadRaw(int chunknum=0) const;
+        template<class T> CImg<T> ReadRaw(iRect chunk) const;
+        template<class T> CImg<T> Read(int chunknum=0) const;
+        template<class T> CImg<T> Read(iRect chunk) const;
+        template<class T> GeoRaster& WriteRaw(CImg<T> img, int chunknum=0);
+        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk);
+        template<class T> GeoRaster& Write(CImg<T> img, int chunknum=0);
         template<class T> GeoRaster& Process(GeoRaster& raster);
 
          //! Get Saturation mask: 1's where it's saturated
-        cimg_library::CImg<unsigned char> SaturationMask(int chunk=0) const {
+        CImg<unsigned char> SaturationMask(int chunk=0) const {
             switch (DataType()) {
                 case GDT_Byte: return _Mask<unsigned char>(_maxDC, chunk);
                 case GDT_UInt16: return _Mask<unsigned short>(_maxDC, chunk);
@@ -404,7 +406,7 @@ namespace gip {
         }
 
         //! NoData mask: 1's where it's bad data
-        cimg_library::CImg<unsigned char> NoDataMask(int chunk=0) const {
+        CImg<unsigned char> NoDataMask(int chunk=0) const {
             // TODO - if NoData not set, return all 1s
             if (!NoData()) {
                 int width, height;
@@ -430,7 +432,7 @@ namespace gip {
             }
         }
 
-        cimg_library::CImg<unsigned char> DataMask(int chunk=0) const {
+        CImg<unsigned char> DataMask(int chunk=0) const {
             return NoDataMask(chunk)^=1;
         }
 
@@ -517,8 +519,7 @@ namespace gip {
             Chunk();
         }
 
-        template<class T> inline cimg_library::CImg<unsigned char> _Mask(T val, int chunk=0) const {
-            using cimg_library::CImg;
+        template<class T> inline CImg<unsigned char> _Mask(T val, int chunk=0) const {
             CImg<T> img = ReadRaw<T>(chunk);
             CImg<unsigned char> mask(img.width(),img.height(),1,1,0);
             cimg_forXY(img,x,y) if (img(x,y) == val) mask(x,y) = 1;
@@ -528,7 +529,7 @@ namespace gip {
     }; //class GeoImage
 
     //! \name File I/O
-    template<class T> cimg_library::CImg<T> GeoRaster::ReadRaw(int chunknum) const {
+    template<class T> CImg<T> GeoRaster::ReadRaw(int chunknum) const {
         if (chunknum == 0)
             return ReadRaw<T>( iRect(iPoint(0,0),iPoint(XSize()-1,YSize()-1)) );
         //if (chunknum == _chunknum) return _cimg;
@@ -539,7 +540,7 @@ namespace gip {
     }
 
     //! Read raw chunk given bounding box
-    template<class T> cimg_library::CImg<T> GeoRaster::ReadRaw(iRect chunk) const {
+    template<class T> CImg<T> GeoRaster::ReadRaw(iRect chunk) const {
         // This doesn't check for in bounds, should it?
         int width = chunk.x1()-chunk.x0()+1;
         int height = chunk.y1()-chunk.y0()+1;
@@ -572,16 +573,15 @@ namespace gip {
     }
 
     //! Retrieve a piece of the image as a CImg
-    template<class T> cimg_library::CImg<T> GeoRaster::Read(int chunknum) const {
+    template<class T> CImg<T> GeoRaster::Read(int chunknum) const {
         if (chunknum == 0)
             return Read<T>( iRect(iPoint(0,0),iPoint(XSize()-1,YSize()-1)) );
         return Read<T>( this->_PadChunks[chunknum-1]);
     }
 
     //! Retrieve a piece of the image as a CImg
-    template<class T> cimg_library::CImg<T> GeoRaster::Read(iRect chunk) const {
+    template<class T> CImg<T> GeoRaster::Read(iRect chunk) const {
         time_t start = time(NULL);
-        using cimg_library::CImg;
 
         CImg<T> img(ReadRaw<T>(chunk));
         CImg<T> imgorig(img);
@@ -625,14 +625,14 @@ namespace gip {
     }
 
     //! Write raw CImg to file
-    template<class T> GeoRaster& GeoRaster::WriteRaw(cimg_library::CImg<T> img, int chunknum) {
+    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, int chunknum) {
         if (chunknum == 0)
             return WriteRaw(img, iRect(iPoint(0,0),iPoint(XSize()-1,YSize()-1)) );
         return WriteRaw(img, _Chunks[chunknum-1] );
     }
 
     //! Write raw CImg to file
-    template<class T> GeoRaster& GeoRaster::WriteRaw(cimg_library::CImg<T> img, iRect chunk) {
+    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect chunk) {
         if (Options::Verbose() > 4) {
             std::cout << Basename() << ": writing " << img.width() << " x " 
                 << img.height() << " image to rect " << chunk << std::endl;
@@ -650,7 +650,7 @@ namespace gip {
     }
 
     //! Write a Cimg to the file
-    template<class T> GeoRaster& GeoRaster::Write(cimg_library::CImg<T> img, int chunknum) {
+    template<class T> GeoRaster& GeoRaster::Write(CImg<T> img, int chunknum) {
         iRect chunk;
         if (chunknum == 0) {
             chunk = iRect( iPoint(0,0), iPoint(XSize()-1,YSize()-1) );
@@ -676,7 +676,6 @@ namespace gip {
 
     //! Process into input band "raster"
     template<class T> GeoRaster& GeoRaster::Process(GeoRaster& raster) {
-        using cimg_library::CImg;
         GDALRasterBand* band = raster.GetGDALRasterBand();
         raster.CopyCategoryNames(*this);
 

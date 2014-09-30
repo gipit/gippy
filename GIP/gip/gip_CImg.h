@@ -31,6 +31,7 @@
 namespace gip {
 
     using cimg_library::CImg;
+    using cimg_library::CImgList;
 
     template<typename T> inline void cimg_printclasses(cimg_library::CImg<T> img, std::string prefix="Class") {
         for (int i=0; i<img.height(); i++) {

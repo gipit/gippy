@@ -57,7 +57,6 @@ namespace gip {
     using std::cout;
     using std::cerr;
     using std::endl;
-    using cimg_library::CImg;
     namespace fs = boost::filesystem;
 
     /** ACCA (Automatic Cloud Cover Assessment). Takes in TOA Reflectance,
@@ -803,7 +802,7 @@ namespace gip {
     }
 
     //! Perform linear transform with given coefficients (e.g., PC transform)
-    GeoImage LinearTransform(const GeoImage& img, string filename, cimg_library::CImg<float> coef) {
+    GeoImage LinearTransform(const GeoImage& img, string filename, CImg<float> coef) {
         // Verify size of array
         unsigned int numbands = img.NumBands();
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))

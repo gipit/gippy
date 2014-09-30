@@ -215,6 +215,11 @@ namespace gip {
         }
         //! Clear all masks
         void ClearMasks() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ClearMasks(); }
+        //! Apply a mask directly to a file
+        GeoImage& ApplyMask(CImg<unsigned char> mask, int chunk=0) {
+            for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ApplyMask(mask, chunk);
+            return *this;
+        }
 
         //! Replace all 'Inf' or 'NaN' results with the bands NoData value
         GeoImage& FixBadPixels();
@@ -237,8 +242,8 @@ namespace gip {
 
         //! \name File I/O
         //! Read raw chunk, across all bands
-        template<class T> cimg_library::CImg<T> ReadRaw(int chunk=0) const { //, bool RAW=false) const {
-            cimg_library::CImgList<T> images;
+        template<class T> CImg<T> ReadRaw(int chunk=0) const { //, bool RAW=false) const {
+            CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->ReadRaw<T>(chunk) );
@@ -247,8 +252,8 @@ namespace gip {
             return images.get_append('v','p');
         }
         //! Read chunk, across all bands
-        template<class T> cimg_library::CImg<T> Read(int chunk=0) const { //, bool RAW=false) const {
-            cimg_library::CImgList<T> images;
+        template<class T> CImg<T> Read(int chunk=0) const { //, bool RAW=false) const {
+            CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->Read<T>(chunk) );
@@ -272,8 +277,8 @@ namespace gip {
             return *this;
         }
         // Read Cube as list
-        template<class T> cimg_library::CImgList<T> ReadAsList(int chunk=0) const {
-            cimg_library::CImgList<T> images;
+        template<class T> CImgList<T> ReadAsList(int chunk=0) const {
+            CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->Read<T>(chunk) );
@@ -350,8 +355,8 @@ namespace gip {
         }
 
         //! Extract, and interpolate, time series (C is time axis)
-        template<class T, class t> cimg_library::CImg<T> TimeSeries(cimg_library::CImg<t> times) {
-            cimg_library::CImg<T> cimg = Read<T>();
+        template<class T, class t> CImg<T> TimeSeries(CImg<t> times) {
+            CImg<T> cimg = Read<T>();
             T nodata = _RasterBands[0].NoDataValue();
             if (cimg.spectrum() > 2) {
                 int lowi, highi;
@@ -384,17 +389,17 @@ namespace gip {
         }
 
         //! Extract spectra from select pixels (where mask > 0)
-        template<class T> cimg_library::CImg<T> Extract(const GeoRaster& mask) {
+        template<class T> CImg<T> Extract(const GeoRaster& mask) {
             if (Options::Verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
-            cimg_library::CImg<unsigned char> cmask;
-            cimg_library::CImg<T> cimg;
+            CImg<unsigned char> cmask;
+            CImg<T> cimg;
             long count = 0;
 
             for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
                 cmask = mask.Read<unsigned char>(iChunk);
                 cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
             }
-            cimg_library::CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
+            CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
             count = 0;
             int ch(0);
             unsigned int c;

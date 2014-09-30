@@ -70,7 +70,7 @@ namespace gip {
             info << ", NoData = " << NoDataValue() << endl;
         else info << endl;
         if (showstats) {
-            cimg_library::CImg<float> stats = this->Stats();
+            CImg<float> stats = this->Stats();
             info << "\t\tMin = " << stats(0) << ", Max = " << stats(1) << ", Mean = " << stats(2) << " =/- " << stats(3) << endl;
         }
         if (!_Functions.empty()) info << "\t\tFunctions:" << endl;
@@ -85,9 +85,7 @@ namespace gip {
     }
 
     //! Compute stats
-    cimg_library::CImg<float> GeoRaster::Stats() const {
-        using cimg_library::CImg;
-
+    CImg<float> GeoRaster::Stats() const {
         if (_ValidStats) return _Stats;
 
         CImg<double> cimg;
@@ -143,7 +141,7 @@ namespace gip {
     }
 
     //! Compute histogram
-    cimg_library::CImg<float> GeoRaster::Histogram(int bins, bool cumulative) const {
+    CImg<float> GeoRaster::Histogram(int bins, bool cumulative) const {
         CImg<double> cimg;
         CImg<float> stats = Stats();
         CImg<float> hist(bins,1,1,1,0);
@@ -162,6 +160,14 @@ namespace gip {
         if (cumulative) for (int i=1;i<bins;i++) hist[i] += hist[i-1];
         //if (Options::Verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",stats(0),stats(1));
         return hist;
+    }
+
+    GeoRaster& GeoRaster::ApplyMask(CImg<unsigned char> mask, int chunk) {
+        CImg<double> cimg = ReadRaw<double>(chunk);
+        if (!mask.is_sameXY(cimg))
+            throw std::runtime_error("mask wrong size for chunk " + to_string(chunk));
+        WriteRaw(cimg.mul(mask), chunk);
+        return *this;
     }
 
 } // namespace gip
