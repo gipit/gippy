@@ -51,7 +51,7 @@
     }*/
 
     // Convert CImg into numpy array
-    template<typename T> PyObject* CImgToArr(cimg_library::CImg<T> cimg) {
+    template<typename T> PyObject* CImgToArr(CImg<T> cimg) {
         int typenum;
         if (typeid(T) == typeid(uint8_t)) typenum = NPY_UINT8;
         else if (typeid(T) == typeid(int8_t)) typenum = NPY_INT8;
@@ -82,12 +82,12 @@
     }
 
     // Convert numpy array into CImg
-    template<typename T> cimg_library::CImg<T> ArrToCImg(PyObject* arr) {
+    template<typename T> CImg<T> ArrToCImg(PyObject* arr) {
         PyArrayObject* _arr = (PyArrayObject*)arr;
         if (_arr->nd == 1) {
-            return cimg_library::CImg<T>((T*)_arr->data, _arr->dimensions[0]);
+            return CImg<T>((T*)_arr->data, _arr->dimensions[0]);
         } else if (_arr->nd == 2) {
-            return cimg_library::CImg<T>((T*)_arr->data, _arr->dimensions[1], _arr->dimensions[0]);
+            return CImg<T>((T*)_arr->data, _arr->dimensions[1], _arr->dimensions[0]);
         } else {
             throw(std::exception());
         }
@@ -140,32 +140,34 @@ namespace std {
 }
 
 // CImg -> numpy
-%typemap (out) cimg_library::CImg<uint8_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<int8_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<uint16_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<int16_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<uint32_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<int32_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<uint64_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<int64_t> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<float> { return CImgToArr($1); }
-%typemap (out) cimg_library::CImg<double> { return CImgToArr($1); }
+%typemap (out) CImg<unsigned char> { return CImgToArr($1); }
+%typemap (out) CImg<uint8_t> { return CImgToArr($1); }
+%typemap (out) CImg<int8_t> { return CImgToArr($1); }
+%typemap (out) CImg<uint16_t> { return CImgToArr($1); }
+%typemap (out) CImg<int16_t> { return CImgToArr($1); }
+%typemap (out) CImg<uint32_t> { return CImgToArr($1); }
+%typemap (out) CImg<int32_t> { return CImgToArr($1); }
+%typemap (out) CImg<uint64_t> { return CImgToArr($1); }
+%typemap (out) CImg<int64_t> { return CImgToArr($1); }
+%typemap (out) CImg<float> { return CImgToArr($1); }
+%typemap (out) CImg<double> { return CImgToArr($1); }
 
 // numpy -> CImg
-%typemap (in) cimg_library::CImg<uint8_t> { $1 = ArrToCImg<uint8_t>($input); }
-%typemap (in) cimg_library::CImg<int8_t> { $1 = ArrToCImg<int8_t>($input); }
-%typemap (in) cimg_library::CImg<uint16_t> { $1 = ArrToCImg<uint16_t>($input); }
-%typemap (in) cimg_library::CImg<int16_t> { $1 = ArrToCImg<int16_t>($input); }
-%typemap (in) cimg_library::CImg<uint32_t> { $1 = ArrToCImg<uint32_t>($input); }
-%typemap (in) cimg_library::CImg<int32_t> { $1 = ArrToCImg<int32_t>($input); }
-%typemap (in) cimg_library::CImg<uint64_t> { $1 = ArrToCImg<uint64_t>($input); }
-%typemap (in) cimg_library::CImg<int64_t> { $1 = ArrToCImg<int64_t>($input); }
-%typemap (in) cimg_library::CImg<float> { $1 = ArrToCImg<float>($input); }
-%typemap (in) cimg_library::CImg<double> { $1 = ArrToCImg<double>($input); }
+%typemap (in) CImg<unsigned char> { $1 = ArrToCImg<unsigned char>($input); }
+%typemap (in) CImg<uint8_t> { $1 = ArrToCImg<uint8_t>($input); }
+%typemap (in) CImg<int8_t> { $1 = ArrToCImg<int8_t>($input); }
+%typemap (in) CImg<uint16_t> { $1 = ArrToCImg<uint16_t>($input); }
+%typemap (in) CImg<int16_t> { $1 = ArrToCImg<int16_t>($input); }
+%typemap (in) CImg<uint32_t> { $1 = ArrToCImg<uint32_t>($input); }
+%typemap (in) CImg<int32_t> { $1 = ArrToCImg<int32_t>($input); }
+%typemap (in) CImg<uint64_t> { $1 = ArrToCImg<uint64_t>($input); }
+%typemap (in) CImg<int64_t> { $1 = ArrToCImg<int64_t>($input); }
+%typemap (in) CImg<float> { $1 = ArrToCImg<float>($input); }
+%typemap (in) CImg<double> { $1 = ArrToCImg<double>($input); }
 
 
 // TODO - Was trying to quiet warnings...didn't work
-//%typemap(typecheck) PyArrayObject * = cimg_library::CImg<unsigned char> ;
+//%typemap(typecheck) PyArrayObject * = CImg<unsigned char> ;
 
 // GIP functions to ignore (suppresses warnings)
 // These operators are redefined below
@@ -302,7 +304,7 @@ namespace gip {
         GeoImage& Process() {
             return self->Process<double>();
         }
-        PyObject* TimeSeries(cimg_library::CImg<double> C) {
+        PyObject* TimeSeries(CImg<double> C) {
             return CImgToArr(self->TimeSeries<double>(C));
         }
         PyObject* Extract(const GeoRaster& mask) {
