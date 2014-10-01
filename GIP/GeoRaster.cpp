@@ -71,14 +71,14 @@ namespace gip {
         else info << endl;
         if (showstats) {
             CImg<float> stats = this->Stats();
-            info << "\t\tMin = " << stats(0) << ", Max = " << stats(1) << ", Mean = " << stats(2) << " =/- " << stats(3) << endl;
+            info << "      Min = " << stats(0) << ", Max = " << stats(1) << ", Mean = " << stats(2) << " =/- " << stats(3) << endl;
         }
-        if (!_Functions.empty()) info << "      Functions:" << endl;
-        //for (unsigned int i=0;i<_Functions.size();i++) {
-        //  info << "\t\t\t" << _Functions[i].F() << endl; //" " << _Functions[i].Operand() << endl;
-        //}
+        /*if (!_Functions.empty()) info << "      Functions:" << endl;
+        for (unsigned int i=0;i<_Functions.size();i++) {
+          info << "      " << _Functions[i] << endl; //" " << _Functions[i].Operand() << endl;
+        }*/
         if (!_Masks.empty()) info << "\tMasks:" << endl;
-        for (unsigned int i=0;i<_Masks.size();i++) info << "         " << _Masks[i].Info() << endl;
+        for (unsigned int i=0;i<_Masks.size();i++) info << "      " << _Masks[i].Info() << endl;
         //_GeoImage->GetGDALDataset()->Reference(); int ref = _GeoImage->GetGDALDataset()->Dereference();
         //info << "  GDALDataset: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << endl;
         return info.str();
