@@ -162,11 +162,12 @@ namespace gip {
         return hist;
     }
 
-    GeoRaster& GeoRaster::ApplyMask(CImg<unsigned char> mask, int chunk) {
+    GeoRaster& GeoRaster::ApplyMask(CImg<uint8_t> mask, int chunk) {
         CImg<double> cimg = ReadRaw<double>(chunk);
         if (!mask.is_sameXY(cimg))
             throw std::runtime_error("mask wrong size for chunk " + to_string(chunk));
-        WriteRaw(cimg.mul(mask), chunk);
+        cimg_forXY(cimg,x,y) if (mask(x,y) == 0) cimg(x,y) = NoDataValue();
+        WriteRaw(cimg, chunk);
         return *this;
     }
 

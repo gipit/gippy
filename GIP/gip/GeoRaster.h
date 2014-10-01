@@ -35,6 +35,7 @@
 
 #include <typeinfo>
 #include <ctime>
+#include <stdint.h>
 
 namespace gip {
     //! Extended GDALRasterBand class
@@ -92,7 +93,7 @@ namespace gip {
         }
         //! Set Color Interp
         void SetColor(std::string col) {
-            SetDescription(col);
+            //SetDescription(col);
             // Is this used in other GDAL aware programs?
             GDALColorInterp gdalcol;
             if (col == "Red")
@@ -216,7 +217,7 @@ namespace gip {
             return *this;
         }
         //! Apply a mask directly to a file (inplace)
-        GeoRaster& ApplyMask(CImg<unsigned char> mask, int chunk=0);
+        GeoRaster& ApplyMask(CImg<uint8_t> mask, int chunk=0);
 
         GeoRaster& AddFunction(func f) {
             _ValidStats = false;
