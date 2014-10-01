@@ -25,7 +25,15 @@
 #include <initializer_list>
 
 namespace gip {
-    template<class T> cimg_library::CImg<T> _test(cimg_library::CImg<T> cimg) {
+    template<class T> CImg<T> _test(CImg<T> cimg) {
+        //std::cout << "GIPPY CImg input/output test" << std::endl;
+        //std::cout << "typeid = " << typeid(T) << std::endl;
+        cimg_printinfo(cimg);
+        cimg_printstats(cimg);
+        cimg_print(cimg);
+        return cimg;
+    }
+    template<class T> CImg<T> _testuc(CImg<unsigned char> cimg) {
         //std::cout << "GIPPY CImg input/output test" << std::endl;
         //std::cout << "typeid = " << typeid(T) << std::endl;
         cimg_printinfo(cimg);
@@ -51,7 +59,7 @@ namespace gip {
     dictionary Indices(const GeoImage&, dictionary, dictionary=dictionary());
 
     //! Create output based on linear combinations of input
-    GeoImage LinearTransform(const GeoImage&, std::string filename, cimg_library::CImg<float> coef);
+    GeoImage LinearTransform(const GeoImage&, std::string filename, CImg<float> coef);
 
     //! Stretch image into byte
     std::string BrowseImage(const GeoImage&, int quality=75);
