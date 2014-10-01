@@ -18,8 +18,10 @@
 ################################################################################
 v1.0.0
 - Added BrowseImage for creating an RGB or single band JPG image from a GeoImage for easy viewing
-- Refactored color management (removed class, uses band descriptions directly)
+- Refactored color management (removed class, uses single vector of band names)
 - misc fixes
+- Added ApplyMask
+- Updated swig bindings to properly support numpy arrays as input
 
 v0.9.9
 - Added TimeSeries, Extract, GetRandomPixels, GetPixelClasses functions to GeoImage python bindings
