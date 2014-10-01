@@ -82,17 +82,18 @@
     }
 
     // Convert numpy array into CImg
-    template<typename T> CImg<T> ArrToCImg(PyObject* arr) {
-        PyArrayObject* _arr = (PyArrayObject*)arr;
-        if (_arr->nd == 1) {
-            return CImg<T>((T*)_arr->data, _arr->dimensions[0]);
-        } else if (_arr->nd == 2) {
-            return CImg<T>((T*)_arr->data, _arr->dimensions[1], _arr->dimensions[0]);
+    template<typename T> CImg<T> ArrToCImg(PyObject* obj) {
+        PyArrayObject* arr = (PyArrayObject*)obj;
+        if (((PyArrayObject*)arr)->nd == 1) {
+            return CImg<T>((T*)arr->data, arr->dimensions[0]);
+        } else if (arr->nd == 2) {
+            return CImg<T>((T*)arr->data, arr->dimensions[1], arr->dimensions[0]);
         } else {
             throw(std::exception());
         }
     }
 
+    /*
     namespace gip {
     PyObject* test(PyObject* arr) {
         //return CImgToArr(_test(ArrToCImg<float>(arr)));
@@ -111,7 +112,7 @@
                 throw(std::exception());
         }
     }
-}
+    }*/
 
 %}
 
@@ -153,21 +154,58 @@ namespace std {
 %typemap (out) CImg<double> { return CImgToArr($1); }
 
 // numpy -> CImg
-%typemap (in) CImg<unsigned char> { $1 = ArrToCImg<unsigned char>($input); }
-%typemap (in) CImg<uint8_t> { $1 = ArrToCImg<uint8_t>($input); }
-%typemap (in) CImg<int8_t> { $1 = ArrToCImg<int8_t>($input); }
-%typemap (in) CImg<uint16_t> { $1 = ArrToCImg<uint16_t>($input); }
-%typemap (in) CImg<int16_t> { $1 = ArrToCImg<int16_t>($input); }
-%typemap (in) CImg<uint32_t> { $1 = ArrToCImg<uint32_t>($input); }
-%typemap (in) CImg<int32_t> { $1 = ArrToCImg<int32_t>($input); }
-%typemap (in) CImg<uint64_t> { $1 = ArrToCImg<uint64_t>($input); }
-%typemap (in) CImg<int64_t> { $1 = ArrToCImg<int64_t>($input); }
-%typemap (in) CImg<float> { $1 = ArrToCImg<float>($input); }
-%typemap (in) CImg<double> { $1 = ArrToCImg<double>($input); }
+//%typemap (in) CImg<unsigned char> { $1 = ArrToCImg<unsigned char>($input); }
+%typemap (in) CImg<uint8_t> { 
+    //std::cout << "uint8" << std::endl;
+    $1 = ArrToCImg<uint8_t>($input); 
+}
+%typemap (in) CImg<int8_t> { 
+    //std::cout << "int8" << std::endl;
+    $1 = ArrToCImg<int8_t>($input); 
+}
+%typemap (in) CImg<uint16_t> { 
+    //std::cout << "uint16" << std::endl;
+    $1 = ArrToCImg<uint16_t>($input); 
+}
+%typemap (in) CImg<int16_t> { 
+    //std::cout << "int16" << std::endl;
+    $1 = ArrToCImg<int16_t>($input); 
+}
+%typemap (in) CImg<uint32_t> { 
+    //std::cout << "uint32" << std::endl;
+    $1 = ArrToCImg<uint32_t>($input); 
+}
+%typemap (in) CImg<int32_t> { 
+    //std::cout << "int32" << std::endl;
+    $1 = ArrToCImg<int32_t>($input); 
+}
+%typemap (in) CImg<uint64_t> { 
+    //std::cout << "uint64" << std::endl;
+    $1 = ArrToCImg<uint64_t>($input); 
+}
+%typemap (in) CImg<int64_t> { 
+    //std::cout << "int64" << std::endl;
+    $1 = ArrToCImg<int64_t>($input); 
+}
+%typemap (in) CImg<float> { 
+    //std::cout << "float" << std::endl;
+    $1 = ArrToCImg<float>($input); 
+}
+%typemap (in) CImg<double> { 
+    //std::cout << "double" << std::endl;
+    $1 = ArrToCImg<double>($input); 
+}
 
-
-// TODO - Was trying to quiet warnings...didn't work
-//%typemap(typecheck) PyArrayObject * = CImg<unsigned char> ;
+%typemap(typecheck) CImg<uint8_t> = PyObject*;
+%typemap(typecheck) CImg<int8_t> = PyObject*;
+%typemap(typecheck) CImg<uint16_t> = PyObject*;
+%typemap(typecheck) CImg<int16_t> = PyObject*;
+%typemap(typecheck) CImg<uint32_t> = PyObject*;
+%typemap(typecheck) CImg<int32_t> = PyObject*;
+%typemap(typecheck) CImg<uint64_t> = PyObject*;
+%typemap(typecheck) CImg<int64_t> = PyObject*;
+%typemap(typecheck) CImg<float> = PyObject*;
+%typemap(typecheck) CImg<double> = PyObject*;
 
 // GIP functions to ignore (suppresses warnings)
 // These operators are redefined below
@@ -187,17 +225,14 @@ namespace std {
 enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32,
     GDT_Float32, GDT_Float64 };
     #GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
-//enum UNITS { RAW, RADIANCE, REFLECTIVITY };
-
 
 
 namespace gip {
 
     // Register file formats with GDAL
     void reg();
-    PyObject* test(PyObject* arr);
+    //PyObject* test(PyObject* arr);
     //%template(testint) _test<int>;
-
 
     %template(iRect) Rect<int>;
 
@@ -257,17 +292,18 @@ namespace gip {
 		%feature("docstring",
 				 "PyObject passed in is a numpy.array.\n"
 				 "Comply!\n ");
-        GeoRaster& Write(PyObject* arr, int chunk=0) {
+        GeoRaster& Write(PyObject* obj, int chunk=0) {
+            PyArrayObject* arr = (PyArrayObject*)obj;
             switch(((PyArrayObject*)arr)->descr->type_num) {
-                case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(arr), chunk); break;
-                case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(arr), chunk); break;
-                case NPY_INT16: self->Write(ArrToCImg<short>(arr), chunk); break;
-                case NPY_UINT32: self->Write(ArrToCImg<unsigned int>(arr), chunk); break;
-                case NPY_INT32: self->Write(ArrToCImg<int>(arr), chunk); break;
-                case NPY_UINT64: self->Write(ArrToCImg<unsigned int>(arr), chunk); break;
-                case NPY_INT64: self->Write(ArrToCImg<int>(arr), chunk); break;
-                case NPY_FLOAT32: self->Write(ArrToCImg<float>(arr), chunk); break;
-                case NPY_FLOAT64: self->Write(ArrToCImg<double>(arr), chunk); break;
+                case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
+                case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(obj), chunk); break;
+                case NPY_INT16: self->Write(ArrToCImg<short>(obj), chunk); break;
+                case NPY_UINT32: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT32: self->Write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_UINT64: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT64: self->Write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_FLOAT32: self->Write(ArrToCImg<float>(obj), chunk); break;
+                case NPY_FLOAT64: self->Write(ArrToCImg<double>(obj), chunk); break;
                 default:
                     throw(std::exception());
             }
