@@ -28,20 +28,18 @@ namespace gip {
 
     GeoImage::GeoImage(vector<string> filenames)
         : GeoData(filenames[0]) {
-        vector<string>::const_iterator f;
+        std::vector<std::string>::const_iterator f;
         LoadBands();
         unsigned int b;
         for (b=0; b<NumBands(); b++) {
-            _BandNames[b] = "1 " + _BandNames[b];
+            _BandNames[b] = Basename() + (NumBands() > 1 ? "-" + _BandNames[b] : "");
         }
-        int bandnum(2);
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
             GeoImage img(*f);
             for (b=0; b<img.NumBands(); b++) {
                 AddBand(img[b]);
-                _BandNames[bandnum] = to_string(bandnum) + " " + _BandNames[bandnum];
+                _BandNames[NumBands()-1] = img.Basename() + (img.NumBands() > 1 ? "-" + img[b].Description() : "");
             }
-            bandnum++;
         }
     }
 
@@ -60,7 +58,7 @@ namespace gip {
         GeoData::operator=(image);
         _RasterBands.clear();
         for (uint i=0;i<image.NumBands();i++) _RasterBands.push_back( image[i] );
-        _BandNames = image.BandNames()
+        _BandNames = image.BandNames();
         //cout << Basename() << ": GeoImage Assignment - " << _GDALDataset.use_count() << " GDALDataset references" << endl;
         return *this;
     }
@@ -69,15 +67,15 @@ namespace gip {
         std::stringstream info;
         info << Filename() << " - " << _RasterBands.size() << " bands ("
                 << XSize() << "x" << YSize() << ") " << std::endl;
-        info << "\tGeoData References: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << std::endl;
-        info << "\tGeo Coordinates (top left): " << TopLeft().x() << ", " << TopLeft().y() << std::endl;
-        info << "\tGeo Coordinates (lower right): " << LowerRight().x() << ", " << LowerRight().y() << std::endl;
+        info << "   GeoData References: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << std::endl;
+        info << "   Geo Coordinates (top left): " << TopLeft().x() << ", " << TopLeft().y() << std::endl;
+        info << "   Geo Coordinates (lower right): " << LowerRight().x() << ", " << LowerRight().y() << std::endl;
         //info << "   References - GeoImage: " << _Ref << " (&" << this << ")";
         //_GDALDataset->Reference(); int ref = _GDALDataset->Dereference();
         //info << "  GDALDataset: " << ref << " (&" << _GDALDataset << ")" << endl;
         if (bandinfo) {
             for (unsigned int i=0;i<_RasterBands.size();i++) {
-                info << "\tBand " << i+1 << " (" << _BandNames[i] << ": " << _RasterBands[i].Info(stats);
+                info << "   Band " << i+1 << " (" << _BandNames[i] << "): " << _RasterBands[i].Info(stats);
             }
         }
         return info.str();
