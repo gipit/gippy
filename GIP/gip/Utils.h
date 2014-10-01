@@ -93,7 +93,7 @@ namespace gip {
     private:
             // Static options
         //! Configuration file directory
-        static boost::filesystem::path _ConfigDir;
+        //static boost::filesystem::path _ConfigDir;
         //! Default format
         static std::string _DefaultFormat;
         //! Chunk size used when chunking up an image
