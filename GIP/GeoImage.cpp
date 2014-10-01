@@ -32,15 +32,14 @@ namespace gip {
         LoadBands();
         unsigned int b;
         for (b=0; b<NumBands(); b++) {
-            _RasterBands[b].SetDescription("1 " + _RasterBands[0].Description());
+            _BandNames[b] = "1 " + _BandNames[b];
         }
         int bandnum(2);
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
             GeoImage img(*f);
-            //std::cout << *f << " - " << img[0].Description() << std::endl;
             for (b=0; b<img.NumBands(); b++) {
-                img[b].SetDescription(to_string(bandnum) + " " + img[b].Description());
                 AddBand(img[b]);
+                _BandNames[bandnum] = to_string(bandnum) + " " + _BandNames[bandnum];
             }
             bandnum++;
         }
@@ -51,6 +50,7 @@ namespace gip {
         : GeoData(image) {
         for (uint i=0;i<image.NumBands();i++)
             _RasterBands.push_back( image[i] );
+            _BandNames = image.BandNames();
     }
 
     // Assignment operator
@@ -60,6 +60,7 @@ namespace gip {
         GeoData::operator=(image);
         _RasterBands.clear();
         for (uint i=0;i<image.NumBands();i++) _RasterBands.push_back( image[i] );
+        _BandNames = image.BandNames()
         //cout << Basename() << ": GeoImage Assignment - " << _GDALDataset.use_count() << " GDALDataset references" << endl;
         return *this;
     }
@@ -76,19 +77,19 @@ namespace gip {
         //info << "  GDALDataset: " << ref << " (&" << _GDALDataset << ")" << endl;
         if (bandinfo) {
             for (unsigned int i=0;i<_RasterBands.size();i++) {
-                info << "\tBand " << i+1 << ": " << _RasterBands[i].Info(stats);
+                info << "\tBand " << i+1 << " (" << _BandNames[i] << ": " << _RasterBands[i].Info(stats);
             }
         }
         return info.str();
     }
-    // Get band names
-    vector<string> GeoImage::BandNames() const {
+    // Get band descriptions (not always the same as name)
+    /*vector<string> GeoImage::BandDescriptions() const {
         std::vector<string> names;
         for (std::vector< GeoRaster >::const_iterator iRaster=_RasterBands.begin();iRaster!=_RasterBands.end();iRaster++) {
             names.push_back(iRaster->Description());
         }
         return names;
-    }
+    }*/
     // Band indexing
     const GeoRaster& GeoImage::operator[](std::string name) const {
         int index(BandIndex(name));
@@ -98,20 +99,21 @@ namespace gip {
             throw std::out_of_range ("No band named " + name);
         }
     }
-    // Add a band
+    // Add a band (to the end)
     GeoImage& GeoImage::AddBand(GeoRaster band) { //, unsigned int bandnum) {
         std::string name = (band.Description() == "") ? to_string(_RasterBands.size()+1) : band.Description();
         if (BandExists(name)) {
-            throw std::runtime_error("Band already exists in GeoImage!");
+            throw std::runtime_error("Band named " + name + " already exists in GeoImage!");
         }
-        band.SetColor(name);
         _RasterBands.push_back(band);
+        _BandNames.push_back(name);
         return *this;
     }
     // Remove a band
     GeoImage& GeoImage::RemoveBand(unsigned int bandnum) {
         if (bandnum <= _RasterBands.size()) {
             _RasterBands.erase(_RasterBands.begin()+bandnum-1);
+            _BandNames.erase(_BandNames.begin()+bandnum-1);
         }
         return *this;
     }
@@ -174,6 +176,7 @@ namespace gip {
             // Load Subdatasets as bands, assuming 1 band/subdataset
             for(b=0;b<bandnums.size();b++) {
                 _RasterBands.push_back( GeoData(names[bandnums[b]-1],_GDALDataset->GetAccess()) );
+                _BandNames.push_back(_RasterBands[b].Description());
             }
             // Replace this dataset with first full frame band
             unsigned int index(0);

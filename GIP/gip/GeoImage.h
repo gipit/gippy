@@ -22,6 +22,7 @@
 
 #include <gip/GeoData.h>
 #include <gip/GeoRaster.h>
+#include <stdint.h>
 
 namespace gip {
     // Forward declaration
@@ -120,12 +121,7 @@ namespace gip {
 
         //! \name Bands and colors
         //! Get vector of band names
-        std::vector<std::string> BandNames() const;
-        //! Set band name
-        void SetColor(std::string desc, int bandnum) {
-            std::cout << "GIPPY Deprecation Warning: SetColor replaced with SetBandName" << std::endl;
-            SetBandName(desc, bandnum);
-        }
+        std::vector<std::string> BandNames() const { return _BandNames; }
         //! Set a band name
         void SetBandName(std::string desc, int bandnum) {
             try {
@@ -133,14 +129,14 @@ namespace gip {
                 (*this)[desc];
                 throw std::out_of_range ("Band " + desc + " already exists in GeoImage!");
             } catch(...) {
-                _RasterBands[bandnum-1].SetColor(desc);
+                _BandNames[bandnum-1] = desc;
             }            
         }
 
         //! Get band index for provided band name
         int BandIndex(std::string name) const {
-            for (unsigned int i=0; i<_RasterBands.size(); i++) {
-                if (name == _RasterBands[i].Description()) return i;
+            for (unsigned int i=0; i<_BandNames.size(); i++) {
+                if (name == _BandNames[i]) return i;
             }
             return -1;
         }
@@ -216,7 +212,7 @@ namespace gip {
         //! Clear all masks
         void ClearMasks() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ClearMasks(); }
         //! Apply a mask directly to a file
-        GeoImage& ApplyMask(CImg<unsigned char> mask, int chunk=0) {
+        GeoImage& ApplyMask(CImg<uint8_t> mask, int chunk=0) {
             for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ApplyMask(mask, chunk);
             return *this;
         }
@@ -313,7 +309,7 @@ namespace gip {
         }
 
         //! NoData mask (all bands).  1's where it is nodata
-        CImg<unsigned char> NoDataMask(int chunk=0, std::vector<std::string> bands=std::vector<std::string>()) const {
+        CImg<uint8_t> NoDataMask(int chunk=0, std::vector<std::string> bands=std::vector<std::string>()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
             for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
@@ -323,6 +319,11 @@ namespace gip {
                     mask|=_RasterBands[*i].NoDataMask(chunk);
             }
             return mask;
+        }
+
+        //! Data mask. 1's where valid data
+        CImg<unsigned char> DataMask(int chunk=0, std::vector<std::string> bands=std::vector<std::string>()) const {
+            return NoDataMask(chunk, bands)^=1;
         }
 
         //! Saturation mask (all bands).  1's where it is saturated
@@ -355,6 +356,7 @@ namespace gip {
         }
 
         //! Extract, and interpolate, time series (C is time axis)
+        // TODO - times can be a fixed datatype CImg
         template<class T, class t> CImg<T> TimeSeries(CImg<t> times) {
             CImg<T> cimg = Read<T>();
             T nodata = _RasterBands[0].NoDataValue();
@@ -478,6 +480,8 @@ namespace gip {
     protected:
         //! Vector of raster bands
         std::vector< GeoRaster > _RasterBands;
+        //! Vector of raster band names
+        std::vector< std::string > _BandNames;
 
         //! Loads Raster Bands of this GDALDataset into _RasterBands vector
         void LoadBands();
@@ -517,10 +521,9 @@ namespace gip {
         GeoImage imgout(filename, *this, datatype);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
+            imgout[i].SetDescription(_BandNames[i]);
             (*this)[i].Process<T>(imgout[i]);
         }
-        // Don't think this is needed since description is used directly as band name/color
-        //for (unsigned int i=0;i<this->NumBands();i++) imgout.SetColor(colors[i+1], i+1);
         imgout.CopyColorTable(*this);
         return imgout;
     }
