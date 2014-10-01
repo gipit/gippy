@@ -65,7 +65,7 @@ namespace gip {
         info << XSize() << " x " << YSize() << " " << DataType() << ": " << Description();
         //info << " (GeoData: " << _GDALDataset.use_count() << " " << _GDALDataset << ")";
         //info << " RasterBand &" << _GDALRasterBand << endl;
-        info << "\t\tGain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
+        info << "   Gain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
         if (_NoData)
             info << ", NoData = " << NoDataValue() << endl;
         else info << endl;
@@ -73,12 +73,12 @@ namespace gip {
             CImg<float> stats = this->Stats();
             info << "\t\tMin = " << stats(0) << ", Max = " << stats(1) << ", Mean = " << stats(2) << " =/- " << stats(3) << endl;
         }
-        if (!_Functions.empty()) info << "\t\tFunctions:" << endl;
+        if (!_Functions.empty()) info << "      Functions:" << endl;
         //for (unsigned int i=0;i<_Functions.size();i++) {
         //  info << "\t\t\t" << _Functions[i].F() << endl; //" " << _Functions[i].Operand() << endl;
         //}
         if (!_Masks.empty()) info << "\tMasks:" << endl;
-        for (unsigned int i=0;i<_Masks.size();i++) info << "\t\t\t" << _Masks[i].Info() << endl;
+        for (unsigned int i=0;i<_Masks.size();i++) info << "         " << _Masks[i].Info() << endl;
         //_GeoImage->GetGDALDataset()->Reference(); int ref = _GeoImage->GetGDALDataset()->Dereference();
         //info << "  GDALDataset: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << endl;
         return info.str();
