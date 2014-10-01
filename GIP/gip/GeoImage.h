@@ -130,6 +130,7 @@ namespace gip {
                 throw std::out_of_range ("Band " + desc + " already exists in GeoImage!");
             } catch(...) {
                 _BandNames[bandnum-1] = desc;
+                _RasterBands[bandnum-1].SetDescription(desc);
             }            
         }
 
