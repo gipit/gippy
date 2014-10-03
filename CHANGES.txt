@@ -16,6 +16,9 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
+v1.0.1
+- Added SpectralStatistics algorithm and functions to GeoImage and GeoAlgorithms
+
 v1.0.0
 - Added BrowseImage for creating an RGB or single band JPG image from a GeoImage for easy viewing
 - Refactored color management (removed class, uses single vector of band names)

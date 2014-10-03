@@ -774,6 +774,30 @@ namespace gip {
         return imgout;
     }
 
+    //! Calculate spectral statistics and output to new image
+    GeoImage SpectralStatistics(const GeoImage& img, string filename) {
+        if (img.NumBands() < 2) {
+            throw std::runtime_error("Must have at least 2 bands!");
+        }
+        GeoImage imgout(filename, img, GDT_Float32, 2);
+        imgout.SetNoData(img[0].NoDataValue());
+        imgout.CopyMeta(img);
+        imgout.SetBandName("Mean", 1);
+        imgout.SetBandName("StdDev", 2);
+
+        CImgList<double> stats;
+        for (unsigned int iChunk=1; iChunk<=img.NumChunks(); iChunk++) {
+            if (Options::Verbose() > 2) 
+                std::cout << "Processing chunk " << iChunk << " of " << img.NumChunks() << std::endl;
+            stats = img.SpectralStatistics(iChunk);
+            imgout[0].Write(stats[0], iChunk);
+            imgout[1].Write(stats[1], iChunk);
+        }
+        if (Options::Verbose())
+            std::cout << "Spectral statistics written to " << imgout.Filename() << std::endl;
+        return imgout;
+    }
+
     //! Spectral Matched Filter, with missing data
     /*GeoImage SMF(const GeoImage& image, string filename, CImg<double> Signature) {
         GeoImage output(filename, image, GDT_Float32, 1);

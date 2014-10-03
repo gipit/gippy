@@ -45,6 +45,9 @@ namespace gip {
     //! Create cloudmask using ACCA
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
+    //! Stretch image into byte
+    std::string BrowseImage(const GeoImage&, int quality=75);
+
     //! Create single image from multiple input images using vector file footprint
     GeoImage CookieCutter(std::vector<std::string>, std::string, std::string, 
         float=1.0, float=1.0, bool crop=false, dictionary=dictionary());
@@ -61,8 +64,8 @@ namespace gip {
     //! Create output based on linear combinations of input
     GeoImage LinearTransform(const GeoImage&, std::string filename, CImg<float> coef);
 
-    //! Stretch image into byte
-    std::string BrowseImage(const GeoImage&, int quality=75);
+    //! Calculate spectral statistics and output to new image
+    GeoImage SpectralStatistics(const GeoImage&, std::string filename);
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);

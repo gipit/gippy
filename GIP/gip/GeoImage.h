@@ -283,6 +283,40 @@ namespace gip {
             return images;
         }
 
+        //! Calculate mean, stddev for chunk - must contain data for all bands
+        CImgList<double> SpectralStatistics(int iChunk=0) const {
+            CImg<unsigned char> mask;
+            CImg<double> band, total, mean;
+            unsigned int iBand;
+            mask = DataMask(iChunk);
+            double nodata = _RasterBands[0].NoDataValue();
+            for (iBand=0;iBand<NumBands();iBand++) {
+                band = _RasterBands[iBand].Read<double>(iChunk).mul(mask);
+                if (iBand == 0) {
+                    total = band;
+                } else {
+                    total += band;
+                }
+            }
+            mean = total / NumBands();
+            for (iBand=0;iBand<NumBands();iBand++) {
+                band = _RasterBands[iBand].Read<double>(iChunk).mul(mask);
+                if (iBand == 0) {
+                    total = (band - mean).pow(2);
+                } else {
+                    total += (band - mean).pow(2);
+                }
+            }
+            CImgList<double> stats(mean, (total / (NumBands()-1)).sqrt());
+            cimg_forXY(mask,x,y) { 
+                if (mask(x,y) == 0) {
+                    stats[0](x,y) = nodata;
+                    stats[1](x,y) = nodata; 
+                }
+            }
+            return stats;          
+        }
+
         //! Mean (per pixel) of all bands, written to raster
         GeoRaster& Mean(GeoRaster& raster) const {
             CImg<unsigned char> mask;
