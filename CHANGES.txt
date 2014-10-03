@@ -22,6 +22,7 @@ v1.0.0
 - misc fixes
 - Added ApplyMask
 - Updated swig bindings to properly support numpy arrays as input
+- CookieCutter now properly uses cutline
 
 v0.9.9
 - Added TimeSeries, Extract, GetRandomPixels, GetPixelClasses functions to GeoImage python bindings
