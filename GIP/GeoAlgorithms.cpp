@@ -23,33 +23,10 @@
 
 #include <gip/GeoAlgorithms.h>
 #include <gip/gip_CImg.h>
+#include <gip/gip_gdal.h>
 
-#include <gdal/ogrsf_frmts.h>
-#include <gdal/gdalwarper.h>
-
-class CutlineTransformer : public OGRCoordinateTransformation
-{
-public:
-
-    void         *hSrcImageTransformer;
-
-    virtual OGRSpatialReference *GetSourceCS() { return NULL; }
-    virtual OGRSpatialReference *GetTargetCS() { return NULL; }
-
-    virtual int Transform( int nCount, double *x, double *y, double *z = NULL ) {
-        int nResult;
-
-        int *pabSuccess = (int *) CPLCalloc(sizeof(int),nCount);
-        nResult = TransformEx( nCount, x, y, z, pabSuccess );
-        CPLFree( pabSuccess );
-
-        return nResult;
-    }
-
-    virtual int TransformEx( int nCount, double *x, double *y, double *z = NULL, int *pabSuccess = NULL ) {
-        return GDALGenImgProjTransform( hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess );
-    }
-};
+//#include <gdal/ogrsf_frmts.h>
+//#include <gdal/gdalwarper.h>
 
 namespace gip {
     using std::string;
@@ -296,6 +273,7 @@ namespace gip {
         GDALDataType dtype = imgs[0].DataType();
 
         // Create output file based on input vector
+        // TODO - GeoImage constructor that takes in vector
         OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vectorname.c_str());
         OGRLayer *poLayer = poDS->GetLayer(0);
         OGRSpatialReference* vSRS = poLayer->GetSpatialRef();
@@ -340,9 +318,9 @@ namespace gip {
         affine[3] = extent.y1();
         affine[4] = 0;
         affine[5] = -std::abs(yres);
-        char* wkt = NULL;
-        poLayer->GetSpatialRef()->exportToWkt(&wkt);
-        imgout.GetGDALDataset()->SetProjection(wkt);
+        char* orig_wkt = NULL;
+        poLayer->GetSpatialRef()->exportToWkt(&orig_wkt);
+        imgout.GetGDALDataset()->SetProjection(orig_wkt);
         imgout.GetGDALDataset()->SetGeoTransform(affine);
 
         // Combine shape geometries into single geometry cutline
@@ -354,9 +332,7 @@ namespace gip {
         site = poFeature->GetGeometryRef();
         while( (poFeature = poLayer->GetNextFeature()) != NULL ) {
             poGeometry = poFeature->GetGeometryRef();
-
             if( poGeometry == NULL ) fprintf( stderr, "ERROR: Cutline feature without a geometry.\n" );
-
             //OGRwkbGeometryType eType = wkbFlatten(poGeometry->getGeometryType());
             site = site->Union(poGeometry);
             /*if( eType == wkbPolygon )
@@ -372,25 +348,8 @@ namespace gip {
         }
         OGRDataSource::DestroyDataSource( poDS );
 
-        // Cutline transform to pixel coordinates
-        char **papszOptionsCutline = NULL;
-        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", wkt );
-        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "SRC_SRS", wkt );
-        //papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
-        CutlineTransformer oTransformer;
-
-        /* The cutline transformer will *invert* the hSrcImageTransformer */
-        /* so it will convert from the cutline SRS to the source pixel/line */
-        /* coordinates */
-        oTransformer.hSrcImageTransformer = GDALCreateGenImgProjTransformer2( imgout.GetGDALDataset(), NULL, papszOptionsCutline );
-        site->transform(&oTransformer);
-
-        GDALDestroyGenImgProjTransformer( oTransformer.hSrcImageTransformer );
-        CSLDestroy( papszOptionsCutline );
-
         // Warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
-        
         psWarpOptions->hDstDS = imgout.GetGDALDataset();
         psWarpOptions->nBandCount = bsz;
         psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
@@ -407,39 +366,25 @@ namespace gip {
             psWarpOptions->padfSrcNoDataImag[b] = 0.0;
             psWarpOptions->padfDstNoDataImag[b] = 0.0;
         }
+        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
         if (Options::Verbose() > 2)
             psWarpOptions->pfnProgress = GDALTermProgress;
         else psWarpOptions->pfnProgress = GDALDummyProgress;
+
         char **papszOptions = NULL;
-        //psWarpOptions->hCutline = site;
         //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
         papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
         //papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS","ALL_CPUS");
-        //site->exportToWkt(&wkt);
-        //papszOptions = CSLSetNameValue(papszOptions,"CUTLINE",wkt);
-        psWarpOptions->papszWarpOptions = CSLDuplicate(papszOptions);
-        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
+        psWarpOptions->papszWarpOptions = papszOptions;
 
-        GDALWarpOperation oOperation;
-        // Perform warp for each input file
-        vector<GeoImage>::iterator iimg;
-        for (iimg=imgs.begin();iimg!=imgs.end();iimg++) {
-            if (Options::Verbose() > 2) cout << iimg->Basename() << " warping " << std::flush;
-            psWarpOptions->hSrcDS = iimg->GetGDALDataset();
-            psWarpOptions->pTransformerArg =
-                GDALCreateGenImgProjTransformer( iimg->GetGDALDataset(), iimg->GetGDALDataset()->GetProjectionRef(),
-                                                imgout.GetGDALDataset(), imgout.GetGDALDataset()->GetProjectionRef(), TRUE, 0.0, 0 );
-            psWarpOptions->pfnTransformer = GDALGenImgProjTransform;
-            oOperation.Initialize( psWarpOptions );
-            //if (Options::Verbose() > 3) cout << "Error: " << CPLGetLastErrorMsg() << endl;
-            oOperation.ChunkAndWarpMulti( 0, 0, imgout.XSize(), imgout.YSize() );
+        for (vector<GeoImage>::iterator iimg=imgs.begin();iimg!=imgs.end();iimg++) {
+            WarpToImage(*iimg, imgout, psWarpOptions, site);
 
-            GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );
             psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
         }
-        GDALDestroyWarpOptions( psWarpOptions );
 
+        GDALDestroyWarpOptions( psWarpOptions );
         return imgout;
     }
 
