@@ -48,6 +48,13 @@ namespace gip {
         }
     };
 
+    //! Get file extension for currently set file format
+    std::string FileExtension() {
+        string format = Options::DefaultFormat();
+        GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
+        return driver->GetMetadataItem(GDAL_DMD_EXTENSION);
+    }
+
     GeoImage& WarpToImage(const GeoImage&, GeoImage&, GDALWarpOptions*, OGRGeometry*);
 
 }
