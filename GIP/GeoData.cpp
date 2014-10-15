@@ -18,6 +18,7 @@
 ##############################################################################*/
 
 #include <gip/GeoData.h>
+#include <gip/gip_gdal.h>
 #include <boost/make_shared.hpp>
 
 #include <iostream>
