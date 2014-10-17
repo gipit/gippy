@@ -392,8 +392,8 @@ namespace gip {
 
         //! Extract, and interpolate, time series (C is time axis)
         // TODO - times can be a fixed datatype CImg
-        template<class T, class t> CImg<T> TimeSeries(CImg<t> times) {
-            CImg<T> cimg = Read<T>();
+        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, int chunk=0) {
+            CImg<T> cimg = Read<T>(chunk);
             T nodata = _RasterBands[0].NoDataValue();
             if (cimg.spectrum() > 2) {
                 int lowi, highi;
