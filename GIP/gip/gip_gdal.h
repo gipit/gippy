@@ -20,6 +20,7 @@
 #ifndef GIP_GDAL_H
 #define GIP_GDAL_H
 
+#include <string>
 #include <gip/GeoImage.h>
 #include <gdal/ogrsf_frmts.h>
 #include <gdal/gdalwarper.h>
@@ -49,11 +50,7 @@ namespace gip {
     };
 
     //! Get file extension for currently set file format
-    std::string FileExtension() {
-        string format = Options::DefaultFormat();
-        GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
-        return driver->GetMetadataItem(GDAL_DMD_EXTENSION);
-    }
+    std::string FileExtension();
 
     GeoImage& WarpToImage(const GeoImage&, GeoImage&, GDALWarpOptions*, OGRGeometry*);
 
