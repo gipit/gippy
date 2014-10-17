@@ -138,15 +138,27 @@ namespace gip {
         //! Get group of metadata
         std::vector<std::string> GetMetaGroup(std::string group,std::string filter="") const;
 
-        //! \name Processing functions
-        //! Get the number of chunks used for processing image
-        unsigned int NumChunks() const {
-            //if (_Chunks.size() == 0) Chunk();
-            return _Chunks.size();
-        }
-
+        //! \name Chunking functions
         //! Break up image into chunks
-        void Chunk(unsigned int = 0) const;
+        std::vector< Rect<int> > Chunk(unsigned int = 0) const;
+
+        //! Get the number of chunks used for processing image
+        unsigned int NumChunks() const { return _Chunks.size(); }
+
+        //! Retrieve chunks as vector of rects
+        std::vector< Rect<int> > Chunks() const { return _Chunks; }
+
+        //! Retreive padded chunks as vector of rects
+        std::vector< Rect<int> > PaddedChunks() const { return _PadChunks; }
+
+        //! Get padding for chunks
+        unsigned int ChunkPadding() const { return _padding; }
+
+        //! Set padding for chunks
+        void SetChunkPadding(unsigned int pad = 0) const { 
+            _padding = pad;
+            Chunk(NumChunks());
+        }
 
     protected:
         //! Filename to dataset
@@ -157,6 +169,7 @@ namespace gip {
         //! Vector of chunk coordinates
         mutable std::vector< Rect<int> > _Chunks;
         mutable std::vector< Rect<int> > _PadChunks;
+        mutable unsigned int _padding;
 
     }; //class GeoData
 

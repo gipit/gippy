@@ -76,7 +76,8 @@ namespace gip {
 
     // Copy constructor
     GeoData::GeoData(const GeoData& geodata)
-        : _Filename(geodata._Filename), _GDALDataset(geodata._GDALDataset), _Chunks(geodata._Chunks), _PadChunks(geodata._PadChunks) {
+        : _Filename(geodata._Filename), _GDALDataset(geodata._GDALDataset), 
+            _Chunks(geodata._Chunks), _PadChunks(geodata._PadChunks), _padding(geodata._padding) {
     }
 
     // Assignment copy
@@ -88,6 +89,7 @@ namespace gip {
         _GDALDataset = geodata._GDALDataset;
         _Chunks = geodata._Chunks;
         _PadChunks = geodata._PadChunks;
+        _padding = geodata._padding;
         return *this;
     }
 
@@ -154,28 +156,36 @@ namespace gip {
     }
 
     //! Break up image into smaller size pieces, each of ChunkSize
-    void GeoData::Chunk(unsigned int pad) const {
-        unsigned int rows = floor( ( Options::ChunkSize() *1024*1024) / sizeof(double) / XSize() );
-        rows = rows > YSize() ? YSize() : rows;
-        int numchunks = ceil( YSize()/(float)rows );
+    std::vector< Rect<int> > GeoData::Chunk(unsigned int numchunks) const {
+        unsigned int rows;
+
+        if (numchunks == 0) {
+            rows = floor( ( Options::ChunkSize() *1024*1024) / sizeof(double) / XSize() );
+            rows = rows > YSize() ? YSize() : rows;
+            numchunks = ceil( YSize()/(float)rows );
+        } else {
+            rows = int(YSize() / numchunks);
+        }
+
         _Chunks.clear();
         _PadChunks.clear();
         iRect chunk;
         if (Options::Verbose() > 4) {
             std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
-                << Options::ChunkSize() << " MB max each)" << " with pad = " << pad << std::endl;
+                << Options::ChunkSize() << " MB max each)" << " with pad = " << _padding << std::endl;
         }
         for (int i=0; i<numchunks; i++) {
             chunk = iRect(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
             _Chunks.push_back(chunk);
             if (Options::Verbose() > 4) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
 
-            if (pad > 0) {
-                chunk.Pad(pad).Intersect(iRect(0,0,XSize(),YSize()));
+            if (_padding > 0) {
+                chunk.Pad(_padding).Intersect(iRect(0,0,XSize(),YSize()));
                 if (Options::Verbose() > 4) std::cout << "  PadChunk " << i << ": " << chunk << std::endl;
             }
             _PadChunks.push_back(chunk);
         }
+        return _Chunks;
     }
 
 } // namespace gip

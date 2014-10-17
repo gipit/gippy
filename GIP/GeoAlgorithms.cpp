@@ -194,8 +194,8 @@ namespace gip {
                  << "xstep  = " << signX*xstep << endl
                  << "ystep  = " << signY*ystep << endl ;
 
-        for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].Chunk(padding);
-        for (unsigned int b=0;b<image.NumBands();b++) image[b].Chunk(padding);
+        for (unsigned int b=0;b<imgout.NumBands();b++) { imgout[b].SetChunkPadding(padding); }
+        for (unsigned int b=0;b<image.NumBands();b++) { image[b].SetChunkPadding(padding); }
 
         for (unsigned int iChunk=1; iChunk<=imgout[0].NumChunks(); iChunk++) {
             if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << imgout[0].NumChunks() << endl;
@@ -518,8 +518,8 @@ namespace gip {
         //CImg<int> filter(3,3,1,1, 1);
         int erode = 5;
         int padding(double(std::max(dilate,erode)+1)/2);
-        for (unsigned int b=0;b<image.NumBands();b++) image[b].Chunk(padding);
-        for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].Chunk(padding);
+        for (unsigned int b=0;b<image.NumBands();b++) image[b].SetChunkPadding(padding);
+        for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].SetChunkPadding(padding);
 
         for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
             mask = image.NoDataMask(iChunk)^=1;

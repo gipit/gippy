@@ -446,8 +446,8 @@ namespace gip {
             double total, norm;
             CImg<double> cimg0, cimg, subcimg;
 
-            Chunk(border);
-            raster.Chunk(border);
+            SetChunkPadding(border);
+            raster.SetChunkPadding(border);
             for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
                 cimg0 = Read<double>(iChunk);
                 cimg = cimg0;
@@ -473,8 +473,8 @@ namespace gip {
                 }
                 raster.Write(cimg, iChunk);
             }
-            Chunk();
-            raster.Chunk();
+            SetChunkPadding();
+            raster.SetChunkPadding();
             return raster;
         }
 
