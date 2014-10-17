@@ -30,10 +30,10 @@
 
     using namespace gip;
 
-    namespace gip {
-        void reg() { 
-            GDALAllRegister(); 
-        }
+    // Additional functions used by the SWIG interface but not used directly by users
+
+    void gip_gdalregister() { 
+       GDALAllRegister(); 
     }
 
     /*template<typename T> int numpytype() {
@@ -49,6 +49,7 @@
         else throw(std::exception());
         return typenum;
     }*/
+    //std::vector<int> test_vectori() { return {1,2,3,4,5}; }
 
     // Convert CImg into numpy array
     template<typename T> PyObject* CImgToArr(CImg<T> cimg) {
@@ -95,31 +96,34 @@
 
     /*
     namespace gip {
-    PyObject* test(PyObject* arr) {
-        //return CImgToArr(_test(ArrToCImg<float>(arr)));
-        switch(((PyArrayObject*)arr)->descr->type_num) {
-            case NPY_UINT8: return CImgToArr(_test(ArrToCImg<uint8_t>(arr)));
-            case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(arr)));
-            case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(arr)));
-            case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(arr)));
-            case NPY_UINT32: return CImgToArr(_test(ArrToCImg<uint32_t>(arr)));
-            case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(arr)));
-            case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(arr)));
-            case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(arr)));
-            case NPY_FLOAT32: return CImgToArr(_test(ArrToCImg<float>(arr)));
-            case NPY_FLOAT64: return CImgToArr(_test(ArrToCImg<double>(arr)));
-            default:
-                throw(std::exception());
+        PyObject* test(PyObject* arr) {
+            //return CImgToArr(_test(ArrToCImg<float>(arr)));
+            switch(((PyArrayObject*)arr)->descr->type_num) {
+                case NPY_UINT8: return CImgToArr(_test(ArrToCImg<uint8_t>(arr)));
+                case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(arr)));
+                case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(arr)));
+                case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(arr)));
+                case NPY_UINT32: return CImgToArr(_test(ArrToCImg<uint32_t>(arr)));
+                case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(arr)));
+                case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(arr)));
+                case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(arr)));
+                case NPY_FLOAT32: return CImgToArr(_test(ArrToCImg<float>(arr)));
+                case NPY_FLOAT64: return CImgToArr(_test(ArrToCImg<double>(arr)));
+                default:
+                    throw(std::exception());
+            }
         }
-    }
     }*/
 
 %}
 
 %init %{
-    // Not really sure what this does or why it's needed
+    // initialization for using numpy
     import_array();
 %}
+
+// Register file formats with GDAL
+void gip_gdalregister();
 
 // STL bindings
 %include "std_string.i"
@@ -140,6 +144,8 @@ namespace std {
   }
 }
 
+// Typemaps for conversions
+
 // CImg -> numpy
 %typemap (out) CImg<unsigned char> { return CImgToArr($1); }
 %typemap (out) CImg<uint8_t> { return CImgToArr($1); }
@@ -154,87 +160,78 @@ namespace std {
 %typemap (out) CImg<double> { return CImgToArr($1); }
 
 // numpy -> CImg
-//%typemap (in) CImg<unsigned char> { $1 = ArrToCImg<unsigned char>($input); }
 %typemap (in) CImg<uint8_t> { 
     //std::cout << "uint8" << std::endl;
     $1 = ArrToCImg<uint8_t>($input); 
 }
+%typemap(typecheck) CImg<uint8_t> = PyObject*;
 %typemap (in) CImg<int8_t> { 
     //std::cout << "int8" << std::endl;
     $1 = ArrToCImg<int8_t>($input); 
 }
+%typemap(typecheck) CImg<int8_t> = PyObject*;
 %typemap (in) CImg<uint16_t> { 
     //std::cout << "uint16" << std::endl;
     $1 = ArrToCImg<uint16_t>($input); 
 }
+%typemap(typecheck) CImg<uint16_t> = PyObject*;
 %typemap (in) CImg<int16_t> { 
     //std::cout << "int16" << std::endl;
     $1 = ArrToCImg<int16_t>($input); 
 }
+%typemap(typecheck) CImg<int16_t> = PyObject*;
 %typemap (in) CImg<uint32_t> { 
     //std::cout << "uint32" << std::endl;
     $1 = ArrToCImg<uint32_t>($input); 
 }
+%typemap(typecheck) CImg<uint32_t> = PyObject*;
 %typemap (in) CImg<int32_t> { 
     //std::cout << "int32" << std::endl;
     $1 = ArrToCImg<int32_t>($input); 
 }
+%typemap(typecheck) CImg<int32_t> = PyObject*;
 %typemap (in) CImg<uint64_t> { 
     //std::cout << "uint64" << std::endl;
     $1 = ArrToCImg<uint64_t>($input); 
 }
+%typemap(typecheck) CImg<uint64_t> = PyObject*;
 %typemap (in) CImg<int64_t> { 
     //std::cout << "int64" << std::endl;
     $1 = ArrToCImg<int64_t>($input); 
 }
+%typemap(typecheck) CImg<int64_t> = PyObject*;
 %typemap (in) CImg<float> { 
     //std::cout << "float" << std::endl;
     $1 = ArrToCImg<float>($input); 
 }
+%typemap(typecheck) CImg<float> = PyObject*;
 %typemap (in) CImg<double> { 
     //std::cout << "double" << std::endl;
     $1 = ArrToCImg<double>($input); 
 }
-
-%typemap(typecheck) CImg<uint8_t> = PyObject*;
-%typemap(typecheck) CImg<int8_t> = PyObject*;
-%typemap(typecheck) CImg<uint16_t> = PyObject*;
-%typemap(typecheck) CImg<int16_t> = PyObject*;
-%typemap(typecheck) CImg<uint32_t> = PyObject*;
-%typemap(typecheck) CImg<int32_t> = PyObject*;
-%typemap(typecheck) CImg<uint64_t> = PyObject*;
-%typemap(typecheck) CImg<int64_t> = PyObject*;
-%typemap(typecheck) CImg<float> = PyObject*;
 %typemap(typecheck) CImg<double> = PyObject*;
 
-// GIP functions to ignore (suppresses warnings)
-// These operators are redefined below
+// GIP functions to ignore (suppresses warnings) because operators are redefined below
 %ignore gip::GeoData::operator=;
 %ignore gip::GeoImage::operator[];
 %ignore operator<<;
-//%ignore gip::GeoRaster::operator==;
 
-// GIP headers and classes to be wrapped
+// GIP headers and classes to be wrapped - order is important!
+%include "gip/geometry.h"
 %include "gip/GeoData.h"
 %include "gip/GeoRaster.h"
 %include "gip/GeoImage.h"
 %include "gip/GeoAlgorithms.h"
-%include "gip/geometry.h"
 
-// TODO - improve enums.  C++0x scoped enums ?
-enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32,
-    GDT_Float32, GDT_Float64 };
-    #GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
+// TODO - SWIG3 supports C++11 and scoped enums
+enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64 };
+//GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
 
+%template(Recti) gip::Rect<int>;
+%template(vectorRecti) std::vector< gip::Rect<int> >;
 
+// Additional manual wrapping and redefinition
 namespace gip {
-
-    // Register file formats with GDAL
-    void reg();
-    //PyObject* test(PyObject* arr);
-    //%template(testint) _test<int>;
-
-    %template(iRect) Rect<int>;
 
     // Just wrapping basic options.
     class Options {
@@ -252,10 +249,6 @@ namespace gip {
     };
 
     %extend GeoRaster {
-        // Processing functions
-        //GeoRaster __eq__(double val) {
-        //    return self->operator==(val);
-        //}
 		%feature("docstring",
 				 "PyObject returned is a numpy.array.\n"
 				 "Enjoy!\n ");
@@ -340,8 +333,8 @@ namespace gip {
         GeoImage& Process() {
             return self->Process<double>();
         }
-        PyObject* TimeSeries(CImg<double> C) {
-            return CImgToArr(self->TimeSeries<double>(C));
+        PyObject* TimeSeries(CImg<double> C, int chunk=0) {
+            return CImgToArr(self->TimeSeries<double>(C, chunk));
         }
         PyObject* Extract(const GeoRaster& mask) {
             return CImgToArr(self->Extract<double>(mask));

@@ -31,13 +31,13 @@ from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
 
-__version__ = '1.0.0'
+__version__ = '1.0.1a2'
 
 
 def add_reg(filename):
     # Have GDAL register file formats on import and add version info
     f = open(filename, 'a')
-    f.write('reg()\n')
+    f.write('gip_gdalregister()\n')
     f.write("__version__='%s'\n" % __version__)
     f.close()
 
