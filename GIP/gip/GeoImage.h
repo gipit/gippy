@@ -248,8 +248,16 @@ namespace gip {
             //return images.get_append('c','p');
             return images.get_append('v','p');
         }
+
         //! Read chunk, across all bands
-        template<class T> CImg<T> Read(int chunk=0) const { //, bool RAW=false) const {
+        template<class T> CImg<T> Read(int chunknum=0) const {
+            if (chunknum==0)
+                return Read<T>( iRect(iPoint(0,0), iPoint(XSize()-1,YSize()-1)) );
+            return Read<T>( _PadChunks[chunknum] );
+        }
+
+        //! Read chunk, across all bands
+        template<class T> CImg<T> Read(iRect chunk) const { //, bool RAW=false) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -390,9 +398,15 @@ namespace gip {
             return white;
         }
 
+        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, int chunknum=0) {
+            if (chunknum==0)
+                return TimeSeries<T>(times, iRect(iPoint(0,0), iPoint(XSize()-1,YSize()-1)) );
+            return TimeSeries<T>(times, this->_PadChunks[chunknum-1]);
+        }
+
         //! Extract, and interpolate, time series (C is time axis)
         // TODO - times can be a fixed datatype CImg
-        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, int chunk=0) {
+        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk) {
             CImg<T> cimg = Read<T>(chunk);
             T nodata = _RasterBands[0].NoDataValue();
             if (cimg.spectrum() > 2) {
