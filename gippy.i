@@ -333,8 +333,11 @@ namespace gip {
         GeoImage& Process() {
             return self->Process<double>();
         }
-        PyObject* TimeSeries(CImg<double> C, int chunk=0) {
+        PyObject* TimeSeries(CImg<double> C, Rect<int> chunk) {
             return CImgToArr(self->TimeSeries<double>(C, chunk));
+        }
+        PyObject* TimeSeries(CImg<double> C, int chunknum=0) {
+            return CImgToArr(self->TimeSeries<double>(C, chunknum));
         }
         PyObject* Extract(const GeoRaster& mask) {
             return CImgToArr(self->Extract<double>(mask));
