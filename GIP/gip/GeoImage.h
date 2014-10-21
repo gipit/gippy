@@ -239,7 +239,14 @@ namespace gip {
 
         //! \name File I/O
         //! Read raw chunk, across all bands
-        template<class T> CImg<T> ReadRaw(int chunk=0) const { //, bool RAW=false) const {
+        template<class T> CImg<T> ReadRaw(int chunknum=0) const {
+            if (chunknum==0)
+                return ReadRaw<T>(iRect(0, 0, XSize(), YSize()));
+            return ReadRaw<T>(_PadChunks[chunknum]);
+        }       
+
+
+        template<class T> CImg<T> ReadRaw(iRect chunk) const { //, bool RAW=false) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -400,7 +407,7 @@ namespace gip {
 
         template<class T, class t> CImg<T> TimeSeries(CImg<t> times, int chunknum=0) {
             if (chunknum==0)
-                return TimeSeries<T>(times, iRect(iPoint(0,0), iPoint(XSize()-1,YSize()-1)) );
+                return TimeSeries<T>(times, iRect(0, 0, XSize(), YSize()));
             return TimeSeries<T>(times, this->_PadChunks[chunknum-1]);
         }
 
