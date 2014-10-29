@@ -267,7 +267,7 @@ namespace gip {
             }
             return CImgToArr(self->Read<float>(chunk));
         }
-        PyObject* Read(iRect chunk) {
+        PyObject* Read(Rect<int> chunk) {
             if (self->Gain() == 1.0 && self->Offset() == 0.0) {
                 switch(self->DataType()) {
                     case 1: return CImgToArr(self->Read<unsigned char>(chunk));
