@@ -55,7 +55,7 @@ namespace gip {
         T y() const { return _y; }
         // output operator
         friend std::ostream& operator<<(std::ostream& stream,const Point& p) {
-            return stream << "(" << p._x << ", " << p._y << ")";
+            return stream << "(" << p._x << "," << p._y << ")";
         }
     protected:
         T _x;
@@ -177,7 +177,7 @@ namespace gip {
             return Rect<T>(*this).Union(rect);
         }
         friend std::ostream& operator<<(std::ostream& stream,const Rect& r) {
-            return stream << r._p0 << ", " << r._p1;
+            return stream << r._p0 << "-" << r._p1;
         }
     private:
         // top-left
