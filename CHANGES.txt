@@ -19,7 +19,8 @@
 v1.0.1
 - Added SpectralStatistics algorithm and functions to GeoImage and GeoAlgorithms
 - Added additional gdal helper functions
-- Additional chunking functions and options
+- Additional chunking functions and options. Chunking added to TimeSeries
+- Cleanup
 
 v1.0.0
 - Added BrowseImage for creating an RGB or single band JPG image from a GeoImage for easy viewing
