@@ -228,21 +228,22 @@ namespace gip {
         GeoData& AddOverviews() {
             int panOverviewList[3] = { 2, 4, 8 };
             _GDALDataset->BuildOverviews( "NEAREST", 3, panOverviewList, 0, NULL, GDALDummyProgress, NULL );
-            return *this;
+            return *this; 
         }
 
         //! Break up image into chunks
-        /*void Chunk(unsigned int pad=0) const {
-            GeoData::Chunk(pad);
-            for (unsigned int b=0;b<NumBands();b++) _RasterBands.
-        }*/
+        std::vector< Rect<int> > Chunk(unsigned int numchunks=0) const {
+            GeoData::Chunk(numchunks);
+            for (unsigned int b=0;b<NumBands();b++) _RasterBands[b].Chunk(numchunks);
+            return _Chunks;
+        }
 
         //! \name File I/O
         //! Read raw chunk, across all bands
         template<class T> CImg<T> ReadRaw(int chunknum=0) const {
             if (chunknum==0)
                 return ReadRaw<T>(iRect(0, 0, XSize(), YSize()));
-            return ReadRaw<T>(_PadChunks[chunknum]);
+            return ReadRaw<T>(_PadChunks[chunknum-1]);
         }       
 
 
@@ -260,7 +261,7 @@ namespace gip {
         template<class T> CImg<T> Read(int chunknum=0) const {
             if (chunknum==0)
                 return Read<T>( iRect(iPoint(0,0), iPoint(XSize()-1,YSize()-1)) );
-            return Read<T>( _PadChunks[chunknum] );
+            return Read<T>( _PadChunks[chunknum-1] );
         }
 
         //! Read chunk, across all bands
@@ -273,10 +274,6 @@ namespace gip {
             //return images.get_append('c','p');
             return images.get_append('v','p');
         }
-
-        //GeoImageIO& Write(const CImg<T> img, int chunk=0, bool BadValCheck=false) {
-        //    return Write(img, chunk, BadValCheck);
-        //}
 
         //! Write cube across all bands
         template<class T> GeoImage& Write(const CImg<T> img, int chunk=0) { //, bool BadValCheck=false) {
@@ -419,7 +416,6 @@ namespace gip {
             if (cimg.spectrum() > 2) {
                 int lowi, highi;
                 float y0, y1, x0, x1;
-                //if (Options::Verbose() > 2) cimg_print(times, "requested time vector: ");
                 for (int c=1; c<cimg.spectrum()-1;c++) {
                     cimg_forXY(cimg,x,y) {
                         if (cimg(x,y,c) == nodata) {
@@ -452,16 +448,15 @@ namespace gip {
             CImg<unsigned char> cmask;
             CImg<T> cimg;
             long count = 0;
-
-            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
+            for (unsigned int iChunk=1; iChunk<=mask.NumChunks(); iChunk++) {
                 cmask = mask.Read<unsigned char>(iChunk);
                 cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
             }
             CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
             count = 0;
-            int ch(0);
             unsigned int c;
             for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
+                if (Options::Verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
                 cimg = Read<T>(iChunk);
                 cmask = mask.Read<unsigned char>(iChunk);
                 cimg_forXY(cimg,x,y) {
@@ -470,7 +465,6 @@ namespace gip {
                         pixels(count++,0) = cmask(x,y);
                     }
                 }
-                if (Options::Verbose() > 2) std::cout << "  Chunk " << ch++ << std::endl;
             }
             return pixels;
         }
@@ -527,8 +521,6 @@ namespace gip {
                 T cutoff = DistSort[RandPixelsPerClass*i]; //(stats.max-stats.min)/10 + stats.min;
                 cimg_forX(Dist,x) if (Dist(x) < cutoff) cimg_forX(RandomPixels,x1) RandomPixels(x1,x) = 0;
             }
-            // Output Class Vectors
-            //if (Options::Verbose()>1) cimg_printclasses(ClassMeans, "Initial Class");
             return ClassMeans;
         }
 
@@ -560,7 +552,6 @@ namespace gip {
     }; // class GeoImage
 
     // GeoImage template function definitions
-
     template<class T> GeoImage& GeoImage::Process() {
         for (unsigned int i=0; i<NumBands(); i++) {
             for (unsigned int iChunk=1; iChunk <= (*this)[i].NumChunks(); iChunk++) {
