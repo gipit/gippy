@@ -33,7 +33,6 @@
 #include <gip/geometry.h>
 
 namespace gip {
-    //class GeoData : boost::enable_shared_from_this<GeoData> {
     typedef std::map<std::string,std::string> dictionary;
     typedef Rect<int> iRect;
     typedef Point<int> iPoint;
@@ -43,7 +42,7 @@ namespace gip {
 
         //! \name Constructors/Destructor
         //! Default constructor
-        GeoData() : _GDALDataset() {}
+        GeoData() : _GDALDataset(), _padding(0) {}
         //! Open existing file
         GeoData(std::string, bool=false);
         //! Create new file on disk
@@ -119,6 +118,8 @@ namespace gip {
             const char* item = _GDALDataset->GetMetadataItem(key.c_str());
             if (item == NULL) return ""; else return item;
         }
+        //! Get group of metadata
+        std::vector<std::string> GetMetaGroup(std::string group,std::string filter="") const;
         //! Set metadata item
         GeoData& SetMeta(std::string key, std::string item) {
             _GDALDataset->SetMetadataItem(key.c_str(),item.c_str());
@@ -135,8 +136,7 @@ namespace gip {
         GeoData& CopyMeta(const GeoData& img);
         //! Copy coordinate system
         GeoData& CopyCoordinateSystem(const GeoData&);
-        //! Get group of metadata
-        std::vector<std::string> GetMetaGroup(std::string group,std::string filter="") const;
+
 
         //! \name Chunking functions
         //! Break up image into chunks
@@ -166,9 +166,11 @@ namespace gip {
         //! Underlying GDALDataset of this file
         boost::shared_ptr<GDALDataset> _GDALDataset;
 
-        //! Vector of chunk coordinates
+        //! Coordinates of chunks
         mutable std::vector< Rect<int> > _Chunks;
+        //! Coordinates of padded out chunks
         mutable std::vector< Rect<int> > _PadChunks;
+        //! Amount of padding around each chunk
         mutable unsigned int _padding;
 
     }; //class GeoData
