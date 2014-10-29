@@ -59,7 +59,6 @@ namespace gip {
         _RasterBands.clear();
         for (uint i=0;i<image.NumBands();i++) _RasterBands.push_back( image[i] );
         _BandNames = image.BandNames();
-        //cout << Basename() << ": GeoImage Assignment - " << _GDALDataset.use_count() << " GDALDataset references" << endl;
         return *this;
     }
 
