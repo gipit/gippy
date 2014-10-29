@@ -156,22 +156,20 @@ namespace gip {
 
         _Chunks.clear();
         _PadChunks.clear();
-        iRect chunk;
-        if (Options::Verbose() > 3) {
+        iRect chunk, pchunk;
+        /*if (Options::Verbose() > 3) {
             std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
                 << Options::ChunkSize() << " MB max each)" << " padding = " << _padding << std::endl;
-        }
+        }*/
         for (unsigned int i=0; i<numchunks; i++) {
             chunk = iRect(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
             _Chunks.push_back(chunk);
+            pchunk = chunk;
             if (_padding > 0)
-                chunk.Pad(_padding).Intersect(iRect(0,0,XSize(),YSize()));
-            _PadChunks.push_back(chunk);
-            if (Options::Verbose() > 3) {
-                std::cout << "  Chunk " << i << ": " << chunk << std::endl;
-                std::cout << "  PadChunk " << i << ": " << chunk << std::endl;
-            }
-
+                pchunk.Pad(_padding).Intersect(iRect(0,0,XSize(),YSize()));
+            _PadChunks.push_back(pchunk);
+            //if (Options::Verbose() > 3)
+            //    std::cout << "  Chunk " << i << ": " << chunk << "\tPadded: " << pchunk << std::endl;
         }
         return _Chunks;
     }

@@ -42,6 +42,8 @@ namespace gip {
      */
     GeoImage ACCA(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
+        if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.Basename() << endl;
+
         float th_red(0.08);
         float th_ndsi(0.7);
         float th_temp(27);
@@ -71,7 +73,6 @@ namespace gip {
         CImg<unsigned char> nonclouds, ambclouds, clouds, mask, temp2;
         float cloudsum(0), scenesize(0);
 
-        if (Options::Verbose() > 1) cout << image.Basename() << " - ACCA" << endl;
         //if (Options::Verbose()) cout << image.Basename() << " - ACCA (dev-version)" << endl;
         for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
             red = image["RED"].Read<float>(iChunk);
@@ -225,6 +226,8 @@ namespace gip {
 
     //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
     std::string BrowseImage(const GeoImage& image, int quality) {
+        //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
+
         GeoImage img(image);
         if (img.BandsExist({"RED","GREEN","BLUE"})) {
             img.PruneToRGB();
@@ -253,7 +256,7 @@ namespace gip {
 
         cimg.round().save_jpeg(filename.c_str(), quality);
 
-        if (Options::Verbose() > 1) cout << "BrowseImage written to " << filename << endl;
+        if (Options::Verbose() > 1) cout << image.Basename() << ": BrowseImage written to " << filename << endl;
         return filename;
     }
 
@@ -261,9 +264,8 @@ namespace gip {
     GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, 
             float xres, float yres, bool crop, dictionary metadata) {
         // TODO - pass in vector of GeoRaster's instead
-        if (Options::Verbose() > 2) {
-            cout << filename << ": CookieCutter" << endl;
-        }
+        if (Options::Verbose() > 1)
+            cout << "GIPPY: CookieCutter (" << imgnames.size() << " files) - " << filename << endl;
 
         // Open input images
         vector<GeoImage> imgs;
@@ -391,7 +393,7 @@ namespace gip {
     //! Fmask cloud mask
     GeoImage Fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
         if (Options::Verbose() > 1)
-            std::cout << image.Basename() << ": Fmask - dilate(" << dilate << ")" << std::endl;
+            cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
         GeoImage imgout(filename, image, GDT_Byte, 5);
         int b_final(0); imgout[b_final].SetDescription("finalmask");
@@ -630,6 +632,8 @@ namespace gip {
 
     //void Indices(const GeoImage& ImageIn, string basename, std::vector<std::string> products) {
     dictionary Indices(const GeoImage& image, dictionary products, dictionary metadata) {
+        if (Options::Verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
+
         float nodataout = -32768;
 
         std::map< string, GeoImage > imagesout;
@@ -638,7 +642,7 @@ namespace gip {
         string prodname;
         for (iprod=products.begin(); iprod!=products.end(); iprod++) {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
-            if (Options::Verbose() > 2) cout << iprod->first << ", " << iprod->second << endl;
+            if (Options::Verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
             prodname = iprod->first;
             imagesout[prodname] = GeoImage(iprod->second, image, GDT_Int16, 1);
             imagesout[prodname].SetNoData(nodataout);
@@ -698,9 +702,7 @@ namespace gip {
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-                prodname = iprod->first;
-                if (Options::Verbose() > 4) cout << "Product " << prodname << endl;
-                //cout << "Products: " << prodname << std::flush;
+                //prodname = iprod->first.tolower();
                 //string pname = iprod->toupper();
                 if (prodname == "ndvi") {
                     cimgout = (nir-red).div(nir+red);
@@ -736,7 +738,6 @@ namespace gip {
                 } else if (prodname == "sti") {
                     cimgout = swir1.div(swir2);
                 }
-                //if (Options::Verbose() > 2) cout << "Getting mask" << endl;
                 // TODO don't read mask again...create here
                 cimgmask = image.NoDataMask(iChunk, colors[prodname]);
                 cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;

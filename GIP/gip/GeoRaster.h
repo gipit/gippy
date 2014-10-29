@@ -518,7 +518,7 @@ namespace gip {
             if (pbSuccess != 0) {
                 if (pbSuccess == 1) _NoData = true;
             }
-            Chunk();
+            //Chunk();
         }
 
         template<class T> inline CImg<unsigned char> _Mask(T val, int chunk=0) const {
