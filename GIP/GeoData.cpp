@@ -34,7 +34,8 @@ namespace gip {
     string Options::_WorkDir("/tmp/");
 
     // Open existing file
-    GeoData::GeoData(string filename, bool Update) : _Filename(filename) {
+    GeoData::GeoData(string filename, bool Update) 
+        : _Filename(filename), _padding(0) {
         GDALAccess access = Update ? GA_Update : GA_ReadOnly;
         if (access == GA_ReadOnly)
             CPLSetConfigOption("GDAL_PAM_ENABLED","NO");
@@ -47,17 +48,14 @@ namespace gip {
             throw std::runtime_error(to_string(CPLGetLastErrorNo()) + ": " + string(CPLGetLastErrorMsg()));
         }
         _GDALDataset.reset(ds);
-        if (Options::Verbose() > 4)
+        if (Options::Verbose() > 3)
             std::cout << Basename() << ": GeoData Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
     }
 
     // Create new file
     GeoData::GeoData(int xsz, int ysz, int bsz, GDALDataType datatype, string filename, dictionary options)
-        :_Filename(filename) {
-        if (Options::Verbose() > 3)
-            std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
+        :_Filename(filename), _padding(0) {
         string format = Options::DefaultFormat();
-        //if (format == "GTiff" && datatype == GDT_Byte) options["COMPRESS"] = "JPEG";
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
@@ -70,6 +68,9 @@ namespace gip {
                 papszOptions = CSLSetNameValue(papszOptions,imap->first.c_str(),imap->second.c_str());
         }
         _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz,datatype, papszOptions) );
+
+        if (Options::Verbose() > 3)
+            std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         if (_GDALDataset.get() == NULL)
             std::cout << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
     }
@@ -98,23 +99,9 @@ namespace gip {
         // flush GDALDataset if last open pointer
         if (_GDALDataset.unique()) {
             _GDALDataset->FlushCache();
-            if (Options::Verbose() > 4) std::cout << Basename() << ": ~GeoData (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (Options::Verbose() > 3) std::cout << Basename() << ": ~GeoData (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
         }
     }
-
-    // Data type size
-    /*int GeoData::DataTypeSize() const {
-        switch(DataType()) {
-            case 1: return sizeof(unsigned char);
-            case 2: return sizeof(unsigned short);
-            case 3: return sizeof(short);
-            case 4: return sizeof(unsigned int);
-            case 5: return sizeof(int);
-            case 6: return sizeof(float);
-            case 7: return sizeof(double);
-            default: throw(std::exception());
-        }
-    }*/
 
     // Using GDALDatasets GeoTransform get Geo-located coordinates
     Point<double> GeoData::GeoLoc(float xloc, float yloc) const {
@@ -122,6 +109,21 @@ namespace gip {
         _GDALDataset->GetGeoTransform(Affine);
         Point<double> Coord(Affine[0] + xloc*Affine[1] + yloc*Affine[2], Affine[3] + xloc*Affine[4] + yloc*Affine[5]);
         return Coord;
+    }
+
+    // Get metadata group
+    std::vector<string> GeoData::GetMetaGroup(string group,string filter) const {
+        char** meta= _GDALDataset->GetMetadata(group.c_str());
+        int num = CSLCount(meta);
+        std::vector<string> items;
+        for (int i=0;i<num; i++) {
+                if (filter != "") {
+                        string md = string(meta[i]);
+                        string::size_type pos = md.find(filter);
+                        if (pos != string::npos) items.push_back(md.substr(pos+filter.length()));
+                } else items.push_back( meta[i] );
+        }
+        return items;
     }
 
     // Copy all metadata from input
@@ -140,21 +142,6 @@ namespace gip {
         return *this;
     }
 
-    // Get metadata group
-    std::vector<string> GeoData::GetMetaGroup(string group,string filter) const {
-        char** meta= _GDALDataset->GetMetadata(group.c_str());
-        int num = CSLCount(meta);
-        std::vector<string> items;
-        for (int i=0;i<num; i++) {
-                if (filter != "") {
-                        string md = string(meta[i]);
-                        string::size_type pos = md.find(filter);
-                        if (pos != string::npos) items.push_back(md.substr(pos+filter.length()));
-                } else items.push_back( meta[i] );
-        }
-        return items;
-    }
-
     //! Break up image into smaller size pieces, each of ChunkSize
     std::vector< Rect<int> > GeoData::Chunk(unsigned int numchunks) const {
         unsigned int rows;
@@ -170,20 +157,21 @@ namespace gip {
         _Chunks.clear();
         _PadChunks.clear();
         iRect chunk;
-        if (Options::Verbose() > 4) {
+        if (Options::Verbose() > 3) {
             std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
-                << Options::ChunkSize() << " MB max each)" << " with pad = " << _padding << std::endl;
+                << Options::ChunkSize() << " MB max each)" << " padding = " << _padding << std::endl;
         }
-        for (int i=0; i<numchunks; i++) {
+        for (unsigned int i=0; i<numchunks; i++) {
             chunk = iRect(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
             _Chunks.push_back(chunk);
-            if (Options::Verbose() > 4) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
-
-            if (_padding > 0) {
+            if (_padding > 0)
                 chunk.Pad(_padding).Intersect(iRect(0,0,XSize(),YSize()));
-                if (Options::Verbose() > 4) std::cout << "  PadChunk " << i << ": " << chunk << std::endl;
-            }
             _PadChunks.push_back(chunk);
+            if (Options::Verbose() > 3) {
+                std::cout << "  Chunk " << i << ": " << chunk << std::endl;
+                std::cout << "  PadChunk " << i << ": " << chunk << std::endl;
+            }
+
         }
         return _Chunks;
     }
