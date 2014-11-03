@@ -702,7 +702,7 @@ namespace gip {
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-                //prodname = iprod->first.tolower();
+                prodname = iprod->first;
                 //string pname = iprod->toupper();
                 if (prodname == "ndvi") {
                     cimgout = (nir-red).div(nir+red);
