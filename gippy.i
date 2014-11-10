@@ -32,8 +32,9 @@
 
     // Additional functions used by the SWIG interface but not used directly by users
 
-    void gip_gdalregister() { 
-       GDALAllRegister(); 
+    void gip_gdalinit() { 
+       GDALAllRegister();
+       CPLPushErrorHandler(CPLQuietErrorHandler);
     }
 
     /*template<typename T> int numpytype() {
@@ -123,7 +124,7 @@
 %}
 
 // Register file formats with GDAL
-void gip_gdalregister();
+void gip_gdalinit();
 
 // STL bindings
 %include "std_string.i"

@@ -16,6 +16,13 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
+v1.0.3
+- Changed name of secondary probability image in fmask algorithm to -prob (from _prob)
+- Suppressed stderr messages from GDAL (these should all be handled internally by GIPPY)
+
+v1.0.2
+- Fixed bug in Indices algorithm
+
 v1.0.1
 - Added SpectralStatistics algorithm and functions to GeoImage and GeoAlgorithms
 - Added additional gdal helper functions
