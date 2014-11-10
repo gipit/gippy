@@ -405,7 +405,7 @@ namespace gip {
         imgout.SetMeta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
-        GeoImage probout(filename + "_prob", image, GDT_Float32, 2);
+        GeoImage probout(filename + "-prob", image, GDT_Float32, 2);
         probout[0].SetDescription("wcloud");
         probout[1].SetDescription("lcloud");
         probout.SetNoData(nodataval);
