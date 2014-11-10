@@ -38,7 +38,6 @@
 #include <stdint.h>
 
 namespace gip {
-    using std::chrono::system_clock;
     //! Extended GDALRasterBand class
     /*!
         The GeoRaster class wraps the GDALRasterBand class
@@ -583,7 +582,7 @@ namespace gip {
 
     //! Retrieve a piece of the image as a CImg
     template<class T> CImg<T> GeoRaster::Read(iRect chunk) const {
-        auto start = system_clock::now();
+        auto start = std::chrono::system_clock::now();
 
         CImg<T> img(ReadRaw<T>(chunk));
         CImg<T> imgorig(img);
@@ -620,7 +619,7 @@ namespace gip {
                 if (imgorig(x,y) == NoDataValue()) img(x,y) = NoDataValue();
             }
         }
-        auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(system_clock::now()-start);
+        auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);
         if (Options::Verbose() > 3)
             std::cout << Basename() << ": read " << chunk << " in " << elapsed.count() << " seconds" << std::endl;
 
