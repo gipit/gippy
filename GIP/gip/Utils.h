@@ -30,7 +30,7 @@
 
 namespace gip {
 
-    // inline itility functions
+    // inline utility functions
 
     //! Conversion function, any type to string
     template<typename T> inline std::string to_string(const T& t) {
