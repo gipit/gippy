@@ -31,7 +31,7 @@ from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
 
-__version__ = '1.0.4a1'
+__version__ = '1.1.0a1'
 
 
 def add_reg(filename):
