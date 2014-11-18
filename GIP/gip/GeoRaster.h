@@ -23,7 +23,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/function.hpp>
 
-#include <gip/gip_CImg.h>
 #include <gip/GeoData.h>
 #include <boost/bind.hpp>
 

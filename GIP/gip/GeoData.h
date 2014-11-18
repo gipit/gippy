@@ -23,13 +23,11 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <gdal/gdal_priv.h>
 #include <boost/shared_ptr.hpp>
-
 #include <boost/filesystem.hpp>
-
+#include <gdal/gdal_priv.h>
+#include <gip/gip_CImg.h>
 #include <gip/Utils.h>
-
 #include <gip/geometry.h>
 
 namespace gip {
@@ -110,6 +108,11 @@ namespace gip {
         OGRSpatialReference SRS() const {
             std::string s(Projection());
             return OGRSpatialReference(s.c_str());
+        }
+        CImg<double> Affine() const {
+            double affine[6];
+            _GDALDataset->GetGeoTransform(affine);
+            return CImg<double>(&affine[0], 6);
         }
 
         //! \name Metadata functions
