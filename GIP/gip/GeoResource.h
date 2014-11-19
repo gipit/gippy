@@ -21,7 +21,6 @@
 #define GIP_GEORESOURCE_H
 
 #include <string>
-#include <boost/filesystem.hpp>
 #include <gip/geometry.h>
 
 namespace gip {
@@ -32,24 +31,19 @@ namespace gip {
     public:
         //! \name Constructors
         //! Default Constructor with filename
-        GeoResource(string filename = "")
-            : _Filename(filename) {}
-
+        GeoResource(string filename = "");
         //! Copy constructor
-        GeoResource(const GeoResource&);
-
+        GeoResource(const GeoResource& resource);
         //! Assignment copy
         GeoResource& operator=(const GeoResource&);
-
         //! Destructor
-        ~GeoResource();
-
+        ~GeoResource() {};
 
         //! \name Resource Information
-        //! Filename, or some other resource identifier
-        string Filename() const { return _Filename.string(); }
+        //! Get the filename of the resource
+        string Filename() const;
         //! Basename, or short name of filename
-        string Basename() const { return _Filename.stem().string(); }
+        string Basename() const;
         //! Format of resource
         virtual string Format() const;
 
@@ -60,65 +54,42 @@ namespace gip {
         virtual unsigned int YSize() const;
         //! Geolocated coordinates of a point within the resource
         virtual Point<double> GeoLoc(float xloc, float yloc) const;
-
         //! Coordinates of top left
-        Point<double> TopLeft() const { return GeoLoc(0,0); }
+        Point<double> TopLeft() const;
         //! Coordinates of lower left
-        Point<double> LowerLeft() const { return GeoLoc(0,YSize()-1); }
+        Point<double> LowerLeft() const;
         //! Coordinates of top right
-        Point<double> TopRight() const { return GeoLoc(XSize()-1,0); }
+        Point<double> TopRight() const;
         //! Coordinates of bottom right
-        Point<double> LowerRight() const { return GeoLoc(XSize()-1,YSize()-1); }
+        Point<double> LowerRight() const;
         //! Minimum Coordinates of X and Y
-        Point<double> MinXY() const {
-            Point<double> pt1(TopLeft()), pt2(LowerRight());
-            double MinX(std::min(pt1.x(), pt2.x()));
-            double MinY(std::min(pt1.y(), pt2.y()));
-            return Point<double>(MinX, MinY);           
-        }
+        Point<double> MinXY() const;
         //! Maximum Coordinates of X and Y
-        Point<double> MaxXY() const { 
-            Point<double> pt1(TopLeft()), pt2(LowerRight());
-            double MaxX(std::max(pt1.x(), pt2.x()));
-            double MaxY(std::max(pt1.y(), pt2.y()));
-            return Point<double>(MaxX, MaxY);
-        }
+        Point<double> MaxXY() const;
         //! Return projection definition in Well Known Text format
         virtual string Projection() const;
         //! Return projection as OGRSpatialReference
-        OGRSpatialReference SRS() const {
-            std::string s(Projection());
-            return OGRSpatialReference(s.c_str());
-        }
-
+        OGRSpatialReference SRS() const;
+        //! Get Affine transformation
+        virtual CImg<double> Affine() const;
 
         //! \name Metadata functions
         //! Get metadata item
-        string GetMeta(string key) const {
-            const char* item = GetGDALMajorObject()->GetMetadataItem(key.c_str());
-            return (item == NULL) ? "": item;
-        }
+        string Meta(string key) const;
         // Get group of metadata
         //std::vector<std::string> GetMetaGroup(std::string group,std::string filter="") const;
         //! Set metadata item
-        GeoResource& SetMeta(std::string key, std::string item) {
-            GetGDALMajorObject()->SetMetadataItem(key.c_str(), item.c_str());
-            return *this;
-        }
+        GeoResource& SetMeta(std::string key, std::string item);
         //! Set multiple metadata items
-        GeoResource& SetMeta(std::map<std::string, std::string> items) {
-            for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
-                SetMeta(i->first, i->second);
-            }
-            return *this;
-        }
+        GeoResource& SetMeta(std::map<std::string, std::string> items);
         //! Copy Meta data from another resource
         GeoResource& CopyMeta(const GeoResource& img);
 
-
     protected:
-        virtual GDALMajorObject* GetGDALMajorObject() const;
+        //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
+        virtual GDALMajorObject* GDALMajorObject() const;
 
+        //! Filename, or some other resource identifier
         boost::filesystem::path _Filename;
 
     }; // class GeoResource
