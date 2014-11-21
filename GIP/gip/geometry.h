@@ -21,10 +21,13 @@
 #define GEOMETRY_H
 
 #include <iostream>
+#include <vector>
+#include <gip/Utils.h>
 //#include <gdal/ogr_srs_api.h>
 #include <gdal/ogr_spatialref.h>
 
 namespace gip {
+    using std::vector;
 
     //! (2D) Point Class
     template<typename T=int> class Point {
@@ -66,7 +69,7 @@ namespace gip {
     template<typename T=int> class Rect {
     public:
         //! Default Constructor
-        Rect() : _p0(0,0), _p1(0,0) {}
+        Rect() : _p0(0,0), _p1(-1,-1) {}
         //! Constructor takes in top left coordinate and width/height
         Rect(T x, T y, T width, T height) 
             : _p0(x,y), _p1(x+width-1,y+height-1) {
@@ -93,6 +96,8 @@ namespace gip {
         //Point<T> min_corner() const { return Point<T>(_x,_y); }
         //Point<T> max_corner() const { return Point<T>(_x+_width,_y+height); }
 
+        //! Validity of rect
+        T valid() const { return (area() == 0) ? false : true; }
         //! Area of the Rect
         T area() const { return abs(width()*height()); }
         //! Width of Rect
@@ -186,6 +191,107 @@ namespace gip {
         Point<T> _p1;
     };
 
+
+    //! Collection of Rects representing a chunked up region (i.e. image)
+    class ChunkSet {
+    public:
+        //! Default constructor
+        ChunkSet()
+            : _xsize(0), _ysize(0) {}
+
+        //! Constructor taking in image size
+        ChunkSet(unsigned int xsize, unsigned int ysize, unsigned int numchunks=0)
+            : _xsize(xsize), _ysize(ysize) {
+            ChunkUp(numchunks);
+        }
+
+        //! Copy constructor
+        ChunkSet(const ChunkSet& chunks)
+            : _xsize(chunks._xsize), _ysize(chunks._ysize) {
+            ChunkUp(chunks.Size());
+        }
+
+        //! Assignment copy
+        ChunkSet& operator=(const ChunkSet& chunks) {
+            if (this == & chunks) return *this;
+            _xsize = chunks._xsize;
+            _ysize = chunks._ysize;
+            ChunkUp(chunks.Size());
+        }
+
+        //! Get width of region
+        unsigned int XSize() const { return _xsize; }
+
+        //! Get height of region
+        unsigned int YSize() const { return _ysize; }
+
+        //! Determine if region is valid
+        bool Valid() const {
+            return (((_xsize * _ysize) == 0) || (Size() == 0)) ? false : true;
+        }
+
+        //! Get number of chunks
+        unsigned int Size() const { return _Chunks.size(); }
+
+        //! Get a chunk without padding
+        Rect<int>& operator[](int index) { return _Chunks[index]; }
+        //! Get a chunk, const version
+        const Rect<int>& operator[](int index) const { return _Chunks[index]; }
+
+        //! Get a chunk for reading with optional padding
+        const Rect<int> Chunk(int index, int padding=0) const {
+            if (padding == 0)
+                return _Chunks[index];
+            else {
+                return _Chunks[index].get_Pad(padding).Intersect(Rect<int>(0,0,XSize(),YSize()));
+            }
+        }
+
+        //! Get a rect that has been "de-padded" - returns rect suitable to use for cropping
+        const Rect<int> DePad(int index, int padding=0) const {
+            Rect<int> chunk = _Chunks[index];
+            if (padding == 0) return chunk;
+            Rect<int> pchunk = Chunk(index, padding);
+            Point<int> p0(chunk.p0()-pchunk.p0());
+            Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
+            return Rect<int>(p0, p1);
+        }     
+
+    private:
+        //! Function to chunk up region
+        vector< Rect<int> > ChunkUp(unsigned int numchunks=0) {
+            unsigned int rows;
+
+            if (numchunks == 0) {
+                rows = floor( ( Options::ChunkSize() *1024*1024) / sizeof(double) / XSize() );
+                rows = rows > YSize() ? YSize() : rows;
+                numchunks = ceil( YSize()/(float)rows );
+            } else {
+                rows = int(YSize() / numchunks);
+            }
+
+            _Chunks.clear();
+            Rect<int> chunk;
+            /*if (Options::Verbose() > 3) {
+                std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
+                    << Options::ChunkSize() << " MB max each)" << std::endl;
+            }*/
+            for (unsigned int i=0; i<numchunks; i++) {
+                chunk = Rect<int>(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
+                _Chunks.push_back(chunk);
+                //if (Options::Verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
+            }
+            return _Chunks;            
+        }
+
+        //! Width (columns) of region
+        unsigned int _xsize;
+        //! Height (rows) of region
+        unsigned int _ysize;
+
+        //! Coordinates of the chunks
+        vector< Rect<int> > _Chunks;
+    };
 
 } // namespace GIP
 
