@@ -35,7 +35,7 @@ namespace gip {
 
     // Open existing file
     GeoData::GeoData(string filename, bool Update) 
-        : _Filename(filename), _padding(0) {
+        : GeoResource(filename), _padding(0) {
         GDALAccess access = Update ? GA_Update : GA_ReadOnly;
         if (access == GA_ReadOnly)
             CPLSetConfigOption("GDAL_PAM_ENABLED","NO");
@@ -54,7 +54,7 @@ namespace gip {
 
     // Create new file
     GeoData::GeoData(int xsz, int ysz, int bsz, GDALDataType datatype, string filename, dictionary options)
-        :_Filename(filename), _padding(0) {
+        : GeoResource(filename), _Chunks(xsz, ysz) {
         string format = Options::DefaultFormat();
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
@@ -77,8 +77,7 @@ namespace gip {
 
     // Copy constructor
     GeoData::GeoData(const GeoData& geodata)
-        : _Filename(geodata._Filename), _GDALDataset(geodata._GDALDataset), 
-            _Chunks(geodata._Chunks), _PadChunks(geodata._PadChunks), _padding(geodata._padding) {
+        : GeoResource(geodata), _GDALDataset(geodata._GDALDataset), _Chunks(geodata._Chunks){
     }
 
     // Assignment copy
@@ -86,11 +85,9 @@ namespace gip {
     //GeoData& GeoData::operator=(const GeoData& geodata) {
         // Check for self assignment
         if (this == &geodata) return *this;
-        _Filename = geodata._Filename;
+        GeoResource::operator=(geodata);
         _GDALDataset = geodata._GDALDataset;
         _Chunks = geodata._Chunks;
-        _PadChunks = geodata._PadChunks;
-        _padding = geodata._padding;
         return *this;
     }
 
@@ -103,35 +100,6 @@ namespace gip {
         }
     }
 
-    // Using GDALDatasets GeoTransform get Geo-located coordinates
-    Point<double> GeoData::GeoLoc(float xloc, float yloc) const {
-        double Affine[6];
-        _GDALDataset->GetGeoTransform(Affine);
-        Point<double> Coord(Affine[0] + xloc*Affine[1] + yloc*Affine[2], Affine[3] + xloc*Affine[4] + yloc*Affine[5]);
-        return Coord;
-    }
-
-    // Get metadata group
-    std::vector<string> GeoData::GetMetaGroup(string group,string filter) const {
-        char** meta= _GDALDataset->GetMetadata(group.c_str());
-        int num = CSLCount(meta);
-        std::vector<string> items;
-        for (int i=0;i<num; i++) {
-                if (filter != "") {
-                        string md = string(meta[i]);
-                        string::size_type pos = md.find(filter);
-                        if (pos != string::npos) items.push_back(md.substr(pos+filter.length()));
-                } else items.push_back( meta[i] );
-        }
-        return items;
-    }
-
-    // Copy all metadata from input
-    GeoData& GeoData::CopyMeta(const GeoData& img) {
-        _GDALDataset->SetMetadata(img._GDALDataset->GetMetadata());
-        return *this;
-    }
-
     // Copy coordinate system from another image
     GeoData& GeoData::CopyCoordinateSystem(const GeoData& img) {
         GDALDataset* ds = const_cast<GeoData&>(img)._GDALDataset.get();
@@ -140,38 +108,6 @@ namespace gip {
         ds->GetGeoTransform(Affine);
         _GDALDataset->SetGeoTransform(Affine);
         return *this;
-    }
-
-    //! Break up image into smaller size pieces, each of ChunkSize
-    std::vector< Rect<int> > GeoData::Chunk(unsigned int numchunks) const {
-        unsigned int rows;
-
-        if (numchunks == 0) {
-            rows = floor( ( Options::ChunkSize() *1024*1024) / sizeof(double) / XSize() );
-            rows = rows > YSize() ? YSize() : rows;
-            numchunks = ceil( YSize()/(float)rows );
-        } else {
-            rows = int(YSize() / numchunks);
-        }
-
-        _Chunks.clear();
-        _PadChunks.clear();
-        iRect chunk, pchunk;
-        /*if (Options::Verbose() > 3) {
-            std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
-                << Options::ChunkSize() << " MB max each)" << " padding = " << _padding << std::endl;
-        }*/
-        for (unsigned int i=0; i<numchunks; i++) {
-            chunk = iRect(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
-            _Chunks.push_back(chunk);
-            pchunk = chunk;
-            if (_padding > 0)
-                pchunk.Pad(_padding).Intersect(iRect(0,0,XSize(),YSize()));
-            _PadChunks.push_back(pchunk);
-            //if (Options::Verbose() > 3)
-            //    std::cout << "  Chunk " << i << ": " << chunk << "\tPadded: " << pchunk << std::endl;
-        }
-        return _Chunks;
     }
 
 } // namespace gip
