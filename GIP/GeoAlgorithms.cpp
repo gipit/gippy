@@ -73,15 +73,19 @@ namespace gip {
         CImg<unsigned char> nonclouds, ambclouds, clouds, mask, temp2;
         float cloudsum(0), scenesize(0);
 
-        //if (Options::Verbose()) cout << image.Basename() << " - ACCA (dev-version)" << endl;
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            red = image["RED"].Read<float>(iChunk);
-            green = image["GREEN"].Read<float>(iChunk);
-            nir = image["NIR"].Read<float>(iChunk);
-            swir1 = image["SWIR1"].Read<float>(iChunk);
-            temp = image["LWIR"].Read<float>(iChunk);
+        ChunkSet chunks(image.XSize(),image.YSize());
+        Rect<int> chunk;
 
-            mask = image.NoDataMask(iChunk, bands_used)^=1;
+        //if (Options::Verbose()) cout << image.Basename() << " - ACCA (dev-version)" << endl;
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            chunk = chunks[iChunk];
+            red = image["RED"].Read<float>(chunk);
+            green = image["GREEN"].Read<float>(chunk);
+            nir = image["NIR"].Read<float>(chunk);
+            swir1 = image["SWIR1"].Read<float>(chunk);
+            temp = image["LWIR"].Read<float>(chunk);
+
+            mask = image.NoDataMask(bands_used, chunk)^=1;
 
             ndsi = (green - swir1).div(green + swir1);
             b56comp = (1.0 - swir1).mul(temp + 273.15);
@@ -119,10 +123,10 @@ namespace gip {
             cloudsum += clouds.sum();
             scenesize += mask.sum();
 
-            imgout[b_pass1].Write<unsigned char>(clouds,iChunk);
-            imgout[b_ambclouds].Write<unsigned char>(ambclouds,iChunk);
+            imgout[b_pass1].Write<unsigned char>(clouds,chunk);
+            imgout[b_ambclouds].Write<unsigned char>(ambclouds,chunk);
             //imgout[0].Write(nonclouds,iChunk);
-            if (Options::Verbose() > 3) cout << "Processed chunk " << iChunk << " of " << image[0].NumChunks() << endl;
+            if (Options::Verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.Size() << endl;
         }
         // Cloud statistics
         float cloudcover = cloudsum / scenesize;
@@ -195,15 +199,15 @@ namespace gip {
                  << "xstep  = " << signX*xstep << endl
                  << "ystep  = " << signY*ystep << endl ;
 
-        for (unsigned int b=0;b<imgout.NumBands();b++) { imgout[b].SetChunkPadding(padding); }
-        for (unsigned int b=0;b<image.NumBands();b++) { image[b].SetChunkPadding(padding); }
+        chunks.Padding(padding);
 
-        for (unsigned int iChunk=1; iChunk<=imgout[0].NumChunks(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << imgout[0].NumChunks() << endl;
-            clouds = imgout[b_pass1].Read<unsigned char>(iChunk);
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            chunk = chunks[iChunk];
+            if (Options::Verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
+            clouds = imgout[b_pass1].Read<unsigned char>(chunk);
             // should this be a |= ?
-            if (addclouds) clouds += imgout[b_ambclouds].Read<unsigned char>(iChunk);
-            clouds|=(image.SaturationMask(iChunk, bands_used));
+            if (addclouds) clouds += imgout[b_ambclouds].Read<unsigned char>(chunk);
+            clouds|=(image.SaturationMask(bands_used, chunk));
             // Majority filter
             //clouds|=clouds.get_convolve(filter).threshold(majority));
             if (erode > 0)
@@ -216,9 +220,9 @@ namespace gip {
                 for(int xN=abs(dx),yN=abs(dy); xN>0 && yN>0; xN-=xstep,yN-=ystep)
                     clouds|=temp2.get_shift(signX*xN,signY*yN);
             }
-            imgout[b_cloudmask].Write<unsigned char>(clouds,iChunk);
+            imgout[b_cloudmask].Write<unsigned char>(clouds,chunk);
             // Inverse and multiply by nodata mask to get good data mask
-            imgout[b_finalmask].Write<unsigned char>((clouds^=1).mul(image.NoDataMask(iChunk, bands_used)^=1), iChunk);
+            imgout[b_finalmask].Write<unsigned char>((clouds^=1).mul(image.NoDataMask(bands_used, chunk)^=1), chunk);
             // TODO - add in snow mask
         }
         return imgout;
@@ -419,18 +423,20 @@ namespace gip {
         //CImg<double> wstats(image.Size()), lstats(image.Size());
         //int wloc(0), lloc(0);
 
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            blue = image["BLUE"].Read<double>(iChunk);
-            red = image["RED"].Read<double>(iChunk);
-            green = image["GREEN"].Read<double>(iChunk);
-            nir = image["NIR"].Read<double>(iChunk);
-            swir1 = image["SWIR1"].Read<double>(iChunk);
-            swir2 = image["SWIR2"].Read<double>(iChunk);
-            BT = image["LWIR"].Read<double>(iChunk);
-            mask = image.NoDataMask(iChunk)^=1;
+        ChunkSet chunks(image.XSize(),image.YSize());
+
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            blue = image["BLUE"].Read<double>(chunks[iChunk]);
+            red = image["RED"].Read<double>(chunks[iChunk]);
+            green = image["GREEN"].Read<double>(chunks[iChunk]);
+            nir = image["NIR"].Read<double>(chunks[iChunk]);
+            swir1 = image["SWIR1"].Read<double>(chunks[iChunk]);
+            swir2 = image["SWIR2"].Read<double>(chunks[iChunk]);
+            BT = image["LWIR"].Read<double>(chunks[iChunk]);
+            mask = image.NoDataMask(chunks[iChunk])^=1;
             ndvi = (nir-red).div(nir+red);
             ndsi = (green-swir1).div(green+swir1);
-            white = image.Whiteness(iChunk);
+            white = image.Whiteness(chunks[iChunk]);
 
             // Potential cloud pixels
             pcp =
@@ -445,8 +451,8 @@ namespace gip {
                 & white.get_threshold(0.7,false,true)^=1
                 & nir.get_div(swir1).threshold(0.75);
 
-            redsatmask = image["RED"].SaturationMask(iChunk);
-            greensatmask = image["GREEN"].SaturationMask(iChunk);
+            redsatmask = image["RED"].SaturationMask(chunks[iChunk]);
+            greensatmask = image["GREEN"].SaturationMask(chunks[iChunk]);
             vprob = red;
             // Calculate "variability probability"
             cimg_forXY(vprob,x,y) {
@@ -454,18 +460,18 @@ namespace gip {
                 _ndsi = (greensatmask(x,y) && swir1(x,y) > green(x,y)) ? 0 : abs(ndsi(x,y));
                 vprob(x,y) = 1 - std::max(white(x,y), std::max(_ndsi, _ndvi));
             }
-            probout[1].Write(vprob, iChunk);
+            probout[1].Write(vprob, chunks[iChunk]);
 
             datapixels += mask.sum();
             cloudpixels += pcp.sum();
             wmask = ((ndvi.get_threshold(0.01,false,true)^=1) &= (nir.get_threshold(0.01,false,true)^=1))|=
                     ((ndvi.get_threshold(0.1,false,true)^=1) &= (nir.get_threshold(0.05,false,true)^=1));
 
-            imgout[b_pcp].Write(pcp.mul(mask), iChunk);        // Potential cloud pixels
-            imgout[b_water].Write(wmask.get_mul(mask), iChunk);   // Clear-sky water
+            imgout[b_pcp].Write(pcp.mul(mask), chunks[iChunk]);        // Potential cloud pixels
+            imgout[b_water].Write(wmask.get_mul(mask), chunks[iChunk]);   // Clear-sky water
             CImg<unsigned char> landimg((wmask^1).mul(pcp^1).mul(mask));
             landpixels += landimg.sum();
-            imgout[b_land].Write(landimg, iChunk);    // Clear-sky land
+            imgout[b_land].Write(landimg, chunks[iChunk]);    // Clear-sky land
         }
         // floodfill....seems bad way
         //shadowmask = nir.draw_fill(nir.width()/2,nir.height()/2,)
@@ -492,20 +498,20 @@ namespace gip {
 
         // Calculate cloud probabilities for over water and land
         CImg<float> wprob, lprob;
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            mask = image.NoDataMask(iChunk)^=1;
-            BT = image["LWIR"].Read<double>(iChunk);
-            swir1 = image["SWIR1"].Read<double>(iChunk);
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            mask = image.NoDataMask(chunks[iChunk])^=1;
+            BT = image["LWIR"].Read<double>(chunks[iChunk]);
+            swir1 = image["SWIR1"].Read<double>(chunks[iChunk]);
 
             // Water Clouds = temp probability x brightness probability
             wprob = ((Twater - BT)/=4.0).mul( swir1.min(0.11)/=0.11 ).mul(mask);
-            probout[0].Write(wprob, iChunk);
+            probout[0].Write(wprob, chunks[iChunk]);
 
             // Land Clouds = temp probability x variability probability
-            vprob = probout[0].Read<double>(iChunk);
+            vprob = probout[0].Read<double>(chunks[iChunk]);
             lprob = ((Thi + 4-BT)/=(Thi+4-(Tlo-4))).mul( vprob ).mul(mask);
-            //1 - image.NDVI(*iChunk).abs().max(image.NDSI(*iChunk).abs()).max(image.Whiteness(*iChunk).abs()) );
-            probout[1].Write( lprob, iChunk);
+            //1 - image.NDVI(*chunks[iChunk]).abs().max(image.NDSI(*chunks[iChunk]).abs()).max(image.Whiteness(*chunks[iChunk]).abs()) );
+            probout[1].Write( lprob, chunks[iChunk]);
         }
 
         // Thresholds
@@ -520,16 +526,14 @@ namespace gip {
         //CImg<int> filter(3,3,1,1, 1);
         int erode = 5;
         int padding(double(std::max(dilate,erode)+1)/2);
-        for (unsigned int b=0;b<image.NumBands();b++) image[b].SetChunkPadding(padding);
-        for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].SetChunkPadding(padding);
+        chunks.Padding(padding);
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            mask = image.NoDataMask(chunks[iChunk])^=1;
+            pcp = imgout[b_pcp].Read<double>(chunks[iChunk]);
+            wmask = imgout[b_water].Read<double>(chunks[iChunk]);
+            BT = image["LWIR"].Read<double>(chunks[iChunk]);
 
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            mask = image.NoDataMask(iChunk)^=1;
-            pcp = imgout[b_pcp].Read<double>(iChunk);
-            wmask = imgout[b_water].Read<double>(iChunk);
-            BT = image["LWIR"].Read<double>(iChunk);
-
-            lprob = probout[1].Read<double>(iChunk);
+            lprob = probout[1].Read<double>(chunks[iChunk]);
             
             clouds = 
                 (pcp & wmask & wprob.threshold(0.5))|=
@@ -546,8 +550,8 @@ namespace gip {
 
             //cimg_forXY(nodatamask,x,y) if (!nodatamask(x,y)) mask(x,y) = 0;
             clouds.mul(mask);
-            imgout[b_clouds].Write(clouds, iChunk);
-            imgout[b_final].Write((clouds^=1).mul(mask), iChunk);
+            imgout[b_clouds].Write(clouds, chunks[iChunk]);
+            imgout[b_final].Write((clouds^=1).mul(mask), chunks[iChunk]);
         }
 
         return imgout;
@@ -689,16 +693,18 @@ namespace gip {
 
         CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg;
 
+        ChunkSet chunks(image.XSize(),image.YSize());
+
         // need to add overlap
-        for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << iChunk << " of " << image[0].NumChunks() << endl;
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].Size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
-                if (*isstr == "RED") red = image["RED"].Read<float>(iChunk);
-                else if (*isstr == "GREEN") green = image["GREEN"].Read<float>(iChunk);
-                else if (*isstr == "BLUE") blue = image["BLUE"].Read<float>(iChunk);
-                else if (*isstr == "NIR") nir = image["NIR"].Read<float>(iChunk);
-                else if (*isstr == "SWIR1") swir1 = image["SWIR1"].Read<float>(iChunk);
-                else if (*isstr == "SWIR2") swir2 = image["SWIR2"].Read<float>(iChunk);
+                if (*isstr == "RED") red = image["RED"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "GREEN") green = image["GREEN"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "BLUE") blue = image["BLUE"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "NIR") nir = image["NIR"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "SWIR1") swir1 = image["SWIR1"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "SWIR2") swir2 = image["SWIR2"].Read<float>(chunks[iChunk]);
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
@@ -739,9 +745,9 @@ namespace gip {
                     cimgout = swir1.div(swir2);
                 }
                 // TODO don't read mask again...create here
-                cimgmask = image.NoDataMask(iChunk, colors[prodname]);
+                cimgmask = image.NoDataMask(colors[prodname], chunks[iChunk]);
                 cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;
-                imagesout[prodname].Write(cimgout,iChunk);
+                imagesout[prodname].Write(cimgout,chunks[iChunk]);
             }
         }
         return filenames;
@@ -760,16 +766,19 @@ namespace gip {
         imgout.CopyMeta(img);
         CImg<float> cimg;
         CImg<unsigned char> mask;
+
+        ChunkSet chunks(img.XSize(),img.YSize());
+
         for (unsigned int bout=0; bout<numbands; bout++) {
             //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
-            for (unsigned int iChunk=1; iChunk<=imgout[bout].NumChunks(); iChunk++) {
-                cimg = img[0].Read<float>(iChunk) * coef(0, bout);;
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+                cimg = img[0].Read<float>(chunks[iChunk]) * coef(0, bout);;
                 for (unsigned int bin=1; bin<numbands; bin++) {
-                    cimg = cimg + (img[bin].Read<float>(iChunk) * coef(bin, bout));
+                    cimg = cimg + (img[bin].Read<float>(chunks[iChunk]) * coef(bin, bout));
                 }
-                mask = img.NoDataMask(iChunk);
+                mask = img.NoDataMask(chunks[iChunk]);
                 cimg_forXY(cimg,x,y) if (mask(x,y)) cimg(x,y) = nodataout;
-                imgout[bout].Write(cimg, iChunk);
+                imgout[bout].Write(cimg, chunks[iChunk]);
             }
         }
         return imgout;
@@ -787,12 +796,13 @@ namespace gip {
         imgout.SetBandName("StdDev", 2);
 
         CImgList<double> stats;
-        for (unsigned int iChunk=1; iChunk<=img.NumChunks(); iChunk++) {
+        ChunkSet chunks(img.XSize(),img.YSize());
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             if (Options::Verbose() > 2) 
-                std::cout << "Processing chunk " << iChunk << " of " << img.NumChunks() << std::endl;
-            stats = img.SpectralStatistics(iChunk);
-            imgout[0].Write(stats[0], iChunk);
-            imgout[1].Write(stats[1], iChunk);
+                std::cout << "Processing chunk " << chunks[iChunk] << " of " << img.Size() << std::endl;
+            stats = img.SpectralStatistics(chunks[iChunk]);
+            imgout[0].Write(stats[0], chunks[iChunk]);
+            imgout[1].Write(stats[1], chunks[iChunk]);
         }
         if (Options::Verbose())
             std::cout << "Spectral statistics written to " << imgout.Filename() << std::endl;

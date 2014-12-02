@@ -21,10 +21,18 @@
 #define GIP_GEORESOURCE_H
 
 #include <string>
+#include <vector>
+#include <map>
+#include <boost/filesystem.hpp>
+#include <gdal/gdal_priv.h>
+#include <gip/gip_CImg.h>
 #include <gip/geometry.h>
 
 namespace gip {
-    using std::string:
+    using std::string;
+    using std::vector;
+    using boost::filesystem::path;
+    typedef std::map<std::string,std::string> dictionary;
 
     //! Base class representing a geospatial resource
     class GeoResource {
@@ -42,6 +50,8 @@ namespace gip {
         //! \name Resource Information
         //! Get the filename of the resource
         string Filename() const;
+        //! Get path (boost filesystem path)
+        path Path() const;
         //! Basename, or short name of filename
         string Basename() const;
         //! Format of resource
@@ -52,8 +62,10 @@ namespace gip {
         virtual unsigned int XSize() const;
         //! Height of resource
         virtual unsigned int YSize() const;
+        //! Total size
+        unsigned long Size() const { return XSize() * YSize(); }
         //! Geolocated coordinates of a point within the resource
-        virtual Point<double> GeoLoc(float xloc, float yloc) const;
+        Point<double> GeoLoc(float xloc, float yloc) const;
         //! Coordinates of top left
         Point<double> TopLeft() const;
         //! Coordinates of lower left
@@ -77,20 +89,20 @@ namespace gip {
         //! Get metadata item
         string Meta(string key) const;
         // Get group of metadata
-        //std::vector<std::string> GetMetaGroup(std::string group,std::string filter="") const;
+        vector<string> MetaGroup(string group, string filter="") const;
         //! Set metadata item
         GeoResource& SetMeta(std::string key, std::string item);
         //! Set multiple metadata items
-        GeoResource& SetMeta(std::map<std::string, std::string> items);
+        GeoResource& SetMeta(dictionary items);
         //! Copy Meta data from another resource
         GeoResource& CopyMeta(const GeoResource& img);
 
     protected:
-        //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
-        virtual GDALMajorObject* GDALMajorObject() const;
-
         //! Filename, or some other resource identifier
         boost::filesystem::path _Filename;
+
+        //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
+        virtual GDALMajorObject* GDALObject() const;
 
     }; // class GeoResource
 } // namespace gip

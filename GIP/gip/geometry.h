@@ -25,6 +25,7 @@
 #include <gip/Utils.h>
 //#include <gdal/ogr_srs_api.h>
 #include <gdal/ogr_spatialref.h>
+#include <gip/gip_CImg.h>
 
 namespace gip {
     using std::vector;
@@ -69,10 +70,10 @@ namespace gip {
     template<typename T=int> class Rect {
     public:
         //! Default Constructor
-        Rect() : _p0(0,0), _p1(-1,-1) {}
+        Rect() : _p0(0,0), _p1(-1,-1), _padding(0) {}
         //! Constructor takes in top left coordinate and width/height
         Rect(T x, T y, T width, T height) 
-            : _p0(x,y), _p1(x+width-1,y+height-1) {
+            : _p0(x,y), _p1(x+width-1,y+height-1), _padding(0) {
             // Validate, x0 and y0 should always be the  min values
             /*if (_width < 0) {
                 _width = abs(m_width);
@@ -84,7 +85,18 @@ namespace gip {
             }*/
         }
         Rect(Point<T> p0, Point<T> p1)
-            : _p0(p0), _p1(p1) {
+            : _p0(p0), _p1(p1), _padding(0) {
+        }
+        //! Copy constructor
+        Rect(const Rect<T>& rect)
+            : _p0(rect._p0), _p1(rect._p1), _padding(rect._padding) {}
+        //! Assignment operator
+        Rect& operator=(const Rect& rect) {
+            if (this == &rect) return *this;
+            _p0 = rect._p0;
+            _p1 = rect._p1;
+            _padding = rect._padding;
+            return *this;
         }
 
         //! Destructor
@@ -122,6 +134,14 @@ namespace gip {
             return !operator==(rect);
         }
 
+        //! Get padding
+        unsigned int Padding() const { return _padding; }
+        //! Set padding
+        Rect& Padding(unsigned int padding) {
+            _padding = padding;
+            return *this;
+        }
+
         //! Determines if ROI is valid (not valid if height or width is 0 or less)
         //bool valid() const { if (width() <= 0 || height() <=0) return false; else return true; }
 
@@ -153,11 +173,20 @@ namespace gip {
             return *this;
         }
 
+        Rect& Pad() {
+            return Pad(_padding);
+        }
+
         Rect& Pad(int pad) {
             _p0 = _p0 - Point<T>(pad,pad);
             _p1 = _p1 + Point<T>(pad,pad);
             return *this;
         }
+
+        Rect get_Pad() const {
+            return get_Pad(_padding);
+        }
+
         Rect get_Pad(int pad) const {
             return Rect<T>(*this).Pad(pad);
         }
@@ -189,6 +218,8 @@ namespace gip {
         Point<T> _p0;
         // bottom-right
         Point<T> _p1;
+        // Amount of padding around the rect (Rect is always stored WITHOUT padding)
+        unsigned int _padding;
     };
 
 
@@ -197,17 +228,17 @@ namespace gip {
     public:
         //! Default constructor
         ChunkSet()
-            : _xsize(0), _ysize(0) {}
+            : _xsize(0), _ysize(0), _padding(0) {}
 
         //! Constructor taking in image size
-        ChunkSet(unsigned int xsize, unsigned int ysize, unsigned int numchunks=0)
-            : _xsize(xsize), _ysize(ysize) {
+        ChunkSet(unsigned int xsize, unsigned int ysize, unsigned int padding=0, unsigned int numchunks=0)
+            : _xsize(xsize), _ysize(ysize), _padding(padding) {
             ChunkUp(numchunks);
         }
 
         //! Copy constructor
         ChunkSet(const ChunkSet& chunks)
-            : _xsize(chunks._xsize), _ysize(chunks._ysize) {
+            : _xsize(chunks._xsize), _ysize(chunks._ysize), _padding(chunks._padding) {
             ChunkUp(chunks.Size());
         }
 
@@ -216,7 +247,9 @@ namespace gip {
             if (this == & chunks) return *this;
             _xsize = chunks._xsize;
             _ysize = chunks._ysize;
+            _padding = chunks._padding;
             ChunkUp(chunks.Size());
+            return *this;
         }
 
         //! Get width of region
@@ -233,29 +266,19 @@ namespace gip {
         //! Get number of chunks
         unsigned int Size() const { return _Chunks.size(); }
 
-        //! Get a chunk without padding
+        //! Get amount of padding in pixels
+        unsigned int Padding() const { return _padding; }
+
+        //! Set padding
+        ChunkSet& Padding(unsigned int _pad) {
+            _padding = _pad;
+            return *this;
+        }
+
+        //! Get a chunk
         Rect<int>& operator[](int index) { return _Chunks[index]; }
         //! Get a chunk, const version
         const Rect<int>& operator[](int index) const { return _Chunks[index]; }
-
-        //! Get a chunk for reading with optional padding
-        const Rect<int> Chunk(int index, int padding=0) const {
-            if (padding == 0)
-                return _Chunks[index];
-            else {
-                return _Chunks[index].get_Pad(padding).Intersect(Rect<int>(0,0,XSize(),YSize()));
-            }
-        }
-
-        //! Get a rect that has been "de-padded" - returns rect suitable to use for cropping
-        const Rect<int> DePad(int index, int padding=0) const {
-            Rect<int> chunk = _Chunks[index];
-            if (padding == 0) return chunk;
-            Rect<int> pchunk = Chunk(index, padding);
-            Point<int> p0(chunk.p0()-pchunk.p0());
-            Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
-            return Rect<int>(p0, p1);
-        }     
 
     private:
         //! Function to chunk up region
@@ -278,6 +301,7 @@ namespace gip {
             }*/
             for (unsigned int i=0; i<numchunks; i++) {
                 chunk = Rect<int>(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
+                chunk.Padding(_padding);
                 _Chunks.push_back(chunk);
                 //if (Options::Verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
             }
@@ -288,6 +312,8 @@ namespace gip {
         unsigned int _xsize;
         //! Height (rows) of region
         unsigned int _ysize;
+        //! Padding to apply to rects (dimensions are always the rect without padding)
+        unsigned int _padding;
 
         //! Coordinates of the chunks
         vector< Rect<int> > _Chunks;

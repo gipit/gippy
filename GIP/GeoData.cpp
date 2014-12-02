@@ -35,7 +35,7 @@ namespace gip {
 
     // Open existing file
     GeoData::GeoData(string filename, bool Update) 
-        : GeoResource(filename), _padding(0) {
+        : GeoResource(filename) {
         GDALAccess access = Update ? GA_Update : GA_ReadOnly;
         if (access == GA_ReadOnly)
             CPLSetConfigOption("GDAL_PAM_ENABLED","NO");
@@ -54,7 +54,7 @@ namespace gip {
 
     // Create new file
     GeoData::GeoData(int xsz, int ysz, int bsz, GDALDataType datatype, string filename, dictionary options)
-        : GeoResource(filename), _Chunks(xsz, ysz) {
+        : GeoResource(filename) {
         string format = Options::DefaultFormat();
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
@@ -77,7 +77,7 @@ namespace gip {
 
     // Copy constructor
     GeoData::GeoData(const GeoData& geodata)
-        : GeoResource(geodata), _GDALDataset(geodata._GDALDataset), _Chunks(geodata._Chunks){
+        : GeoResource(geodata), _GDALDataset(geodata._GDALDataset) {
     }
 
     // Assignment copy
@@ -87,7 +87,6 @@ namespace gip {
         if (this == &geodata) return *this;
         GeoResource::operator=(geodata);
         _GDALDataset = geodata._GDALDataset;
-        _Chunks = geodata._Chunks;
         return *this;
     }
 

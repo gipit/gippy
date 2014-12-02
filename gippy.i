@@ -104,7 +104,7 @@
                 case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(arr)));
                 case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(arr)));
                 case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(arr)));
-                case NPY_UINT32: return CImgToArr(_test(ArrToCImg<uint32_t>(arr)));
+                case NPY_UINT32: returnedrn CImgToArr(_test(ArrToCImg<uint32_t>(arr)));
                 case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(arr)));
                 case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(arr)));
                 case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(arr)));
@@ -213,12 +213,21 @@ namespace std {
 %typemap(typecheck) CImg<double> = PyObject*;
 
 // GIP functions to ignore (suppresses warnings) because operators are redefined below
+%ignore operator<<;
+%ignore boost::filesystem::path;
+
+%ignore gip::Point::operator=;
+%ignore gip::Rect::operator=;
+%ignore gip::ChunkSet::operator=;
+%ignore gip::ChunkSet::operator[];
+%ignore gip::GeoResource::operator=;
 %ignore gip::GeoData::operator=;
 %ignore gip::GeoImage::operator[];
-%ignore operator<<;
+
 
 // GIP headers and classes to be wrapped - order is important!
 %include "gip/geometry.h"
+%include "gip/GeoResource.h"
 %include "gip/GeoData.h"
 %include "gip/GeoRaster.h"
 %include "gip/GeoImage.h"
@@ -249,26 +258,25 @@ namespace gip {
         static void SetWorkDir(std::string workdir);
     };
 
+
+    %extend ChunkSet {
+        Rect<int> __getitem__(int index) {
+            return self->ChunkSet::operator[](index);
+        }
+        Rect<int>& __setitem__(int index, const Rect<int>& rect) {
+            self->operator[](index) = rect;
+            return self->ChunkSet::operator[](index);
+        }
+        ChunkSet __deepcopy__(ChunkSet chunks) {
+            return ChunkSet(chunks);
+        }
+    }
+
     %extend GeoRaster {
 		%feature("docstring",
 				 "PyObject returned is a numpy.array.\n"
 				 "Enjoy!\n ");
-        PyObject* Read(int chunk=0) {
-            if (self->Gain() == 1.0 && self->Offset() == 0.0) {
-                switch(self->DataType()) {
-                    case 1: return CImgToArr(self->Read<unsigned char>(chunk));
-                    case 2: return CImgToArr(self->Read<unsigned short>(chunk));
-                    case 3: return CImgToArr(self->Read<short>(chunk));
-                    case 4: return CImgToArr(self->Read<unsigned int>(chunk));
-                    case 5: return CImgToArr(self->Read<int>(chunk));
-                    case 6: return CImgToArr(self->Read<float>(chunk));
-                    case 7: return CImgToArr(self->Read<double>(chunk));
-                    default: throw(std::exception());
-                }
-            }
-            return CImgToArr(self->Read<float>(chunk));
-        }
-        PyObject* Read(Rect<int> chunk) {
+        PyObject* Read(Rect<int> chunk=Rect<int>()) {
             if (self->Gain() == 1.0 && self->Offset() == 0.0) {
                 switch(self->DataType()) {
                     case 1: return CImgToArr(self->Read<unsigned char>(chunk));
@@ -286,7 +294,7 @@ namespace gip {
 		%feature("docstring",
 				 "PyObject passed in is a numpy.array.\n"
 				 "Comply!\n ");
-        GeoRaster& Write(PyObject* obj, int chunk=0) {
+        GeoRaster& Write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
             PyArrayObject* arr = (PyArrayObject*)obj;
             switch(((PyArrayObject*)arr)->descr->type_num) {
                 case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
@@ -337,9 +345,6 @@ namespace gip {
         PyObject* TimeSeries(CImg<double> C, Rect<int> chunk) {
             return CImgToArr(self->TimeSeries<double>(C, chunk));
         }
-        PyObject* TimeSeries(CImg<double> C, int chunknum=0) {
-            return CImgToArr(self->TimeSeries<double>(C, chunknum));
-        }
         PyObject* Extract(const GeoRaster& mask) {
             return CImgToArr(self->Extract<double>(mask));
         }
@@ -355,7 +360,7 @@ namespace gip {
 		%feature("docstring",
 				 "PyObject returned is a numpy.array.\n"
 				 "Enjoy!\n ");
-        PyObject* Read(int chunk=0) {
+        PyObject* Read(Rect<int> chunk=Rect<int>()) {
             // Only looks at first band for gain and offset
             if ((*self)[0].Gain() == 1.0 && (*self)[0].Offset() == 0.0) {
                 switch(self->DataType()) {

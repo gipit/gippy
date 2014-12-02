@@ -37,6 +37,9 @@
 #include <stdint.h>
 
 namespace gip {
+    typedef Rect<int> iRect;
+    typedef Point<int> iPoint;
+
     //! Extended GDALRasterBand class
     /*!
         The GeoRaster class wraps the GDALRasterBand class
@@ -216,7 +219,7 @@ namespace gip {
             return *this;
         }
         //! Apply a mask directly to a file (inplace)
-        GeoRaster& ApplyMask(CImg<uint8_t> mask, int chunk=0);
+        GeoRaster& ApplyMask(CImg<uint8_t> mask, iRect chunk=iRect());
 
         GeoRaster& AddFunction(func f) {
             _ValidStats = false;
@@ -382,17 +385,14 @@ namespace gip {
         }*/
 
         //! \name File I/O
-        template<class T> CImg<T> ReadRaw(int chunknum=0) const;
-        template<class T> CImg<T> ReadRaw(iRect chunk) const;
-        template<class T> CImg<T> Read(int chunknum=0) const;
-        template<class T> CImg<T> Read(iRect chunk) const;
-        template<class T> GeoRaster& WriteRaw(CImg<T> img, int chunknum=0);
-        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk);
-        template<class T> GeoRaster& Write(CImg<T> img, int chunknum=0);
+        template<class T> CImg<T> ReadRaw(iRect chunk=iRect()) const;
+        template<class T> CImg<T> Read(iRect chunk=iRect()) const;
+        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk=iRect());
+        template<class T> GeoRaster& Write(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Process(GeoRaster& raster);
 
          //! Get Saturation mask: 1's where it's saturated
-        CImg<unsigned char> SaturationMask(int chunk=0) const {
+        CImg<unsigned char> SaturationMask(iRect chunk=iRect()) const {
             switch (DataType()) {
                 case GDT_Byte: return _Mask<unsigned char>(_maxDC, chunk);
                 case GDT_UInt16: return _Mask<unsigned short>(_maxDC, chunk);
@@ -406,20 +406,10 @@ namespace gip {
         }
 
         //! NoData mask: 1's where it's bad data
-        CImg<unsigned char> NoDataMask(int chunk=0) const {
-            // TODO - if NoData not set, return all 1s
-            if (!NoData()) {
-                int width, height;
-                if (chunk == 0) {
-                    width = XSize();
-                    height = YSize();
-                } else {
-                    iRect ch = _PadChunks[chunk-1];
-                    width = ch.x1()-ch.x0()+1;
-                    height = ch.y1()-ch.y0()+1;
-                }
-                return CImg<unsigned char>(width,height,1,1,0);
-            }
+        CImg<unsigned char> NoDataMask(iRect chunk=iRect()) const {
+            if (!chunk.valid()) chunk = iRect(0,0,XSize(),YSize());
+            // if NoData not set, return all 1s
+            if (!NoData()) return CImg<unsigned char>(chunk.width(),chunk.height(),1,1,0);
             switch (DataType()) {
                 case GDT_Byte: return _Mask<unsigned char>(NoDataValue(), chunk);
                 case GDT_UInt16: return _Mask<unsigned short>(NoDataValue(), chunk);
@@ -432,7 +422,7 @@ namespace gip {
             }
         }
 
-        CImg<unsigned char> DataMask(int chunk=0) const {
+        CImg<unsigned char> DataMask(iRect chunk=iRect()) const {
             return NoDataMask(chunk)^=1;
         }
 
@@ -445,10 +435,10 @@ namespace gip {
             double total, norm;
             CImg<double> cimg0, cimg, subcimg;
 
-            SetChunkPadding(border);
-            raster.SetChunkPadding(border);
-            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-                cimg0 = Read<double>(iChunk);
+            ChunkSet chunks(XSize(),YSize());
+            chunks.Padding(border);
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+                cimg0 = Read<double>(chunks[iChunk]);
                 cimg = cimg0;
                 cimg_for_insideXY(cimg,x,y,border) {
                     subcimg = cimg0.get_crop(x-m0,y-n0,x+m0,y+m0);
@@ -470,10 +460,8 @@ namespace gip {
                 cimg_for_borderXY(cimg,x,y,border) {
                     if (cimg(x,y) == NoDataValue()) cimg(x,y) = raster.NoDataValue();
                 }
-                raster.Write(cimg, iChunk);
+                raster.Write(cimg, chunks[iChunk]);
             }
-            SetChunkPadding();
-            raster.SetChunkPadding();
             return raster;
         }
 
@@ -519,7 +507,7 @@ namespace gip {
             //Chunk();
         }
 
-        template<class T> inline CImg<unsigned char> _Mask(T val, int chunk=0) const {
+        template<class T> inline CImg<unsigned char> _Mask(T val, iRect chunk=iRect()) const {
             CImg<T> img = ReadRaw<T>(chunk);
             CImg<unsigned char> mask(img.width(),img.height(),1,1,0);
             cimg_forXY(img,x,y) if (img(x,y) == val) mask(x,y) = 1;
@@ -529,16 +517,6 @@ namespace gip {
     }; //class GeoImage
 
     //! \name File I/O
-    template<class T> CImg<T> GeoRaster::ReadRaw(int chunknum) const {
-        if (chunknum == 0)
-            return ReadRaw<T>( iRect(iPoint(0,0),iPoint(XSize()-1,YSize()-1)) );
-        //if (chunknum == _chunknum) return _cimg;
-        //_chunknum = chunknum;
-        //_cimg.assign( ReadRaw( _PadChunks[chunknum-1] ) );
-        //return _cimg;
-        return ReadRaw<T>( _PadChunks[chunknum-1] ) ;
-    }
-
     //! Read raw chunk given bounding box
     template<class T> CImg<T> GeoRaster::ReadRaw(iRect chunk) const {
         // This doesn't check for in bounds, should it?
@@ -573,15 +551,10 @@ namespace gip {
     }
 
     //! Retrieve a piece of the image as a CImg
-    template<class T> CImg<T> GeoRaster::Read(int chunknum) const {
-        if (chunknum == 0)
-            return Read<T>( iRect(iPoint(0,0),iPoint(XSize()-1,YSize()-1)) );
-        return Read<T>( this->_PadChunks[chunknum-1]);
-    }
-
-    //! Retrieve a piece of the image as a CImg
     template<class T> CImg<T> GeoRaster::Read(iRect chunk) const {
         auto start = std::chrono::system_clock::now();
+        if (chunk.Padding() > 0)
+            chunk = chunk.Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
 
         CImg<T> img(ReadRaw<T>(chunk));
         CImg<T> imgorig(img);
@@ -626,14 +599,15 @@ namespace gip {
     }
 
     //! Write raw CImg to file
-    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, int chunknum) {
-        if (chunknum == 0)
-            return WriteRaw(img, iRect(iPoint(0,0),iPoint(XSize()-1,YSize()-1)) );
-        return WriteRaw(img, _Chunks[chunknum-1] );
-    }
-
-    //! Write raw CImg to file
     template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect chunk) {
+        // Depad this if needed
+        if (chunk.Padding() > 0) {
+            Rect<int> pchunk = chunk.get_Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
+            Point<int> p0(chunk.p0()-pchunk.p0());
+            Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
+            img.crop(p0.x(),p0.y(),p1.x(),p1.y());
+        }
+
         if (Options::Verbose() > 4) {
             std::cout << Basename() << ": writing " << img.width() << " x " 
                 << img.height() << " image to rect " << chunk << std::endl;
@@ -651,28 +625,13 @@ namespace gip {
     }
 
     //! Write a Cimg to the file
-    template<class T> GeoRaster& GeoRaster::Write(CImg<T> img, int chunknum) {
-        iRect chunk;
-        if (chunknum == 0) {
-            chunk = iRect( iPoint(0,0), iPoint(XSize()-1,YSize()-1) );
-        } else {
-            chunk = _Chunks[chunknum-1];
-            iRect pchunk = _PadChunks[chunknum-1];
-            if (chunk != pchunk) {
-                iPoint p0(chunk.p0()-pchunk.p0());
-                iPoint p1 = p0 + iPoint(chunk.width()-1,chunk.height()-1);
-                img.crop(p0.x(),p0.y(),p1.x(),p1.y());
-            }
-        }
+    template<class T> GeoRaster& GeoRaster::Write(CImg<T> img, iRect chunk) {
         if (Gain() != 1.0 || Offset() != 0.0) {
             cimg_for(img,ptr,T) if (*ptr != NoDataValue()) *ptr = (*ptr-Offset())/Gain();
         }
         if (Options::Verbose() > 3 && (chunk.p0()==iPoint(0,0)))
             std::cout << Basename() << ": Writing (" << Gain() << "x + " << Offset() << ")" << std::endl;
-        /*if (BadValCheck) {
-            cimg_for(img,ptr,T) if ( std::isinf(*ptr) || std::isnan(*ptr) ) *ptr = NoDataValue();
-        }*/
-        return WriteRaw(img,chunk); 
+        return WriteRaw(img,chunk);
     }
 
     //! Process into input band "raster"
@@ -684,12 +643,13 @@ namespace gip {
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
         raster.CopyCoordinateSystem(*this);
-        for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-                CImg<T> cimg = Read<T>(iChunk);
+        ChunkSet chunks(XSize(), YSize());
+        for (unsigned int iChunk=1; iChunk<=chunks.Size(); iChunk++) {
+                CImg<T> cimg = Read<T>(chunks[iChunk]);
                 if (NoDataValue() != raster.NoDataValue()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == NoDataValue()) *ptr = raster.NoDataValue(); }
                 }
-                raster.Write(cimg,iChunk);
+                raster.Write(cimg,chunks[iChunk]);
         }
         return *this;
     }

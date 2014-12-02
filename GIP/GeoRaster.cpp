@@ -27,13 +27,13 @@ namespace gip {
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image)
         : GeoData(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
-            _ValidStats(image._ValidStats), _Stats(image._Stats), //_ValidSize(image._ValidSize),
+            _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {}
 
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image, func f)
         : GeoData(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
-            _ValidStats(image._ValidStats), _Stats(image._Stats), //_ValidSize(image._ValidSize),
+            _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {
         //if (func.Function() != "") AddFunction(func);
         _Functions.push_back(f);
@@ -91,9 +91,10 @@ namespace gip {
         CImg<double> cimg;
         double count(0), total(0), val;
         double min(MaxValue()), max(MinValue());
+        ChunkSet chunks(XSize(),YSize());
 
-        for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-            cimg = Read<double>(iChunk);
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            cimg = Read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != NoDataValue()) {
                     total += *ptr;
@@ -106,8 +107,8 @@ namespace gip {
         float mean = total/count;
         total = 0;
         double total3(0);
-        for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-            cimg = Read<double>(iChunk);
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            cimg = Read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != NoDataValue()) {
                     val = *ptr-mean;
@@ -147,8 +148,9 @@ namespace gip {
         CImg<float> hist(bins,1,1,1,0);
         long numpixels(0);
         float nodata = NoDataValue();
-        for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-            cimg = Read<double>(iChunk);
+        ChunkSet chunks(XSize(),YSize());
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            cimg = Read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nodata) {
                     hist[(unsigned int)( (*ptr-stats(0))*bins / (stats(1)-stats(0)) )]++;
@@ -162,7 +164,7 @@ namespace gip {
         return hist;
     }
 
-    GeoRaster& GeoRaster::ApplyMask(CImg<uint8_t> mask, int chunk) {
+    GeoRaster& GeoRaster::ApplyMask(CImg<uint8_t> mask, iRect chunk) {
         CImg<double> cimg = ReadRaw<double>(chunk);
         if (!mask.is_sameXY(cimg))
             throw std::runtime_error("mask wrong size for chunk " + to_string(chunk));

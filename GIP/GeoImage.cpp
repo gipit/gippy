@@ -14,7 +14,7 @@
 #    GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program. If not, see <http://www.gnu.org/licenses/>
+#   along with this program. If not, see <http://www.g nu.org/licenses/>
 ##############################################################################*/
 
 #include <gip/GeoImage.h>
@@ -129,12 +129,13 @@ namespace gip {
     // Replaces all Inf or NaN pixels with NoDataValue
     GeoImage& GeoImage::FixBadPixels() {
         typedef float T;
+        ChunkSet chunks(XSize(),YSize());
         for (unsigned int b=0;b<NumBands();b++) {
-            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
-                CImg<T> img = (*this)[b].ReadRaw<T>(iChunk);
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+                CImg<T> img = (*this)[b].ReadRaw<T>(chunks[iChunk]);
                 T nodata = (*this)[b].NoDataValue();
                 cimg_for(img,ptr,T) if ( std::isinf(*ptr) || std::isnan(*ptr) ) *ptr = nodata;
-                (*this)[b].WriteRaw(img,iChunk);
+                (*this)[b].WriteRaw(img,chunks[iChunk]);
             }
         }
         return *this;
@@ -149,7 +150,7 @@ namespace gip {
     void GeoImage::LoadBands() {
         vector<unsigned int> bandnums; // = _Options.Bands();
         // Check for subdatasets
-        vector<string> names = this->GetMetaGroup("SUBDATASETS","_NAME=");
+        vector<string> names = this->MetaGroup("SUBDATASETS","_NAME=");
         unsigned int numbands(names.size());
         if (names.empty()) numbands = _GDALDataset->GetRasterCount();
         unsigned int b;
@@ -184,7 +185,6 @@ namespace gip {
             _GDALDataset.reset();
             _GDALDataset = _RasterBands[index]._GDALDataset;
         }
-        Chunk();
     }
 
 } // namespace gip

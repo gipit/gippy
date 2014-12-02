@@ -22,41 +22,51 @@
 
 namespace gip {
     // Constructors
-    GeoResource::GeoResource(string filename = "")
+    GeoResource::GeoResource(string filename)
         : _Filename(filename) {}
 
     GeoResource::GeoResource(const GeoResource& resource)
         : _Filename(resource._Filename) {}
 
-    GeoResource& GeoResource::operator=(const GeoResource% resource) {
+    GeoResource& GeoResource::operator=(const GeoResource& resource) {
         if (this == & resource) return *this;
         _Filename = resource._Filename;
     }
 
     // Info
-    string Filename() const {
+    string GeoResource::Filename() const {
         return _Filename.string();
     }
 
-    string Basename() const {
+    path GeoResource::Path() const {
+        return _Filename;
+    }
+
+    string GeoResource::Basename() const {
         return _Filename.stem().string();
     }
 
     // Geospatial
+    Point<double> GeoResource::GeoLoc(float xloc, float yloc) const {
+        CImg<double> affine = Affine();
+        Point<double> pt(affine[0] + xloc*affine[1] + yloc*affine[2], affine[3] + xloc*affine[4] + yloc*affine[5]);
+        return pt;
+    }
+
     Point<double> GeoResource::TopLeft() const { 
-        return GeoLoc(0,0); 
+        return GeoLoc(0, 0); 
     }
 
     Point<double> GeoResource::LowerLeft() const {
-        return GeoLoc(0,YSize()-1); 
+        return GeoLoc(0, YSize()-1); 
     }
 
     Point<double> GeoResource::TopRight() const { 
-        return GeoLoc(XSize()-1,0;
+        return GeoLoc(XSize()-1, 0);
     }
 
     Point<double> GeoResource::LowerRight() const { 
-        return GeoLoc(XSize()-1,YSize()-1);
+        return GeoLoc(XSize()-1, YSize()-1);
     }
 
     Point<double> GeoResource::MinXY() const {
@@ -80,19 +90,39 @@ namespace gip {
 
     // Metadata
     string GeoResource::Meta(string key) const {
-        const char* item = GDALMajorObject()->GetMetadataItem(key.c_str());
+        const char* item = GDALObject()->GetMetadataItem(key.c_str());
         return (item == NULL) ? "": item;
     }
 
+    // Get metadata group
+    vector<string> GeoResource::MetaGroup(string group, string filter) const {
+        char** meta= GDALObject()->GetMetadata(group.c_str());
+        int num = CSLCount(meta);
+        std::vector<string> items;
+        for (int i=0;i<num; i++) {
+                if (filter != "") {
+                        string md = string(meta[i]);
+                        string::size_type pos = md.find(filter);
+                        if (pos != string::npos) items.push_back(md.substr(pos+filter.length()));
+                } else items.push_back( meta[i] );
+        }
+        return items;
+    }
+
     GeoResource& GeoResource::SetMeta(string key, string item) {
-        GDALMajorObject()->SetMetadataItem(key.c_str(), item.c_str());
+        GDALObject()->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
-    GeoResource& GeoResource::SetMeta(std::map<string, string> item) {
+    GeoResource& GeoResource::SetMeta(std::map<string, string> items) {
         for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
             SetMeta(i->first, i->second);
         }
+        return *this;
+    }
+
+    GeoResource& GeoResource::CopyMeta(const GeoResource& resource) {
+        GDALObject()->SetMetadata(resource.GDALObject()->GetMetadata());
         return *this;
     }
 

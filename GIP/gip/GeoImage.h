@@ -25,6 +25,9 @@
 #include <stdint.h>
 
 namespace gip {
+    using std::vector;
+    using std::string;
+
     // Forward declaration
     class GeoRaster;
 
@@ -213,7 +216,7 @@ namespace gip {
         //! Clear all masks
         void ClearMasks() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ClearMasks(); }
         //! Apply a mask directly to a file
-        GeoImage& ApplyMask(CImg<uint8_t> mask, int chunk=0) {
+        GeoImage& ApplyMask(CImg<uint8_t> mask, iRect chunk=iRect()) {
             for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ApplyMask(mask, chunk);
             return *this;
         }
@@ -231,23 +234,9 @@ namespace gip {
             return *this; 
         }
 
-        //! Break up image into chunks
-        std::vector< Rect<int> > Chunk(unsigned int numchunks=0) const {
-            GeoData::Chunk(numchunks);
-            for (unsigned int b=0;b<NumBands();b++) _RasterBands[b].Chunk(numchunks);
-            return _Chunks;
-        }
-
         //! \name File I/O
         //! Read raw chunk, across all bands
-        template<class T> CImg<T> ReadRaw(int chunknum=0) const {
-            if (chunknum==0)
-                return ReadRaw<T>(iRect(0, 0, XSize(), YSize()));
-            return ReadRaw<T>(_PadChunks[chunknum-1]);
-        }       
-
-
-        template<class T> CImg<T> ReadRaw(iRect chunk) const { //, bool RAW=false) const {
+        template<class T> CImg<T> ReadRaw(iRect chunk=iRect()) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -258,14 +247,7 @@ namespace gip {
         }
 
         //! Read chunk, across all bands
-        template<class T> CImg<T> Read(int chunknum=0) const {
-            if (chunknum==0)
-                return Read<T>( iRect(iPoint(0,0), iPoint(XSize()-1,YSize()-1)) );
-            return Read<T>( _PadChunks[chunknum-1] );
-        }
-
-        //! Read chunk, across all bands
-        template<class T> CImg<T> Read(iRect chunk) const { //, bool RAW=false) const {
+        template<class T> CImg<T> Read(iRect chunk=iRect()) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -276,17 +258,16 @@ namespace gip {
         }
 
         //! Write cube across all bands
-        template<class T> GeoImage& Write(const CImg<T> img, int chunk=0) { //, bool BadValCheck=false) {
+        template<class T> GeoImage& Write(const CImg<T> img, iRect chunk=iRect()) {
             typename std::vector< GeoRaster >::iterator iBand;
             int i(0);
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
-                CImg<T> tmp = img.get_channel(i++);
-                iBand->Write(tmp, chunk); //, BadValCheck);
+                iBand->Write(img.get_channel(i++), chunk);
             }
             return *this;
         }
         // Read Cube as list
-        template<class T> CImgList<T> ReadAsList(int chunk=0) const {
+        template<class T> CImgList<T> ReadAsList(iRect chunk=iRect()) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -296,14 +277,14 @@ namespace gip {
         }
 
         //! Calculate mean, stddev for chunk - must contain data for all bands
-        CImgList<double> SpectralStatistics(int iChunk=0) const {
+        CImgList<double> SpectralStatistics(iRect chunk=iRect()) const {
             CImg<unsigned char> mask;
             CImg<double> band, total, mean;
             unsigned int iBand;
-            mask = DataMask(iChunk);
+            mask = DataMask({}, chunk);
             double nodata = _RasterBands[0].NoDataValue();
             for (iBand=0;iBand<NumBands();iBand++) {
-                band = _RasterBands[iBand].Read<double>(iChunk).mul(mask);
+                band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
                 if (iBand == 0) {
                     total = band;
                 } else {
@@ -312,7 +293,7 @@ namespace gip {
             }
             mean = total / NumBands();
             for (iBand=0;iBand<NumBands();iBand++) {
-                band = _RasterBands[iBand].Read<double>(iChunk).mul(mask);
+                band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
                 if (iBand == 0) {
                     total = (band - mean).pow(2);
                 } else {
@@ -334,10 +315,11 @@ namespace gip {
             CImg<unsigned char> mask;
             CImg<int> totalpixels;
             CImg<double> band, total;
-            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
+            ChunkSet chunks(XSize(),YSize());
+            for (unsigned int iChunk=1; iChunk<=chunks.Size(); iChunk++) {
                 for (unsigned int iBand=0;iBand<NumBands();iBand++) {
-                    mask = _RasterBands[iBand].DataMask(iChunk);
-                    band = _RasterBands[iBand].Read<double>(iChunk).mul(mask);
+                    mask = _RasterBands[iBand].DataMask(chunks[iChunk]);
+                    band = _RasterBands[iBand].Read<double>(chunks[iChunk]).mul(mask);
                     if (iBand == 0) {
                         totalpixels = mask;
                         total = band;
@@ -350,13 +332,13 @@ namespace gip {
                 cimg_for(total,ptr,double) {
                     if (*ptr != *ptr) *ptr = raster.NoDataValue();
                 }
-                raster.Write(total, iChunk);
+                raster.Write(total, chunks[iChunk]);
             }
             return raster;
         }
 
-        //! NoData mask (all bands).  1's where it is nodata
-        CImg<uint8_t> NoDataMask(int chunk=0, std::vector<std::string> bands=std::vector<std::string>()) const {
+        //! NoData mask.  1's where it is nodata
+        CImg<uint8_t> NoDataMask(vector<string> bands, iRect chunk=iRect()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
             for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
@@ -368,13 +350,22 @@ namespace gip {
             return mask;
         }
 
+        // NoData mask (all bands)
+        CImg<uint8_t> NoDataMask(iRect chunk=iRect()) const {
+            return NoDataMask({}, chunk);
+        }
+
         //! Data mask. 1's where valid data
-        CImg<unsigned char> DataMask(int chunk=0, std::vector<std::string> bands=std::vector<std::string>()) const {
-            return NoDataMask(chunk, bands)^=1;
+        CImg<unsigned char> DataMask(vector<string> bands, iRect chunk=iRect()) const {
+            return NoDataMask(bands, chunk)^=1;
+        }
+
+        CImg<unsigned char> DataMask(iRect chunk=iRect()) const {
+            return DataMask({}, chunk);
         }
 
         //! Saturation mask (all bands).  1's where it is saturated
-        CImg<unsigned char> SaturationMask(int chunk=0, std::vector<std::string> bands=std::vector<std::string>()) const {
+        CImg<unsigned char> SaturationMask(vector<string> bands, iRect chunk=iRect()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
             for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
@@ -386,8 +377,12 @@ namespace gip {
             return mask;
         }
 
+        CImg<unsigned char> SaturationMask(iRect chunk=iRect()) const {
+            return SaturationMask({}, chunk);
+        }
+
         //! Whiteness (created from red, green, blue)
-        CImg<float> Whiteness(int chunk=0) const {
+        CImg<float> Whiteness(iRect chunk=iRect()) const {
             // RAW or RADIANCE ?
             CImg<float> red = operator[]("RED").ReadRaw<float>(chunk);
             CImg<float> green = operator[]("GREEN").ReadRaw<float>(chunk);
@@ -402,15 +397,9 @@ namespace gip {
             return white;
         }
 
-        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, int chunknum=0) {
-            if (chunknum==0)
-                return TimeSeries<T>(times, iRect(0, 0, XSize(), YSize()));
-            return TimeSeries<T>(times, this->_PadChunks[chunknum-1]);
-        }
-
         //! Extract, and interpolate, time series (C is time axis)
         // TODO - times can be a fixed datatype CImg
-        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk) {
+        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk=iRect()) {
             CImg<T> cimg = Read<T>(chunk);
             T nodata = _RasterBands[0].NoDataValue();
             if (cimg.spectrum() > 2) {
@@ -448,17 +437,18 @@ namespace gip {
             CImg<unsigned char> cmask;
             CImg<T> cimg;
             long count = 0;
-            for (unsigned int iChunk=1; iChunk<=mask.NumChunks(); iChunk++) {
-                cmask = mask.Read<unsigned char>(iChunk);
+            ChunkSet chunks(XSize(),YSize());
+            for (unsigned int iChunk=0; iChunk<=chunks.Size(); iChunk++) {
+                cmask = mask.Read<unsigned char>(chunks[iChunk]);
                 cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
             }
             CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
             count = 0;
             unsigned int c;
-            for (unsigned int iChunk=1; iChunk<=NumChunks(); iChunk++) {
+            for (unsigned int iChunk=0; iChunk<=chunks.Size(); iChunk++) {
                 if (Options::Verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
-                cimg = Read<T>(iChunk);
-                cmask = mask.Read<unsigned char>(iChunk);
+                cimg = Read<T>(chunks[iChunk]);
+                cmask = mask.Read<unsigned char>(chunks[iChunk]);
                 cimg_forXY(cimg,x,y) {
                     if (cmask(x,y) > 0) {
                         for (c=0;c<NumBands();c++) pixels(count,c+1) = cimg(x,y,c);
@@ -553,9 +543,11 @@ namespace gip {
 
     // GeoImage template function definitions
     template<class T> GeoImage& GeoImage::Process() {
+        // Create chunks
+        ChunkSet chunks(XSize(), YSize());
         for (unsigned int i=0; i<NumBands(); i++) {
-            for (unsigned int iChunk=1; iChunk <= (*this)[i].NumChunks(); iChunk++) {
-                (*this)[i].Write((*this)[i].Read<T>(iChunk),iChunk);
+            for (unsigned int iChunk=0; iChunk <= chunks.Size(); iChunk++) {
+                (*this)[i].Write((*this)[i].Read<T>(chunks[i]),chunks[i]);
             }
         }
         return *this;
