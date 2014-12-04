@@ -97,12 +97,22 @@ gip_module = Extension(
 
 gippy_module = Extension(
     name='_gippy',
-    sources=['gippy.i'],
+    sources=['gippy/gippy.i'],
     swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],
     include_dirs=['GIP', numpy.get_include()],
     libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem'],  # ,'X11'],
     extra_compile_args=['-fPIC', '-std=c++0x'],
 )
+
+test_module = Extension(
+    name='_gippy_tests',
+    sources=['gippy/tests/gippy_tests.i'],
+    swig_opts=['-c++', '-w509', '-IGIP'],
+    include_dirs=['GIP'],
+    libraries=['gip'],
+    extra_compile_args=['-fPIC', '-std=c++0x'],
+)
+
 
 setup(
     name='gippy',
@@ -112,7 +122,7 @@ setup(
     author_email='mhanson@appliedgeosolutions.com',
     license='GPLv2',
     ext_modules=[gip_module, gippy_module],
-    py_modules=['gippy'],
+    py_modules=['gippy'], #, 'gippy.tests'],
     #install_requires = ['numpy'],
     cmdclass={
         "develop": gippy_develop,
