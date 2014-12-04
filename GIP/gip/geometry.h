@@ -251,6 +251,7 @@ namespace gip {
             ChunkUp(chunks.Size());
             return *this;
         }
+        ~ChunkSet() {}
 
         //! Get width of region
         unsigned int XSize() const { return _xsize; }
@@ -272,6 +273,7 @@ namespace gip {
         //! Set padding
         ChunkSet& Padding(unsigned int _pad) {
             _padding = _pad;
+            ChunkUp(_Chunks.size());
             return *this;
         }
 
