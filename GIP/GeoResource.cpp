@@ -29,8 +29,9 @@ namespace gip {
         : _Filename(resource._Filename) {}
 
     GeoResource& GeoResource::operator=(const GeoResource& resource) {
-        if (this == & resource) return *this;
+        if (this == &resource) return *this;
         _Filename = resource._Filename;
+        return *this;
     }
 
     // Info
@@ -86,6 +87,11 @@ namespace gip {
     OGRSpatialReference GeoResource::SRS() const {
         string s(Projection());
         return OGRSpatialReference(s.c_str());
+    }
+
+
+    ChunkSet GeoResource::Chunks(unsigned int padding, unsigned int numchunks) const {
+        return ChunkSet(XSize(), YSize(), padding, numchunks);
     }
 
     // Metadata
