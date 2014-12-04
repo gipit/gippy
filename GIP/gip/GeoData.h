@@ -83,6 +83,10 @@ namespace gip {
         //! Underlying GDALDataset of this file
         boost::shared_ptr<GDALDataset> _GDALDataset;
 
+        GDALMajorObject* GDALObject() const {
+            return _GDALDataset.get();
+        }
+
     }; //class GeoData
 
 } // namespace gip
