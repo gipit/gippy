@@ -55,13 +55,13 @@ namespace gip {
         //! Basename, or short name of filename
         string Basename() const;
         //! Format of resource
-        virtual string Format() const;
+        virtual string Format() const = 0;
 
         //! \name Geospatial information
         //! Width of resource
-        virtual unsigned int XSize() const;
+        virtual unsigned int XSize() const = 0;
         //! Height of resource
-        virtual unsigned int YSize() const;
+        virtual unsigned int YSize() const = 0;
         //! Total size
         unsigned long Size() const { return XSize() * YSize(); }
         //! Geolocated coordinates of a point within the resource
@@ -79,11 +79,13 @@ namespace gip {
         //! Maximum Coordinates of X and Y
         Point<double> MaxXY() const;
         //! Return projection definition in Well Known Text format
-        virtual string Projection() const;
+        virtual string Projection() const = 0;
         //! Return projection as OGRSpatialReference
         OGRSpatialReference SRS() const;
         //! Get Affine transformation
-        virtual CImg<double> Affine() const;
+        virtual CImg<double> Affine() const = 0;
+        //! Get chunkset chunking up image
+        ChunkSet Chunks(unsigned int padding=0, unsigned int numchunks=0) const;
 
         //! \name Metadata functions
         //! Get metadata item
@@ -102,7 +104,7 @@ namespace gip {
         boost::filesystem::path _Filename;
 
         //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
-        virtual GDALMajorObject* GDALObject() const;
+        virtual GDALMajorObject* GDALObject() const = 0;
 
     }; // class GeoResource
 } // namespace gip
