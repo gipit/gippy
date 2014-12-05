@@ -24,7 +24,7 @@
 
 namespace gip {
 
-	GeoImage test_chunking();
+	GeoImage test_chunking(int=0, int=100);
 
 
 } // namespace gip
