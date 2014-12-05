@@ -17,6 +17,7 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ##############################################################################*/
 %module tests
+
 %feature("autodoc", "1");
 %{
     #define SWIG_FILE_WITH_INIT
@@ -25,4 +26,7 @@
     using namespace gip;
 %}
 
+%include "core.i"
 %include "gip/tests.h"
+
+
