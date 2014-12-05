@@ -23,11 +23,11 @@ setup for GIP and gippy
 
 import os
 import glob
-from setuptools import setup, Extension
-from setuptools.extension import Library
+from setuptools import setup, Extension, find_packages
+#from setuptools.extension import Library
 from setuptools.command.install import install
 from setuptools.command.develop import develop
-from setuptools.command.bdist_egg import bdist_egg
+#from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
 
@@ -35,7 +35,7 @@ __version__ = '1.1.0a1'
 
 
 def add_reg(filename):
-    # Have GDAL register file formats on import and add version info
+    """ Add gdal init function and version to the SWIG generated module file """
     f = open(filename, 'a')
     f.write('gip_gdalinit()\n')
     f.write("__version__='%s'\n" % __version__)
@@ -45,27 +45,30 @@ def add_reg(filename):
 class gippy_build_ext(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)
-        gippy_module.library_dirs.append(self.build_lib)
+        gippy_module.library_dirs.append(os.path.join(self.build_lib, os.path.dirname(gippy_module.name)))
+        test_module.library_dirs.append(os.path.join(self.build_lib, os.path.dirname(test_module.name)))
 
 
-class gippy_bdist_egg(bdist_egg):
-    def run(self):
-        self.distribution.ext_modules = [gip_module_static, gippy_module]
-        self.run_command('build_ext')
-        add_reg('gippy.py')
-        bdist_egg.run(self)
+#class gippy_bdist_egg(bdist_egg):
+#    def run(self):
+#        self.distribution.ext_modules = [gip_module_static, gippy_module]
+#        self.run_command('build_ext')
+#        add_reg('gippy/gippy.py')
+#        bdist_egg.run(self)
 
 
 class gippy_install(install):
     def finalize_options(self):
         install.finalize_options(self)
-        gippy_module.runtime_library_dirs.append(self.install_lib)
+        gdir = os.path.dirname(gippy_module.name)
+        gippy_module.runtime_library_dirs.append(os.path.join(self.install_lib, gdir))
+        test_module.runtime_library_dirs.append(os.path.join(self.install_lib, gdir))
 
     def run(self):
         # ensure swig extension built before packaging
         self.run_command('build_ext')
         install.run(self)
-        add_reg(os.path.join(self.install_lib, 'gippy.py'))
+        add_reg(os.path.join(self.install_lib, os.path.dirname(gippy_module.name), 'gippy.py'))
 
 
 class gippy_develop(develop):
@@ -75,59 +78,69 @@ class gippy_develop(develop):
 
     def run(self):
         develop.run(self)
-        add_reg('gippy.py')
+        add_reg(os.path.join(os.path.dirname(gippy_module.name), 'gippy.py'))
 
 # Static library
-gip_module_static = Library(
-    name='gip',
-    sources=glob.glob('GIP/*.cpp'),
-    include_dirs=['GIP'],
-    language='c++',
-    extra_compile_args=['-std=c++0x', '-O3'],
-)
+#gip_module_static = Library(
+#    name='gip',
+#    sources=glob.glob('GIP/*.cpp'),
+#    include_dirs=['GIP'],
+#    language='c++',
+#    extra_compile_args=['-std=c++0x', '-O3'],
+#)
 
 # Dynamic shared library
 gip_module = Extension(
-    name='libgip',
+    name='gippy/libgip',
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP'],
     language='c++',
     extra_compile_args=['-std=c++0x', '-O3'],
 )
 
+swig_opts = ['-c++', '-w509', '-IGIP']  # '-keyword'],
+libraries = ['gip', 'gdal', 'boost_system', 'boost_filesystem']  # ,'X11'],
+extra_compile_args = ['-fPIC', '-std=c++0x']
+
+# Python bindings to core libgip
+dirname = 'gippy'
 gippy_module = Extension(
-    name='_gippy',
-    sources=['gippy/gippy.i'],
-    swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],
+    name=os.path.join(dirname, '_gippy'),
+    sources=[os.path.join(dirname, 'gippy.i')],
+    swig_opts=swig_opts,
     include_dirs=['GIP', numpy.get_include()],
-    libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem'],  # ,'X11'],
-    extra_compile_args=['-fPIC', '-std=c++0x'],
+    libraries=libraries,
+    extra_compile_args=extra_compile_args,
 )
 
+# Python bindings to test functions
+#dirname = 'gippy/tests'
 test_module = Extension(
-    name='_gippy_tests',
-    sources=['gippy/tests/gippy_tests.i'],
-    swig_opts=['-c++', '-w509', '-IGIP'],
+    name=os.path.join(dirname, '_tests'),
+    sources=[os.path.join(dirname, 'tests.i')],
+    swig_opts=swig_opts,
     include_dirs=['GIP'],
-    libraries=['gip'],
-    extra_compile_args=['-fPIC', '-std=c++0x'],
+    libraries=libraries,
+    extra_compile_args=extra_compile_args,
 )
-
 
 setup(
     name='gippy',
     version=__version__,
     description='Geospatial Image Processing for Python',
     author='Matthew Hanson',
-    author_email='mhanson@appliedgeosolutions.com',
+    author_email='matt.a.hanson@gmail.com',
     license='GPLv2',
-    ext_modules=[gip_module, gippy_module],
-    py_modules=['gippy'], #, 'gippy.tests'],
+    ext_modules=[gip_module, gippy_module, test_module],
+    packages=find_packages(),
+    #packages=['gippy', 'gippy.tests'],
+    #package_dir={'gippy': 'gippy'},
+    py_modules=['gippy', 'gippy.tests'],
     #install_requires = ['numpy'],
     cmdclass={
         "develop": gippy_develop,
         "install": gippy_install,
-        "bdist_egg": gippy_bdist_egg,
+        #"bdist_egg": gippy_bdist_egg,
         "build_ext": gippy_build_ext,
     }
 )

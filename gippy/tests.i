@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-##############################################################################
+/*##############################################################################
 #    GIPPY: Geospatial Image Processing library for Python
 #
 #    Copyright (C) 2014 Matthew A Hanson
@@ -16,5 +15,14 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
-##############################################################################
-from gippy_tests import *
+##############################################################################*/
+%module tests
+%feature("autodoc", "1");
+%{
+    #define SWIG_FILE_WITH_INIT
+    #include <gip/tests.h>
+
+    using namespace gip;
+%}
+
+%include "gip/tests.h"
