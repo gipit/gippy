@@ -28,10 +28,10 @@
 #include <CImg_152.h>
 #include <iostream>
 
-namespace gip {
+using cimg_library::CImg;
+using cimg_library::CImgList;
 
-    using cimg_library::CImg;
-    using cimg_library::CImgList;
+namespace gip {
 
     template<typename T> inline void cimg_printclasses(cimg_library::CImg<T> img, std::string prefix="Class") {
         for (int i=0; i<img.height(); i++) {
