@@ -33,7 +33,7 @@ There are a few dependencies that must be installed first. These notes are for U
     $ sudo apt-get update
 
     2) Installed required dependencies
-    $ sudo apt-get install python-setuptools python-numpy python-gdal g++ libgdal1-dev gdal-bin libboost-dev swig2.0 swig
+    $ sudo apt-get install python-dev python-setuptools python-numpy python-gdal g++ libgdal1-dev gdal-bin libboost-all-dev swig2.0 swig
 
     3) Install GIPPY (sudo not required if installing to virtual environment)
     $ sudo pip install gippy
