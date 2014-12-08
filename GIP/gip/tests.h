@@ -26,6 +26,22 @@ namespace gip {
 
 	GeoImage test_chunking(int=0, int=100);
 
+    /*template<class T> CImg<T> _test(CImg<T> cimg) {
+        //std::cout << "GIPPY CImg input/output test" << std::endl;
+        //std::cout << "typeid = " << typeid(T) << std::endl;
+        cimg_printinfo(cimg);
+        cimg_printstats(cimg);
+        cimg_print(cimg);
+        return cimg;
+    }
+    template<class T> CImg<T> _testuc(CImg<unsigned char> cimg) {
+        //std::cout << "GIPPY CImg input/output test" << std::endl;
+        //std::cout << "typeid = " << typeid(T) << std::endl;
+        cimg_printinfo(cimg);
+        cimg_printstats(cimg);
+        cimg_print(cimg);
+        return cimg;
+    }*/
 
 } // namespace gip
 

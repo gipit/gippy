@@ -25,23 +25,6 @@
 #include <initializer_list>
 
 namespace gip {
-    /*template<class T> CImg<T> _test(CImg<T> cimg) {
-        //std::cout << "GIPPY CImg input/output test" << std::endl;
-        //std::cout << "typeid = " << typeid(T) << std::endl;
-        cimg_printinfo(cimg);
-        cimg_printstats(cimg);
-        cimg_print(cimg);
-        return cimg;
-    }
-    template<class T> CImg<T> _testuc(CImg<unsigned char> cimg) {
-        //std::cout << "GIPPY CImg input/output test" << std::endl;
-        //std::cout << "typeid = " << typeid(T) << std::endl;
-        cimg_printinfo(cimg);
-        cimg_printstats(cimg);
-        cimg_print(cimg);
-        return cimg;
-    }*/
-
     //! Create cloudmask using ACCA
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
