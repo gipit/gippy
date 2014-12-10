@@ -35,7 +35,10 @@ There are a few dependencies that must be installed first. These notes are for U
     2) Installed required dependencies
     $ sudo apt-get install python-dev python-setuptools python-numpy python-gdal g++ libgdal1-dev gdal-bin libboost-all-dev swig2.0 swig
 
-    3) Install GIPPY (sudo not required if installing to virtual environment)
+    3) Install pip (if not installed)
+    $ sudo easy_install pip
+
+    4) Install GIPPY (sudo not required if installing to virtual environment)
     $ sudo pip install gippy
     -or-
     $ git clone http://github.com/matthewhanson/gippy.git
