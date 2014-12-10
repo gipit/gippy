@@ -16,6 +16,14 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ################################################################################
+v1.1.0b1
+- Added test framework
+- Separated into python modules: gippy (core), gippy.tests, gippy.algorithms
+- Cleaned up setup to use single 'gippy' distro directory
+- Refactored: new base class GeoResource (linked to GDALMajorObject)
+- Chunking code moved from GeoData to new ChunkSet class
+- Removed 'chunking by chunk index' feature (poor implementation made it error prone)
+
 v1.0.4
 - Added Affine to get affine transformation for SRS
 - Python bindings now correctly handling Point data type (returned as tuple)
