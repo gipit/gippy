@@ -30,15 +30,13 @@ from setuptools.command.develop import develop
 #from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
-
-__version__ = '1.1.0a1'
+from gippy.version import __version__
 
 
 def add_reg(filename):
     """ Add gdal init function and version to the SWIG generated module file """
     f = open(filename, 'a')
     f.write('gip_gdalinit()\n')
-    f.write("__version__='%s'\n" % __version__)
     f.close()
 
 
