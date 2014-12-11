@@ -45,7 +45,7 @@ namespace gip {
         //! Assignment copy
         GeoResource& operator=(const GeoResource&);
         //! Destructor
-        virtual ~GeoResource() = 0;
+        virtual ~GeoResource() {}
 
         //! \name Resource Information
         //! Get the filename of the resource
