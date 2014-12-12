@@ -640,13 +640,14 @@ namespace gip {
     template<class T> GeoRaster& GeoRaster::Process(GeoRaster& raster) {
         GDALRasterBand* band = raster.GetGDALRasterBand();
         raster.CopyCategoryNames(*this);
-
         band->SetDescription(_GDALRasterBand->GetDescription());
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
         raster.CopyCoordinateSystem(*this);
         ChunkSet chunks(XSize(), YSize());
-        for (unsigned int iChunk=1; iChunk<=chunks.Size(); iChunk++) {
+        if (Options::Verbose() > 3)
+            std::cout << Basename() << ": Processing in " << chunks.Size() << " chunks" << std::endl;
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 CImg<T> cimg = Read<T>(chunks[iChunk]);
                 if (NoDataValue() != raster.NoDataValue()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == NoDataValue()) *ptr = raster.NoDataValue(); }
