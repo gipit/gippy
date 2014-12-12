@@ -57,10 +57,14 @@
     // Convert numpy array into CImg
     template<typename T> CImg<T> ArrToCImg(PyObject* obj) {
         PyArrayObject* arr = (PyArrayObject*)obj;
-        if (((PyArrayObject*)arr)->nd == 1) {
+        if (arr->nd == 1) {
             return CImg<T>((T*)arr->data, arr->dimensions[0]);
         } else if (arr->nd == 2) {
             return CImg<T>((T*)arr->data, arr->dimensions[1], arr->dimensions[0]);
+        } else if (arr->nd == 3) {
+            return CImg<T>((T*)arr->data, arr->dimensions[2], arr->dimensions[1], arr->dimensions[0]);
+        } else if (arr->nd == 4) {
+            return CImg<T>((T*)arr->data, arr->dimensions[3], arr->dimensions[2], arr->dimensions[1], arr->dimensions[0]);
         } else {
             throw(std::exception());
         }
