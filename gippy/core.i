@@ -208,6 +208,23 @@ namespace gip {
             }
             return CImgToArr(self->Read<float>(chunk));
         }
+        GeoImage& Write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
+            PyArrayObject* arr = (PyArrayObject*)obj;
+            switch(arr->descr->type_num) {
+                case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
+                case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(obj), chunk); break;
+                case NPY_INT16: self->Write(ArrToCImg<short>(obj), chunk); break;
+                case NPY_UINT32: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT32: self->Write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_UINT64: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT64: self->Write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_FLOAT32: self->Write(ArrToCImg<float>(obj), chunk); break;
+                case NPY_FLOAT64: self->Write(ArrToCImg<double>(obj), chunk); break;
+                default:
+                    throw(std::exception());
+            }
+            return *self;
+        }
     }
 
 }
