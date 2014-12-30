@@ -87,9 +87,6 @@ namespace gip {
             return *this;
         }
 
-        //! Copy coordinate system
-        GeoData& CopyCoordinateSystem(const GeoData&);
-
     protected:
         //! Underlying GDALDataset of this file
         boost::shared_ptr<GDALDataset> _GDALDataset;

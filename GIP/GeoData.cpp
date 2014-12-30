@@ -99,14 +99,4 @@ namespace gip {
         }
     }
 
-    // Copy coordinate system from another image
-    GeoData& GeoData::CopyCoordinateSystem(const GeoData& img) {
-        GDALDataset* ds = const_cast<GeoData&>(img)._GDALDataset.get();
-        _GDALDataset->SetProjection(ds->GetProjectionRef());
-        double Affine[6];
-        ds->GetGeoTransform(Affine);
-        _GDALDataset->SetGeoTransform(Affine);
-        return *this;
-    }
-
 } // namespace gip

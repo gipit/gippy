@@ -88,6 +88,14 @@ namespace gip {
         virtual CImg<double> Affine() const = 0;
         //! Set Affine transformation
         virtual GeoResource& SetAffine(CImg<double>) = 0;
+        //! Set coordinate system from another GeoResource
+        GeoResource& SetCoordinateSystem(const GeoResource& res);
+        //! Copy coordinate system
+        GeoResource& CopyCoordinateSystem(const GeoResource& res) {
+            std::cerr << "GIPPY Deprecation Warning: Use SetCoordinateSystem instead of CopyCoordinateSystem" << std::endl;
+            return SetCoordinateSystem(res);
+        }
+
         //! Get chunkset chunking up image
         ChunkSet Chunks(unsigned int padding=0, unsigned int numchunks=0) const;
 

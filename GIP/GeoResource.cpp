@@ -89,6 +89,11 @@ namespace gip {
         return OGRSpatialReference(s.c_str());
     }
 
+    GeoResource& SetCoordinateSystem(const GeoResource& res) {
+        SetProjection(res.Projection());
+        SetAffine(res.Affine());
+        return *this;
+    }
 
     ChunkSet GeoResource::Chunks(unsigned int padding, unsigned int numchunks) const {
         return ChunkSet(XSize(), YSize(), padding, numchunks);
