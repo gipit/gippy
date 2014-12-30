@@ -70,10 +70,21 @@ namespace gip {
         string Projection() const {
             return _GDALDataset->GetProjectionRef();
         }
+        //! Set projection
+        GeoResource& SetProjection(string proj) {
+            _GDALDataset->SetProjection(proj.c_str());
+            return *this;
+        }
+        //! Get affine
         CImg<double> Affine() const {
             double affine[6];
             _GDALDataset->GetGeoTransform(affine);
             return CImg<double>(&affine[0], 6);
+        }
+        //! Set affine
+        GeoResource& SetAffine(CImg<double> affine) {
+            _GDALDataset->SetGeoTransform(affine.data());
+            return *this;
         }
 
         //! Copy coordinate system

@@ -80,10 +80,14 @@ namespace gip {
         Point<double> MaxXY() const;
         //! Return projection definition in Well Known Text format
         virtual string Projection() const = 0;
+        //! Set projection definition in Well Known Text format
+        virtual GeoResource& SetProjection(string) = 0;
         //! Return projection as OGRSpatialReference
         OGRSpatialReference SRS() const;
         //! Get Affine transformation
         virtual CImg<double> Affine() const = 0;
+        //! Set Affine transformation
+        virtual GeoResource& SetAffine(CImg<double>) = 0;
         //! Get chunkset chunking up image
         ChunkSet Chunks(unsigned int padding=0, unsigned int numchunks=0) const;
 
