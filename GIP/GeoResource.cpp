@@ -89,7 +89,7 @@ namespace gip {
         return OGRSpatialReference(s.c_str());
     }
 
-    GeoResource& SetCoordinateSystem(const GeoResource& res) {
+    GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
         SetProjection(res.Projection());
         SetAffine(res.Affine());
         return *this;
