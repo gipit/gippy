@@ -36,7 +36,7 @@
         else if (typeid(T) == typeid(int64_t)) typenum = NPY_INT64;
         else if (typeid(T) == typeid(float)) typenum = NPY_FLOAT32;
         else if (typeid(T) == typeid(double)) typenum = NPY_FLOAT64;
-        else throw(std::exception());
+        else throw(std::runtime_error("Error converting CImg to numpy array"));
 
         npy_intp dims[] = { cimg.spectrum(), cimg.depth(), cimg.height(), cimg.width() };
         PyObject* arr;
@@ -66,7 +66,7 @@
         } else if (arr->nd == 4) {
             return CImg<T>((T*)arr->data, arr->dimensions[3], arr->dimensions[2], arr->dimensions[1], arr->dimensions[0]);
         } else {
-            throw(std::exception());
+            throw(std::runtime_error("Error converting numpy array to CImg"));
         }
     }
 
@@ -80,7 +80,7 @@
         else if (typeid(T) == typeid(int)) typenum = NPY_INT32;
         else if (typeid(T) == typeid(float)) typenum = NPY_FLOAT32;
         else if (typeid(T) == typeid(double)) typenum = NPY_FLOAT64;
-        else throw(std::exception());
+        else throw(std::runtime_error());
         return typenum;
     }*/
     //std::vector<int> test_vectori() { return {1,2,3,4,5}; }
