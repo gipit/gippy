@@ -317,10 +317,10 @@ namespace gip {
         for (unsigned int b=0;b<bsz;b++) imgout[b].CopyMeta(imgs[0][b]);
 
         // Add additional metadata
-        for (vector<std::string>::const_iterator i=imgnames.begin(); i!= imgnames.end(); i++) {
-            metadata["SourceFiles"] = metadata["SourceFiles"] + " " + *i;
-        }
-        metadata["Interpolation"] = interpolation;
+        string sourcefiles("");
+        for (unsigned int i=0; i<imgs.size(); i++) sourcefiles = sourcefiles + " " + imgs[i].Basename();
+        metadata["SourceFiles"] = sourcefiles;
+        if (interpolation > 1) metadata["Interpolation"] = interpolation;
         imgout.SetMeta(metadata);
 
         double affine[6];
