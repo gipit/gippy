@@ -266,7 +266,7 @@ namespace gip {
 
     //! Merge images into one file and crop to vector
     GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, 
-            float xres, float yres, bool crop, dictionary metadata) {
+            float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         // TODO - pass in vector of GeoRaster's instead
         if (Options::Verbose() > 1)
             cout << "GIPPY: CookieCutter (" << imgnames.size() << " files) - " << filename << endl;
@@ -315,6 +315,12 @@ namespace gip {
         imgout.CopyMeta(imgs[0]);
         imgout.CopyColorTable(imgs[0]);
         for (unsigned int b=0;b<bsz;b++) imgout[b].CopyMeta(imgs[0][b]);
+
+        // Add additional metadata
+        for (vector<std::string>::const_iterator i=imgnames.begin(); i!= imgnames.end(); i++) {
+            metadata["SourceFiles"] = metadata["SourceFiles"] + " " + *i;
+        }
+        metadata["Interpolation"] = interpolation;
         imgout.SetMeta(metadata);
 
         double affine[6];
@@ -373,6 +379,13 @@ namespace gip {
             psWarpOptions->padfDstNoDataImag[b] = 0.0;
         }
         psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
+        switch (interpolation) {
+            case 1: psWarpOptions->eResampleAlg = GRA_Bilinear;
+                break;
+            case 2: psWarpOptions->eResampleAlg = GRA_Cubic;
+                break;
+            default: psWarpOptions->eResampleAlg = GRA_NearestNeighbour;
+        }
         if (Options::Verbose() > 2)
             psWarpOptions->pfnProgress = GDALTermProgress;
         else psWarpOptions->pfnProgress = GDALDummyProgress;
