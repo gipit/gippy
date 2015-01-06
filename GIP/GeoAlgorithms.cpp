@@ -320,7 +320,7 @@ namespace gip {
         string sourcefiles("");
         for (unsigned int i=0; i<imgs.size(); i++) sourcefiles = sourcefiles + " " + imgs[i].Basename();
         metadata["SourceFiles"] = sourcefiles;
-        if (interpolation > 1) metadata["Interpolation"] = interpolation;
+        if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
         imgout.SetMeta(metadata);
 
         double affine[6];
