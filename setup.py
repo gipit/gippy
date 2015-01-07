@@ -58,6 +58,7 @@ class gippy_install(install):
     def finalize_options(self):
         install.finalize_options(self)
         for m in modules:
+            print 'module', m, os.path.join(self.install_lib, os.path.dirname(m.name))
             m.runtime_library_dirs.append(os.path.join(self.install_lib, os.path.dirname(m.name)))
 
     def run(self):
@@ -121,7 +122,7 @@ setup(
     packages=find_packages(),
     #packages=['gippy', 'gippy.tests'],
     #package_dir={'gippy': 'gippy'},
-    py_modules=['gippy', 'gippy.tests'],
+    #py_modules=['gippy', 'gippy.tests'],
     #install_requires = ['numpy'],
     cmdclass={
         "develop": gippy_develop,
