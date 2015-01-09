@@ -643,7 +643,7 @@ namespace gip {
         band->SetDescription(_GDALRasterBand->GetDescription());
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
-        raster.CopyCoordinateSystem(*this);
+        raster.SetCoordinateSystem(*this);
         ChunkSet chunks(XSize(), YSize());
         if (Options::Verbose() > 3)
             std::cout << Basename() << ": Processing in " << chunks.Size() << " chunks" << std::endl;

@@ -59,7 +59,7 @@ namespace gip {
             GeoData(image.XSize(), image.YSize(), bsz, datatype, filename) {
             //if (datatype == GDT_Unknown) datatype = image->GetDataType();
             //CopyMeta(image);
-            CopyCoordinateSystem(image);
+            SetCoordinateSystem(image);
             LoadBands();
         }
         //! Constructor for creating new file with same properties (xsize, ysize, bsize) as existing file
@@ -67,7 +67,7 @@ namespace gip {
             GeoData(image.XSize(), image.YSize(), image.NumBands(), datatype, filename) {
             //if (datatype == GDT_Unknown) datatype = image->GetDataType();
             //CopyMeta(image);
-            CopyCoordinateSystem(image);
+            SetCoordinateSystem(image);
             LoadBands();
         }
         //! Constructor for creating new file with given properties (xsize, ysize, bsize,datatype) as existing file
@@ -75,7 +75,7 @@ namespace gip {
             GeoData(image.XSize(), image.YSize(), image.NumBands(), image.DataType(), filename) {
             //if (datatype == GDT_Unknown) datatype = image->GetDataType();
             //CopyMeta(image);
-            CopyCoordinateSystem(image);
+            SetCoordinateSystem(image);
             LoadBands();
         }
 
