@@ -797,6 +797,36 @@ namespace gip {
         return imgout;
     }
 
+    //! Runs the RX Detector (RXD) anamoly detection algorithm
+    GeoImage RXD(const GeoImage& img, string filename) {
+        if (img.NumBands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
+
+        GeoImage imgout(filename, img, GDT_Byte, 1);
+        imgout.SetBandName("RXD", 1);
+
+        CImg<double> covariance = SpectralCovariance(img);
+        CImg<double> K = covariance.invert();
+        CImg<double> chip, chipout, pixel;
+
+        // Calculate band means
+        CImg<double> bandmeans(img.NumBands());
+        cimg_forX(bandmeans, x) {
+            bandmeans(x) = img[x].Stats()[2];
+        }
+
+        ChunkSet chunks(img.XSize(),img.YSize());
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            chip = img.Read<double>(chunks[iChunk]);
+            chipout = CImg<double>(chip, "xyzc");
+            cimg_forXY(chip,x,y) {
+                pixel = chip.get_crop(x,y,0,0,x,y,0,chip.spectrum()-1).unroll('x') - bandmeans;
+                chipout(x,y) = (pixel * K.get_transpose() * pixel.get_transpose())[0];
+            }
+            imgout[0].Write(chipout, chunks[iChunk]);
+        }
+        return imgout;
+    }
+
     //! Calculate spectral statistics and output to new image
     GeoImage SpectralStatistics(const GeoImage& img, string filename) {
         if (img.NumBands() < 2) {
@@ -834,8 +864,7 @@ namespace gip {
         return output;
     }*/
 
-    /*
-    CImg<double> SpectralCorrelation(const GeoImage& image, CImg<double> covariance) {
+    /*CImg<double> SpectralCorrelation(const GeoImage& image, CImg<double> covariance) {
         // Correlation matrix
         if (covariance.size() == 0) covariance = SpectralCovariance(image);
 
@@ -865,56 +894,49 @@ namespace gip {
         return Correlation;
     }*/
 
-    /*CImg<double> SpectralCovariance(const GeoImage& image) {
-        typedef double T;
+    //! Calculates spectral covariance of image
+    CImg<double> SpectralCovariance(const GeoImage& img) {
+        unsigned int NumBands(img.NumBands());
 
-        GeoImageIO<T> img(image);
-
-        unsigned int NumBands(image.NumBands());
-        CImg<double> Covariance(NumBands, NumBands);
-
-        // Calculate Covariance
-        vector<bbox> Chunks = image.Chunk();
-        vector<bbox>::const_iterator iChunk;
-        CImg<T> bandchunk;
+        CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;        
         CImg<unsigned char> mask;
-        for (iChunk=Chunks.begin(); iChunk!=Chunks.end(); iChunk++) {
-            int chunksize = boost::geometry::area(*iChunk);
-            CImg<T> matrixchunk(NumBands, chunksize);
-            mask = img.NoDataMask(*iChunk);
-            int validsize = mask.size() - mask.sum();
+        int validsize;
+
+        ChunkSet chunks = img.Chunks();
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            // Bands x NumPixels
+            matrixchunk = CImg<double>(NumBands, chunks[iChunk].area(),1,1,0);
+            mask = img.NoDataMask(chunks[iChunk]);
+            validsize = mask.size() - mask.sum();
 
             int p(0);
             for (unsigned int b=0;b<NumBands;b++) {
-                cout << "band" << b << endl;
-                CImg<T> bandchunk( img[b].Read(*iChunk) );
+                bandchunk = img[b].Read<double>(chunks[iChunk]);
                 p = 0;
                 cimg_forXY(bandchunk,x,y) {
                     if (mask(x,y)==0) matrixchunk(b,p++) = bandchunk(x,y);
                 }
-                //cout << "p = " << matrixchunk[p-1] << endl;
             }
-            if (p != (int)image.Size()) matrixchunk.crop(0,0,NumBands-1,p-1);
-            Covariance += (matrixchunk.get_transpose() * matrixchunk)/(validsize-1);
+            if (p != (int)img.Size()) matrixchunk.crop(0,0,NumBands-1,p-1);
+            covariance += (matrixchunk.get_transpose() * matrixchunk)/(validsize-1);
         }
-        cout << "done cov" << endl;
         // Subtract Mean
         CImg<double> means(NumBands);
-        for (unsigned int b=0; b<NumBands; b++) means(b) = image[b].Mean(); //cout << "Mean b" << b << " = " << means(b) << endl; }
-        Covariance -= (means.get_transpose() * means);
+        for (unsigned int b=0; b<NumBands; b++) means(b) = img[b].Stats()[2]; //cout << "Mean b" << b << " = " << means(b) << endl; }
+        covariance -= (means.get_transpose() * means);
 
-        if (Options::Verbose() > 0) {
-            cout << image.Basename() << " Spectral Covariance Matrix:" << endl;
-            cimg_forY(Covariance,y) {
+        if (Options::Verbose() > 2) {
+            cout << img.Basename() << " Spectral Covariance Matrix:" << endl;
+            cimg_forY(covariance,y) {
                 cout << "\t";
-                cimg_forX(Covariance,x) {
-                    cout << std::setw(18) << Covariance(x,y);
+                cimg_forX(covariance,x) {
+                    cout << std::setw(18) << covariance(x,y);
                 }
                 cout << endl;
             }
         }
-        return Covariance;
-    }*/
+        return covariance;
+    }
 
 
 } // namespace gip

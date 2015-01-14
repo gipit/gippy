@@ -45,10 +45,13 @@ namespace gip {
     dictionary Indices(const GeoImage&, dictionary, dictionary=dictionary());
 
     //! Create output based on linear combinations of input
-    GeoImage LinearTransform(const GeoImage&, std::string filename, CImg<float> coef);
+    GeoImage LinearTransform(const GeoImage&, std::string, CImg<float>);
+
+    //! Runs the RX Detector (RXD) anamoly detection algorithm
+    GeoImage RXD(const GeoImage&, string);
 
     //! Calculate spectral statistics and output to new image
-    GeoImage SpectralStatistics(const GeoImage&, std::string filename);
+    GeoImage SpectralStatistics(const GeoImage&, std::string);
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);
@@ -57,7 +60,7 @@ namespace gip {
     //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
     //! Calculate spectral covariance
-    //CImg<double> SpectralCovariance(const GeoImage&);
+    CImg<double> SpectralCovariance(const GeoImage&);
 
 } // namespace gip
 
