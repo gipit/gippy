@@ -89,6 +89,11 @@ namespace gip {
         return OGRSpatialReference(s.c_str());
     }
 
+    Point<double> GeoResource::Resolution() const {
+        CImg<double> affine = Affine();
+        return Point<double>(affine[1], affine[5]);
+    }
+
     GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
         SetProjection(res.Projection());
         SetAffine(res.Affine());

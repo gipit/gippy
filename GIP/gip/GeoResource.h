@@ -88,6 +88,8 @@ namespace gip {
         virtual CImg<double> Affine() const = 0;
         //! Set Affine transformation
         virtual GeoResource& SetAffine(CImg<double>) = 0;
+        //! Get resolution convenience function
+        Point<double> Resolution() const;
         //! Set coordinate system from another GeoResource
         GeoResource& SetCoordinateSystem(const GeoResource& res);
         //! Copy coordinate system
