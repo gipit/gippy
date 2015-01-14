@@ -438,7 +438,7 @@ namespace gip {
             CImg<T> cimg;
             long count = 0;
             ChunkSet chunks(XSize(),YSize());
-            for (unsigned int iChunk=0; iChunk<=chunks.Size(); iChunk++) {
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 cmask = mask.Read<unsigned char>(chunks[iChunk]);
                 cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
             }
