@@ -26,8 +26,9 @@ namespace gip {
     class GeoExtent {
     public:
         //! \name Constructors
-        //! Default constructor
-        GeoExtent() {}
+        //! Constructor requires a GeoResource
+        GeoExtent(GeoResource* resource) 
+            : _GeoResource(resource) {}
         //! Destructor
         ~GeoExtent() {}
 
@@ -54,6 +55,9 @@ namespace gip {
         virtual CImg<double> Affine() const = 0;
 
     protected:
+
+    private:
+        GeoResource* _GeoResource;
 
     } // class GeoExtent
 
