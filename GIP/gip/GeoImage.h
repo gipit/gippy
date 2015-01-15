@@ -316,7 +316,7 @@ namespace gip {
             CImg<int> totalpixels;
             CImg<double> band, total;
             ChunkSet chunks(XSize(),YSize());
-            for (unsigned int iChunk=1; iChunk<=chunks.Size(); iChunk++) {
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 for (unsigned int iBand=0;iBand<NumBands();iBand++) {
                     mask = _RasterBands[iBand].DataMask(chunks[iChunk]);
                     band = _RasterBands[iBand].Read<double>(chunks[iChunk]).mul(mask);
@@ -445,7 +445,7 @@ namespace gip {
             CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
             count = 0;
             unsigned int c;
-            for (unsigned int iChunk=0; iChunk<=chunks.Size(); iChunk++) {
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 if (Options::Verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
                 cimg = Read<T>(chunks[iChunk]);
                 cmask = mask.Read<unsigned char>(chunks[iChunk]);
@@ -546,7 +546,7 @@ namespace gip {
         // Create chunks
         ChunkSet chunks(XSize(), YSize());
         for (unsigned int i=0; i<NumBands(); i++) {
-            for (unsigned int iChunk=0; iChunk <= chunks.Size(); iChunk++) {
+            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 (*this)[i].Write((*this)[i].Read<T>(chunks[i]),chunks[i]);
             }
         }
