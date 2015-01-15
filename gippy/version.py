@@ -17,4 +17,4 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 ##############################################################################
-__version__ = '1.1.0b5'
+__version__ = '1.1.0b6'

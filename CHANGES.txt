@@ -24,6 +24,8 @@ v1.1.0
 - Chunking code moved from GeoData to new ChunkSet class
 - Removed 'chunking by chunk index' feature (poor implementation made it error prone)
 - Added interpolation option to CookieCutter
+- Added Resolution convenience function to GeoResource (gets resolution from Affine)
+- Added SpectralCovariance and RXD (RX Anomoly detector) to algorithms
 
 v1.0.4
 - Added Affine to get affine transformation for SRS
