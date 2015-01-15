@@ -43,7 +43,12 @@
         int numdim = 4;
         if (cimg.spectrum() == 1) {
             numdim = 3;
-            if (cimg.depth() == 1) numdim=2;
+            if (cimg.depth() == 1) {
+                numdim=2;
+                if (cimg.height() == 1) {
+                    numdim=1;
+                }
+            }
         }
         arr = PyArray_SimpleNew(numdim, &dims[4-numdim], typenum);
         //if (dims[0] == 1)
