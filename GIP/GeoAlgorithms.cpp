@@ -331,8 +331,8 @@ namespace gip {
         affine[5] = -std::abs(yres);
         char* orig_wkt = NULL;
         poLayer->GetSpatialRef()->exportToWkt(&orig_wkt);
-        imgout.GetGDALDataset()->SetProjection(orig_wkt);
-        imgout.GetGDALDataset()->SetGeoTransform(affine);
+        imgout.SetProjection(orig_wkt);
+        imgout.SetAffine(affine);
 
         // Combine shape geometries into single geometry cutline
         OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
