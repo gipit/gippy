@@ -105,7 +105,7 @@ for n in names:
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include()],
             libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem'],  # ,'X11'],
-            extra_compile_args=['-fPIC', '-std=c++0x']
+            extra_compile_args=['-fPIC', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
         )
     )
 
@@ -116,7 +116,7 @@ setup(
     description='Geospatial Image Processing for Python',
     author='Matthew Hanson',
     author_email='matt.a.hanson@gmail.com',
-    license='GPLv2',
+    license='Apache v2.0',
     ext_modules=modules,
     packages=find_packages(),
     #packages=['gippy', 'gippy.tests'],
