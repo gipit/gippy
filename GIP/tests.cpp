@@ -24,6 +24,13 @@ namespace gip {
     using std::cout;
     using std::endl;
 
+    GeoImage test_reading(string filename) {
+        cout << "Reading test: " << filename << endl;
+        GeoImage img(filename);
+        cout << img.Info() << endl;
+        return img;
+    }
+
     GeoImage test_chunking(int pad, int chunk) {
         cout << "Chunking test with padding=" + to_string(pad) + " and " + to_string(chunk) + " chunks" << endl;
         // Create new image
