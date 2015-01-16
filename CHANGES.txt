@@ -16,6 +16,7 @@
 #    limitations under the License.
 ################################################################################
 v1.1.0
+- License changed from GPL v2 to Apache 2.0
 - Added test framework
 - Separated into python modules: gippy (core), gippy.tests, gippy.algorithms
 - Cleaned up setup to use single 'gippy' distro directory
