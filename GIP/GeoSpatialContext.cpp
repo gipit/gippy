@@ -16,7 +16,7 @@
 #    limitations under the License.
 ##############################################################################*/
 
-#include <gip/GeoExtent.h>
+#include <gip/GeoSpatialContext.h>
 
 namespace gip {
 

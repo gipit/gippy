@@ -16,19 +16,19 @@
 #    limitations under the License.
 ##############################################################################*/
 
-#ifndef GIP_GEOEXTENT_H
-#define GIP_GEOEXTENT_H
+#ifndef GIP_GEOSPATIALCONTEXT_H
+#define GIP_GEOSPATIALCONTEXT_H
 
 
 namespace gip {
 
-    class GeoExtent {
+    class GeoSpatialContext {
     public:
         //! \name Constructors
 
     private:
 
-    }; // class GeoExtent
+    }; // class GeoSpatialContext
 
 
 } // namespace gip
