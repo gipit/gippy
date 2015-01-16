@@ -15,7 +15,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
-v1.1.0
+v0.3.0
 - License changed from GPL v2 to Apache 2.0
 - Added test framework
 - Separated into python modules: gippy (core), gippy.tests, gippy.algorithms
@@ -27,24 +27,24 @@ v1.1.0
 - Added Resolution convenience function to GeoResource (gets resolution from Affine)
 - Added SpectralCovariance and RXD (RX Anomoly detector) to algorithms
 
-v1.0.4
+v0.2.4
 - Added Affine to get affine transformation for SRS
 - Python bindings now correctly handling Point data type (returned as tuple)
 
-v1.0.3
+v0.2.3
 - Changed name of secondary probability image in fmask algorithm to -prob (from _prob)
 - Suppressed stderr messages from GDAL (these should all be handled internally by GIPPY)
 
-v1.0.2
+v0.2.2
 - Fixed bug in Indices algorithm
 
-v1.0.1
+v0.2.1
 - Added SpectralStatistics algorithm and functions to GeoImage and GeoAlgorithms
 - Added additional gdal helper functions
 - Additional chunking functions and options. Chunking added to TimeSeries
 - Cleanup
 
-v1.0.0
+v0.2.0
 - Added BrowseImage for creating an RGB or single band JPG image from a GeoImage for easy viewing
 - Refactored color management (removed class, uses single vector of band names)
 - misc fixes
@@ -52,27 +52,27 @@ v1.0.0
 - Updated swig bindings to properly support numpy arrays as input
 - CookieCutter now properly uses cutline
 
-v0.9.9
+v0.1.9
 - Added TimeSeries, Extract, GetRandomPixels, GetPixelClasses functions to GeoImage python bindings
 - Standardized datatypes using stdint.h for better interoperability
 - 1-d Numpy to CImg conversion fixed
 
-v0.9.8
+v0.1.8
 - Added additional operators on GeoRaster: min, max, exp, sign, acos, etc.
 - Added LinearTransform algorithm
 
-v0.9.7
+v0.1.7
 - Added union and transform functions to Rect
 - Added additional coordinate convenience functions to GeoData
 - Added crop option to CookieCutter
 
-v0.9.6
+v0.1.6
 - Added NDWI and MSAVI2 to Indices function
 - Overloaded SetMeta function to take in map<string, string> for multiple items
 - Updated algorithms to all take optional metadata dictionary for output
 - cleanup of GeoAlgorithms.h and GeoAlgorithms.cpp
 
-v0.9.5
+v0.1.5
 - When opening an image default is now read-only
 - Fixed bug with Process to new image
 - Added license info to all files

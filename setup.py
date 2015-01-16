@@ -92,7 +92,7 @@ gip_module = Extension(
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP'],
     language='c++',
-    extra_compile_args=['-std=c++0x', '-O3'],
+    extra_compile_args=['-std=c++11', '-O3', '-DBOOST_LOG_DYN_LINK'],
 )
 
 modules = [gip_module]
@@ -104,7 +104,7 @@ for n in names:
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include()],
-            libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem'],  # ,'X11'],
+            libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem', 'boost_log', 'pthread'],  # ,'X11'],
             extra_compile_args=['-fPIC', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
         )
     )
