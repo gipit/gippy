@@ -25,40 +25,10 @@ namespace gip {
     class GeoExtent {
     public:
         //! \name Constructors
-        //! Constructor requires a GeoResource
-        GeoExtent(GeoResource* resource) 
-            : _GeoResource(resource) {}
-        //! Destructor
-        ~GeoExtent() {}
-
-        //! Geolocated coordinates of a point within the resource
-        Point<double> GeoLoc(float xloc, float yloc) const;
-        //! Coordinates of top left
-        Point<double> TopLeft() const;
-        //! Coordinates of lower left
-        Point<double> LowerLeft() const;
-        //! Coordinates of top right
-        Point<double> TopRight() const;
-        //! Coordinates of bottom right
-        Point<double> LowerRight() const;
-        //! Minimum Coordinates of X and Y
-        Point<double> MinXY() const;
-        //! Maximum Coordinates of X and Y
-        Point<double> MaxXY() const;
-
-        //! Return projection definition in Well Known Text format
-        virtual string Projection() const = 0;
-        //! Return projection as OGRSpatialReference
-        OGRSpatialReference SRS() const;
-        //! Get Affine transformation
-        virtual CImg<double> Affine() const = 0;
-
-    protected:
 
     private:
-        GeoResource* _GeoResource;
 
-    } // class GeoExtent
+    }; // class GeoExtent
 
 
 } // namespace gip
