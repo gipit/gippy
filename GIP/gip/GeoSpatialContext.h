@@ -19,14 +19,68 @@
 #ifndef GIP_GEOSPATIALCONTEXT_H
 #define GIP_GEOSPATIALCONTEXT_H
 
+#include <gip/geometry.h>
+
 
 namespace gip {
 
     class GeoSpatialContext {
     public:
+    	/*
         //! \name Constructors
+        GeoSpatialContext(GeoResource* resource) {
+        	_GeoResource.reset(resource);
+        }
+        ~GeoSpatialContext() {}
+
+        //! Geolocated coordinates of a point within the resource
+        Point<double> GeoLoc(float xloc, float yloc) const;
+        //! Coordinates of top left
+        Point<double> TopLeft() const;
+        //! Coordinates of lower left
+        Point<double> LowerLeft() const;
+        //! Coordinates of top right
+        Point<double> TopRight() const;
+        //! Coordinates of bottom right
+        Point<double> LowerRight() const;
+        //! Minimum Coordinates of X and Y
+        Point<double> MinXY() const;
+        //! Maximum Coordinates of X and Y
+        Point<double> MaxXY() const;
+        //! Return projection definition in Well Known Text format
+        string Projection() const {
+            return _GDALDataset->GetProjectionRef();
+        }
+        //! Set projection definition in Well Known Text format
+        GeoResource& SetProjection(string proj) {
+            _GDALDataset->SetProjection(proj.c_str());
+            return *this;
+        }
+        //! Return projection as OGRSpatialReference
+        OGRSpatialReference SRS() const;
+        //! Get Affine transformation
+        CImg<double> Affine() const {
+            double affine[6];
+            _GDALDataset->GetGeoTransform(affine);
+            return CImg<double>(&affine[0], 6);
+        }
+        //! Set Affine transformation
+        GeoResource& SetAffine(CImg<double> affine) {
+            _GDALDataset->SetGeoTransform(affine.data());
+            return *this;
+        }
+        GeoResource& SetAffine(double affine[6]) {
+            _GDALDataset->SetGeoTransform(affine);
+            return *this;
+        }
+        //! Get resolution convenience function
+        Point<double> Resolution() const;
+        //! Set coordinate system from another GeoResource
+        GeoResource& SetCoordinateSystem(const GeoResource& res);
 
     private:
+    	boost::shared_ptr<GeoResource> _GeoResource;
+    	*/
 
     }; // class GeoSpatialContext
 
