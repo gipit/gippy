@@ -22,7 +22,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/function.hpp>
 
-#include <gip/GeoData.h>
+#include <gip/GeoResource.h>
 #include <boost/bind.hpp>
 
 #include <iostream>
@@ -43,14 +43,14 @@ namespace gip {
     /*!
         The GeoRaster class wraps the GDALRasterBand class
     */
-    class GeoRaster : public GeoData {
+    class GeoRaster : public GeoResource {
         friend class GeoImage;
     public:
         typedef boost::function< CImg<double>& (CImg<double>&) > func;
         //! \name Constructors/Destructors
         //! Constructor for new band
-        GeoRaster(const GeoData& geodata, int bandnum=1)
-            : GeoData(geodata), _NoData(false), _ValidStats(false),
+        GeoRaster(const GeoResource& georesource, int bandnum=1)
+            : GeoResource(georesource), _NoData(false), _ValidStats(false),
             _minDC(1), _maxDC(255) {
             LoadBand(bandnum);
         }
@@ -63,7 +63,7 @@ namespace gip {
         ~GeoRaster() {}
 
         //! \name File Information
-        std::string Basename() const { return GeoData::Basename() + "[" + Description() + "]"; }
+        std::string Basename() const { return GeoResource::Basename() + "[" + Description() + "]"; }
         //! Band X Size
         unsigned int XSize() const { return _GDALRasterBand->GetXSize(); }
         //! Band Y Size

@@ -22,7 +22,10 @@
 #include <string>
 #include <vector>
 #include <map>
+
 #include <boost/filesystem.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <gdal/gdal_priv.h>
 #include <gip/gip_CImg.h>
 #include <gip/geometry.h>
@@ -37,14 +40,19 @@ namespace gip {
     class GeoResource {
     public:
         //! \name Constructors
-        //! Default Constructor with filename
-        GeoResource(string filename = "");
+        //! Default constructor
+        GeoResource() : _GDALDataset() {}
+        //! Open existing file constructor
+        GeoResource(string filename, bool update=false);
+        //! Create new file - TODO how specify OGRLayer
+        GeoResource(int, int, int, GDALDataType, string, dictionary = dictionary());
+
         //! Copy constructor
         GeoResource(const GeoResource& resource);
         //! Assignment copy
         GeoResource& operator=(const GeoResource&);
         //! Destructor
-        virtual ~GeoResource() {}
+        ~GeoResource();
 
         //! \name Resource Information
         //! Get the filename of the resource
@@ -53,14 +61,14 @@ namespace gip {
         path Path() const;
         //! Basename, or short name of filename
         string Basename() const;
-        //! Format of resource
-        virtual string Format() const = 0;
+        //! File format of dataset
+        std::string Format() const { return _GDALDataset->GetDriver()->GetDescription(); }
 
         //! \name Geospatial information
-        //! Width of resource
-        virtual unsigned int XSize() const = 0;
-        //! Height of resource
-        virtual unsigned int YSize() const = 0;
+        //! X Size of resource, in pixels
+        unsigned int XSize() const { return _GDALDataset->GetRasterXSize(); }
+        //! Y Size of resource, in pixels
+        unsigned int YSize() const { return _GDALDataset->GetRasterYSize(); }
         //! Total size
         unsigned long Size() const { return XSize() * YSize(); }
         //! Geolocated coordinates of a point within the resource
@@ -78,24 +86,36 @@ namespace gip {
         //! Maximum Coordinates of X and Y
         Point<double> MaxXY() const;
         //! Return projection definition in Well Known Text format
-        virtual string Projection() const = 0;
+        string Projection() const {
+            return _GDALDataset->GetProjectionRef();
+        }
         //! Set projection definition in Well Known Text format
-        virtual GeoResource& SetProjection(string) = 0;
+        GeoResource& SetProjection(string proj) {
+            _GDALDataset->SetProjection(proj.c_str());
+            return *this;
+        }
         //! Return projection as OGRSpatialReference
         OGRSpatialReference SRS() const;
         //! Get Affine transformation
-        virtual CImg<double> Affine() const = 0;
+        CImg<double> Affine() const {
+            double affine[6];
+            _GDALDataset->GetGeoTransform(affine);
+            return CImg<double>(&affine[0], 6);
+        }
         //! Set Affine transformation
-        virtual GeoResource& SetAffine(CImg<double>) = 0;
+        GeoResource& SetAffine(CImg<double> affine) {
+            _GDALDataset->SetGeoTransform(affine.data());
+            return *this;
+        }
+        GeoResource& SetAffine(double affine[6]) {
+            _GDALDataset->SetGeoTransform(affine);
+            return *this;
+        }
         //! Get resolution convenience function
         Point<double> Resolution() const;
         //! Set coordinate system from another GeoResource
         GeoResource& SetCoordinateSystem(const GeoResource& res);
-        //! Copy coordinate system
-        GeoResource& CopyCoordinateSystem(const GeoResource& res) {
-            std::cerr << "GIPPY Deprecation Warning: Use SetCoordinateSystem instead of CopyCoordinateSystem" << std::endl;
-            return SetCoordinateSystem(res);
-        }
+
 
         //! Get chunkset chunking up image
         ChunkSet Chunks(unsigned int padding=0, unsigned int numchunks=0) const;
@@ -112,12 +132,22 @@ namespace gip {
         //! Copy Meta data from another resource
         GeoResource& CopyMeta(const GeoResource& img);
 
+        //! Retrieve the GDALdataset this is a member of
+        GDALDataset* GetGDALDataset() const {
+            return _GDALDataset.get();
+        }
+
     protected:
         //! Filename, or some other resource identifier
         boost::filesystem::path _Filename;
 
+        //! Underlying GDALDataset of this file
+        boost::shared_ptr<GDALDataset> _GDALDataset;
+
         //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
-        virtual GDALMajorObject* GDALObject() const = 0;
+        GDALMajorObject* GetGDALObject() const {
+            return _GDALDataset.get();
+        }
 
     }; // class GeoResource
 } // namespace gip

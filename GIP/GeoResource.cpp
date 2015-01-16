@@ -19,18 +19,94 @@
 #include <gip/GeoResource.h>
 #include <boost/filesystem.hpp>
 
+// logging
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+
 namespace gip {
+
+    // Options given initial values here
+    //boost::filesystem::path Options::_ConfigDir("/usr/share/gip/");
+    string Options::_DefaultFormat("GTiff");
+    float Options::_ChunkSize(128.0);
+    int Options::_Verbose(1);
+    string Options::_WorkDir("/tmp/");
+
     // Constructors
-    GeoResource::GeoResource(string filename)
-        : _Filename(filename) {}
+    GeoResource::GeoResource(string filename, bool update)
+        : _Filename(filename) {
+
+        // read/write permissions
+        GDALAccess access = update ? GA_Update : GA_ReadOnly;
+        if (access == GA_ReadOnly)
+            CPLSetConfigOption("GDAL_PAM_ENABLED","NO");
+        else CPLSetConfigOption("GDAL_PAM_ENABLED",NULL);
+
+        // open dataset
+        GDALDataset* ds = (GDALDataset*)GDALOpenShared(_Filename.string().c_str(), access);
+        // Check if Update access not supported
+        if (ds == NULL) // && CPLGetLastErrorNo() == 6)
+            ds = (GDALDataset*)GDALOpenShared(_Filename.string().c_str(), GA_ReadOnly);
+        if (ds == NULL) {
+            throw std::runtime_error(to_string(CPLGetLastErrorNo()) + ": " + string(CPLGetLastErrorMsg()));
+        }
+        _GDALDataset.reset(ds);
+
+        // boost logging test
+        BOOST_LOG_TRIVIAL(trace) << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+
+        if (Options::Verbose() > 3)
+            std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+    }
+
+
+    GeoResource::GeoResource(int xsz, int ysz, int bsz, GDALDataType datatype, string filename, dictionary options)
+        : _Filename(filename) {
+
+        // format, driver, and file extension
+        string format = Options::DefaultFormat();
+        //if (format == "GTiff") options["COMPRESS"] = "LZW";
+        GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
+        // TODO check for null driver and create method
+        // Check extension
+        string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
+        if (ext != "" && _Filename.extension().string() != ('.'+ext)) _Filename = boost::filesystem::path(_Filename.string() + '.' + ext);
+
+        // add options
+        char **papszOptions = NULL;
+        if (options.size()) {
+            for (dictionary::const_iterator imap=options.begin(); imap!=options.end(); imap++)
+                papszOptions = CSLSetNameValue(papszOptions,imap->first.c_str(),imap->second.c_str());
+        }
+
+        // create file
+        BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
+        if (Options::Verbose() > 3)
+            std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
+        _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz,datatype, papszOptions) );
+        BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
+        if (_GDALDataset.get() == NULL)
+            std::cout << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
+    }
 
     GeoResource::GeoResource(const GeoResource& resource)
-        : _Filename(resource._Filename) {}
+        : _Filename(resource._Filename), _GDALDataset(resource._GDALDataset) {}
 
     GeoResource& GeoResource::operator=(const GeoResource& resource) {
         if (this == &resource) return *this;
         _Filename = resource._Filename;
+        _GDALDataset = resource._GDALDataset;
         return *this;
+    }
+
+    GeoResource::~GeoResource() {
+        // flush GDALDataset if last open pointer
+        if (_GDALDataset.unique()) {
+            _GDALDataset->FlushCache();
+            BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (Options::Verbose() > 3) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+        }
     }
 
     // Info
@@ -83,6 +159,7 @@ namespace gip {
         return Point<double>(MaxX, MaxY);
     }
 
+
     OGRSpatialReference GeoResource::SRS() const {
         string s(Projection());
         return OGRSpatialReference(s.c_str());
@@ -105,13 +182,13 @@ namespace gip {
 
     // Metadata
     string GeoResource::Meta(string key) const {
-        const char* item = GDALObject()->GetMetadataItem(key.c_str());
+        const char* item = GetGDALObject()->GetMetadataItem(key.c_str());
         return (item == NULL) ? "": item;
     }
 
     // Get metadata group
     vector<string> GeoResource::MetaGroup(string group, string filter) const {
-        char** meta= GDALObject()->GetMetadata(group.c_str());
+        char** meta= GetGDALObject()->GetMetadata(group.c_str());
         int num = CSLCount(meta);
         std::vector<string> items;
         for (int i=0;i<num; i++) {
@@ -125,7 +202,7 @@ namespace gip {
     }
 
     GeoResource& GeoResource::SetMeta(string key, string item) {
-        GDALObject()->SetMetadataItem(key.c_str(), item.c_str());
+        GetGDALObject()->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
@@ -137,7 +214,7 @@ namespace gip {
     }
 
     GeoResource& GeoResource::CopyMeta(const GeoResource& resource) {
-        GDALObject()->SetMetadata(resource.GDALObject()->GetMetadata());
+        GetGDALObject()->SetMetadata(resource.GetGDALObject()->GetMetadata());
         return *this;
     }
 

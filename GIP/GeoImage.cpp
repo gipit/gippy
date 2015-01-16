@@ -22,12 +22,10 @@
 //#include <sstream>
 
 namespace gip {
-    using std::string;
-    using std::vector;
 
     GeoImage::GeoImage(vector<string> filenames)
-        : GeoData(filenames[0]) {
-        std::vector<std::string>::const_iterator f;
+        : GeoResource(filenames[0]) {
+        vector<string>::const_iterator f;
         LoadBands();
         unsigned int b;
         for (b=0; b<NumBands(); b++) {
@@ -44,7 +42,7 @@ namespace gip {
 
     // Copy constructor
     GeoImage::GeoImage(const GeoImage& image)
-        : GeoData(image) {
+        : GeoResource(image) {
         for (uint i=0;i<image.NumBands();i++)
             _RasterBands.push_back( image[i] );
             _BandNames = image.BandNames();
@@ -54,7 +52,7 @@ namespace gip {
     GeoImage& GeoImage::operator=(const GeoImage& image) {
         // Check for self assignment
         if (this == &image) return *this;
-        GeoData::operator=(image);
+        GeoResource::operator=(image);
         _RasterBands.clear();
         for (uint i=0;i<image.NumBands();i++) _RasterBands.push_back( image[i] );
         _BandNames = image.BandNames();
@@ -64,10 +62,10 @@ namespace gip {
     string GeoImage::Info(bool bandinfo, bool stats) const {
         std::stringstream info;
         info << Filename() << " - " << _RasterBands.size() << " bands ("
-                << XSize() << "x" << YSize() << ") " << std::endl;
-        info << "   GeoData References: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << std::endl;
-        info << "   Geo Coordinates (top left): " << TopLeft().x() << ", " << TopLeft().y() << std::endl;
-        info << "   Geo Coordinates (lower right): " << LowerRight().x() << ", " << LowerRight().y() << std::endl;
+                << XSize() << "x" << YSize() << ") " << endl;
+        info << "   References: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << endl;
+        info << "   Geo Coordinates (top left): " << TopLeft().x() << ", " << TopLeft().y() << endl;
+        info << "   Geo Coordinates (lower right): " << LowerRight().x() << ", " << LowerRight().y() << endl;
         //info << "   References - GeoImage: " << _Ref << " (&" << this << ")";
         //_GDALDataset->Reference(); int ref = _GDALDataset->Dereference();
         //info << "  GDALDataset: " << ref << " (&" << _GDALDataset << ")" << endl;
@@ -80,14 +78,14 @@ namespace gip {
     }
     // Get band descriptions (not always the same as name)
     /*vector<string> GeoImage::BandDescriptions() const {
-        std::vector<string> names;
-        for (std::vector< GeoRaster >::const_iterator iRaster=_RasterBands.begin();iRaster!=_RasterBands.end();iRaster++) {
+        vector<string> names;
+        for (vector< GeoRaster >::const_iterator iRaster=_RasterBands.begin();iRaster!=_RasterBands.end();iRaster++) {
             names.push_back(iRaster->Description());
         }
         return names;
     }*/
     // Band indexing
-    const GeoRaster& GeoImage::operator[](std::string name) const {
+    const GeoRaster& GeoImage::operator[](string name) const {
         int index(BandIndex(name));
         if (index >= 0) {
             return _RasterBands[index];
@@ -97,7 +95,7 @@ namespace gip {
     }
     // Add a band (to the end)
     GeoImage& GeoImage::AddBand(GeoRaster band) { //, unsigned int bandnum) {
-        std::string name = (band.Description() == "") ? to_string(_RasterBands.size()+1) : band.Description();
+        string name = (band.Description() == "") ? to_string(_RasterBands.size()+1) : band.Description();
         if (BandExists(name)) {
             throw std::runtime_error("Band named " + name + " already exists in GeoImage!");
         }
@@ -172,7 +170,7 @@ namespace gip {
         } else {
             // Load Subdatasets as bands, assuming 1 band/subdataset
             for(b=0;b<bandnums.size();b++) {
-                _RasterBands.push_back( GeoData(names[bandnums[b]-1],_GDALDataset->GetAccess()) );
+                _RasterBands.push_back( GeoResource(names[bandnums[b]-1],_GDALDataset->GetAccess()) );
                 _BandNames.push_back(_RasterBands[b].Description());
             }
             // Replace this dataset with first full frame band

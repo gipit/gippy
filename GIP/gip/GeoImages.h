@@ -43,7 +43,7 @@ namespace gip {
             Validate();
         }
 
-        //! Copy constructor - copies GeoData and all bands
+        //! Copy constructor - copies GeoResource and all bands
         GeoImages(const GeoImages& images);
         //! Assignment Operator
         GeoImages& operator=(const GeoImages& images) ;

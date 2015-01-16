@@ -54,13 +54,11 @@ namespace std {
 %ignore gip::ChunkSet::operator=;
 %ignore gip::ChunkSet::operator[];
 %ignore gip::GeoResource::operator=;
-%ignore gip::GeoData::operator=;
 %ignore gip::GeoImage::operator[];
 
 // GIP headers and classes to be wrapped - order is important!
 %include "gip/geometry.h"
 %include "gip/GeoResource.h"
-%include "gip/GeoData.h"
 %include "gip/GeoRaster.h"
 %include "gip/GeoImage.h"
 

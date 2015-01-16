@@ -25,13 +25,13 @@ namespace gip {
 
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image)
-        : GeoData(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
+        : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
             _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {}
 
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image, func f)
-        : GeoData(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
+        : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
             _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {
         //if (func.Function() != "") AddFunction(func);
@@ -43,8 +43,7 @@ namespace gip {
     GeoRaster& GeoRaster::operator=(const GeoRaster& image) {
         // Check for self assignment
         if (this == &image) return *this;
-        //_GeoData = image._GeoData;
-        GeoData::operator=(image);
+        GeoResource::operator=(image);
         _GDALRasterBand = image._GDALRasterBand;
         _Masks = image._Masks;
         _NoData = image._NoData;
