@@ -85,8 +85,8 @@ namespace gip {
         if (Options::Verbose() > 3)
             std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz,datatype, papszOptions) );
-        BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
         if (_GDALDataset.get() == NULL)
+            BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
             std::cout << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
     }
 
