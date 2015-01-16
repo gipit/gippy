@@ -16,6 +16,7 @@
 #    limitations under the License.
 ##############################################################################*/
 %{
+    #include <gip/gip.h>
     #include <gip/gip_CImg.h>
     #include <gip/geometry.h>
     #include <gip/GeoImage.h>
@@ -57,6 +58,7 @@ namespace std {
 %ignore gip::GeoImage::operator[];
 
 // GIP headers and classes to be wrapped - order is important!
+%include "gip/gip.h"
 %include "gip/geometry.h"
 %include "gip/GeoResource.h"
 %include "gip/GeoRaster.h"
