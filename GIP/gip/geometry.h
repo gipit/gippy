@@ -27,7 +27,6 @@
 #include <gip/gip_CImg.h>
 
 namespace gip {
-    using std::vector;
 
     //! (2D) Point Class
     template<typename T=int> class Point {
@@ -283,7 +282,7 @@ namespace gip {
 
     private:
         //! Function to chunk up region
-        vector< Rect<int> > ChunkUp(unsigned int numchunks=0) {
+        std::vector< Rect<int> > ChunkUp(unsigned int numchunks=0) {
             unsigned int rows;
 
             if (numchunks == 0) {
@@ -317,7 +316,7 @@ namespace gip {
         unsigned int _padding;
 
         //! Coordinates of the chunks
-        vector< Rect<int> > _Chunks;
+        std::vector< Rect<int> > _Chunks;
     };
 
 } // namespace GIP

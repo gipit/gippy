@@ -15,14 +15,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ##############################################################################*/
-%{
-    #include <gip/gip.h>
-    #include <gip/gip_CImg.h>
-    #include <gip/geometry.h>
-    #include <gip/GeoImage.h>
-    using namespace gip;
-%}
-
 // STL bindings
 %include "std_string.i"
 %include "std_vector.i"
@@ -42,14 +34,26 @@ namespace std {
   }
 }
 
-%include "cimg.i"
-
-// Wrapping GIP
-
-// GIP functions to ignore (suppresses warnings) because operators are redefined below
+// Ignore these standard functions
+%ignore std::cout;
+%ignore std::endl;
 %ignore operator<<;
 %ignore boost::filesystem::path;
 
+// Wrap CImg
+%include "cimg.i"
+
+
+// Wrap GIPS
+%{
+    #include <gip/gip.h>
+    #include <gip/gip_CImg.h>
+    #include <gip/geometry.h>
+    #include <gip/GeoImage.h>
+    using namespace gip;
+%}
+
+// GIP functions to ignore (suppresses warnings) because operators are redefined below
 %ignore gip::Point::operator=;
 %ignore gip::Rect::operator=;
 %ignore gip::ChunkSet::operator=;

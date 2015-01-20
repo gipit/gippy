@@ -31,9 +31,6 @@
 #include <gip/geometry.h>
 
 namespace gip {
-    using std::string;
-    using std::vector;
-    using boost::filesystem::path;
     typedef std::map<std::string,std::string> dictionary;
 
     //! Base class representing a geospatial resource
@@ -43,9 +40,9 @@ namespace gip {
         //! Default constructor
         GeoResource() : _GDALDataset() {}
         //! Open existing file constructor
-        GeoResource(string filename, bool update=false);
+        GeoResource(std::string filename, bool update=false);
         //! Create new file - TODO how specify OGRLayer
-        GeoResource(int, int, int, GDALDataType, string, dictionary = dictionary());
+        GeoResource(int, int, int, GDALDataType, std::string, dictionary = dictionary());
 
         //! Copy constructor
         GeoResource(const GeoResource& resource);
@@ -56,11 +53,11 @@ namespace gip {
 
         //! \name Resource Information
         //! Get the filename of the resource
-        string Filename() const;
+        std::string Filename() const;
         //! Get path (boost filesystem path)
-        path Path() const;
+        boost::filesystem::path Path() const;
         //! Basename, or short name of filename
-        string Basename() const;
+        std::string Basename() const;
         //! File format of dataset
         std::string Format() const { return _GDALDataset->GetDriver()->GetDescription(); }
 
@@ -86,11 +83,11 @@ namespace gip {
         //! Maximum Coordinates of X and Y
         Point<double> MaxXY() const;
         //! Return projection definition in Well Known Text format
-        string Projection() const {
+        std::string Projection() const {
             return _GDALDataset->GetProjectionRef();
         }
         //! Set projection definition in Well Known Text format
-        GeoResource& SetProjection(string proj) {
+        GeoResource& SetProjection(std::string proj) {
             _GDALDataset->SetProjection(proj.c_str());
             return *this;
         }
@@ -122,9 +119,9 @@ namespace gip {
 
         //! \name Metadata functions
         //! Get metadata item
-        string Meta(string key) const;
+        std::string Meta(std::string key) const;
         // Get group of metadata
-        vector<string> MetaGroup(string group, string filter="") const;
+        std::vector<std::string> MetaGroup(std::string group, std::string filter="") const;
         //! Set metadata item
         GeoResource& SetMeta(std::string key, std::string item);
         //! Set multiple metadata items

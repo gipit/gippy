@@ -24,10 +24,8 @@
 #include <stdint.h>
 
 namespace gip {
-    using std::string;
-    using std::vector;
-    using std::cout;
-    using std::endl;
+    //using std::string;
+    //using std::vector;
 
     // Forward declaration
     class GeoRaster;
@@ -42,19 +40,19 @@ namespace gip {
         //! Default constructor
         explicit GeoImage() : GeoResource() {}
         //! Open file constructor
-        explicit GeoImage(string filename, bool update=false)
+        explicit GeoImage(std::string filename, bool update=false)
             : GeoResource(filename, update) {
             LoadBands();
         }
         //! Open file from vector of individual files
-        explicit GeoImage(vector<string> filenames);
+        explicit GeoImage(std::vector<std::string> filenames);
         //! Constructor for creating new file
-        explicit GeoImage(string filename, int xsz, int ysz, int bsz, GDALDataType datatype=GDT_Byte) :
+        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, GDALDataType datatype=GDT_Byte) :
             GeoResource(xsz, ysz, bsz, datatype, filename) {
             LoadBands();
         }
         //! Constructor for creating new file with same properties (xsize, ysize, metadata) as existing file
-        explicit GeoImage(string filename, const GeoImage& image, GDALDataType datatype, int bsz) :
+        explicit GeoImage(std::string filename, const GeoImage& image, GDALDataType datatype, int bsz) :
             GeoResource(image.XSize(), image.YSize(), bsz, datatype, filename) {
             //if (datatype == GDT_Unknown) datatype = image->GetDataType();
             //CopyMeta(image);
@@ -62,7 +60,7 @@ namespace gip {
             LoadBands();
         }
         //! Constructor for creating new file with same properties (xsize, ysize, bsize) as existing file
-        explicit GeoImage(string filename, const GeoImage& image, GDALDataType datatype) :
+        explicit GeoImage(std::string filename, const GeoImage& image, GDALDataType datatype) :
             GeoResource(image.XSize(), image.YSize(), image.NumBands(), datatype, filename) {
             //if (datatype == GDT_Unknown) datatype = image->GetDataType();
             //CopyMeta(image);
@@ -70,7 +68,7 @@ namespace gip {
             LoadBands();
         }
         //! Constructor for creating new file with given properties (xsize, ysize, bsize,datatype) as existing file
-        explicit GeoImage(string filename, const GeoImage& image) :
+        explicit GeoImage(std::string filename, const GeoImage& image) :
             GeoResource(image.XSize(), image.YSize(), image.NumBands(), image.DataType(), filename) {
             //if (datatype == GDT_Unknown) datatype = image->GetDataType();
             //CopyMeta(image);
@@ -119,13 +117,13 @@ namespace gip {
         //! Get datatype of image (check all raster bands, return 'largest')
         GDALDataType DataType() const { return _RasterBands[0].DataType(); }
         //! Return information on image as string
-        string Info(bool=true, bool=false) const;
+        std::string Info(bool=true, bool=false) const;
 
         //! \name Bands and colors
         //! Get vector of band names
-        vector<string> BandNames() const { return _BandNames; }
+        std::vector<std::string> BandNames() const { return _BandNames; }
         //! Set a band name
-        void SetBandName(string desc, int bandnum) {
+        void SetBandName(std::string desc, int bandnum) {
             try {
                 // Test if color already exists
                 (*this)[desc];
@@ -137,13 +135,13 @@ namespace gip {
         }
 
         //! Get band index for provided band name
-        int BandIndex(string name) const {
+        int BandIndex(std::string name) const {
             for (unsigned int i=0; i<_BandNames.size(); i++) {
                 if (name == _BandNames[i]) return i;
             }
             return -1;
         }
-        bool BandExists(string desc) const {
+        bool BandExists(std::string desc) const {
             try {
                 (*this)[desc];
                 return true;
@@ -237,7 +235,7 @@ namespace gip {
         //! Read raw chunk, across all bands
         template<class T> CImg<T> ReadRaw(iRect chunk=iRect()) const {
             CImgList<T> images;
-            typename vector< GeoRaster >::const_iterator iBand;
+            typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->ReadRaw<T>(chunk) );
             }
@@ -248,7 +246,7 @@ namespace gip {
         //! Read chunk, across all bands
         template<class T> CImg<T> Read(iRect chunk=iRect()) const {
             CImgList<T> images;
-            typename vector< GeoRaster >::const_iterator iBand;
+            typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->Read<T>(chunk) );
             }
@@ -258,7 +256,7 @@ namespace gip {
 
         //! Write cube across all bands
         template<class T> GeoImage& Write(const CImg<T> img, iRect chunk=iRect()) {
-            typename vector< GeoRaster >::iterator iBand;
+            typename std::vector< GeoRaster >::iterator iBand;
             int i(0);
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 iBand->Write(img.get_channel(i++), chunk);
@@ -268,7 +266,7 @@ namespace gip {
         // Read Cube as list
         template<class T> CImgList<T> ReadAsList(iRect chunk=iRect()) const {
             CImgList<T> images;
-            typename vector< GeoRaster >::const_iterator iBand;
+            typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->Read<T>(chunk) );
             }
@@ -337,10 +335,10 @@ namespace gip {
         }
 
         //! NoData mask.  1's where it is nodata
-        CImg<uint8_t> NoDataMask(vector<string> bands, iRect chunk=iRect()) const {
-            vector<int> ibands = Descriptions2Indices(bands);
+        CImg<uint8_t> NoDataMask(std::vector<std::string> bands, iRect chunk=iRect()) const {
+            std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
-            for (vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
+            for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
                 if (i==ibands.begin()) 
                     mask = CImg<unsigned char>(_RasterBands[*i].NoDataMask(chunk));
                 else
@@ -355,7 +353,7 @@ namespace gip {
         }
 
         //! Data mask. 1's where valid data
-        CImg<unsigned char> DataMask(vector<string> bands, iRect chunk=iRect()) const {
+        CImg<unsigned char> DataMask(std::vector<std::string> bands, iRect chunk=iRect()) const {
             return NoDataMask(bands, chunk)^=1;
         }
 
@@ -364,10 +362,10 @@ namespace gip {
         }
 
         //! Saturation mask (all bands).  1's where it is saturated
-        CImg<unsigned char> SaturationMask(vector<string> bands, iRect chunk=iRect()) const {
-            vector<int> ibands = Descriptions2Indices(bands);
+        CImg<unsigned char> SaturationMask(std::vector<std::string> bands, iRect chunk=iRect()) const {
+            std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
-            for (vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
+            for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
                 if (i==ibands.begin()) 
                     mask = CImg<unsigned char>(_RasterBands[*i].SaturationMask(chunk));
                 else
@@ -432,7 +430,7 @@ namespace gip {
 
         //! Extract spectra from select pixels (where mask > 0)
         template<class T> CImg<T> Extract(const GeoRaster& mask) {
-            if (Options::Verbose() > 2 ) cout << "Pixel spectral extraction" << endl;
+            if (Options::Verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
             CImg<unsigned char> cmask;
             CImg<T> cimg;
             long count = 0;
@@ -445,7 +443,7 @@ namespace gip {
             count = 0;
             unsigned int c;
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                if (Options::Verbose() > 3) cout << "Extracting from chunk " << iChunk << endl;
+                if (Options::Verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
                 cimg = Read<T>(chunks[iChunk]);
                 cmask = mask.Read<unsigned char>(chunks[iChunk]);
                 cimg_forXY(cimg,x,y) {
@@ -516,22 +514,22 @@ namespace gip {
 
     protected:
         //! Vector of raster bands
-        vector< GeoRaster > _RasterBands;
+        std::vector< GeoRaster > _RasterBands;
         //! Vector of raster band names
-        vector< string > _BandNames;
+        std::vector< std::string > _BandNames;
 
         //! Loads Raster Bands of this GDALDataset into _RasterBands vector
         void LoadBands();
 
         // Convert vector of band descriptions to band indices
-        vector<int> Descriptions2Indices(vector<string> bands) const {
-            vector<int> ibands;
-            vector<int>::const_iterator b;
+        std::vector<int> Descriptions2Indices(std::vector<std::string> bands) const {
+            std::vector<int> ibands;
+            std::vector<int>::const_iterator b;
             if (bands.empty()) {
                 // If no bands specified then defaults to all bands
                 for (unsigned int c=0; c<NumBands(); c++) ibands.push_back(c);
             } else {
-                for (vector<string>::const_iterator name=bands.begin(); name!=bands.end(); name++) {
+                for (std::vector<std::string>::const_iterator name=bands.begin(); name!=bands.end(); name++) {
                     ibands.push_back( BandIndex(*name) );
                 }
             }
@@ -553,7 +551,7 @@ namespace gip {
     }
 
     // Copy input file into new output file
-    template<class T> GeoImage GeoImage::Process(string filename, GDALDataType datatype) {
+    template<class T> GeoImage GeoImage::Process(std::string filename, GDALDataType datatype) {
         // TODO: if not supplied base output datatype on units?
         if (datatype == GDT_Unknown) datatype = this->DataType();
         GeoImage imgout(filename, *this, datatype);

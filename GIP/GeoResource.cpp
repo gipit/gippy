@@ -25,6 +25,9 @@
 //#include <boost/log/expressions.hpp>
 
 namespace gip {
+    using std::string;
+    using std::vector;
+    using boost::filesystem::path;
 
     // Options given initial values here
     //boost::filesystem::path Options::_ConfigDir("/usr/share/gip/");
@@ -191,7 +194,7 @@ namespace gip {
     vector<string> GeoResource::MetaGroup(string group, string filter) const {
         char** meta= GetGDALObject()->GetMetadata(group.c_str());
         int num = CSLCount(meta);
-        std::vector<string> items;
+        vector<string> items;
         for (int i=0;i<num; i++) {
                 if (filter != "") {
                         string md = string(meta[i]);

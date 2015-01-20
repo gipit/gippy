@@ -23,7 +23,7 @@
 
 namespace gip {
 
-    GeoImage test_reading(string filename);
+    GeoImage test_reading(std::string filename);
 
 	GeoImage test_chunking(int=0, int=100);
 

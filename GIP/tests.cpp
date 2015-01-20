@@ -21,6 +21,7 @@
 #include <gip/Utils.h>
 
 namespace gip {
+    using std::string;
     using std::cout;
     using std::endl;
 

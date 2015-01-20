@@ -47,7 +47,7 @@ namespace gip {
     GeoImage LinearTransform(const GeoImage&, std::string, CImg<float>);
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
-    GeoImage RXD(const GeoImage&, string);
+    GeoImage RXD(const GeoImage&, std::string);
 
     //! Calculate spectral statistics and output to new image
     GeoImage SpectralStatistics(const GeoImage&, std::string);

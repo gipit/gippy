@@ -22,6 +22,9 @@
 //#include <sstream>
 
 namespace gip {
+    using std::string;
+    using std::vector;
+    using std::endl;
 
     GeoImage::GeoImage(vector<string> filenames)
         : GeoResource(filenames[0]) {
