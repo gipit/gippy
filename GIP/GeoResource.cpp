@@ -20,9 +20,9 @@
 #include <boost/filesystem.hpp>
 
 // logging
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
+//#include <boost/log/core.hpp>
+//#include <boost/log/trivial.hpp>
+//#include <boost/log/expressions.hpp>
 
 namespace gip {
 
@@ -54,7 +54,7 @@ namespace gip {
         _GDALDataset.reset(ds);
 
         // boost logging test
-        BOOST_LOG_TRIVIAL(trace) << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+        //BOOST_LOG_TRIVIAL(trace) << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
 
         if (Options::Verbose() > 3)
             std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
@@ -81,13 +81,14 @@ namespace gip {
         }
 
         // create file
-        BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
+        //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         if (Options::Verbose() > 3)
             std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz,datatype, papszOptions) );
-        if (_GDALDataset.get() == NULL)
-            BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
+        if (_GDALDataset.get() == NULL) {
+            //BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
             std::cout << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
+        }
     }
 
     GeoResource::GeoResource(const GeoResource& resource)
@@ -104,7 +105,7 @@ namespace gip {
         // flush GDALDataset if last open pointer
         if (_GDALDataset.unique()) {
             _GDALDataset->FlushCache();
-            BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            //BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
             if (Options::Verbose() > 3) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
         }
     }
