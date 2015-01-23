@@ -264,7 +264,7 @@ namespace gip {
     }
 
     //! Merge images into one file and crop to vector
-    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, 
+    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, string layer,
             float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         // TODO - pass in vector of GeoRaster's instead
         if (Options::Verbose() > 1)
@@ -280,7 +280,11 @@ namespace gip {
         // Create output file based on input vector
         // TODO - GeoImage constructor that takes in vector
         OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vectorname.c_str());
-        OGRLayer *poLayer = poDS->GetLayer(0);
+        OGRLayer *poLayer;
+        if (layer == "")
+            poLayer = poDS->GetLayer(0);
+        else
+            poLayer = poDS->GetLayerByName(layer.c_str());
         OGRSpatialReference* vSRS = poLayer->GetSpatialRef();
         OGREnvelope _extent;
         poLayer->GetExtent(&_extent, true);
