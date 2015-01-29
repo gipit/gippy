@@ -522,19 +522,7 @@ namespace gip {
         void LoadBands();
 
         // Convert vector of band descriptions to band indices
-        std::vector<int> Descriptions2Indices(std::vector<std::string> bands) const {
-            std::vector<int> ibands;
-            std::vector<int>::const_iterator b;
-            if (bands.empty()) {
-                // If no bands specified then defaults to all bands
-                for (unsigned int c=0; c<NumBands(); c++) ibands.push_back(c);
-            } else {
-                for (std::vector<std::string>::const_iterator name=bands.begin(); name!=bands.end(); name++) {
-                    ibands.push_back( BandIndex(*name) );
-                }
-            }
-            return ibands;
-        }
+        std::vector<int> Descriptions2Indices(std::vector<std::string> bands) const;
 
     }; // class GeoImage
 

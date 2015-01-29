@@ -146,6 +146,9 @@ namespace gip {
         return *this;
     }*/
 
+
+    
+
     //! Load bands from dataset
     void GeoImage::LoadBands() {
         vector<unsigned int> bandnums; // = _Options.Bands();
@@ -186,5 +189,20 @@ namespace gip {
             _GDALDataset = _RasterBands[index]._GDALDataset;
         }
     }
+
+    std::vector<int> GeoImage::Descriptions2Indices(std::vector<std::string> bands) const {
+        std::vector<int> ibands;
+        std::vector<int>::const_iterator b;
+        if (bands.empty()) {
+            // If no bands specified then defaults to all bands
+            for (unsigned int c=0; c<NumBands(); c++) ibands.push_back(c);
+        } else {
+            for (std::vector<std::string>::const_iterator name=bands.begin(); name!=bands.end(); name++) {
+                ibands.push_back( BandIndex(*name) );
+            }
+        }
+        return ibands;
+    }
+
 
 } // namespace gip
