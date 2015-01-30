@@ -50,6 +50,7 @@ namespace std {
     #include <gip/gip_CImg.h>
     #include <gip/geometry.h>
     #include <gip/GeoImage.h>
+    #include <gip/GeoVector.h>
     using namespace gip;
 %}
 
@@ -67,6 +68,7 @@ namespace std {
 %include "gip/GeoResource.h"
 %include "gip/GeoRaster.h"
 %include "gip/GeoImage.h"
+%include "gip/GeoVector.h"
 
 // TODO - SWIG3 supports C++11 and scoped enums
 enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64 };
