@@ -20,16 +20,18 @@
 %{
     #define SWIG_FILE_WITH_INIT
     #include <gdal/gdal_priv.h>
+    #include <gdal/ogrsf_frmts.h>
 
     // Additional functions used by the SWIG interface but not used directly by users
 
     void gip_gdalinit() { 
        GDALAllRegister();
+       OGRRegisterAll();
        CPLPushErrorHandler(CPLQuietErrorHandler);
     }
 %}
 
-// Register file formats with GDAL
+// Register file formats with GDAL and OGR
 void gip_gdalinit();
 
 %include "core.i"
