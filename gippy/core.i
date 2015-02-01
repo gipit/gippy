@@ -47,6 +47,7 @@ namespace std {
 // Wrap GIPS
 %{
     #include <gip/gip.h>
+    #include <gip/Utils.h>
     #include <gip/gip_CImg.h>
     #include <gip/geometry.h>
     #include <gip/GeoImage.h>
@@ -54,32 +55,11 @@ namespace std {
     using namespace gip;
 %}
 
-// GIP functions to ignore (suppresses warnings) because operators are redefined below
-%ignore gip::Point::operator=;
-%ignore gip::Rect::operator=;
-%ignore gip::ChunkSet::operator=;
-%ignore gip::ChunkSet::operator[];
-%ignore gip::GeoResource::operator=;
-%ignore gip::GeoImage::operator[];
-
 // GIP headers and classes to be wrapped - order is important!
+//  ignore directives suppress warnings, then operators are redefined through %extend
 %include "gip/gip.h"
-%include "gip/geometry.h"
-%include "gip/GeoResource.h"
-%include "gip/GeoRaster.h"
-%include "gip/GeoImage.h"
-%include "gip/GeoVector.h"
 
-// TODO - SWIG3 supports C++11 and scoped enums
-enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64 };
-//GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
-
-%template(Recti) gip::Rect<int>;
-%template(vectorRecti) std::vector< gip::Rect<int> >;
-
-// Additional manual wrapping and redefinition
 namespace gip {
-
     // Just wrapping basic options.
     class Options {
     public:
@@ -94,8 +74,24 @@ namespace gip {
         static std::string WorkDir();
         static void SetWorkDir(std::string workdir);
     };
+}
+
+// TODO - SWIG3 supports C++11 and scoped enums
+enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64 };
+//GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
 
 
+// Geometry
+%ignore gip::Point::operator=;
+%ignore gip::Rect::operator=;
+%ignore gip::ChunkSet::operator=;
+%ignore gip::ChunkSet::operator[];
+%include "gip/geometry.h"
+
+%template(Recti) gip::Rect<int>;
+%template(vectorRecti) std::vector< gip::Rect<int> >;
+
+namespace gip {
     %extend ChunkSet {
         Rect<int> __getitem__(int index) {
             return self->ChunkSet::operator[](index);
@@ -108,7 +104,17 @@ namespace gip {
             return ChunkSet(chunks);
         }
     }
+}
 
+
+// GeoResource
+%ignore gip::GeoResource::operator=;
+%include "gip/GeoResource.h"
+
+
+// GeoRaster
+%include "gip/GeoRaster.h"
+namespace gip {
     %extend GeoRaster {
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
@@ -152,7 +158,13 @@ namespace gip {
             return self->Process<double>(raster);
         }
     }
+}
 
+
+// GeoImage
+%ignore gip::GeoImage::operator[];
+%include "gip/GeoImage.h"
+namespace gip {
     %extend GeoImage {
         /*%feature("kwargs") static GeoImage New(std::string filename, const GeoImage& template=GeoImage(),
             int xsz=0, int ysz, int bands=1, GDALDataType dt=GDT_Byte) {
@@ -232,4 +244,19 @@ namespace gip {
         }
     }
 
+}
+
+
+// GeoVector
+%ignore gip::GeoVector::operator[];
+%include "gip/GeoVector.h"
+namespace gip {
+    %extend GeoVector {
+        GeoFeature __getitem__(int index) {
+            return self->GeoVector::operator[](index);
+        }
+        GeoVector __deepcopy__(GeoVector vector) {
+            return GeoVector(vector);
+        }
+    }    
 }
