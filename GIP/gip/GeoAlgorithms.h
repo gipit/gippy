@@ -32,7 +32,7 @@ namespace gip {
 
     //! Create single image from multiple input images using vector file footprint
     GeoImage CookieCutter(std::vector<std::string>, std::string, std::string, 
-        float=1.0, float=1.0, bool crop=false, unsigned char=0, dictionary=dictionary());
+        float, float, bool crop, unsigned char, dictionary=dictionary());
 
     GeoImage CookieCutter(std::vector<std::string>, std::string, std::string, std::string="",
         float=1.0, float=1.0, bool crop=false, unsigned char=0, dictionary=dictionary());

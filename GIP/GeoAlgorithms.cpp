@@ -267,7 +267,7 @@ namespace gip {
     GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname,
             float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         cout << "GIPPY Deprecation warning: CookieCutter has new function prototype" << endl;
-        return CookieCutter(imgnames, filename, vectorname, xres, yres, crop, interapolation, metadata);
+        return CookieCutter(imgnames, filename, vectorname, xres, yres, crop, interpolation, metadata);
     }
 
     GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, string layer,
@@ -403,7 +403,7 @@ namespace gip {
         //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
         papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
-        //papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS","ALL_CPUS");
+        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::NumCores()).c_str());
         psWarpOptions->papszWarpOptions = papszOptions;
 
         for (vector<GeoImage>::iterator iimg=imgs.begin();iimg!=imgs.end();iimg++) {

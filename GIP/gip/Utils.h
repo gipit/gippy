@@ -79,6 +79,12 @@ namespace gip {
                 CPLPushErrorHandler(CPLQuietErrorHandler);
             }
         }
+        //! Get desired number of cores
+        static int NumCores() { return _NumCores; }
+        //! Set desired number of cores
+        static void SetNumCores(int n) {
+            _NumCores = n;
+        }
         //! Get workdir
         static std::string WorkDir() { return _WorkDir; }
         //! Set workdir
@@ -94,6 +100,8 @@ namespace gip {
         static float _ChunkSize;
         //! Verbosity level
         static int _Verbose;
+        //! Number of cores to use when multi threading
+        static int _NumCores;
         //! Work dir
         static std::string _WorkDir;
 

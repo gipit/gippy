@@ -34,6 +34,7 @@ namespace gip {
     string Options::_DefaultFormat("GTiff");
     float Options::_ChunkSize(128.0);
     int Options::_Verbose(1);
+    int Options::_NumCores(2);
     string Options::_WorkDir("/tmp/");
 
     // Constructors
