@@ -248,6 +248,7 @@ namespace gip {
 
 
 // GeoVector
+%ignore gip::GeoVector::operator=;
 %ignore gip::GeoVector::operator[];
 %include "gip/GeoVector.h"
 namespace gip {
