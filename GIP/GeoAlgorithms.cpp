@@ -264,6 +264,12 @@ namespace gip {
     }
 
     //! Merge images into one file and crop to vector
+    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname,
+            float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
+        cout << "GIPPY Deprecation warning: CookieCutter has new function prototype" << endl;
+        return CookieCutter(imgnames, filename, vectorname, xres, yres, crop, interapolation, metadata);
+    }
+
     GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, string layer,
             float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         // TODO - pass in vector of GeoRaster's instead
