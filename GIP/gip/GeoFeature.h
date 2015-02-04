@@ -21,28 +21,50 @@
 
 #include <gdal/ogrsf_frmts.h>
 #include <gdal/ogr_feature.h>
+#include <boost/shared_ptr.hpp>
+
+#include <gip/GeoVectorResource.h>
 
 namespace gip {
 
-    class GeoFeature {
+    class GeoFeature : public GeoVectorResource {
     public:
         //! \name Constructors/Destructor
         //! Default constructor
-        explicit GeoFeature() {}
+        explicit GeoFeature() 
+            : GeoVectorResource(), _Feature() {}
         //! New feature constructor
-        explicit GeoFeature(OGRFeature* feature) {
-            _OGRFeature = feature;
+        explicit GeoFeature(const GeoVectorResource& vector, boost::shared_ptr<OGRFeature> feature) 
+            : GeoVectorResource(vector) {
+            _Feature = feature; //.reset(feature, OGRFeature::DestroyFeature);
+        }
+        //! Copy constructor
+        GeoFeature(const GeoFeature& feature) 
+            : GeoVectorResource(feature), _Feature(feature._Feature) {}
+        //! Assignment operator
+        GeoFeature& operator=(const GeoFeature& feature) {
+            if (this == &feature) return *this;
+            GeoVectorResource::operator=(feature);
+            _Feature = feature._Feature;
+            return *this;
         }
         ~GeoFeature() {
-            OGRFeature::DestroyFeature(_OGRFeature);
+            if (Options::Verbose() > 4) {
+                std::cout << "~GeoFeature (use_count = " << _Feature.use_count() << ")" << std::endl;
+            }
         }
 
         OGRGeometry* Geometry() const {
-            return _OGRFeature->GetGeometryRef();
+            return _Feature->GetGeometryRef();
+        }
+
+        // output operator
+        void print() const {
+            _Feature->DumpReadable(NULL);
         }
 
     protected:
-        OGRFeature* _OGRFeature;
+        boost::shared_ptr<OGRFeature> _Feature;
 
     }; // class GeoFeature
 } // namespace gip
