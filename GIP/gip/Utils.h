@@ -38,6 +38,13 @@ namespace gip {
         return ss.str();
     }
 
+    inline std::string to_string(std::vector<std::string> vector) {
+        std::string str("");
+        for (unsigned int i=0; i<vector.size(); i++) 
+            str = str + " " + vector[i];
+        return str;
+    }
+
     //! Returns GDAL Type corresponding to type passed in
     inline GDALDataType type2GDALtype(const std::type_info& info) {
         if (info == typeid(unsigned char)) return GDT_Byte;
