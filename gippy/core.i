@@ -51,6 +51,7 @@ namespace std {
     #include <gip/gip_CImg.h>
     #include <gip/geometry.h>
     #include <gip/GeoImage.h>
+    #include <gip/GeoImages.h>
     #include <gip/GeoVector.h>
     using namespace gip;
 %}
@@ -245,7 +246,31 @@ namespace gip {
             return *self;
         }
     }
+}
 
+
+// GeoImages
+%ignore gip::GeoImages::operator=;
+%ignore gip::GeoImages::operator[];
+%include "gip/GeoImages.h"
+namespace gip {
+    %extend GeoImages {
+        GeoImage __getitem__(int index) {
+            return self->GeoImages::operator[](index);
+        }
+    }
+}
+
+
+// GeoFeature
+%ignore gip::GeoFeature::operator=;
+%include "gip/GeoFeature.h"
+namespace gip {
+    %extend GeoFeature {
+        GeoFeature __deepcopy__(GeoFeature feature) {
+            return GeoFeature(feature);
+        }
+    }
 }
 
 
