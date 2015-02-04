@@ -220,6 +220,15 @@ namespace gip {
         unsigned int _padding;
     };
 
+    //! calculate union of all rects 
+    template<typename T> Rect<T> Union(std::vector< Rect<T> > rects) {
+        Rect<T> unioned(rects[0]);
+        for (unsigned int i=1; i<rects.size(); i++) {
+            unioned.Union(rects[i]);
+        }
+        return unioned;
+    }
+
 
     //! Collection of Rects representing a chunked up region (i.e. image)
     class ChunkSet {
