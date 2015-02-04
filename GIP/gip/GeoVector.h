@@ -26,73 +26,70 @@
 #include <boost/filesystem.hpp>
 
 #include <gip/geometry.h>
+#include <gip/GeoVectorResource.h>
 #include <gip/GeoFeature.h>
 
 namespace gip {
 
-    class GeoVector {
+    class GeoVector : public GeoVectorResource {
     public:
 
         //! \name Constructors/Destructors
         //! Default constructor
-        GeoVector() : _OGRDataSource() {}
+        GeoVector() 
+            : GeoVectorResource() {}
         //! Open existing layer from source
-        GeoVector(std::string, std::string layer="");
+        GeoVector(std::string filename, std::string layer="")
+            : GeoVectorResource(filename, layer) {
+            _Layer->ResetReading();
+            OGRFeature* feature;
+            while( (feature = _Layer->GetNextFeature()) != NULL) {
+                std::cout << "feature" << feature->GetFID() << std::endl;
+                boost::shared_ptr<OGRFeature> f; 
+                f.reset(feature, OGRFeature::DestroyFeature);
+                _Features.push_back(f);
+                std::cout << "feature use_count " << f.use_count() << std::endl;
+            }
+        }
         //! Create new file vector layer
         //GeoVector(std::string filename, OGRwkbGeometryType dtype);
 
         //! Copy constructor
-        GeoVector(const GeoVector& vector);
+        GeoVector(const GeoVector& vector)
+            : GeoVectorResource(vector) {
+            _Features = vector._Features;
+        }
         //! Assignment operator
-        GeoVector& operator=(const GeoVector& vector);
+        GeoVector& operator=(const GeoVector& vector) {
+            if (this == &vector) return *this;
+            GeoVectorResource::operator=(vector);
+            _Features = vector._Features;
+            return *this;
+        }
         //! Destructor
-        ~GeoVector();
-
-        //! \name Resource information
-        std::string Filename() const;
-        //! Get path (boost filesystem path)
-        boost::filesystem::path Path() const;
-        //! Basename, or short name of filename
-        std::string Basename() const;
-        //! File format of dataset
-        //std::string Format() const;
-
-        // Geospatial
-        OGRSpatialReference SRS() const;
-
-        std::string Projection() const;
-
-        Rect<double> Extent() const;
+        ~GeoVector() {
+            if (Options::Verbose() > 3)
+                std::cout << "~GeoVector destruct" << std::endl;
+        }
 
         // Features
         //! Get feature (0-based index)
-        GeoFeature& operator[](int index) { return _Features[index]; }
+        GeoFeature operator[](int index) { return GeoFeature(*this, _Features[index]); }
         //! Get feature, const version
-        const GeoFeature& operator[](int index) const { return _Features[index]; }
+        const GeoFeature operator[](int index) const { return GeoFeature(*this, _Features[index]); }
 
         //! Combine into single geometry - Should be freed with OGRGeometryFactory::destroyGeometry() after use.
-        OGRGeometry* Union() const {
+        /*OGRGeometry* Union() const {
             OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
-
             return site;
-        }
+        }*/
 
     protected:
 
-        //! Filename to dataset
-        boost::filesystem::path _Filename;
+        // OGRFeature
+        //std::vector<GeoFeature> _Features;
+        std::vector< boost::shared_ptr<OGRFeature> > _Features;
 
-        //! Underlying OGRDataSource
-        boost::shared_ptr<OGRDataSource> _OGRDataSource;
-
-        // OGRLayer
-        OGRLayer* _OGRLayer;
-
-        //! OGRFeature
-        std::vector< GeoFeature > _Features;
-
-    private:
-        void OpenLayer(std::string layer="");
 
     }; // class GeoVector
 
