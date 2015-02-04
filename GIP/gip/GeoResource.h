@@ -82,6 +82,8 @@ namespace gip {
         Point<double> MinXY() const;
         //! Maximum Coordinates of X and Y
         Point<double> MaxXY() const;
+        //! Extent
+        Rect<double> Extent() const { return Rect<double>(LowerLeft(), TopRight()); }
         //! Return projection definition in Well Known Text format
         std::string Projection() const {
             return _GDALDataset->GetProjectionRef();
