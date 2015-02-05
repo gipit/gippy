@@ -26,6 +26,9 @@ v0.3.0
 - Added interpolation option to CookieCutter
 - Added Resolution convenience function to GeoResource (gets resolution from Affine)
 - Added SpectralCovariance and RXD (RX Anomoly detector) to algorithms
+- Added GeoVectorResource, GeoVector, GeoFeature classes
+- Added GeoImages class as collection of GeoImage objects
+- Refactored CookieCutter
 
 v0.2.4
 - Added Affine to get affine transformation for SRS
