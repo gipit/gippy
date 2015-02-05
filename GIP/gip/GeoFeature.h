@@ -34,25 +34,42 @@ namespace gip {
         explicit GeoFeature() 
             : GeoVectorResource(), _Feature() {}
         //! New feature constructor
-        explicit GeoFeature(const GeoVectorResource& vector, boost::shared_ptr<OGRFeature> feature) 
+        /*explicit GeoFeature(const GeoVectorResource& vector, boost::shared_ptr<OGRFeature> feature) 
             : GeoVectorResource(vector) {
-            _Feature = feature; //.reset(feature, OGRFeature::DestroyFeature);
+            _Feature = feature;
+            if (Options::Verbose() > 4) use_counts("constructor");
+        }*/
+        //! Open feature constructor
+        explicit GeoFeature(const GeoVectorResource& vector, int index)
+            : GeoVectorResource(vector) {
+            //if (!_Layer.TestCapability(OLCFastSetNextByIndex))
+            //    std::cout << "using slow method of accessing feature" << std::endl;
+            // Is this a race condition ?
+            if (index == 0)
+                _Layer->ResetReading();
+            else
+                _Layer->SetNextByIndex(index-1);
+            _Feature.reset(_Layer->GetNextFeature(), OGRFeature::DestroyFeature);
         }
         //! Copy constructor
         GeoFeature(const GeoFeature& feature) 
-            : GeoVectorResource(feature), _Feature(feature._Feature) {}
+            : GeoVectorResource(feature), _Feature(feature._Feature) {
+            if (Options::Verbose() > 4) use_count("copy constructor");
+        }
         //! Assignment operator
         GeoFeature& operator=(const GeoFeature& feature) {
             if (this == &feature) return *this;
             GeoVectorResource::operator=(feature);
             _Feature = feature._Feature;
+            if (Options::Verbose() > 4) use_count("assignment");
             return *this;
         }
         ~GeoFeature() {
-            if (Options::Verbose() > 4) {
-                std::cout << "~GeoFeature (use_count = " << _Feature.use_count() << ")" << std::endl;
-            }
+            if (Options::Verbose() > 4) use_count("destructor");
         }
+
+        //! \name Geospatial information
+        //Rect<double> Extent() const {}
 
         OGRGeometry* Geometry() const {
             return _Feature->GetGeometryRef();
@@ -61,6 +78,11 @@ namespace gip {
         // output operator
         void print() const {
             _Feature->DumpReadable(NULL);
+        }
+
+        void use_count(std::string s="") const {
+            GeoVectorResource::use_count(s);
+            std::cout << "\tFeature use_count: " << _Feature.use_count() << std::endl;
         }
 
     protected:

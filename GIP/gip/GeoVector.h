@@ -41,15 +41,16 @@ namespace gip {
         //! Open existing layer from source
         GeoVector(std::string filename, std::string layer="")
             : GeoVectorResource(filename, layer) {
-            _Layer->ResetReading();
+            // No longer keeping array of pointers to all features
+            /*_Layer->ResetReading();
             OGRFeature* feature;
             while( (feature = _Layer->GetNextFeature()) != NULL) {
                 std::cout << "feature" << feature->GetFID() << std::endl;
                 boost::shared_ptr<OGRFeature> f; 
                 f.reset(feature, OGRFeature::DestroyFeature);
                 _Features.push_back(f);
-                std::cout << "feature use_count " << f.use_count() << std::endl;
-            }
+            }*/
+            if (Options::Verbose() > 4) use_counts("open constructor");
         }
         //! Create new file vector layer
         //GeoVector(std::string filename, OGRwkbGeometryType dtype);
@@ -57,26 +58,28 @@ namespace gip {
         //! Copy constructor
         GeoVector(const GeoVector& vector)
             : GeoVectorResource(vector) {
-            _Features = vector._Features;
+            //_Features = vector._Features;
         }
         //! Assignment operator
         GeoVector& operator=(const GeoVector& vector) {
             if (this == &vector) return *this;
             GeoVectorResource::operator=(vector);
-            _Features = vector._Features;
+            //_Features = vector._Features;
+            if (Options::Verbose() > 4) use_counts("assignment");
             return *this;
         }
         //! Destructor
         ~GeoVector() {
-            if (Options::Verbose() > 3)
-                std::cout << "~GeoVector destruct" << std::endl;
+            if (Options::Verbose() > 4) use_counts("destructor");
         }
 
         // Features
         //! Get feature (0-based index)
-        GeoFeature operator[](int index) { return GeoFeature(*this, _Features[index]); }
+        GeoFeature operator[](int index) { return GeoFeature(*this, index); }
+        //GeoFeature operator[](int index) { return GeoFeature(*this, _Features[index]); }
         //! Get feature, const version
-        const GeoFeature operator[](int index) const { return GeoFeature(*this, _Features[index]); }
+        const GeoFeature operator[](int index) const { return GeoFeature(*this, index); }
+        //const GeoFeature operator[](int index) const { return GeoFeature(*this, _Features[index]); }
 
         //! Combine into single geometry - Should be freed with OGRGeometryFactory::destroyGeometry() after use.
         /*OGRGeometry* Union() const {
@@ -84,12 +87,16 @@ namespace gip {
             return site;
         }*/
 
-    protected:
+        void use_counts(std::string s="") const {
+            std::cout << Basename() << " GeoVector " << s << " use_counts" << std::endl;
+            //for (unsigned int i=0; i<_Features.size(); i++)
+            //   std::cout << "\tFeature " << i << ": use_count = " << _Features[i].use_count() << std::endl;
+        }
 
+    protected:
         // OGRFeature
         //std::vector<GeoFeature> _Features;
-        std::vector< boost::shared_ptr<OGRFeature> > _Features;
-
+        //std::vector< boost::shared_ptr<OGRFeature> > _Features;
 
     }; // class GeoVector
 
