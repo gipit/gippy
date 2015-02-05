@@ -20,7 +20,9 @@
 #define GIP_GEOALGORITHMS_H
 
 #include <gip/GeoImage.h>
+#include <gip/GeoImages.h>
 #include <gip/GeoRaster.h>
+#include <gip/GeoVector.h>
 #include <initializer_list>
 
 namespace gip {
@@ -31,11 +33,8 @@ namespace gip {
     std::string BrowseImage(const GeoImage&, int quality=75);
 
     //! Create single image from multiple input images using vector file footprint
-    GeoImage CookieCutter(std::vector<std::string>, std::string, std::string, 
-        float, float, bool crop, unsigned char, dictionary=dictionary());
-
-    GeoImage CookieCutter(std::vector<std::string>, std::string, std::string, std::string="",
-        float=1.0, float=1.0, bool crop=false, unsigned char=0, dictionary=dictionary());
+    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
+        float xres, float yres, bool crop=false, unsigned char interpolation=0, dictionary metadata=dictionary());
 
     //! Create new file with a Fmask cloud mask
     GeoImage Fmask(const GeoImage&, std::string, int=3, int=5, dictionary=dictionary());

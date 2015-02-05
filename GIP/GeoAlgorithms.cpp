@@ -229,6 +229,7 @@ namespace gip {
 
     //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
     std::string BrowseImage(const GeoImage& image, int quality) {
+        // TODO - take in output filename rather then autogenerating
         //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
 
         GeoImage img(image);
@@ -264,74 +265,40 @@ namespace gip {
     }
 
     //! Merge images into one file and crop to vector
-    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname,
-            float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
-        cout << "GIPPY Deprecation warning: CookieCutter has new function prototype" << endl;
-        return CookieCutter(imgnames, filename, vectorname, xres, yres, crop, interpolation, metadata);
-    }
-
-    GeoImage CookieCutter(vector<std::string> imgnames, string filename, string vectorname, string layer,
-            float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
-        // TODO - pass in vector of GeoRaster's instead
+    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
+        float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         if (Options::Verbose() > 1)
-            cout << "GIPPY: CookieCutter (" << imgnames.size() << " files) - " << filename << endl;
+            cout << "GIPPY: CookieCutter (" << images.size() << " files) - " << filename << endl;
+        Rect<double> extent = feature.Extent();
 
-        // Open input images
-        vector<GeoImage> imgs;
-        vector<std::string>::const_iterator iimgs;
-        for (iimgs=imgnames.begin();iimgs!=imgnames.end();iimgs++) imgs.push_back(GeoImage(*iimgs));
-        unsigned int bsz = imgs[0].NumBands();
-        GDALDataType dtype = imgs[0].DataType();
-
-        // Create output file based on input vector
-        // TODO - GeoImage constructor that takes in vector
-        OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vectorname.c_str());
-        OGRLayer *poLayer;
-        if (layer == "")
-            poLayer = poDS->GetLayer(0);
-        else
-            poLayer = poDS->GetLayerByName(layer.c_str());
-        OGRSpatialReference* vSRS = poLayer->GetSpatialRef();
-        OGREnvelope _extent;
-        poLayer->GetExtent(&_extent, true);
-        Rect<double> extent(Point<double>(_extent.MinX,_extent.MinY),Point<double>(_extent.MaxX,_extent.MaxY));
-        // Crop down to minimum bounding box if crop set
         if (crop) {
-            // Find transformed union of all raster bounding boxes
-            vector< Rect<double> > r_extents;
-            for (vector<GeoImage>::const_iterator i=imgs.begin(); i!=imgs.end(); i++) {
-                Rect<double> ext(Point<double>(i->LowerLeft()),Point<double>(i->TopRight()));
-                ext.Transform(i->SRS(), *vSRS);
-                r_extents.push_back(ext);
-            }
-            Rect<double> r_extent(r_extents[0]);
-            for (vector< Rect<double> >::const_iterator r=r_extents.begin(); r!=r_extents.end(); r++) {
-                r_extent.Union(*r);
-            }
-            // Limit to vector extent
-            r_extent.Intersect(extent);
-
-            // anchor to top left of vector (MinX, MaxY) and make multiple of resolution
+            Rect<double> _extent = images.Extent(feature.SRS());
+            // limit to feature extent
+            _extent.Intersect(extent);
+            // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
             extent = Rect<double>(
-                Point<double>(extent.x0() + std::floor((r_extent.x0()-extent.x0()) / xres) * xres, r_extent.y0()),
-                Point<double>(r_extent.x1(), extent.y1() - std::floor((extent.y1()-r_extent.y1()) / yres) * yres)
+                Point<double>(extent.x0() + std::floor((_extent.x0()-extent.x0()) / xres) * xres, _extent.y0()),
+                Point<double>(_extent.x1(), extent.y1() - std::floor((extent.y1()-_extent.y1()) / yres) * yres)
             );
         }
-        // Need to convert extent to resolution units
+
+        // create output
+        // convert extent to resolution units
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
-        GeoImage imgout(filename, xsize, ysize, bsz, dtype);
-        imgout.CopyMeta(imgs[0]);
-        imgout.CopyColorTable(imgs[0]);
-        for (unsigned int b=0;b<bsz;b++) imgout[b].CopyMeta(imgs[0][b]);
+        GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.DataType());
+        imgout.CopyMeta(images[0]);
+        imgout.CopyColorTable(images[0]);
+        for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].CopyMeta(images[0][b]);
 
-        // Add additional metadata
-        string sourcefiles("");
-        for (unsigned int i=0; i<imgs.size(); i++) sourcefiles = sourcefiles + " " + imgs[i].Basename();
-        metadata["SourceFiles"] = sourcefiles;
+        // add additional metadata to output
+        metadata["SourceFiles"] = to_string(images.Basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
         imgout.SetMeta(metadata);
 
+        // set projection and affine transformation
+        imgout.SetProjection(feature.Projection());
+        // TODO - set affine based on extent and resolution (?)
         double affine[6];
         affine[0] = extent.x0();
         affine[1] = xres;
@@ -339,50 +306,22 @@ namespace gip {
         affine[3] = extent.y1();
         affine[4] = 0;
         affine[5] = -std::abs(yres);
-        char* orig_wkt = NULL;
-        poLayer->GetSpatialRef()->exportToWkt(&orig_wkt);
-        imgout.SetProjection(orig_wkt);
         imgout.SetAffine(affine);
 
-        // Combine shape geometries into single geometry cutline
-        OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
-        OGRGeometry* poGeometry;
-        OGRFeature *poFeature;
-        poLayer->ResetReading();
-        poFeature = poLayer->GetNextFeature();
-        site = poFeature->GetGeometryRef();
-        while( (poFeature = poLayer->GetNextFeature()) != NULL ) {
-            poGeometry = poFeature->GetGeometryRef();
-            if( poGeometry == NULL ) fprintf( stderr, "ERROR: Cutline feature without a geometry.\n" );
-            //OGRwkbGeometryType eType = wkbFlatten(poGeometry->getGeometryType());
-            site = site->Union(poGeometry);
-            /*if( eType == wkbPolygon )
-                site->addGeometry(poGeometry);
-            else if( eType == wkbMultiPolygon ) {
-                for(int iGeom = 0; iGeom < OGR_G_GetGeometryCount( poGeometry ); iGeom++ ) {
-                    site->addGeometry( poGeometry->getGeometryRef(iGeom)  );
-                }
-            }
-            else fprintf( stderr, "ERROR: Cutline not of polygon type.\n" );*/
-
-            OGRFeature::DestroyFeature( poFeature );
-        }
-        OGRDataSource::DestroyDataSource( poDS );
-
-        // Warp options
+        // warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
         psWarpOptions->hDstDS = imgout.GetGDALDataset();
-        psWarpOptions->nBandCount = bsz;
+        psWarpOptions->nBandCount = imgout.NumBands();
         psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
         psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
         psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        for (unsigned int b=0;b<bsz;b++) {
+        for (unsigned int b=0;b<imgout.NumBands();b++) {
             psWarpOptions->panSrcBands[b] = b+1;
             psWarpOptions->panDstBands[b] = b+1;
-            psWarpOptions->padfSrcNoDataReal[b] = imgs[0][b].NoDataValue();
+            psWarpOptions->padfSrcNoDataReal[b] = images[0][b].NoDataValue();
             psWarpOptions->padfDstNoDataReal[b] = imgout[b].NoDataValue();
             psWarpOptions->padfSrcNoDataImag[b] = 0.0;
             psWarpOptions->padfDstNoDataImag[b] = 0.0;
@@ -406,15 +345,17 @@ namespace gip {
         papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::NumCores()).c_str());
         psWarpOptions->papszWarpOptions = papszOptions;
 
-        for (vector<GeoImage>::iterator iimg=imgs.begin();iimg!=imgs.end();iimg++) {
-            WarpToImage(*iimg, imgout, psWarpOptions, site);
+        OGRGeometry* geom = feature.Geometry();
 
+        for (unsigned int i=0; i<images.size(); i++) {
+            WarpToImage(images[i], imgout, psWarpOptions, geom);
             psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
         }
-
         GDALDestroyWarpOptions( psWarpOptions );
+
         return imgout;
     }
+
 
     //! Fmask cloud mask
     GeoImage Fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
