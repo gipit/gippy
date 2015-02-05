@@ -262,6 +262,10 @@ namespace gip {
 }
 
 
+// GeoVectorResource
+%include "gip/GeoVectorResource.h"
+
+
 // GeoFeature
 %ignore gip::GeoFeature::operator=;
 %include "gip/GeoFeature.h"
