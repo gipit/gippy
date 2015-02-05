@@ -42,17 +42,15 @@ namespace gip {
             _Feature = feature;
             if (Options::Verbose() > 4) use_counts("constructor");
         }*/
+        //! Constructor to open specific feature in a vector
+        explicit GeoFeature(std::string filename, std::string layer, int index)
+            : GeoVectorResource(filename, layer) {
+            OpenFeature(index);
+        }
         //! Open feature constructor
         explicit GeoFeature(const GeoVectorResource& vector, int index)
             : GeoVectorResource(vector) {
-            //if (!_Layer.TestCapability(OLCFastSetNextByIndex))
-            //    std::cout << "using slow method of accessing feature" << std::endl;
-            // Is this a race condition ?
-            if (index == 0)
-                _Layer->ResetReading();
-            else
-                _Layer->SetNextByIndex(index-1);
-            _Feature.reset(_Layer->GetNextFeature(), OGRFeature::DestroyFeature);
+            OpenFeature(index);
         }
         //! Copy constructor
         GeoFeature(const GeoFeature& feature) 
@@ -78,6 +76,13 @@ namespace gip {
             return _Feature->GetGeometryRef();
         }
 
+        //! Get geometry in Well Known Text format
+        std::string WKT() const {
+            char* wkt(NULL);
+            Geometry()->exportToWkt(&wkt);
+            return std::string(wkt);
+        }
+
         // output operator
         //void print() const {
         //    _Feature->DumpReadable(NULL);
@@ -90,6 +95,18 @@ namespace gip {
 
     protected:
         boost::shared_ptr<OGRFeature> _Feature;
+
+    private:
+        void OpenFeature(int index) {
+            //if (!_Layer.TestCapability(OLCFastSetNextByIndex))
+            //    std::cout << "using slow method of accessing feature" << std::endl;
+            // Is this a race condition ?
+            if (index == 0)
+                _Layer->ResetReading();
+            else
+                _Layer->SetNextByIndex(index-1);
+            _Feature.reset(_Layer->GetNextFeature(), OGRFeature::DestroyFeature);
+        }
 
     }; // class GeoFeature
 } // namespace gip
