@@ -50,7 +50,7 @@ namespace gip {
                 f.reset(feature, OGRFeature::DestroyFeature);
                 _Features.push_back(f);
             }*/
-            if (Options::Verbose() > 4) use_counts("open constructor");
+            //if (Options::Verbose() > 4) use_counts("open constructor");
         }
         //! Create new file vector layer
         //GeoVector(std::string filename, OGRwkbGeometryType dtype);
@@ -65,12 +65,12 @@ namespace gip {
             if (this == &vector) return *this;
             GeoVectorResource::operator=(vector);
             //_Features = vector._Features;
-            if (Options::Verbose() > 4) use_counts("assignment");
+            //if (Options::Verbose() > 4) use_counts("assignment");
             return *this;
         }
         //! Destructor
         ~GeoVector() {
-            if (Options::Verbose() > 4) use_counts("destructor");
+            //if (Options::Verbose() > 4) use_counts("destructor");
         }
 
         // Features

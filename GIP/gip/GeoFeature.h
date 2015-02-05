@@ -54,18 +54,18 @@ namespace gip {
         //! Copy constructor
         GeoFeature(const GeoFeature& feature) 
             : GeoVectorResource(feature), _Feature(feature._Feature) {
-            if (Options::Verbose() > 4) use_count("copy constructor");
+            //if (Options::Verbose() > 4) use_count("copy constructor");
         }
         //! Assignment operator
         GeoFeature& operator=(const GeoFeature& feature) {
             if (this == &feature) return *this;
             GeoVectorResource::operator=(feature);
             _Feature = feature._Feature;
-            if (Options::Verbose() > 4) use_count("assignment");
+            //if (Options::Verbose() > 4) use_count("assignment");
             return *this;
         }
         ~GeoFeature() {
-            if (Options::Verbose() > 4) use_count("destructor");
+            //if (Options::Verbose() > 4) use_count("destructor");
         }
 
         //! \name Geospatial information
@@ -76,9 +76,9 @@ namespace gip {
         }
 
         // output operator
-        void print() const {
-            _Feature->DumpReadable(NULL);
-        }
+        //void print() const {
+        //    _Feature->DumpReadable(NULL);
+        //}
 
         void use_count(std::string s="") const {
             GeoVectorResource::use_count(s);
