@@ -63,6 +63,8 @@ namespace gip {
 
         Rect<double> Extent() const;
 
+        void use_count(std::string s = "") const;
+
     protected:
 
         //! Filename to dataset

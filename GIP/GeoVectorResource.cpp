@@ -43,8 +43,6 @@ namespace gip {
     // Copy constructor
     GeoVectorResource::GeoVectorResource(const GeoVectorResource& vector) 
         : _Filename(vector._Filename), _OGRDataSource(vector._OGRDataSource), _Layer(vector._Layer) {
-        if (Options::Verbose() > 3) 
-            cout << "GeoVectorResource copy: use_count = " << _OGRDataSource.use_count() << endl;
     }
 
     // Assignment
@@ -53,20 +51,16 @@ namespace gip {
         _Filename = vector._Filename;
         _OGRDataSource = vector._OGRDataSource;
         _Layer = vector._Layer;
-        if (Options::Verbose() > 3) 
-            cout << "GeoVectorResource assignment: use_count = " << _OGRDataSource.use_count() << endl;
         return *this;
     }
 
     GeoVectorResource::~GeoVectorResource() {
-        if (Options::Verbose() > 3) 
-            cout << Basename() << ": ~GeoVectorResource (use_count = " << _OGRDataSource.use_count() << ")" << endl;
     }
 
     // Open layer
     void GeoVectorResource::OpenLayer(string layer) {
-        if (Options::Verbose() > 3)
-            cout << Basename() << ": opening layer " << layer << endl;
+        //if (Options::Verbose() > 4)
+        //    cout << Basename() << ": opening layer " << layer << endl;
         if (layer == "") {
             _Layer = _OGRDataSource->GetLayer(0);
         } else {
@@ -105,6 +99,10 @@ namespace gip {
             Point<double>(ext.MinX, ext.MinY),
             Point<double>(ext.MaxX, ext.MaxY)
         );
+    }
+
+    void GeoVectorResource::use_count(string s) const {
+        cout << Basename() << " GeoVectorResource " << s << " use_count = " << _OGRDataSource.use_count() << endl;
     }
 
 } //namespace gip
