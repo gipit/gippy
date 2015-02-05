@@ -2,6 +2,9 @@
 ################################################################################
 #    GIPPY: Geospatial Image Processing library for Python
 #
+#    AUTHOR: Matthew Hanson
+#    EMAIL:  matt.a.hanson@gmail.com
+#
 #    Copyright (C) 2015 Applied Geosolutions
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
