@@ -100,11 +100,12 @@ namespace gip {
         void OpenFeature(int index) {
             //if (!_Layer.TestCapability(OLCFastSetNextByIndex))
             //    std::cout << "using slow method of accessing feature" << std::endl;
+            // TODO - check # of features
             // Is this a race condition ?
             if (index == 0)
                 _Layer->ResetReading();
             else
-                _Layer->SetNextByIndex(index-1);
+                _Layer->SetNextByIndex(index);
             _Feature.reset(_Layer->GetNextFeature(), OGRFeature::DestroyFeature);
         }
 
