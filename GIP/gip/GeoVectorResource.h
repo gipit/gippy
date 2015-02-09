@@ -66,6 +66,11 @@ namespace gip {
 
         Rect<double> Extent() const;
 
+        //! Get number of features
+        unsigned long int NumFeatures() const {
+            return _Layer->GetFeatureCount();
+        }
+
         void use_count(std::string s = "") const;
 
     protected:

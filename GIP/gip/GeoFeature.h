@@ -102,9 +102,8 @@ namespace gip {
             //    std::cout << "using slow method of accessing feature" << std::endl;
             // TODO - check # of features
             // Is this a race condition ?
-            if (index == 0)
-                _Layer->ResetReading();
-            else
+            _Layer->ResetReading();
+            if (index > 0)
                 _Layer->SetNextByIndex(index);
             _Feature.reset(_Layer->GetNextFeature(), OGRFeature::DestroyFeature);
         }
