@@ -537,6 +537,8 @@ namespace gip {
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 (*this)[i].Write((*this)[i].Read<T>(chunks[i]),chunks[i]);
             }
+            // clear functions after processing
+            (*this)[i].ClearFunctions();
         }
         return *this;
     }
