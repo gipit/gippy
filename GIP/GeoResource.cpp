@@ -51,10 +51,10 @@ namespace gip {
         else CPLSetConfigOption("GDAL_PAM_ENABLED",NULL);
 
         // open dataset
-        GDALDataset* ds = (GDALDataset*)GDALOpenShared(_Filename.string().c_str(), access);
+        GDALDataset* ds = (GDALDataset*)GDALOpen(_Filename.string().c_str(), access);
         // Check if Update access not supported
         if (ds == NULL) // && CPLGetLastErrorNo() == 6)
-            ds = (GDALDataset*)GDALOpenShared(_Filename.string().c_str(), GA_ReadOnly);
+            ds = (GDALDataset*)GDALOpen(_Filename.string().c_str(), GA_ReadOnly);
         if (ds == NULL) {
             throw std::runtime_error(to_string(CPLGetLastErrorNo()) + ": " + string(CPLGetLastErrorMsg()));
         }
