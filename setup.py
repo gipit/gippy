@@ -32,7 +32,9 @@ from setuptools.command.develop import develop
 #from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
-from gippy.version import __version__
+import imp
+
+__version__ = imp.load_source('gippy.version', 'gippy/version.py').__version__
 
 
 def add_reg(filename):
