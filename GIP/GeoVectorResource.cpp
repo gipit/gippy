@@ -38,7 +38,7 @@ namespace gip {
         _OGRDataSource.reset(OGRSFDriverRegistrar::Open(filename.c_str()), OGRDataSource::DestroyDataSource);
         if (_OGRDataSource == NULL) {
             //BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
-            cout << "Error opening " << _Filename.string() << CPLGetLastErrorMsg() << endl;
+            throw std::runtime_error("Error opening " + filename + ": " + string(CPLGetLastErrorMsg()));
         }
         OpenLayer(layer);
     }
