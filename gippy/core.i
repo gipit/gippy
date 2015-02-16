@@ -95,6 +95,7 @@ enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GD
 %include "gip/geometry.h"
 
 %template(Recti) gip::Rect<int>;
+%template(Rectd) gip::Rect<double>;
 %template(vectorRecti) std::vector< gip::Rect<int> >;
 
 namespace gip {
