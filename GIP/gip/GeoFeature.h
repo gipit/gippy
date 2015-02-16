@@ -70,7 +70,14 @@ namespace gip {
         }
 
         //! \name Geospatial information
-        //Rect<double> Extent() const {}
+        Rect<double> Extent() const {
+            OGREnvelope ext;
+            Geometry()->getEnvelope(&ext);
+            return Rect<double>(
+                Point<double>(ext.MinX, ext.MinY),
+                Point<double>(ext.MaxX, ext.MaxY)
+            );
+        }
 
         OGRGeometry* Geometry() const {
             return _Feature->GetGeometryRef();
