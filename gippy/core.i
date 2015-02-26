@@ -30,11 +30,17 @@ namespace std {
 
 %include "exception.i"
 %exception {
-  try {
-    $action
-  } catch (const std::exception& e) {
-    SWIG_exception(SWIG_RuntimeError, e.what());
-  }
+    try {
+        $action
+    } catch (const std::out_of_range& e) {
+        //PyErr_SetString(PyExc_StopIteration, e.what());
+        PyErr_SetString(PyExc_IndexError, e.what());
+        return NULL;
+    } catch (const std::exception& e) {
+        std::cout << "runtime error" << std::endl;
+        PyErr_SetString(PyExc_RuntimeError, e.what());
+        return NULL;
+    }
 }
 
 // Ignore these standard functions
@@ -107,6 +113,9 @@ namespace gip {
             self->operator[](index) = rect;
             return self->ChunkSet::operator[](index);
         }
+        unsigned long int __len__() {
+            return self->size();
+        }        
         ChunkSet __deepcopy__(ChunkSet chunks) {
             return ChunkSet(chunks);
         }
@@ -192,6 +201,9 @@ namespace gip {
             self->operator[](col) = raster;
             return self->operator[](col);
         }
+        unsigned long int __len__() {
+            return self->size();
+        }
         GeoImage Process(std::string filename, GDALDataType dtype=GDT_Unknown) {
             return self->Process<double>(filename, dtype);
         }
@@ -262,6 +274,9 @@ namespace gip {
         GeoImage __getitem__(int index) {
             return self->GeoImages::operator[](index);
         }
+        unsigned long int __len__() {
+            return self->GeoImages::size();
+        }
     }
 }
 
@@ -269,15 +284,29 @@ namespace gip {
 // GeoVectorResource
 %ignore gip::GeoVectorResource::operator=;
 %include "gip/GeoVectorResource.h"
+namespace gip {
+    %extend GeoVectorResource {
+        unsigned long int __len__() {
+            return self->GeoVectorResource::size();
+        }
+    }
+}
 
 
 // GeoFeature
 %ignore gip::GeoFeature::operator=;
+%ignore gip::GeoFeature::operator[];
 %include "gip/GeoFeature.h"
 namespace gip {
     %extend GeoFeature {
         GeoFeature __deepcopy__(GeoFeature feature) {
             return GeoFeature(feature);
+        }
+        std::string __getitem__(std::string att) {
+            return self->GeoFeature::operator[](att);
+        }
+        unsigned long int __len__() {
+            return self->size();
         }
     }
 }
@@ -286,6 +315,7 @@ namespace gip {
 // GeoVector
 %ignore gip::GeoVector::operator=;
 %ignore gip::GeoVector::operator[];
+%template(vector_GeoFeature) std::vector< gip::GeoFeature >;
 %include "gip/GeoVector.h"
 namespace gip {
     %extend GeoVector {

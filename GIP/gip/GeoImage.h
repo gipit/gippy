@@ -117,6 +117,8 @@ namespace gip {
         //! \name File Information
         //! Number of bands
         unsigned int NumBands() const { return _RasterBands.size(); }
+        //! Number of bands
+        unsigned int size() const { return _RasterBands.size(); }
         //! Get datatype of image (check all raster bands, return 'largest')
         GDALDataType DataType() const { return _RasterBands[0].DataType(); }
         //! Return information on image as string
@@ -142,7 +144,7 @@ namespace gip {
             for (unsigned int i=0; i<_BandNames.size(); i++) {
                 if (name == _BandNames[i]) return i;
             }
-            return -1;
+            throw std::out_of_range("No band " + name);
         }
         bool BandExists(std::string desc) const {
             try {
@@ -160,9 +162,12 @@ namespace gip {
         }
 
         //! Get raster band (0-based index)
-        GeoRaster& operator[](int band) { return _RasterBands[band]; }
+        GeoRaster& operator[](unsigned int index) { 
+            // Call const version
+            return const_cast<GeoRaster&>(static_cast<const GeoImage&>(*this)[index]);
+        }
         //! Get raster band, const version
-        const GeoRaster& operator[](int band) const { return _RasterBands[band]; }
+        const GeoRaster& operator[](unsigned int index) const;
         //! Get raster band by description
         GeoRaster& operator[](std::string desc) {
             // Call const version

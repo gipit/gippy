@@ -90,6 +90,21 @@ namespace gip {
             return std::string(wkt);
         }
 
+        //! Get attribute by name
+        std::string operator[](std::string name) {
+            return static_cast<const GeoFeature&>(*this)[name];
+        }
+        //! Get attribute by name
+        std::string operator[](std::string name) const {
+            // Find index of field
+            OGRFeatureDefn* atts = _Layer->GetLayerDefn();
+            int i = atts->GetFieldIndex(name.c_str());
+            if (i == -1) {
+                throw std::out_of_range("No such attribute " + name);
+            }
+            return _Feature->GetFieldAsString(i);
+        }
+
         // output operator
         //void print() const {
         //    _Feature->DumpReadable(NULL);

@@ -276,6 +276,7 @@ namespace gip {
 
         //! Get number of chunks
         unsigned int Size() const { return _Chunks.size(); }
+        unsigned int size() const { return _Chunks.size(); }
 
         //! Get amount of padding in pixels
         unsigned int Padding() const { return _padding; }
@@ -288,9 +289,16 @@ namespace gip {
         }
 
         //! Get a chunk
-        Rect<int>& operator[](int index) { return _Chunks[index]; }
+        Rect<int>& operator[](unsigned int index) { 
+            // Call const version
+            return const_cast< Rect<int>& >(static_cast<const ChunkSet&>(*this)[index]);
+        }
         //! Get a chunk, const version
-        const Rect<int>& operator[](int index) const { return _Chunks[index]; }
+        const Rect<int>& operator[](unsigned int index) const { 
+            if (index < _Chunks.size())
+                return _Chunks[index];
+            throw std::out_of_range("No chunk " + to_string(index));
+        }
 
     private:
         //! Function to chunk up region

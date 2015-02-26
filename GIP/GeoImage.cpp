@@ -90,14 +90,18 @@ namespace gip {
         }
         return names;
     }*/
+    const GeoRaster& GeoImage::operator[](unsigned int index) const {
+        if (index <_RasterBands.size()) {
+            return _RasterBands[index];
+        } else {
+            throw std::out_of_range ("No band " + to_string(index));
+        }        
+    }
+
     // Band indexing
     const GeoRaster& GeoImage::operator[](string name) const {
         int index(BandIndex(name));
-        if (index >= 0) {
-            return _RasterBands[index];
-        } else {
-            throw std::out_of_range ("No band named " + name);
-        }
+        return this->operator[](index);
     }
     // Add a band (to the end)
     GeoImage& GeoImage::AddBand(GeoRaster band) { //, unsigned int bandnum) {

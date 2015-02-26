@@ -81,9 +81,12 @@ namespace gip {
         }
 
         //! Get image (0-based index)
-        GeoImage& operator[](int num) { return _GeoImages[num]; }
+        GeoImage& operator[](int index) { 
+            // Call const version
+            return const_cast<GeoImage&>(static_cast<const GeoImages&>(*this)[index]);
+        }
         //! Get image, const version
-        const GeoImage& operator[](int num) const { return _GeoImages[num]; }
+        const GeoImage& operator[](int index) const { return _GeoImages[index]; }
 
         //! Return bandnum from all images as a GeoImage
         // TODO this needs to validate (same footprint, etc.)

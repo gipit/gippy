@@ -70,6 +70,19 @@ namespace gip {
         unsigned long int NumFeatures() const {
             return _Layer->GetFeatureCount();
         }
+        unsigned long int size() const {
+            return _Layer->GetFeatureCount();
+        }
+
+        //! Get list of attributes
+        std::vector<std::string> Attributes() const {
+            std::vector<std::string> atts;
+            OGRFeatureDefn* att = _Layer->GetLayerDefn();
+            for (int i=0; i<att->GetFieldCount(); i++) {
+                atts.push_back(std::string(att->GetFieldDefn(i)->GetNameRef()));
+            }
+            return atts;
+        }
 
         void use_count(std::string s = "") const;
 
