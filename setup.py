@@ -108,7 +108,8 @@ for n in names:
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
-            include_dirs=['GIP', numpy.get_include()],
+            #swig_opts=['-c++', '-w509', '-IGIP', '-Igippy/gdal/python', '-Igippy/gdal/python/docs'],  # '-keyword'],,
+            include_dirs=['GIP', numpy.get_include(), '/usr/include/gdal'],
             libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem', 'boost_log', 'pthread'],  # ,'X11'],
             extra_compile_args=['-fPIC', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
         )
