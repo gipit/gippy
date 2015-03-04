@@ -35,6 +35,8 @@ v0.3.0
 - Properly clear functions after image has been Processed to itself (written to own file)
 - Stop opening GDALDataset as shared, which causes problems when user expects a different object
 - Iterable containers: GeoImage (bands), GeoImages (images), GeoVector (features), GeoFeatures (attributes)
+- Added SetGCPs function to GeoResource
+- Added additional functions for retriving and searching values of attributes in vectors
 
 v0.2.4
 - Added Affine to get affine transformation for SRS
