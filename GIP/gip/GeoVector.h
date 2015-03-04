@@ -103,6 +103,17 @@ namespace gip {
             //   std::cout << "\tFeature " << i << ": use_count = " << _Features[i].use_count() << std::endl;
         }
 
+        //! Get value of this attribute for all features
+        std::vector<std::string> Values(std::string attr) {
+            std::vector<std::string> vals;
+            GeoFeature f;
+            for (unsigned int i=0; i<size(); i++) {
+                f = GeoFeature(*this, i);
+                vals.push_back(f[attr]);
+            }
+            return vals;
+        }
+
     protected:
         // OGRFeature
         //std::vector<GeoFeature> _Features;
