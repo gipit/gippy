@@ -113,6 +113,21 @@ namespace gip {
             _GDALDataset->SetGeoTransform(affine);
             return *this;
         }
+        GeoResource& SetGCPs(CImg<double> gcps, std::string projection) {
+            int numgcps(gcps.height());
+            GDAL_GCP gdal_gcps[numgcps];
+            GDALInitGCPs(numgcps, &gdal_gcps[0]);
+            for (int i=0; i<numgcps; i++) {
+                //gdal_gcps[i].pszId = &to_string(i)[0];
+                gdal_gcps[i].dfGCPPixel = gcps(0, i);
+                gdal_gcps[i].dfGCPLine = gcps(1, i);
+                gdal_gcps[i].dfGCPX = gcps(2, i);
+                gdal_gcps[i].dfGCPY = gcps(3, i);
+            }
+            _GDALDataset->SetGCPs(numgcps, &gdal_gcps[0], projection.c_str());
+            return *this;
+        }
+
         //! Get resolution convenience function
         Point<double> Resolution() const;
         //! Set coordinate system from another GeoResource
