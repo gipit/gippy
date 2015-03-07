@@ -43,20 +43,18 @@ namespace gip {
             : GeoVectorResource() {}
         //! Open existing layer from source
         GeoVector(std::string filename, std::string layer="")
-            : GeoVectorResource(filename, layer) {
+            : GeoVectorResource(filename, layer), _PrimaryKey("") {
         }
-        //! Create new file vector layer
-        //GeoVector(std::string filename, OGRwkbGeometryType dtype);
 
         //! Copy constructor
         GeoVector(const GeoVector& vector)
-            : GeoVectorResource(vector) {
-            //_Features = vector._Features;
+            : GeoVectorResource(vector), _PrimaryKey(vector._PrimaryKey) {
         }
         //! Assignment operator
         GeoVector& operator=(const GeoVector& vector) {
             if (this == &vector) return *this;
             GeoVectorResource::operator=(vector);
+            _PrimaryKey = vector._PrimaryKey;
             return *this;
         }
         //! Destructor
@@ -64,29 +62,57 @@ namespace gip {
             //if (Options::Verbose() > 4) use_counts("destructor");
         }
 
+        std::string PrimaryKey() const {
+            return _PrimaryKey;
+        }
 
-        // Features
+        void SetPrimaryKey(std::string key) {
+            std::vector<std::string> atts = Attributes();
+            if (std::find(atts.begin(), atts.end(), key) != atts.end()) {
+                unsigned int sz(atts.size());
+                std::sort(atts.begin(), atts.end());
+                atts.erase(std::unique(atts.begin(), atts.end()), atts.end());
+                if (sz == atts.size())
+                    _PrimaryKey = key;
+                else
+                    throw std::runtime_error("Attribute " + key + " is not unique.");
+            } else
+                throw std::out_of_range("No such attribute " + key);
+        }
+
+        // Feature Indexing
         //! Get feature (0-based index)
         GeoFeature operator[](unsigned int index) { 
             // Call const version
             return static_cast<const GeoVector&>(*this)[index];
         }
-        //GeoFeature operator[](int index) { return GeoFeature(*this, _Features[index]); }
-        //! Get feature, const version
+        //! Get feature (0-based index), const version
         const GeoFeature operator[](unsigned int index) const {
-            if (index < size())
+            if (index >= size())
+                throw std::out_of_range("No feature " + to_string(index));
                 return GeoFeature(*this, index);
-            throw std::out_of_range("No feature " + to_string(index));
+            _Layer->ResetReading();
+            _Layer->SetNextByIndex(index);
+            return GeoFeature(*this, _Layer->GetNextFeature());
         }
-        //const GeoFeature operator[](int index) const { return GeoFeature(*this, _Features[index]); }
+        //! Get feature using primary key
+        GeoFeature operator[](std::string val) {
+            return static_cast<const GeoVector&>(*this)[val];
+        }
+        //! Get feature using primary key (default to FID)
+        const GeoFeature operator[](std::string val) const {
+            if (_PrimaryKey == "") 
+                return GeoFeature(*this, std::stol(val));
+            else {
+                std::vector<GeoFeature> query = where(PrimaryKey(), val);
+                if (query.size() == 0)
+                    throw std::out_of_range("No feature with " + PrimaryKey() + " = " + val);
+                return query[0];
+            }
+        }
 
-        //! Combine into single geometry - Should be freed with OGRGeometryFactory::destroyGeometry() after use.
-        /*OGRGeometry* Union() const {
-            OGRGeometry* site = OGRGeometryFactory::createGeometry( wkbMultiPolygon );
-            return site;
-        }*/
-
-        std::vector<GeoFeature> where(std::string attr, std::string val) {
+        //! Get all features whose "attribute" is equal to "val"
+        std::vector<GeoFeature> where(std::string attr, std::string val) const {
             std::vector<GeoFeature> matches;
             GeoFeature f;
             for (unsigned int i=0; i<size(); i++) {
@@ -99,8 +125,6 @@ namespace gip {
 
         void use_counts(std::string s="") const {
             std::cout << Basename() << " GeoVector " << s << " use_counts" << std::endl;
-            //for (unsigned int i=0; i<_Features.size(); i++)
-            //   std::cout << "\tFeature " << i << ": use_count = " << _Features[i].use_count() << std::endl;
         }
 
         //! Get value of this attribute for all features
@@ -115,9 +139,7 @@ namespace gip {
         }
 
     protected:
-        // OGRFeature
-        //std::vector<GeoFeature> _Features;
-        //std::vector< boost::shared_ptr<OGRFeature> > _Features;
+        std::string _PrimaryKey;
 
     }; // class GeoVector
 
