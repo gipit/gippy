@@ -322,6 +322,9 @@ namespace gip {
         GeoFeature __getitem__(int index) {
             return self->GeoVector::operator[](index);
         }
+        GeoFeature __getitem__(std::string val) {
+            return self->GeoVector::operator[](val);
+        }
         GeoVector __deepcopy__(GeoVector vector) {
             return GeoVector(vector);
         }
