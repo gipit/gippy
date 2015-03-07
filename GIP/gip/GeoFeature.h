@@ -35,7 +35,7 @@ namespace gip {
         //! \name Constructors/Destructor
         //! Default constructor
         explicit GeoFeature() 
-            : GeoVectorResource(), _Feature() {}
+            : GeoVectorResource(), _Feature(), _PrimaryKey("") {}
         //! New feature constructor
         /*explicit GeoFeature(const GeoVectorResource& vector, boost::shared_ptr<OGRFeature> feature) 
             : GeoVectorResource(vector) {
@@ -43,14 +43,20 @@ namespace gip {
             if (Options::Verbose() > 4) use_counts("constructor");
         }*/
         //! Constructor to open specific feature in a vector
-        explicit GeoFeature(std::string filename, std::string layer, int index)
+        explicit GeoFeature(std::string filename, std::string layer, long int fid)
             : GeoVectorResource(filename, layer) {
-            OpenFeature(index);
+            OpenFeature(fid);
         }
         //! Open feature constructor
-        explicit GeoFeature(const GeoVectorResource& vector, int index)
+        // TODO - is this used?
+        explicit GeoFeature(const GeoVectorResource& vector, long int fid)
             : GeoVectorResource(vector) {
-            OpenFeature(index);
+            OpenFeature(fid);
+        }
+        //! Open feature constructor
+        explicit GeoFeature(const GeoVectorResource& vector, OGRFeature* feature)
+            : GeoVectorResource(vector) {
+            _Feature.reset(feature, OGRFeature::DestroyFeature);
         }
         //! Copy constructor
         GeoFeature(const GeoFeature& feature) 
@@ -69,6 +75,16 @@ namespace gip {
             //if (Options::Verbose() > 4) use_count("destructor");
         }
 
+        std::string Basename() const {
+            // look up primary key
+            std::string bname(LayerName());
+            std::cout << "Primary Key = " << _PrimaryKey << std::endl;
+            if (_PrimaryKey == "")
+                return bname + "-" + to_string(FID());
+            std::cout << "Here" << std::endl;
+            return bname + "-" + (*this)[_PrimaryKey];
+        }
+    
         //! \name Geospatial information
         Rect<double> Extent() const {
             OGREnvelope ext;
@@ -88,6 +104,10 @@ namespace gip {
             char* wkt(NULL);
             Geometry()->exportToWkt(&wkt);
             return std::string(wkt);
+        }
+
+        long int FID() const {
+            return _Feature->GetFID();
         }
 
         //! Get attribute by name
@@ -119,16 +139,15 @@ namespace gip {
         boost::shared_ptr<OGRFeature> _Feature;
 
     private:
-        void OpenFeature(int index) {
+        void OpenFeature(long int fid) {
             //if (!_Layer.TestCapability(OLCFastSetNextByIndex))
             //    std::cout << "using slow method of accessing feature" << std::endl;
             // TODO - check # of features
             // Is this a race condition ?
-            _Layer->ResetReading();
-            if (index > 0)
-                _Layer->SetNextByIndex(index);
-            _Feature.reset(_Layer->GetNextFeature(), OGRFeature::DestroyFeature);
+            _Feature.reset(_Layer->GetFeature(fid), OGRFeature::DestroyFeature);
         }
+
+        std::string _PrimaryKey;
 
     }; // class GeoFeature
 } // namespace gip
