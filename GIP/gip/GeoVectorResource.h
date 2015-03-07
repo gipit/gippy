@@ -58,12 +58,16 @@ namespace gip {
         std::string Basename() const;
         //! File format of dataset
         //std::string Format() const;
+        std::string LayerName() const;
 
         // Geospatial
+        //! Return spatial reference system as an OGRSpatialReference
         OGRSpatialReference SRS() const;
 
+        //! Return spatial reference system as WKT
         std::string Projection() const;
 
+        //! Get bounding box in projected units
         Rect<double> Extent() const;
 
         //! Get number of features
@@ -71,7 +75,7 @@ namespace gip {
             return _Layer->GetFeatureCount();
         }
         unsigned long int size() const {
-            return _Layer->GetFeatureCount();
+            return NumFeatures();
         }
 
         //! Get list of attributes
@@ -84,7 +88,10 @@ namespace gip {
             return atts;
         }
 
-        void use_count(std::string s = "") const;
+        void use_count(std::string s = "") const {
+            std::cout << Basename() << " GeoVectorResource " << s 
+                << " use_count = " << _OGRDataSource.use_count() << std::endl;
+        }
 
     protected:
 

@@ -81,7 +81,12 @@ namespace gip {
     }
 
     string GeoVectorResource::Basename() const {
-        return _Filename.stem().string();
+        //return _Filename.stem().string();
+        return LayerName();
+    }
+
+    string GeoVectorResource::LayerName() const {
+        return _Layer->GetName();
     }
 
     // Geospatial
@@ -102,10 +107,6 @@ namespace gip {
             Point<double>(ext.MinX, ext.MinY),
             Point<double>(ext.MaxX, ext.MaxY)
         );
-    }
-
-    void GeoVectorResource::use_count(string s) const {
-        cout << Basename() << " GeoVectorResource " << s << " use_count = " << _OGRDataSource.use_count() << endl;
     }
 
 } //namespace gip
