@@ -34,7 +34,7 @@ namespace gip {
 
     // Constructors
     GeoVectorResource::GeoVectorResource(string filename, string layer) 
-        : _Filename(filename) {
+        : _Filename(filename), _PrimaryKey("") {
         _OGRDataSource.reset(OGRSFDriverRegistrar::Open(filename.c_str()), OGRDataSource::DestroyDataSource);
         if (_OGRDataSource == NULL) {
             //BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
@@ -45,7 +45,8 @@ namespace gip {
 
     // Copy constructor
     GeoVectorResource::GeoVectorResource(const GeoVectorResource& vector) 
-        : _Filename(vector._Filename), _OGRDataSource(vector._OGRDataSource), _Layer(vector._Layer) {
+        : _Filename(vector._Filename), _OGRDataSource(vector._OGRDataSource), 
+            _Layer(vector._Layer), _PrimaryKey(vector._PrimaryKey) {
     }
 
     // Assignment
@@ -54,11 +55,11 @@ namespace gip {
         _Filename = vector._Filename;
         _OGRDataSource = vector._OGRDataSource;
         _Layer = vector._Layer;
+        _PrimaryKey = vector._PrimaryKey;
         return *this;
     }
 
-    GeoVectorResource::~GeoVectorResource() {
-    }
+    GeoVectorResource::~GeoVectorResource() {}
 
     // Open layer
     void GeoVectorResource::OpenLayer(string layer) {
@@ -81,7 +82,6 @@ namespace gip {
     }
 
     string GeoVectorResource::Basename() const {
-        //return _Filename.stem().string();
         return LayerName();
     }
 
