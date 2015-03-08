@@ -75,14 +75,19 @@ namespace gip {
             //if (Options::Verbose() > 4) use_count("destructor");
         }
 
-        std::string Basename() const {
-            // look up primary key
-            std::string bname(LayerName());
+        //! Get value for the PrimaryKey
+        std::string Value() const {
             if (_PrimaryKey == "")
-                return bname + "-" + to_string(FID());
-            return bname + "-" + (*this)[_PrimaryKey];
+                return to_string(FID());
+            else
+                return (*this)[_PrimaryKey];
         }
-    
+
+        //! Return basename made up of layer name and feature name
+        std::string Basename() const {
+            return LayerName() + "-" + Value();
+        }
+
         //! \name Geospatial information
         Rect<double> Extent() const {
             OGREnvelope ext;
