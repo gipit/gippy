@@ -61,7 +61,11 @@ namespace gip {
             //if (Options::Verbose() > 4) use_counts("destructor");
         }
 
-        void SetPrimaryKey(std::string key) {
+        void SetPrimaryKey(std::string key="") {
+            if (key == "") {
+                _PrimaryKey = "";
+                return;
+            }
             std::vector<std::string> atts = Attributes();
             if (std::find(atts.begin(), atts.end(), key) != atts.end()) {
                 std::vector<std::string> vals = Values(key);
