@@ -35,7 +35,7 @@ namespace gip {
         //! \name Constructors/Destructor
         //! Default constructor
         explicit GeoFeature() 
-            : GeoVectorResource(), _Feature(), _PrimaryKey("") {}
+            : GeoVectorResource(), _Feature() {}
         //! New feature constructor
         /*explicit GeoFeature(const GeoVectorResource& vector, boost::shared_ptr<OGRFeature> feature) 
             : GeoVectorResource(vector) {
@@ -78,10 +78,8 @@ namespace gip {
         std::string Basename() const {
             // look up primary key
             std::string bname(LayerName());
-            std::cout << "Primary Key = " << _PrimaryKey << std::endl;
             if (_PrimaryKey == "")
                 return bname + "-" + to_string(FID());
-            std::cout << "Here" << std::endl;
             return bname + "-" + (*this)[_PrimaryKey];
         }
     
@@ -146,8 +144,6 @@ namespace gip {
             // Is this a race condition ?
             _Feature.reset(_Layer->GetFeature(fid), OGRFeature::DestroyFeature);
         }
-
-        std::string _PrimaryKey;
 
     }; // class GeoFeature
 } // namespace gip

@@ -82,19 +82,6 @@ namespace gip {
             return _PrimaryKey;
         }
 
-        void SetPrimaryKey(std::string key) {
-            std::vector<std::string> atts = Attributes();
-            if (std::find(atts.begin(), atts.end(), key) != atts.end()) {
-                unsigned int sz(atts.size());
-                std::sort(atts.begin(), atts.end());
-                atts.erase(std::unique(atts.begin(), atts.end()), atts.end());
-                if (sz == atts.size())
-                    _PrimaryKey = key;
-                else
-                    throw std::runtime_error("Attribute " + key + " is not unique.");
-            } else
-                throw std::out_of_range("No such attribute " + key);
-        }
 
         //! Get list of attributes
         std::vector<std::string> Attributes() const {

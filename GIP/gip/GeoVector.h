@@ -43,23 +43,37 @@ namespace gip {
             : GeoVectorResource() {}
         //! Open existing layer from source
         GeoVector(std::string filename, std::string layer="")
-            : GeoVectorResource(filename, layer), _PrimaryKey("") {
+            : GeoVectorResource(filename, layer) {
         }
 
         //! Copy constructor
         GeoVector(const GeoVector& vector)
-            : GeoVectorResource(vector), _PrimaryKey(vector._PrimaryKey) {
+            : GeoVectorResource(vector) {
         }
         //! Assignment operator
         GeoVector& operator=(const GeoVector& vector) {
             if (this == &vector) return *this;
             GeoVectorResource::operator=(vector);
-            _PrimaryKey = vector._PrimaryKey;
             return *this;
         }
         //! Destructor
         ~GeoVector() {
             //if (Options::Verbose() > 4) use_counts("destructor");
+        }
+
+        void SetPrimaryKey(std::string key) {
+            std::vector<std::string> atts = Attributes();
+            if (std::find(atts.begin(), atts.end(), key) != atts.end()) {
+                std::vector<std::string> vals = Values(key);
+                unsigned int sz(vals.size());
+                std::sort(vals.begin(), vals.end());
+                vals.erase(std::unique(vals.begin(), vals.end()), vals.end());
+                if (sz == vals.size())
+                    _PrimaryKey = key;
+                else
+                    throw std::runtime_error("Attribute " + key + " is not unique.");
+            } else
+                throw std::out_of_range("No such attribute " + key);
         }
 
         // Feature Indexing
@@ -93,6 +107,17 @@ namespace gip {
             }
         }
 
+        //! Get value of this attribute for all features
+        std::vector<std::string> Values(std::string attr) {
+            std::vector<std::string> vals;
+            GeoFeature f;
+            for (unsigned int i=0; i<size(); i++) {
+                f = GeoFeature(*this, i);
+                vals.push_back(f[attr]);
+            }
+            return vals;
+        }
+
         //! Get all features whose "attribute" is equal to "val"
         std::vector<GeoFeature> where(std::string attr, std::string val) const {
             std::vector<GeoFeature> matches;
@@ -105,23 +130,7 @@ namespace gip {
             return matches;
         }
 
-        void use_counts(std::string s="") const {
-            std::cout << Basename() << " GeoVector " << s << " use_counts" << std::endl;
-        }
-
-        //! Get value of this attribute for all features
-        std::vector<std::string> Values(std::string attr) {
-            std::vector<std::string> vals;
-            GeoFeature f;
-            for (unsigned int i=0; i<size(); i++) {
-                f = GeoFeature(*this, i);
-                vals.push_back(f[attr]);
-            }
-            return vals;
-        }
-
     protected:
-        std::string _PrimaryKey;
 
     }; // class GeoVector
 
