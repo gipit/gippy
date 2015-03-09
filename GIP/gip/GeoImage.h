@@ -540,7 +540,7 @@ namespace gip {
         ChunkSet chunks(XSize(), YSize());
         for (unsigned int i=0; i<NumBands(); i++) {
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                (*this)[i].Write((*this)[i].Read<T>(chunks[i]),chunks[i]);
+                (*this)[i].Write((*this)[i].Read<T>(chunks[iChunk]),chunks[iChunk]);
             }
             // clear functions after processing
             (*this)[i].ClearFunctions();
