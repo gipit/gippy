@@ -63,7 +63,7 @@ namespace gip {
         // boost logging test
         //BOOST_LOG_TRIVIAL(trace) << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
 
-        if (Options::Verbose() > 3)
+        if (Options::Verbose() > 4)
             std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
     }
 
@@ -89,7 +89,7 @@ namespace gip {
 
         // create file
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
-        if (Options::Verbose() > 3)
+        if (Options::Verbose() > 4)
             std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz,datatype, papszOptions) );
         if (_GDALDataset.get() == NULL) {
@@ -113,7 +113,7 @@ namespace gip {
         if (_GDALDataset.unique()) {
             _GDALDataset->FlushCache();
             //BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
-            if (Options::Verbose() > 3) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (Options::Verbose() > 4) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
         }
     }
 
