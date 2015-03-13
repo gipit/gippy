@@ -24,7 +24,6 @@
 #include <set>
 
 #include <gip/GeoAlgorithms.h>
-#include <gip/gip_CImg.h>
 #include <gip/gip_gdal.h>
 
 //#include <gdal/ogrsf_frmts.h>
@@ -136,7 +135,7 @@ namespace gip {
         if (Options::Verbose() > 1) {
             cout.precision(4);
             cout << "   Cloud Cover = " << cloudcover*100 << "%" << endl;
-            cimg_print(tstats, "Cloud stats(min,max,mean,sd,skew,count)");
+            //cimg_print(tstats, "Cloud stats(min,max,mean,sd,skew,count)");
         }
 
         // Pass 2 (thermal processing)
@@ -155,7 +154,8 @@ namespace gip {
             }
             image["LWIR"].ClearMasks();
             CImg<float> warm_stats = image["LWIR"].AddMask(imgout[b_ambclouds]).AddMask(image["LWIR"] < th1).AddMask(image["LWIR"] > th0).Stats();
-            if (Options::Verbose() > 1) cimg_print(warm_stats, "Warm Cloud stats(min,max,mean,sd,skew,count)");
+            if (Options::Verbose() > 1) 
+                warm_stats.print("Warm Cloud stats(min,max,mean,sd,skew,count)");
             image["LWIR"].ClearMasks();
             if (((warm_stats(5)/scenesize) < 0.4) && (warm_stats(2) < 22)) {
                 if (Options::Verbose() > 2) cout << "Accepting warm clouds" << endl;
@@ -164,7 +164,8 @@ namespace gip {
             } else {
                 // Cold clouds
                 CImg<float> cold_stats = image["LWIR"].AddMask(imgout[b_ambclouds]).AddMask(image["LWIR"] < th0).Stats();
-                if (Options::Verbose() > 1) cimg_print(cold_stats, "Cold Cloud stats(min,max,mean,sd,skew,count)");
+                if (Options::Verbose() > 1) 
+                    cold_stats.print("Cold Cloud stats(min,max,mean,sd,skew,count)");
                 image["LWIR"].ClearMasks();
                 if (((cold_stats(5)/scenesize) < 0.4) && (cold_stats(2) < 22)) {
                     if (Options::Verbose() > 2) cout << "Accepting cold clouds" << endl;

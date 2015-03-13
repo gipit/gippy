@@ -52,7 +52,7 @@ namespace gip {
         for (unsigned int i=0; i<chunks.Size(); i++) {
             stats = img.Read<unsigned char>(chunks[i]).get_stats();
             if ((stats[0] != i) || (stats[1] != i) || (stats[2] != i)) {
-                cimg_printstats(stats, "Block " + to_string(i) + " stats");
+                //stats.print("Block " + to_string(i) + " stats");
                 success = false;
             }
         }

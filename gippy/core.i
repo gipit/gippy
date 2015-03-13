@@ -57,7 +57,6 @@ namespace std {
 %{
     #include <gip/gip.h>
     #include <gip/Utils.h>
-    #include <gip/gip_CImg.h>
     #include <gip/geometry.h>
     #include <gip/GeoImage.h>
     #include <gip/GeoImages.h>
