@@ -22,8 +22,10 @@
     #include <python2.7/Python.h>
     #include <numpy/arrayobject.h>
     #include <iostream>
-    #include <gip/gip_CImg.h>
+    #include <CImg.h>
     #include <stdint.h>
+
+    using cimg_library::CImg;
 
     // Convert CImg into numpy array
     template<typename T> PyObject* CImgToArr(CImg<T> cimg) {
