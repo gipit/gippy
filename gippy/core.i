@@ -49,6 +49,9 @@ namespace std {
 %ignore operator<<;
 %ignore boost::filesystem::path;
 
+%{
+    #include <gip/gip_CImg.h>
+%}
 // Wrap CImg
 %include "cimg.i"
 
