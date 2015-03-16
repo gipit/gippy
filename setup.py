@@ -26,10 +26,9 @@ setup for GIP and gippy
 import os
 import glob
 from setuptools import setup, Extension, find_packages
-#from setuptools.extension import Library
+
 from setuptools.command.install import install
 from setuptools.command.develop import develop
-#from setuptools.command.bdist_egg import bdist_egg
 from setuptools.command.build_ext import build_ext
 import numpy
 import imp
@@ -69,7 +68,6 @@ class gippy_install(install):
         # ensure swig extension built before packaging
         self.run_command('build_ext')
         install.run(self)
-
         add_reg(os.path.join(self.install_lib, os.path.dirname(modules[1].name), 'gippy.py'))
 
 
@@ -125,10 +123,6 @@ setup(
     license='Apache v2.0',
     ext_modules=modules,
     packages=find_packages(),
-    #packages=['gippy', 'gippy.tests'],
-    #package_dir={'gippy': 'gippy'},
-    #py_modules=['gippy', 'gippy.tests'],
-    #install_requires = ['numpy'],
     cmdclass={
         "develop": gippy_develop,
         "install": gippy_install,
