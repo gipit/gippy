@@ -156,8 +156,7 @@ namespace gip {
                  "PyObject passed in is a numpy.array.\n"
                  "Comply!\n ");
         GeoRaster& Write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
-            PyArrayObject* arr = (PyArrayObject*)obj;
-            switch(((PyArrayObject*)arr)->descr->type_num) {
+            switch( PyArray_TYPE((PyArrayObject*)obj)) {
                 case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
                 case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(obj), chunk); break;
                 case NPY_INT16: self->Write(ArrToCImg<short>(obj), chunk); break;
@@ -247,8 +246,7 @@ namespace gip {
             return CImgToArr(self->Read<float>(chunk));
         }
         GeoImage& Write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
-            PyArrayObject* arr = (PyArrayObject*)obj;
-            switch(arr->descr->type_num) {
+            switch( PyArray_TYPE((PyArrayObject*)obj)) {
                 case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
                 case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(obj), chunk); break;
                 case NPY_INT16: self->Write(ArrToCImg<short>(obj), chunk); break;

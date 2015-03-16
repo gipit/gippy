@@ -19,6 +19,7 @@
 #    limitations under the License.
 ##############################################################################*/
 %{
+    #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
     #include <python2.7/Python.h>
     #include <numpy/arrayobject.h>
     #include <iostream>
@@ -65,15 +66,17 @@
 
     // Convert numpy array into CImg
     template<typename T> CImg<T> ArrToCImg(PyObject* obj) {
-        PyArrayObject* arr = (PyArrayObject*)obj;
-        if (arr->nd == 1) {
-            return CImg<T>((T*)arr->data, arr->dimensions[0]);
-        } else if (arr->nd == 2) {
-            return CImg<T>((T*)arr->data, arr->dimensions[1], arr->dimensions[0]);
-        } else if (arr->nd == 3) {
-            return CImg<T>((T*)arr->data, arr->dimensions[2], arr->dimensions[1], arr->dimensions[0]);
-        } else if (arr->nd == 4) {
-            return CImg<T>((T*)arr->data, arr->dimensions[3], arr->dimensions[2], arr->dimensions[1], arr->dimensions[0]);
+        T* data((T*)PyArray_DATA((PyArrayObject*)obj));
+        npy_intp* dims(PyArray_DIMS((PyArrayObject*)obj));
+        int numdim(PyArray_NDIM((PyArrayObject*)obj));
+        if (numdim == 1) {
+            return CImg<T>(data, dims[0]);
+        } else if (numdim == 2) {
+            return CImg<T>(data, dims[1], dims[0]);
+        } else if (numdim == 3) {
+            return CImg<T>(data, dims[2], dims[1], dims[0]);
+        } else if (numdim == 4) {
+            return CImg<T>(data, dims[3], dims[2], dims[1], dims[0]);
         } else {
             throw(std::runtime_error("Error converting numpy array to CImg"));
         }
@@ -96,19 +99,19 @@
 
     /*
     namespace gip {
-        PyObject* test(PyObject* arr) {
-            //return CImgToArr(_test(ArrToCImg<float>(arr)));
-            switch(((PyArrayObject*)arr)->descr->type_num) {
-                case NPY_UINT8: return CImgToArr(_test(ArrToCImg<uint8_t>(arr)));
-                case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(arr)));
-                case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(arr)));
-                case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(arr)));
-                case NPY_UINT32: returnedrn CImgToArr(_test(ArrToCImg<uint32_t>(arr)));
-                case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(arr)));
-                case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(arr)));
-                case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(arr)));
-                case NPY_FLOAT32: return CImgToArr(_test(ArrToCImg<float>(arr)));
-                case NPY_FLOAT64: return CImgToArr(_test(ArrToCImg<double>(arr)));
+        PyObject* test(PyObject* obj) {
+            //return CImgToArr(_test(ArrToCImg<float>(obj)));
+            switch( PyArray_TYPE((PyArrayObject*)obj)) {
+                case NPY_UINT8: return CImgToArr(_test(ArrToCImg<uint8_t>(obj)));
+                case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(obj)));
+                case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(obj)));
+                case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(obj)));
+                case NPY_UINT32: returnedrn CImgToArr(_test(ArrToCImg<uint32_t>(obj)));
+                case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(obj)));
+                case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(obj)));
+                case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(obj)));
+                case NPY_FLOAT32: return CImgToArr(_test(ArrToCImg<float>(obj)));
+                case NPY_FLOAT64: return CImgToArr(_test(ArrToCImg<double>(obj)));
                 default:
                     throw(std::exception());
             }
