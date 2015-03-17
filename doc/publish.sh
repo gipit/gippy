@@ -9,5 +9,5 @@ git branch -D gh-pages
 git subtree split --prefix doc -b gh-pages
 
 # push to github
-git push -r origin gh-pages
+git push -f origin gh-pages
 
