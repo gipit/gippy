@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # GIPPY documentation build configuration file, created by
-# sphinx-quickstart on Tue Mar 17 15:54:28 2015.
+# sphinx-quickstart on Tue Mar 17 16:17:43 2015.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -31,10 +31,11 @@ import os
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.pngmath',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -263,7 +264,3 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
-
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
