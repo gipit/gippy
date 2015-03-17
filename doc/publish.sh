@@ -6,7 +6,7 @@
 git branch -D gh-pages
 
 # create new branch out of contents in doc directory
-git subtree split --prefix doc -b gh-pages
+git subtree split --prefix doc/html -b gh-pages
 
 # push to github
 git push -f origin gh-pages
