@@ -18,9 +18,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ##############################################################################*/
-%module algorithms
+%module("Geospatial Image Processing for Python Algorithms") algorithms
 
-%feature("autodoc", "1");
+%feature("autodoc", "3");
 %{
 	#define SWIG_FILE_WITH_INIT
 	#include <gip/GeoAlgorithms.h>

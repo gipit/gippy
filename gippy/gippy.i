@@ -18,8 +18,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ##############################################################################*/
-%module gippy
-%feature("autodoc", "1");
+%module(docstring="Geospatial Image Processing for Python") gippy
+%feature("autodoc", "3");
 %{
     #define SWIG_FILE_WITH_INIT
     #include <gdal/gdal_priv.h>
