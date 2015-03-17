@@ -77,11 +77,3 @@ Creating new images
     # As above but with different datatype and 4 bands
     image = gippy.GeoImage('test.tif', gimage, gippy.GDT_Int16, 4)
 
-
-
-## Development Note
-
-For developing GIPS, it is recommended that you use a python virtual environment 
-This allows multiple users on the same system to independently develop without 
-collisions. If you are in a virtual environment (ve), install or develop will install
-to the ve instead of the system
