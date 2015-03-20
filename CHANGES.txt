@@ -18,6 +18,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v0.3.1
+- fixed indexing of vectors to get features
+
 v0.3.0
 - License changed from GPL v2 to Apache 2.0
 - Added test framework
