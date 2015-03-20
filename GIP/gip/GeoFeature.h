@@ -24,6 +24,7 @@
 
 #include <gdal/ogrsf_frmts.h>
 #include <gdal/ogr_feature.h>
+#include <gdal/cpl_error.h>
 #include <boost/shared_ptr.hpp>
 
 #include <gip/GeoVectorResource.h>
@@ -145,9 +146,10 @@ namespace gip {
         void OpenFeature(long int fid) {
             //if (!_Layer.TestCapability(OLCFastSetNextByIndex))
             //    std::cout << "using slow method of accessing feature" << std::endl;
-            // TODO - check # of features
-            // Is this a race condition ?
             _Feature.reset(_Layer->GetFeature(fid), OGRFeature::DestroyFeature);
+            if (CPLGetLastErrorNo() > 0) {
+                throw std::out_of_range (CPLGetLastErrorMsg()); 
+            }
         }
 
     }; // class GeoFeature

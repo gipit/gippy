@@ -90,7 +90,6 @@ namespace gip {
         const GeoFeature operator[](unsigned int index) const {
             if (index >= size())
                 throw std::out_of_range("No feature " + to_string(index));
-                return GeoFeature(*this, index);
             _Layer->ResetReading();
             _Layer->SetNextByIndex(index);
             return GeoFeature(*this, _Layer->GetNextFeature());
