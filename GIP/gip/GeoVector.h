@@ -113,9 +113,10 @@ namespace gip {
         //! Get value of this attribute for all features
         std::vector<std::string> Values(std::string attr) {
             std::vector<std::string> vals;
+            _Layer->ResetReading();
             GeoFeature f;
             for (unsigned int i=0; i<size(); i++) {
-                f = GeoFeature(*this, i);
+                f = GeoFeature(*this, _Layer->GetNextFeature());
                 vals.push_back(f[attr]);
             }
             return vals;
@@ -124,9 +125,10 @@ namespace gip {
         //! Get all features whose "attribute" is equal to "val"
         std::vector<GeoFeature> where(std::string attr, std::string val) const {
             std::vector<GeoFeature> matches;
+            _Layer->ResetReading();
             GeoFeature f;
             for (unsigned int i=0; i<size(); i++) {
-                f = GeoFeature(*this, i);
+                f = GeoFeature(*this, _Layer->GetNextFeature());
                 if (f[attr] == val)
                     matches.push_back(f);
             }
