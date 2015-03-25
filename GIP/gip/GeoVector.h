@@ -68,6 +68,9 @@ namespace gip {
             }
             std::vector<std::string> atts = Attributes();
             if (std::find(atts.begin(), atts.end(), key) != atts.end()) {
+                _PrimaryKey = key;
+                // for now, don't check
+                """
                 std::vector<std::string> vals = Values(key);
                 unsigned int sz(vals.size());
                 std::sort(vals.begin(), vals.end());
@@ -76,6 +79,7 @@ namespace gip {
                     _PrimaryKey = key;
                 else
                     throw std::runtime_error("Attribute " + key + " is not unique.");
+                """
             } else
                 throw std::out_of_range("No such attribute " + key);
         }
