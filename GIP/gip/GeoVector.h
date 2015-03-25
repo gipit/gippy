@@ -135,6 +135,17 @@ namespace gip {
             return matches;
         }
 
+        std::vector<GeoFeature> where(std::string sql) const {
+            std::vector<GeoFeature> matches;
+            _Layer->SetAttributeFilter(sql.c_str());
+            _Layer->ResetReading();
+            OGRFeature* f;
+            while ((f = _Layer->GetNextFeature())) {
+                matches.push_back(GeoFeature(*this, f));
+            }
+            return matches;
+        }
+
     protected:
 
     }; // class GeoVector
