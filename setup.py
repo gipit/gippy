@@ -113,6 +113,10 @@ for n in names:
         )
     )
 
+tmp = find_packages()
+print tmp
+exit(2)
+
 
 setup(
     name='gippy',
@@ -122,7 +126,7 @@ setup(
     author_email='matt.a.hanson@gmail.com',
     license='Apache v2.0',
     ext_modules=modules,
-    packages=find_packages(),
+    packages=['gippy', 'gippy.algorithms', 'gippy.test'], #find_packages(),
     cmdclass={
         "develop": gippy_develop,
         "install": gippy_install,
