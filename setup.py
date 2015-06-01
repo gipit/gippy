@@ -115,6 +115,7 @@ for n in names:
 
 tmp = find_packages()
 print tmp
+print modules
 exit(2)
 
 

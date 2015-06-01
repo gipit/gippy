@@ -18,6 +18,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v0.3.3:
+- fixed install issues through PyPi
+
 v0.3.1
 - fixed indexing of vectors to get features
 
