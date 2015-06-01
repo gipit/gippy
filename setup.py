@@ -30,6 +30,7 @@ from setuptools import setup, Extension, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.build_ext import build_ext
+from setuptools.command.bdist_egg import bdist_egg
 import numpy
 import imp
 
@@ -49,12 +50,12 @@ class gippy_build_ext(build_ext):
         for m in modules:
             m.library_dirs.append(os.path.join(self.build_lib, os.path.dirname(m.name)))
 
-#class gippy_bdist_egg(bdist_egg):
-#    def run(self):
-#        self.distribution.ext_modules = [gip_module_static, gippy_module]
-#        self.run_command('build_ext')
-#        add_reg('gippy/gippy.py')
-#        bdist_egg.run(self)
+class gippy_bdist_egg(bdist_egg):
+    def run(self):
+        self.distribution.ext_modules = modules #[gip_module_static, gippy_module]
+        self.run_command('build_ext')
+        add_reg('gippy/gippy.py')
+        bdist_egg.run(self)
 
 
 class gippy_install(install):
