@@ -123,7 +123,7 @@ setup(
     author_email='matt.a.hanson@gmail.com',
     license='Apache v2.0',
     ext_modules=modules,
-    packages=find_packages(),
+    packages=['gippy'], #, 'gippy.algorithms', 'gippy.test'],
     cmdclass={
         "develop": gippy_develop,
         "install": gippy_install,
