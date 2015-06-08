@@ -21,4 +21,14 @@
 ################################################################################
 from .version import __version__
 from gippy import *
+
+# remove _swigregister and Options_ functions
+remove_f = [f for f in list(locals()) if f.endswith('_swigregister') or f.startswith('Options_')]
+for f in remove_f:
+    del locals()[f] 
+del remove_f
+del f
+
+# register GDAL and OGR formats
 gdalinit()
+del locals()['gdalinit'] 
