@@ -20,6 +20,7 @@
 ################################################################################
 v0.3.3:
 - fixed install issues through PyPi
+- removed uncessary swig generated functions
 
 v0.3.1
 - fixed indexing of vectors to get features
