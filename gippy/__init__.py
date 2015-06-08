@@ -21,3 +21,4 @@
 ################################################################################
 from .version import __version__
 from gippy import *
+gdalinit()
