@@ -31,66 +31,57 @@ from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.build_ext import build_ext
 from setuptools.command.bdist_egg import bdist_egg
+from wheel.bdist_wheel import bdist_wheel
 import numpy
 import imp
 
 __version__ = imp.load_source('gippy.version', 'gippy/version.py').__version__
 
 
-def add_reg(filename):
-    """ Add gdal init function and version to the SWIG generated module file """
-    f = open(filename, 'a')
-    f.write('gip_gdalinit()\n')
-    f.close()
-
-
 class gippy_build_ext(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)
-        for m in modules:
+        # ensure that swig modules can find libgip
+        for m in swig_modules:
             m.library_dirs.append(os.path.join(self.build_lib, os.path.dirname(m.name)))
-
-class gippy_bdist_egg(bdist_egg):
-    def run(self):
-        self.distribution.ext_modules = modules #[gip_module_static, gippy_module]
-        self.run_command('build_ext')
-        add_reg('gippy/gippy.py')
-        bdist_egg.run(self)
-
-
-class gippy_install(install):
-    def finalize_options(self):
-        install.finalize_options(self)
-        for m in modules:
-            print 'module', m, os.path.join(self.install_lib, os.path.dirname(m.name))
-            m.runtime_library_dirs.append(os.path.join(self.install_lib, os.path.dirname(m.name)))
-
-    def run(self):
-        # ensure swig extension built before packaging
-        self.run_command('build_ext')
-        install.run(self)
-        add_reg(os.path.join(self.install_lib, os.path.dirname(modules[1].name), 'gippy.py'))
 
 
 class gippy_develop(develop):
     def finalize_options(self):
         develop.finalize_options(self)
-        modules[1].runtime_library_dirs.append(os.path.abspath('./'))
-
+        for m in swig_modules:
+            m.runtime_library_dirs.append(os.path.abspath('./'))
     def run(self):
+        self.run_command('build_ext')
         develop.run(self)
-        add_reg(os.path.join(os.path.dirname(modules[1].name), 'gippy.py'))
 
-# Static library
-#gip_module_static = Library(
-#    name='gip',
-#    sources=glob.glob('GIP/*.cpp'),
-#    include_dirs=['GIP'],
-#    language='c++',
-#    extra_compile_args=['-std=c++0x', '-O3'],
-#)
 
-# Dynamic shared library
+class gippy_install(install):
+    def finalize_options(self):
+        install.finalize_options(self)
+        for m in swig_modules:
+            m.runtime_library_dirs.append(os.path.join(self.install_lib, os.path.dirname(m.name)))
+    def run(self):
+        # ensure swig extension built before packaging
+        self.run_command('build_ext')
+        install.run(self)
+
+
+class gippy_bdist_egg(bdist_egg):
+    def run(self):
+        #self.distribution.ext_modules = [gip_module] + swig_modules
+        self.run_command('build_ext')
+        bdist_egg.run(self)
+
+
+class gippy_bdist_wheel(bdist_wheel):
+    def run(self):
+        #self.distribution.ext_modules = [gip_module] + swig_modules #[gip_module_static, gippy_module]
+        self.run_command('build_ext')
+        bdist_egg.run(self)
+
+
+# libgip - dynamic shared library
 gip_module = Extension(
     name='gippy/libgip',
     sources=glob.glob('GIP/*.cpp'),
@@ -99,18 +90,17 @@ gip_module = Extension(
     extra_compile_args=['-std=c++11', '-O3', '-DBOOST_LOG_DYN_LINK'],
 )
 
-modules = [gip_module]
-names = ['gippy', 'tests', 'algorithms']
-for n in names:
-    modules.append(
+
+swig_modules = []
+for n in ['gippy', 'algorithms', 'tests']:
+    swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
-            #swig_opts=['-c++', '-w509', '-IGIP', '-Igippy/gdal/python', '-Igippy/gdal/python/docs'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include(), '/usr/include/gdal'],
             libraries=['gip', 'gdal', 'boost_system', 'boost_filesystem', 'boost_log', 'pthread'],  # ,'X11'],
-            extra_compile_args=['-fPIC', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
+            extra_compile_args=['-fPIC', '-std=c++11', '-O3', '-DBOOST_LOG_DYN_LINK']
         )
     )
 
@@ -122,12 +112,20 @@ setup(
     author='Matthew Hanson',
     author_email='matt.a.hanson@gmail.com',
     license='Apache v2.0',
-    ext_modules=modules,
-    packages=['gippy'], #, 'gippy.algorithms', 'gippy.test'],
+    #platform_tag='linux_x86_64',
+    classifiers=[
+        'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: C++',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.7',
+    ],
+    ext_modules=[gip_module] + swig_modules,
+    packages=['gippy'],
     cmdclass={
+        "build_ext": gippy_build_ext,
         "develop": gippy_develop,
         "install": gippy_install,
-        #"bdist_egg": gippy_bdist_egg,
-        "build_ext": gippy_build_ext,
+        "bdist_egg": gippy_bdist_egg,
+        "bdist_wheel": gippy_bdist_wheel,
     }
 )
