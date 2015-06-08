@@ -27,7 +27,12 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 
+#include <gdal/gdal_priv.h>
+#include <gdal/ogrsf_frmts.h>
+
 namespace gip {
+
+    //enum DataType { Unknown, Byte, UInt16, Int16, UInt32, Int32, Float32, Float64 };
 
     void LogLevel(int level) {
         boost::log::core::get()->set_filter(
@@ -35,6 +40,14 @@ namespace gip {
         );
     }
 
+    // Register file formats with GDAL and OGR
+    void gdalinit() {
+        GDALAllRegister();
+        OGRRegisterAll();
+        CPLPushErrorHandler(CPLQuietErrorHandler);
+    }
+
 }
 
 #endif
+
