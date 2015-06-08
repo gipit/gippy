@@ -30,6 +30,7 @@
 //#include <gdal/gdalwarper.h>
 
 namespace gip {
+    namespace algorithms {
     using std::string;
     using std::vector;
     using std::cout;
@@ -892,5 +893,5 @@ namespace gip {
         return covariance;
     }
 
-
+    }
 } // namespace gip

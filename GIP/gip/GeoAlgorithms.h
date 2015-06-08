@@ -29,6 +29,7 @@
 #include <initializer_list>
 
 namespace gip {
+    namespace algorithms {
     //! Create cloudmask using ACCA
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
@@ -65,7 +66,7 @@ namespace gip {
 
     //! Calculate spectral covariance
     CImg<double> SpectralCovariance(const GeoImage&);
-
+    }
 } // namespace gip
 
 #endif // GIP_GEOALGORITHMS_H
