@@ -67,9 +67,6 @@ class gippy_install(install):
 
 
 class gippy_bdist_egg(bdist_egg):
-    def finalize_options(self):
-        bdist_egg.finalize_options(self)
-        add_runtime_library_dirs(self.install_lib)
     def run(self):
         self.distribution.ext_modules = [gip_module] + swig_modules
         self.run_command('build_ext')
@@ -77,9 +74,6 @@ class gippy_bdist_egg(bdist_egg):
 
 
 class gippy_bdist_wheel(bdist_wheel):
-    def finalize_options(self):
-        bdist_wheel.finalize_options(self)
-        add_runtime_library_dirs(self.install_lib)
     def run(self):
         self.distribution.ext_modules = [gip_module] + swig_modules
         self.run_command('build_ext')
