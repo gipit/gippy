@@ -18,7 +18,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
-v0.3.3:
+v0.3.4:
 - fixed install issues through PyPi
 - removed uncessary swig generated functions
 

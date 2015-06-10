@@ -59,8 +59,7 @@ class gippy_develop(develop):
 class gippy_install(install):
     def finalize_options(self):
         install.finalize_options(self)
-        for m in swig_modules:
-            m.runtime_library_dirs.append(os.path.join(self.install_lib, os.path.dirname(m.name)))
+        add_runtime_library_dirs(self.install_lib)
     def run(self):
         # ensure swig extension built before packaging
         self.run_command('build_ext')
@@ -68,17 +67,28 @@ class gippy_install(install):
 
 
 class gippy_bdist_egg(bdist_egg):
+    def finalize_options(self):
+        bdist_egg.finalize_options(self)
+        add_runtime_library_dirs(self.install_lib)
     def run(self):
-        #self.distribution.ext_modules = [gip_module] + swig_modules
+        self.distribution.ext_modules = [gip_module] + swig_modules
         self.run_command('build_ext')
         bdist_egg.run(self)
 
 
 class gippy_bdist_wheel(bdist_wheel):
+    def finalize_options(self):
+        bdist_wheel.finalize_options(self)
+        add_runtime_library_dirs(self.install_lib)
     def run(self):
-        #self.distribution.ext_modules = [gip_module] + swig_modules #[gip_module_static, gippy_module]
+        self.distribution.ext_modules = [gip_module] + swig_modules
         self.run_command('build_ext')
-        bdist_egg.run(self)
+        bdist_wheel.run(self)
+
+
+def add_runtime_library_dirs(path):
+    for m in swig_modules:
+        m.runtime_library_dirs.append(os.path.join(path, os.path.dirname(m.name)))
 
 
 # libgip - dynamic shared library
