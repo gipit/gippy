@@ -387,9 +387,9 @@ namespace gip {
         }*/
 
         //! \name File I/O
-        template<class T> CImg<T> ReadRaw(iRect& chunk=iRect()) const;
+        template<class T> CImg<T> ReadRaw(iRect chunk=iRect()) const;
         template<class T> CImg<T> Read(iRect chunk=iRect()) const;
-        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect& chunk=iRect());
+        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Write(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Process(GeoRaster& raster);
 
@@ -520,7 +520,7 @@ namespace gip {
 
     //! \name File I/O
     //! Read raw chunk given bounding box
-    template<class T> CImg<T> GeoRaster::ReadRaw(iRect& chunk) const {
+    template<class T> CImg<T> GeoRaster::ReadRaw(iRect chunk) const {
         if (!chunk.valid()) chunk = Rect<int>(0,0,XSize(),YSize());
         if (chunk.Padding() > 0) chunk = chunk.Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
 
@@ -602,7 +602,7 @@ namespace gip {
     }
 
     //! Write raw CImg to file
-    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect& chunk) {
+    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect chunk) {
         if (!chunk.valid()) chunk = Rect<int>(0,0,XSize(),YSize());
         // Depad this if needed
         if (chunk.Padding() > 0) {
