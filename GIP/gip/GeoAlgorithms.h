@@ -37,8 +37,10 @@ namespace gip {
     std::string BrowseImage(const GeoImage&, int quality=75);
 
     //! Create single image from multiple input images using vector file footprint
-    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
-        float xres, float yres, bool crop=false, unsigned char interpolation=0, dictionary metadata=dictionary());
+    GeoImage CookieCutter(GeoImages images, GeoFeature feature,
+        std::string filename, float xres, float yres, bool crop=false,
+        unsigned char interpolation=0, dictionary metadata=dictionary(),
+        bool alltouch=false);
 
     //! Create new file with a Fmask cloud mask
     GeoImage Fmask(const GeoImage&, std::string, int=3, int=5, dictionary=dictionary());
