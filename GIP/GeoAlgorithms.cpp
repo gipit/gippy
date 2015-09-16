@@ -155,7 +155,7 @@ namespace gip {
             }
             image["LWIR"].ClearMasks();
             CImg<float> warm_stats = image["LWIR"].AddMask(imgout[b_ambclouds]).AddMask(image["LWIR"] < th1).AddMask(image["LWIR"] > th0).Stats();
-            if (Options::Verbose() > 1) 
+            if (Options::Verbose() > 1)
                 warm_stats.print("Warm Cloud stats(min,max,mean,sd,skew,count)");
             image["LWIR"].ClearMasks();
             if (((warm_stats(5)/scenesize) < 0.4) && (warm_stats(2) < 22)) {
@@ -165,7 +165,7 @@ namespace gip {
             } else {
                 // Cold clouds
                 CImg<float> cold_stats = image["LWIR"].AddMask(imgout[b_ambclouds]).AddMask(image["LWIR"] < th0).Stats();
-                if (Options::Verbose() > 1) 
+                if (Options::Verbose() > 1)
                     cold_stats.print("Cold Cloud stats(min,max,mean,sd,skew,count)");
                 image["LWIR"].ClearMasks();
                 if (((cold_stats(5)/scenesize) < 0.4) && (cold_stats(2) < 22)) {
@@ -245,7 +245,7 @@ namespace gip {
         }
         boost::filesystem::path dir(img.Path().parent_path() / "browse");
         if (!fs::is_directory(dir)) {
-            if(!boost::filesystem::create_directory(dir)) 
+            if(!boost::filesystem::create_directory(dir))
                 throw std::runtime_error("Could not create browse directory " + dir.string());
         }
         std::string filename = (dir / img.Path().stem()).string() + ".jpg";
@@ -270,8 +270,8 @@ namespace gip {
     }
 
     //! Merge images into one file and crop to vector
-    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
-        float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
+    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename,
+        float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata, bool alltouch) {
         if (Options::Verbose() > 1)
             cout << "GIPPY: CookieCutter (" << images.size() << " files) - " << filename << endl;
         Rect<double> extent = feature.Extent();
@@ -291,6 +291,7 @@ namespace gip {
         // convert extent to resolution units
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
+
         GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.DataType());
         imgout.CopyMeta(images[0]);
         imgout.CopyColorTable(images[0]);
@@ -345,6 +346,8 @@ namespace gip {
 
         char **papszOptions = NULL;
         //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
+        if (alltouch)
+            papszOptions = CSLSetNameValue(papszOptions, "CUTLINE_ALL_TOUCHED", "TRUE") ;
         papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
         papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::NumCores()).c_str());
@@ -502,8 +505,8 @@ namespace gip {
             BT = image["LWIR"].Read<double>(chunks[iChunk]);
 
             lprob = probout[1].Read<double>(chunks[iChunk]);
-            
-            clouds = 
+
+            clouds =
                 (pcp & wmask & wprob.threshold(0.5))|=
                 (pcp & (wmask^1) & lprob.threshold(lthresh))|=
                 (lprob.get_threshold(0.99) & (wmask^1))|=
@@ -796,7 +799,7 @@ namespace gip {
         CImgList<double> stats;
         ChunkSet chunks(img.XSize(),img.YSize());
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            if (Options::Verbose() > 2) 
+            if (Options::Verbose() > 2)
                 std::cout << "Processing chunk " << chunks[iChunk] << " of " << img.Size() << std::endl;
             stats = img.SpectralStatistics(chunks[iChunk]);
             imgout[0].Write(stats[0], chunks[iChunk]);
@@ -853,7 +856,7 @@ namespace gip {
     CImg<double> SpectralCovariance(const GeoImage& img) {
         unsigned int NumBands(img.NumBands());
 
-        CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;        
+        CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;
         CImg<unsigned char> mask;
         int validsize;
 
