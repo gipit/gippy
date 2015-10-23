@@ -81,7 +81,7 @@ class CConfig(object):
         self.libs = []
         self.lib_dirs = []
         self.extra_link_args = []
-        for item in self.get('--libs').split() + self.get('--dep-libs').split():
+        for item in self.get('--libs').split():
             if item.startswith("-L"):
                 self.lib_dirs.extend(item[2:].split(":"))
             elif item.startswith("-l"):
