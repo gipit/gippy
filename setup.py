@@ -118,6 +118,8 @@ class gippy_install(install):
     def finalize_options(self):
         install.finalize_options(self)
         add_runtime_library_dirs(self.install_lib)
+        for m in swig_modules:
+            m.runtime_library_dirs.append(os.path.abspath('./'))
 
     def run(self):
         # ensure swig extension built before packaging
