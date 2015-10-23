@@ -24,8 +24,8 @@
 
 #include <string>
 #include <gip/GeoImage.h>
-#include <gdal/ogrsf_frmts.h>
-#include <gdal/gdalwarper.h>
+#include <ogrsf_frmts.h>
+#include <gdalwarper.h>
 
 namespace gip {
 

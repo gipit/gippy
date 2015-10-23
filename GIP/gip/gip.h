@@ -27,8 +27,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 
-#include <gdal/gdal_priv.h>
-#include <gdal/ogrsf_frmts.h>
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
 
 namespace gip {
 

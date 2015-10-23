@@ -177,7 +177,6 @@ if sys.platform == 'darwin':
     # would is hard to silence via pragma
     extra_compile_args.append('-Wno-parentheses-equality')
     extra_link_args.append('-mmacosx-version-min=10.8')
-    sysconfig._config_vars['CFLAGSFORSHARED'] = ''
 
 
 swig_modules = []

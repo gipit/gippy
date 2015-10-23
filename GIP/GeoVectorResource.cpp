@@ -23,7 +23,7 @@
 
 #include <iostream>
 
-#include <gdal/cpl_error.h>
+#include <cpl_error.h>
 
 
 namespace gip {

@@ -22,9 +22,9 @@
 #ifndef GIP_GEOFEATURE_H
 #define GIP_GEOFEATURE_H
 
-#include <gdal/ogrsf_frmts.h>
-#include <gdal/ogr_feature.h>
-#include <gdal/cpl_error.h>
+#include <ogrsf_frmts.h>
+#include <ogr_feature.h>
+#include <cpl_error.h>
 #include <boost/shared_ptr.hpp>
 
 #include <gip/GeoVectorResource.h>

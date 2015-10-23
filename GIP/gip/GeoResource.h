@@ -29,7 +29,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <gdal/gdal_priv.h>
+#include <gdal_priv.h>
 #include <gip/gip_CImg.h>
 #include <gip/geometry.h>
 

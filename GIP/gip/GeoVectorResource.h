@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include <gdal/ogrsf_frmts.h>
+#include <ogrsf_frmts.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
