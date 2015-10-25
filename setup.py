@@ -148,15 +148,6 @@ def add_runtime_library_dirs(path):
 # GDAL config parameters
 gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
-# libgip - dynamic shared library
-gip_module = Extension(
-    name='gippy/libgip',
-    sources=glob.glob('GIP/*.cpp'),
-    include_dirs=['GIP'],
-    language='c++',
-    extra_compile_args=['-std=c++11', '-O3', '-DBOOST_LOG_DYN_LINK'],
-)
-
 extra_compile_args = [
     '-fPIC', '-O3', '-std=c++11', '-DBOOST_LOG_DYN_LINK'
 ]
@@ -180,6 +171,20 @@ if sys.platform == 'darwin':
     extra_compile_args.append('-Wno-parentheses-equality')
     extra_link_args.append('-mmacosx-version-min=10.8')
 
+    extra_link_args.append('-Wl,-rpath,'+'@rpath/libgip.so')
+
+# libgip - dynamic shared library
+gip_module = Extension(
+    name='gippy/libgip',
+    sources=glob.glob('GIP/*.cpp'),
+    include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+    language='c++',
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args,
+)
+
+if sys.platform == 'darwin':
+    gip_module.extra_link_args.append('-install_name libgip.so')
 
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
