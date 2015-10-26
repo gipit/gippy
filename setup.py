@@ -100,7 +100,8 @@ class gippy_build_ext(build_ext):
         build_ext.finalize_options(self)
         # ensure that swig modules can find libgip
         for m in swig_modules:
-            m.library_dirs.append(os.path.join(self.build_lib, os.path.dirname(m.name)))
+            p = os.path.join(self.build_lib, os.path.dirname(m.name))
+            m.library_dirs.append(p)
 
 
 class gippy_develop(develop):
@@ -166,6 +167,7 @@ if sys.platform == 'darwin':
     )
 
     extra_compile_args.append('-mmacosx-version-min=10.8')
+    extra_compile_args.append('-Wno-absolute-value')
     # silence warning coming from boost python macros which
     # would is hard to silence via pragma
     extra_compile_args.append('-Wno-parentheses-equality')
