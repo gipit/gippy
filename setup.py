@@ -171,20 +171,26 @@ if sys.platform == 'darwin':
     extra_compile_args.append('-Wno-parentheses-equality')
     extra_link_args.append('-mmacosx-version-min=10.8')
 
-    extra_link_args.append('-Wl,-rpath,'+'@rpath/libgip.so')
+
+gip_extra_link_args = []
+if sys.platform == 'darwin':
+    #gip_module.extra_link_args = gip_module.extra_link_args.copy()
+    gip_extra_link_args = ["-install_name '@rpath/libgip.so'"]
+    extra_link_args.append('-Wl,-rpath,'+'@rpath/./')
 
 # libgip - dynamic shared library
 gip_module = Extension(
     name='gippy/libgip',
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+    libraries=[
+        'boost_system', 'boost_filesystem',
+        'boost_log', 'pthread'
+    ] + gdal_config.libs,  # ,'X11'],
     language='c++',
     extra_compile_args=extra_compile_args,
-    extra_link_args=extra_link_args,
+    extra_link_args=extra_link_args + gip_extra_link_args,
 )
-
-if sys.platform == 'darwin':
-    gip_module.extra_link_args.append('-install_name libgip.so')
 
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
