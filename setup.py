@@ -95,33 +95,13 @@ class CConfig(object):
         return tuple(map(int, match.groups()))
 
 
-class gippy_build_ext(build_ext):
-    def finalize_options(self):
-        build_ext.finalize_options(self)
-        # ensure that swig modules can find libgip
-        for m in swig_modules:
-            p = os.path.join(self.build_lib, os.path.dirname(m.name))
-            m.library_dirs.append(p)
-
-
 class gippy_develop(develop):
-    def finalize_options(self):
-        develop.finalize_options(self)
-        for m in swig_modules:
-            m.runtime_library_dirs.append(os.path.abspath('./'))
-
     def run(self):
         self.run_command('build_ext')
         develop.run(self)
 
 
 class gippy_install(install):
-    def finalize_options(self):
-        install.finalize_options(self)
-        add_runtime_library_dirs(self.install_lib)
-        for m in swig_modules:
-            m.runtime_library_dirs.append(os.path.abspath('./'))
-
     def run(self):
         # ensure swig extension built before packaging
         self.run_command('build_ext')
@@ -130,14 +110,14 @@ class gippy_install(install):
 
 class gippy_bdist_egg(bdist_egg):
     def run(self):
-        self.distribution.ext_modules = [gip_module] + swig_modules
+        self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_egg.run(self)
 
 
 class gippy_bdist_wheel(bdist_wheel):
     def run(self):
-        self.distribution.ext_modules = [gip_module] + swig_modules
+        self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_wheel.run(self)
 
@@ -149,11 +129,10 @@ def add_runtime_library_dirs(path):
 # GDAL config parameters
 gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
-extra_compile_args = [
-    '-fPIC', '-O3', '-std=c++11', '-DBOOST_LOG_DYN_LINK'
-]
+extra_compile_args = ['-O3', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
 
 extra_link_args = gdal_config.extra_link_args
+gip_extra_link_args = []
 
 if sys.platform == 'darwin':
     extra_compile_args.append('-stdlib=libc++')
@@ -174,37 +153,17 @@ if sys.platform == 'darwin':
     extra_link_args.append('-mmacosx-version-min=10.8')
 
 
-gip_extra_link_args = []
-if sys.platform == 'darwin':
-    #gip_module.extra_link_args = gip_module.extra_link_args.copy()
-    gip_extra_link_args = ["-install_name '@rpath/libgip.so'"]
-    extra_link_args.append('-Wl,-rpath,'+'@rpath/./')
-
-# libgip - dynamic shared library
-gip_module = Extension(
-    name='gippy/libgip',
-    sources=glob.glob('GIP/*.cpp'),
-    include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
-    libraries=[
-        'boost_system', 'boost_filesystem',
-        'boost_log', 'pthread'
-    ] + gdal_config.libs,  # ,'X11'],
-    language='c++',
-    extra_compile_args=extra_compile_args,
-    extra_link_args=extra_link_args + gip_extra_link_args,
-)
-
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),
-            sources=[os.path.join('gippy', n + '.i')],
+            sources=[os.path.join('gippy', n + '.i')] + glob.glob('GIP/*.cpp'),
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
             library_dirs=gdal_config.lib_dirs,
             libraries=[
-                'gip', 'boost_system', 'boost_filesystem',
+                'boost_system', 'boost_filesystem',
                 'boost_log', 'pthread'
             ] + gdal_config.libs,  # ,'X11'],
             extra_compile_args=extra_compile_args,
@@ -227,12 +186,12 @@ setup_args = dict(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
     ],
-    ext_modules=[gip_module] + swig_modules,
+    ext_modules=swig_modules,
     packages=['gippy'],
     cmdclass={
-        "build_ext": gippy_build_ext,
-        "develop": gippy_develop,
-        "install": gippy_install,
+        "build_ext": build_ext,
+        "develop": develop,
+        "install": install,
         "bdist_egg": gippy_bdist_egg,
         "bdist_wheel": gippy_bdist_wheel,
     }
