@@ -95,6 +95,16 @@ class CConfig(object):
         return tuple(map(int, match.groups()))
 
 
+class gippy_build_ext(build_ext):
+    def finalize_options(self):
+        build_ext.finalize_options(self)
+        # ensure that swig modules can find libgip
+        for m in swig_modules:
+            build_dir = os.path.join(self.build_lib, os.path.dirname(m.name))
+            m.library_dirs.append(build_dir)
+            m.runtime_library_dirs.append(os.path.abspath('./'))
+            m.runtime_library_dirs.append(build_dir)
+
 class gippy_develop(develop):
     def run(self):
         self.run_command('build_ext')
@@ -183,7 +193,7 @@ for n in ['gippy', 'algorithms', 'tests']:
     )
 
 
-setup_args = dict(
+setup(
     name='gippy',
     version=__version__,
     description='Geospatial Image Processing for Python',
@@ -200,12 +210,10 @@ setup_args = dict(
     ext_modules=[gip_module] + swig_modules,
     packages=['gippy'],
     cmdclass={
-        "build_ext": build_ext,
+        "build_ext": gippy_build_ext,
         "develop": develop,
         "install": install,
         "bdist_egg": gippy_bdist_egg,
         "bdist_wheel": gippy_bdist_wheel,
     }
 )
-
-setup(**setup_args)
