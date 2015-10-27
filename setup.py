@@ -129,10 +129,9 @@ def add_runtime_library_dirs(path):
 # GDAL config parameters
 gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
-extra_compile_args = ['-O3', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
+extra_compile_args = ['-fPIC', '-O3', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
 
-extra_link_args = gdal_config.extra_link_args
-gip_extra_link_args = []
+extra_link_args = ['-Wl,--export-dynamic'] + gdal_config.extra_link_args
 
 if sys.platform == 'darwin':
     extra_compile_args.append('-stdlib=libc++')
@@ -152,18 +151,30 @@ if sys.platform == 'darwin':
     extra_compile_args.append('-Wno-parentheses-equality')
     extra_link_args.append('-mmacosx-version-min=10.8')
 
+gip_module =  Extension(
+    name=os.path.join("gippy", "libgip"),
+    sources=glob.glob('GIP/*.cpp'),
+    include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+    library_dirs=gdal_config.lib_dirs,
+    libraries=[
+        'boost_system', 'boost_filesystem',
+        'boost_log', 'pthread'
+    ] + gdal_config.libs,
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args
+)
 
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),
-            sources=[os.path.join('gippy', n + '.i')] + glob.glob('GIP/*.cpp'),
+            sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
             library_dirs=gdal_config.lib_dirs,
             libraries=[
-                'boost_system', 'boost_filesystem',
+                'gip', 'boost_system', 'boost_filesystem',
                 'boost_log', 'pthread'
             ] + gdal_config.libs,  # ,'X11'],
             extra_compile_args=extra_compile_args,
@@ -186,7 +197,7 @@ setup_args = dict(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
     ],
-    ext_modules=swig_modules,
+    ext_modules=[gip_module] + swig_modules,
     packages=['gippy'],
     cmdclass={
         "build_ext": build_ext,
