@@ -98,12 +98,16 @@ class CConfig(object):
 class gippy_build_ext(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)
+        mock = gippy_install(self.distribution)
+        mock.finalize_options()
+        install_dir = os.path.join(mock.install_lib, "gippy")
+        self.build_lib = mock.install_lib
+
         # ensure that swig modules can find libgip
         for m in swig_modules:
-            build_dir = os.path.join(self.build_lib, os.path.dirname(m.name))
-            m.library_dirs.append(build_dir)
-            m.runtime_library_dirs.append(os.path.abspath('./'))
-            m.runtime_library_dirs.append(build_dir)
+            m.library_dirs.append(install_dir)
+            m.runtime_library_dirs.append(install_dir)
+
 
 class gippy_develop(develop):
     def run(self):
@@ -132,16 +136,12 @@ class gippy_bdist_wheel(bdist_wheel):
         bdist_wheel.run(self)
 
 
-def add_runtime_library_dirs(path):
-    for m in swig_modules:
-        m.runtime_library_dirs.append(os.path.join(path, os.path.dirname(m.name)))
-
 # GDAL config parameters
 gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
 extra_compile_args = ['-fPIC', '-O3', '-std=c++11', '-DBOOST_LOG_DYN_LINK']
 
-extra_link_args = ['-Wl,--export-dynamic'] + gdal_config.extra_link_args
+extra_link_args = gdal_config.extra_link_args
 
 if sys.platform == 'darwin':
     extra_compile_args.append('-stdlib=libc++')
@@ -211,8 +211,8 @@ setup(
     packages=['gippy'],
     cmdclass={
         "build_ext": gippy_build_ext,
-        "develop": develop,
-        "install": install,
+        "develop": gippy_develop,
+        "install": gippy_install,
         "bdist_egg": gippy_bdist_egg,
         "bdist_wheel": gippy_bdist_wheel,
     }
