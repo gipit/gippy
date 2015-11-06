@@ -101,7 +101,12 @@ class gippy_build_ext(build_ext):
         mock = gippy_install(self.distribution)
         mock.finalize_options()
         install_dir = os.path.join(mock.install_lib, "gippy")
-        self.build_lib = mock.install_lib
+
+        # Workaround for OSX because rpath doesn't work there, is to build
+        # in final module directory. This requires `pip uninstall gippy`
+        # before re-installing
+        if sys.platform == 'darwin':
+            self.build_lib = mock.install_lib
 
         # ensure that swig modules can find libgip
         for m in swig_modules:
@@ -167,8 +172,7 @@ gip_module =  Extension(
     include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
     library_dirs=gdal_config.lib_dirs,
     libraries=[
-        'boost_system', 'boost_filesystem',
-        'boost_log', 'pthread'
+        'boost_log', 'boost_system', 'boost_filesystem', 'pthread'
     ] + gdal_config.libs,
     extra_compile_args=extra_compile_args,
     extra_link_args=extra_link_args
