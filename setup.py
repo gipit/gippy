@@ -111,6 +111,8 @@ class gippy_build_ext(build_ext):
         # ensure that swig modules can find libgip
         for m in swig_modules:
             m.library_dirs.append(install_dir)
+            if sys.platform != 'darwin':
+                m.library_dirs.append(os.path.join(self.build_lib, "gippy"))
             m.runtime_library_dirs.append(install_dir)
 
 
