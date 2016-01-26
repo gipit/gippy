@@ -18,6 +18,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v0.3.7:
+- attempt to build portably on both OSX and Ubuntu 14.04
+
 v0.3.6:
 - added 'alltouch' option to CookieCutter
 
