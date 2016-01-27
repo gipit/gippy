@@ -30,3 +30,5 @@ GIPPY is a library of python bindings to a C++ library called GIPS. GIPS is buil
 
 Most notably GIPPY adds image processing functionality on top of GDAL for easier automation of processing functions. The main objects in the GIPPY library are the GeoRaster, which is a single raster band, and a GeoImage, which is a collection of GeoRaster objects (possibly from different files).  GeoImage and GeoRaster objects support various processing operations (e.g., +, -, log, abs) that can be chained together and saved as a processing chain.  The processing does not actually occur until the file is read (frequently followed by a write to a new file).  Reading may also occur in chunks, thereby facilitating the processing of very large files.
 
+# Testing
+At the moment, our testing is predominantly python 2.7 on Linux (Ubuntu 14.04LTS) with some work being done to support OS X.
