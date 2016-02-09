@@ -178,8 +178,8 @@ namespace gip {
         } else image["LWIR"].ClearMasks();
 
         //! Coarse shadow covering smear of image
-        float xres(30.0);
-        float yres(30.0);
+        float xres(imgout.Resolution().x());
+        float yres(imgout.Resolution().y());
         float sunelevation(se_degrees*M_PI/180.0);
         float solarazimuth(sa_degrees*M_PI/180.0);
         float distance = cloudheight/tan(sunelevation);
