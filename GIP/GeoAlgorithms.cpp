@@ -220,8 +220,10 @@ namespace gip {
                 clouds.dilate(dilate,dilate);
             if (smearlen > 0) {
                 temp2 = clouds;
-                // walking back to 0,0 from dx,dy
-                for(int xN=abs(dx),yN=abs(dy); xN>0 && yN>0; xN-=xstep,yN-=ystep)
+                // walking from xstep,ystep to dx,dy
+                for(int xN(xstep), yN(ystep);
+                    xN<=abs(dx) && yN<=abs(dy);
+                    xN+=xstep,yN+=ystep)
                     clouds|=temp2.get_shift(signX*xN,signY*yN);
             }
             imgout[b_cloudmask].Write<unsigned char>(clouds,chunk);
