@@ -183,31 +183,32 @@ namespace gip {
         float sunelevation(se_degrees*M_PI/180.0);
         float solarazimuth(sa_degrees*M_PI/180.0);
         float distance = cloudheight/tan(sunelevation);
-        int dx = -1.0 * sin(solarazimuth) * distance / xres;
-        int dy = cos(solarazimuth) * distance / yres;
-        int padding(double(dilate)/2+std::max(abs(dx),abs(dy))+1);
-        int smearlen = sqrt(dx*dx+dy*dy);
+        float dx = sin(solarazimuth) * distance / xres;
+        float dy = cos(solarazimuth) * distance / yres;
+        int padding(std::ceil(double(dilate)/2+std::max(abs(dx),abs(dy))));
+        float smearlen = sqrt(dx*dx+dy*dy);
         if (Options::Verbose() > 2)
             cerr << "distance = " << distance << endl
                  << "dx       = " << dx << endl
                  << "dy       = " << dy << endl
-                 << "smearlen = " << smearlen << endl ;
+                 << "snmearlen = " << smearlen << endl ;
 
         // shift-style smear
-        int signX(dx/abs(dx));
-        int signY(dy/abs(dy));
-        int xstep = std::max(signX*dx/dilate/4, 1);
-        int ystep = std::max(signY*dy/dilate/4, 1);
+        int steps(std::max(std::abs(dx), std::abs(dy)));
+        int stepsize(1);
+        if (dilate > 0)
+            stepsize = std::max(dilate / 4, 1);
         if (Options::Verbose() > 2)
             cerr << "dilate = " << dilate << endl
-                 << "xstep  = " << signX*xstep << endl
-                 << "ystep  = " << signY*ystep << endl ;
+                 << "steps  = " << steps << endl
+                 << "stepsize  = " << stepsize << endl ;
 
         chunks.Padding(padding);
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             chunk = chunks[iChunk];
-            if (Options::Verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
+            if (Options::Verbose() > 3)
+                cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
             clouds = imgout[b_pass1].Read<unsigned char>(chunk);
             // should this be a |= ?
             if (addclouds) clouds += imgout[b_ambclouds].Read<unsigned char>(chunk);
@@ -220,11 +221,10 @@ namespace gip {
                 clouds.dilate(dilate,dilate);
             if (smearlen > 0) {
                 temp2 = clouds;
-                // walking from xstep,ystep to dx,dy
-                for(int xN(xstep), yN(ystep);
-                    xN<=abs(dx) && yN<=abs(dy);
-                    xN+=xstep,yN+=ystep)
-                    clouds|=temp2.get_shift(signX*xN,signY*yN);
+                for ( float step(1); step <= steps; step += 1)
+                    clouds |= temp2.get_shift(
+                        -int(std::round(dx*step/steps)),
+                        -int(std::round(dy*step/steps)));
             }
             imgout[b_cloudmask].Write<unsigned char>(clouds,chunk);
             // Inverse and multiply by nodata mask to get good data mask
