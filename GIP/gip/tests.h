@@ -28,7 +28,9 @@ namespace gip {
 
     GeoImage test_reading(std::string filename);
 
-	GeoImage test_chunking(int=0, int=100);
+    GeoImage test_chunking(int=0, int=100);
+
+    GeoImage test_padded_chunk_registration(int=5, int=10);
 
     /*template<class T> CImg<T> _test(CImg<T> cimg) {
         //std::cout << "GIPPY CImg input/output test" << std::endl;

@@ -18,6 +18,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v0.3.8:
+- ACCA shadow smear fixed.
+- Added test to check that chunks of padded image are registered properly
+
 v0.3.7:
 - attempt to build portably on both OSX and Ubuntu 14.04
 

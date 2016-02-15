@@ -62,5 +62,38 @@ namespace gip {
         return img;
     }
 
+    GeoImage test_padded_chunk_registration(int pad, int chunk) {
+        cout << "Chunking test with padding=" + to_string(pad) + " and " + to_string(chunk) + " chunks" << endl;
+        // Create new image
+        GeoImage img0("test_chunk_reg_input.tif", 10, 10, 1, GDT_Byte);
+        CImg<unsigned char> arr(10, 10);
+        arr *= 0;
+        for (int i(4); i<7; ++i)
+            for (int j(4); j<7; ++j)
+                arr(i,j) = 1;
+        img0.Write(arr);
+        GeoImage img("test_chunk_reg_output.tif", 10, 10, 1, GDT_Byte);
+        ChunkSet chunks = img.Chunks(pad, chunk);
+        CImg<unsigned char> cimg_in, cimg_out;
+        for (unsigned int i=0; i<chunks.Size(); i++) {
+            cimg_in = img0.Read<unsigned char>(chunks[i]);
+            img.Write(cimg_in, chunks[i]);
+        }
+        // Verify image
+        chunks.Padding(0);
+        bool success = true;
+        CImg <unsigned char> ck0, ck1;
+        for (unsigned int i=0; i<chunks.Size(); i++) {
+            ck0 = img0.Read<unsigned char>(chunks[i]);
+            ck1 = img.Read<unsigned char>(chunks[i]);
+            if (ck0 != ck1)
+                success = false;
+        }
+        if (success)
+            cout << "Test succeeded" << endl;
+        else cout << "Test failed" << endl;
+        return img;
+    }
+
 
 } // namespace gip
