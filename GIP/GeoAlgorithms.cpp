@@ -44,6 +44,7 @@ namespace gip {
      */
     GeoImage ACCA(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
+        const std::string ACCA_VERSION("0.3.8");
         if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.Basename() << endl;
 
         float th_red(0.08);
@@ -67,6 +68,10 @@ namespace gip {
         imgout[b_cloudmask].SetDescription("cloudmask");
         imgout[b_ambclouds].SetDescription("ambclouds");
         imgout[b_pass1].SetDescription("pass1");
+        metadata["ACCA_VERSION"] = ACCA_VERSION;
+        metadata["ACCA_erode"] = to_string(erode);
+        metadata["ACCA_dilate"] = to_string(dilate);
+        metadata["ACCA_cloudheight"] = to_string(cloudheight);
         imgout.SetMeta(metadata);
 
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
@@ -185,7 +190,6 @@ namespace gip {
         float distance = cloudheight/tan(sunelevation);
         float dx = sin(solarazimuth) * distance / xres;
         float dy = cos(solarazimuth) * distance / yres;
-        int padding(std::ceil(double(dilate)/2+std::max(abs(dx),abs(dy))));
         float smearlen = sqrt(dx*dx+dy*dy);
         if (Options::Verbose() > 2)
             cerr << "distance = " << distance << endl
@@ -203,6 +207,9 @@ namespace gip {
                  << "steps  = " << steps << endl
                  << "stepsize  = " << stepsize << endl ;
 
+        int padding(std::ceil(double(dilate)/2));
+        if (cloudheight > 0)
+            padding += std::max(abs(dx),abs(dy));
         chunks.Padding(padding);
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
