@@ -105,6 +105,7 @@ enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GD
 %template(Recti) gip::Rect<int>;
 %template(Rectd) gip::Rect<double>;
 %template(vectorRecti) std::vector< gip::Rect<int> >;
+%template(Pointd) gip::Point< double >;
 
 namespace gip {
     %extend ChunkSet {
@@ -117,7 +118,7 @@ namespace gip {
         }
         unsigned long int __len__() {
             return self->size();
-        }        
+        }
         ChunkSet __deepcopy__(ChunkSet chunks) {
             return ChunkSet(chunks);
         }
@@ -328,5 +329,5 @@ namespace gip {
         GeoVector __deepcopy__(GeoVector vector) {
             return GeoVector(vector);
         }
-    }    
+    }
 }
