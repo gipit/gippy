@@ -22,6 +22,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <set>
+#include <cstdint>
 
 #include <gip/GeoAlgorithms.h>
 #include <gip/gip_gdal.h>
@@ -44,7 +45,7 @@ namespace gip {
      */
     GeoImage ACCA(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
-        const std::string ACCA_VERSION("0.3.8");
+        const std::string ACCA_VERSION("0.4.0");
         if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.Basename() << endl;
 
         float th_red(0.08);
@@ -216,7 +217,7 @@ namespace gip {
             chunk = chunks[iChunk];
             if (Options::Verbose() > 3)
                 cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
-            clouds = imgout[b_pass1].Read<unsigned char>(chunk);
+            clouds = imgout[b_pass1].Read<unsigned char>(chunk).mul(image.NoDataMask(bands_used, chunk)^=1);
             // should this be a |= ?
             if (addclouds) clouds += imgout[b_ambclouds].Read<unsigned char>(chunk);
             clouds|=(image.SaturationMask(bands_used, chunk));
@@ -237,6 +238,82 @@ namespace gip {
             // Inverse and multiply by nodata mask to get good data mask
             imgout[b_finalmask].Write<unsigned char>((clouds^=1).mul(image.NoDataMask(bands_used, chunk)^=1), chunk);
             // TODO - add in snow mask
+        }
+        return imgout;
+    }
+
+    /** AddShadowMask. Takes in cloud mask, image for output masksun elevation, solar azimuth,
+     * number of pixels to erode, number of pixels to dilate, and height of
+     * clouds.
+     */
+    GeoImage AddShadowMask(const GeoImage& image, GeoImage& imgout,
+                           int b_mask, float se_degrees, float sa_degrees,
+                           int erode, int dilate, int cloudheight,
+                           dictionary metadata ) {
+        const std::string SHADOW_SMEAR_VERSION("0.1.0");
+        if (Options::Verbose() > 1) cout << "GIPPY: ShadowSmear - " << image.Basename() << endl;
+        imgout[b_mask].SetDescription(image[b_mask].Description() + "+shadow_smear");
+        metadata["SHADOW_SMEAR_VERSION"] = SHADOW_SMEAR_VERSION;
+        if (erode)
+            metadata["CLOUD_erode"] = to_string(erode);
+        if (dilate)
+            metadata["CLOUD_dilate"] = to_string(dilate);
+        if (cloudheight)
+            metadata["CLOUD_cloudheight"] = to_string(cloudheight);
+        imgout.SetMeta(metadata);
+
+        CImg<int16_t> clouds, temp2;
+
+        ChunkSet chunks(image.XSize(),image.YSize());
+        Rect<int> chunk;
+
+        //! Coarse shadow covering smear of image
+        float xres(image.Resolution().x());
+        float yres(image.Resolution().y());
+        float sunelevation(se_degrees*M_PI/180.0);
+        float solarazimuth(sa_degrees*M_PI/180.0);
+        float distance = cloudheight/tan(sunelevation);
+        float dx = sin(solarazimuth) * distance / xres;
+        float dy = cos(solarazimuth) * distance / yres;
+        float smearlen = sqrt(dx*dx+dy*dy);
+        if (Options::Verbose() > 2)
+            cerr << "distance = " << distance << endl
+                 << "dx       = " << dx << endl
+                 << "dy       = " << dy << endl
+                 << "snmearlen = " << smearlen << endl ;
+
+        int steps(std::max(std::abs(dx), std::abs(dy)));
+        int stepsize(1);
+        if (dilate > 0)
+            stepsize = std::max(dilate / 4, 1);
+
+        if (Options::Verbose() > 2)
+            cerr << "dilate = " << dilate << endl
+                 << "steps  = " << steps << endl
+                 << "stepsize  = " << stepsize << endl ;
+
+        int padding(std::ceil(double(dilate)/2));
+        if (cloudheight > 0)
+            padding += std::max(abs(dx),abs(dy));
+        chunks.Padding(padding);
+
+        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            chunk = chunks[iChunk];
+            if (Options::Verbose() > 3)
+                cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
+            clouds = image[b_mask].Read<int16_t>(chunk).mul(image[b_mask].NoDataMask(chunk)^=1);
+            if (erode > 0)
+                clouds.erode(erode, erode);
+            if (dilate > 0)
+                clouds.dilate(dilate,dilate);
+            if (cloudheight > 0) {
+                temp2 = clouds;
+                for ( float step(1); step <= steps; step += 1)
+                    clouds |= temp2.get_shift(
+                        -int(std::round(dx*step/steps)),
+                        -int(std::round(dy*step/steps)));
+            }
+            imgout[b_mask].Write<int16_t>((clouds^=1).mul(image[b_mask].NoDataMask(chunk)^=1),chunk);
         }
         return imgout;
     }

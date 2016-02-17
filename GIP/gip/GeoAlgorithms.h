@@ -31,7 +31,13 @@
 namespace gip {
     namespace algorithms {
     //! Create cloudmask using ACCA
-    GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
+    GeoImage ACCA(const GeoImage&, std::string,
+                  float, float, int = 5, int = 10, int = 4000,
+                  dictionary=dictionary());
+
+    GeoImage AddShadowMask(const GeoImage&, GeoImage&, int, float, float,
+                           int = 5, int = 10, int = 4000,
+                           dictionary=dictionary());
 
     //! Stretch image into byte
     std::string BrowseImage(const GeoImage&, int quality=75);
