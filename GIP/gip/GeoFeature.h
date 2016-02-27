@@ -27,6 +27,8 @@
 #include <gdal/cpl_error.h>
 #include <boost/shared_ptr.hpp>
 
+#include <gdal/ogr_api.h>
+
 #include <gip/GeoVectorResource.h>
 
 namespace gip {
@@ -99,14 +101,19 @@ namespace gip {
             );
         }
 
-        OGRGeometry* Geometry() const {
-            return _Feature->GetGeometryRef();
+        //! Get feature as geometry, warp to SRS if provided
+        OGRGeometry* Geometry(OGRSpatialReference* srs = NULL) const {
+            OGRGeometry* geom = _Feature->GetGeometryRef();
+            if (srs != NULL) {
+                geom->transformTo(srs);
+            }
+            return geom;
         }
 
         //! Get geometry in Well Known Text format
-        std::string WKT() const {
+        std::string WKT(OGRSpatialReference* srs = NULL) const {
             char* wkt(NULL);
-            Geometry()->exportToWkt(&wkt);
+            Geometry(srs)->exportToWkt(&wkt);
             return std::string(wkt);
         }
 
