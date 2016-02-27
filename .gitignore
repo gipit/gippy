@@ -1,7 +1,7 @@
 *.pyc
 *~
 *.o
-_gippylib.so
+*.so
 build/
 dist/
 src/
