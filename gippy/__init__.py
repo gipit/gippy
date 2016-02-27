@@ -21,6 +21,9 @@
 ################################################################################
 from .version import __version__
 from gippy import *
+import osgeo.gdal
+import osgeo.ogr
+import osgeo.osr
 
 # remove _swigregister and Options_ functions
 remove_f = [f for f in list(locals()) if f.endswith('_swigregister') or f.startswith('Options_')]
