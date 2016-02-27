@@ -150,6 +150,35 @@ namespace gip {
             return matches;
         }
 
+        //! Calculate intersection between passed in feature and features in this layer
+        std::map<std::string, std::string> Intersections(GeoFeature feat) {
+            // transform passed in feature to native
+            OGRSpatialReference* srs = _Layer->GetSpatialRef();
+            OGRGeometry* geom = feat.Geometry(srs);
+            _Layer->SetSpatialFilter(geom);
+            _Layer->ResetReading();
+            OGRFeature* f;
+
+            std::map<std::string, std::string> geoms;
+            std::vector<std::string> areas;
+            OGRGeometry* intersect;
+            char* wkt;
+            while ((f = _Layer->GetNextFeature())) {
+                if (f->GetGeometryRef()->Overlaps(geom)) {
+                    intersect = f->GetGeometryRef()->Intersection(geom);
+                    intersect->exportToWkt(&wkt);
+                    geoms[to_string(f->GetFID())] = wkt;
+                    //return std::string(wkt);
+
+                    //std::cout << "Area = " << intersect->Area() << std::endl;
+                    //areas.push_back(intersect->exportToWkt());
+                    //areas.push_back(intersect->exportToGEOS()->getArea());
+                }
+            }
+            _Layer->SetSpatialFilter(NULL);
+            return geoms;
+        }
+
     protected:
 
     }; // class GeoVector
