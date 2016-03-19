@@ -259,10 +259,9 @@ namespace gip {
         }
 
         //! \name Convolution functions
-        //GeoRaster convolve(const double& nodata) const {
-            //return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const CImg<double>&,const double&>(&CImg<double>::convolve), _1, kernel, nodata);
-        //    return GeoRaster(*this, boost::bind((&CImg<double>::convolve_nodata), _1, nodata));
-        //}
+        GeoRaster convolve(const CImg<double> kernel) const {
+            return GeoRaster(*this, boost::bind((&CImg<double>::convolve_nodata), _1, kernel, this->NoDataValue()));
+        }
 
         // Arithmetic
         GeoRaster operator+(const double &val) const {
@@ -578,10 +577,9 @@ namespace gip {
         if (_Functions.size() > 0) {
             CImg<double> imgd;
             imgd.assign(img);
-            //if (Options::Verbose() > 3 && (chunk.p0()==iPoint(0,0)))
-                //    std::cout << Basename() << ": Applying function " << std::endl;
-                    //std::cout << Basename() << ": Applying function " << iFunc->F() << std::endl;
             for (std::vector<func>::const_iterator iFunc=_Functions.begin();iFunc!=_Functions.end();iFunc++) {
+                if (Options::Verbose() > 2 && (chunk.p0()==iPoint(0,0)))
+                    std::cout << Basename() << ": Applying function " << (*iFunc) << std::endl;
                 (*iFunc)(imgd);
             }
             updatenodata = true;
