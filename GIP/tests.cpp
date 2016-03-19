@@ -35,6 +35,10 @@ namespace gip {
         return img;
     }
 
+    GeoImage create_test_image() {
+        return GeoImage("test_image.tif", 100, 100, 1, GDT_Byte);
+    }
+
     GeoImage test_chunking(int pad, int chunk) {
         cout << "Chunking test with padding=" + to_string(pad) + " and " + to_string(chunk) + " chunks" << endl;
         // Create new image
