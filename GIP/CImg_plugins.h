@@ -47,8 +47,7 @@ const CImg<T>& print__as_classes(std::string title="") {
 
 //! Convolve ignoring nodata values
 //template<typename t>
-/*CImg<T>& convolve_nodata(double nodata) {
-    CImg<double> kernel(3,3,1,1,1);
+CImg<T>& convolve_nodata(CImg<double> kernel, double nodata) {
     int m0((kernel.width())/2);
     int n0((kernel.height())/2);
     int border(std::max(m0,n0));
@@ -79,6 +78,6 @@ const CImg<T>& print__as_classes(std::string title="") {
             (*this)(x,y) = nodata;
     }
     return *this;
-}*/
+}
 
 #endif // CIMG_PLUGINS_H
