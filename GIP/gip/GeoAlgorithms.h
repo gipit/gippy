@@ -30,6 +30,30 @@
 
 namespace gip {
     namespace algorithms {
+
+    std::map< std::string, std::vector<std::string> > ProductBands = {
+        {"acca", {"RED","GREEN","NIR","SWIR1","LWIR"}},
+        {"truecolor", {"RED","GREEN","BLUE"}},
+        {"fmask", {"BLUE", "RED", "GREEN", "NIR", "SWIR1", "SWIR2", "LWIR"}},
+        // Indices
+        {"ndvi", {"NIR","RED"}},
+        {"evi", {"NIR","RED","BLUE"}},
+        {"lswi", {"NIR","SWIR1"}},
+        {"ndsi", {"SWIR1","GREEN"}},
+        {"ndwi", {"GREEN","NIR"}},
+        {"bi", {"BLUE","NIR"}},
+        {"satvi", {"SWIR1","RED", "SWIR2"}},
+        {"msavi2", {"NIR","RED"}},
+        {"vari", {"RED","GREEN","BLUE"}},
+        {"brgt", {"RED","GREEN","BLUE","NIR"}},
+        // Tillage indices
+        {"ndti", {"SWIR2","SWIR1"}},
+        {"crc", {"SWIR1","SWIR2","BLUE"}},
+        {"crcm", {"SWIR1","SWIR2","GREEN"}},
+        {"isti", {"SWIR1","SWIR2"}},
+        {"sti", {"SWIR1","SWIR2"}}
+    };
+
     //! Create cloudmask using ACCA
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
