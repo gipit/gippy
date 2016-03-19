@@ -520,27 +520,26 @@ namespace gip {
     //! \name File I/O
     //! Read raw chunk given bounding box
     template<class T> CImg<T> GeoRaster::ReadRaw(iRect& chunk) const {
-        if (!chunk.valid()) chunk = Rect<int>(0,0,XSize(),YSize());
-        if (chunk.Padding() > 0) chunk = chunk.Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
+        if (!chunk.valid())
+            chunk = Rect<int>(0,0,XSize(),YSize());
+        else if (chunk.Padding() > 0)
+            chunk = chunk.Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
 
         // This doesn't check for in bounds, should it?
         int width = chunk.x1()-chunk.x0()+1;
         int height = chunk.y1()-chunk.y0()+1;
 
-        T* ptrPixels = new T[width*height];
+        CImg<T> img(width, height);
         CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height, 
-            ptrPixels, width, height, type2GDALtype(typeid(T)), 0, 0);
+            img.data(), width, height, type2GDALtype(typeid(T)), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error reading " << CPLGetLastErrorMsg();
             throw std::runtime_error(err.str());
         }
-        CImg<T> img(ptrPixels,width,height);
 
         // Apply all masks TODO - cmask need to be float ?
         if (_Masks.size() > 0) {
-            if (Options::Verbose() > 3 && (chunk.p0()==iPoint(0,0)))
-                std::cout << Basename() << ": Applying " << _Masks.size() << " masks" << std::endl;
             CImg<float> cmask(_Masks[0].Read<float>(chunk));
             for (unsigned int i=1; i<_Masks.size(); i++) {
                 cmask.mul(_Masks[i].Read<float>(chunk));
@@ -550,7 +549,6 @@ namespace gip {
             }
         }
 
-        delete ptrPixels;
         return img;
     }
 
@@ -562,7 +560,7 @@ namespace gip {
         CImg<T> imgorig(img);
 
         bool updatenodata = false;
-        // Convert data to radiance (if not raw requested)
+        // Apply gain and offset
         if (Gain() != 1.0 || Offset() != 0.0) {
             img = Gain() * (img-_minDC) + Offset();
             // Update NoData now so applied functions have proper NoData value set (?)
@@ -578,8 +576,8 @@ namespace gip {
             CImg<double> imgd;
             imgd.assign(img);
             for (std::vector<func>::const_iterator iFunc=_Functions.begin();iFunc!=_Functions.end();iFunc++) {
-                if (Options::Verbose() > 2 && (chunk.p0()==iPoint(0,0)))
-                    std::cout << Basename() << ": Applying function " << (*iFunc) << std::endl;
+                //if (Options::Verbose() > 2 && (chunk.p0()==iPoint(0,0)))
+                //    std::cout << Basename() << ": Applying function " << (*iFunc) << std::endl;
                 (*iFunc)(imgd);
             }
             updatenodata = true;
