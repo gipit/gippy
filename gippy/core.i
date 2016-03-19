@@ -102,9 +102,11 @@ enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GD
 %ignore gip::ChunkSet::operator[];
 %include "gip/geometry.h"
 
-%template(Recti) gip::Rect<int>;
-%template(Rectd) gip::Rect<double>;
-%template(vectorRecti) std::vector< gip::Rect<int> >;
+%template(Point_int) gip::Point<int>;
+%template(Point_double) gip::Point<double>;
+%template(Rect_int) gip::Rect<int>;
+%template(Rect_double) gip::Rect<double>;
+%template(vector_Rect_int) std::vector< gip::Rect<int> >;
 
 namespace gip {
     %extend ChunkSet {
