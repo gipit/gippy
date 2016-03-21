@@ -36,13 +36,13 @@ namespace gip {
     }
 
     GeoImage create_test_image() {
-        return GeoImage("test_image.tif", 100, 100, 1, GDT_Byte);
+        return GeoImage("test_image.tif", 100, 100, 1, DataType("UInt8"));
     }
 
     GeoImage test_chunking(int pad, int chunk) {
         cout << "Chunking test with padding=" + to_string(pad) + " and " + to_string(chunk) + " chunks" << endl;
         // Create new image
-        GeoImage img("test_chunking.tif", 100, 100, 1, GDT_Byte);
+        GeoImage img("test_chunking.tif", 100, 100, 1, DataType("UInt8"));
         ChunkSet chunks = img.Chunks(pad, chunk);
         CImg<unsigned char> cimg_in, cimg_out;
         for (unsigned int i=0; i<chunks.Size(); i++) {

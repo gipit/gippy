@@ -75,7 +75,7 @@ class GeoRasterTests(unittest.TestCase):
         ndvi[red == nodata] = nodata
         print 'calc and processed in %s' % (datetime.now() - start)
         fout = os.path.splitext(geoimg.Filename())[0] + '_numpy_ndvi'
-        geoimgout = gippy.GeoImage(fout, geoimg, gippy.GDT_Float64, 1)
+        geoimgout = gippy.GeoImage(fout, geoimg, gippy.DataType("Float64"), 1)
         geoimgout[0].Write(ndvi)
         geoimgout = None
         geoimg = None
