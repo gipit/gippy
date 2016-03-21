@@ -50,30 +50,30 @@ namespace gip {
         //! Open file from vector of individual files
         explicit GeoImage(std::vector<std::string> filenames);
         //! Constructor for creating new file
-        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, GDALDataType datatype=GDT_Byte) :
-            GeoResource(xsz, ysz, bsz, datatype, filename) {
+        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, DataType dt=DataType("Uint8")) :
+            GeoResource(xsz, ysz, bsz, dt, filename) {
             LoadBands();
         }
         //! Constructor for creating new file with same properties (xsize, ysize, metadata) as existing file
-        explicit GeoImage(std::string filename, const GeoImage& image, GDALDataType datatype, int bsz) :
-            GeoResource(image.XSize(), image.YSize(), bsz, datatype, filename) {
-            //if (datatype == GDT_Unknown) datatype = image->GetDataType();
+        explicit GeoImage(std::string filename, const GeoImage& image, DataType dt, int bsz) :
+            GeoResource(image.XSize(), image.YSize(), bsz, dt, filename) {
+            //if (datatype == GDT_Unknown) datatype = image->Type();
             //CopyMeta(image);
             SetCoordinateSystem(image);
             LoadBands();
         }
         //! Constructor for creating new file with same properties (xsize, ysize, bsize) as existing file
-        explicit GeoImage(std::string filename, const GeoImage& image, GDALDataType datatype) :
-            GeoResource(image.XSize(), image.YSize(), image.NumBands(), datatype, filename) {
-            //if (datatype == GDT_Unknown) datatype = image->GetDataType();
+        explicit GeoImage(std::string filename, const GeoImage& image, DataType dt) :
+            GeoResource(image.XSize(), image.YSize(), image.NumBands(), dt, filename) {
+            //if (datatype == GDT_Unknown) datatype = image->Type();
             //CopyMeta(image);
             SetCoordinateSystem(image);
             LoadBands();
         }
         //! Constructor for creating new file with given properties (xsize, ysize, bsize,datatype) as existing file
         explicit GeoImage(std::string filename, const GeoImage& image) :
-            GeoResource(image.XSize(), image.YSize(), image.NumBands(), image.DataType(), filename) {
-            //if (datatype == GDT_Unknown) datatype = image->GetDataType();
+            GeoResource(image.XSize(), image.YSize(), image.NumBands(), image.Type(), filename) {
+            //if (datatype == GDT_Unknown) datatype = image->Type();
             //CopyMeta(image);
             SetCoordinateSystem(image);
             LoadBands();
@@ -84,9 +84,9 @@ namespace gip {
             return GeoImage(filename, update);
         }*/
 
-        //static GeoImage New(string filename, const GeoImage& template=GeoImage(), int xsz=0, int ysz=0, int bands=1, GDALDataType dt=GDT_Byte)
+        //static GeoImage New(string filename, const GeoImage& template=GeoImage(), int xsz=0, int ysz=0, int bands=1, DataType dt=GDT_Byte)
         //! Constructor to create new file based on input vector extents
-        /*explicit GeoImage(string filename, string vector, float xres, float yres, GDALDataType datatype=GDT_Byte, int bsz=1) {
+        /*explicit GeoImage(string filename, string vector, float xres, float yres, DataType datatype=GDT_Byte, int bsz=1) {
             OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vector.c_str());
             OGRLayer *poLayer = poDS->GetLayer(0);
             OGREnvelope extent;
@@ -120,7 +120,7 @@ namespace gip {
         //! Number of bands
         unsigned int size() const { return _RasterBands.size(); }
         //! Get datatype of image (check all raster bands, return 'largest')
-        GDALDataType DataType() const { return _RasterBands[0].DataType(); }
+        DataType Type() const { return _RasterBands[0].Type(); }
         //! Return information on image as string
         std::string Info(bool=true, bool=false) const;
 
@@ -211,7 +211,7 @@ namespace gip {
         //! \name Processing functions
         template<class T> GeoImage& Process();
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage Process(std::string, GDALDataType = GDT_Unknown);
+        template<class T> GeoImage Process(std::string, DataType = 0);
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& AddMask(const GeoRaster& band) {
@@ -476,7 +476,7 @@ namespace gip {
                 T pix[1];
                 badpix = false;
                 for (unsigned int j=0; j<NumBands(); j++) {
-                    _RasterBands[j].GetGDALRasterBand()->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, type2GDALtype(typeid(T)), 0, 0);
+                    _RasterBands[j].GetGDALRasterBand()->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, type2GDALType(typeid(T)), 0, 0);
                     if (_RasterBands[j].NoData() && pix[0] == _RasterBands[j].NoDataValue()) {
                         badpix = true;
                     } else {
@@ -535,6 +535,7 @@ namespace gip {
     }; // class GeoImage
 
     // GeoImage template function definitions
+    //! Process in-place
     template<class T> GeoImage& GeoImage::Process() {
         // Create chunks
         ChunkSet chunks(XSize(), YSize());
@@ -549,10 +550,10 @@ namespace gip {
     }
 
     // Copy input file into new output file
-    template<class T> GeoImage GeoImage::Process(std::string filename, GDALDataType datatype) {
+    template<class T> GeoImage GeoImage::Process(std::string filename, DataType dt) {
         // TODO: if not supplied base output datatype on units?
-        if (datatype == GDT_Unknown) datatype = this->DataType();
-        GeoImage imgout(filename, *this, datatype);
+        if (dt.Int() == 0) dt = this->Type();
+        GeoImage imgout(filename, *this, dt);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
             imgout[i].SetDescription(_BandNames[i]);

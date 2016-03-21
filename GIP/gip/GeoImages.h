@@ -69,9 +69,9 @@ namespace gip {
         unsigned int size() const { return _GeoImages.size(); }
 
         //! Best datatype of all bands
-        GDALDataType DataType() const {
+        DataType Type() const {
             // TODO - validate all, return highest precision data type in collection
-            return _GeoImages[0].DataType();
+            return _GeoImages[0].Type();
         }
 
         //! Return number of bands in images, or -1 if they are not all the same

@@ -30,9 +30,11 @@
 #include <gdal/gdal_priv.h>
 #include <gdal/ogrsf_frmts.h>
 
-namespace gip {
+/*
+    Utility functions that are called only from Python (not used internally)
+*/
 
-    //enum DataType { Unknown, Byte, UInt16, Int16, UInt32, Int32, Float32, Float64 };
+namespace gip {
 
     void LogLevel(int level) {
         boost::log::core::get()->set_filter(

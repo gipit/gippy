@@ -55,7 +55,7 @@ namespace gip {
         float th_nirswir1(1.0);
         //float th_warm(210);
 
-        GeoImage imgout(filename, image, GDT_Byte, 4);
+        GeoImage imgout(filename, image, DataType("UInt8"), 4);
         imgout.SetNoData(0);
         imgout.SetUnits("other");
         // Band indices
@@ -291,7 +291,7 @@ namespace gip {
         // convert extent to resolution units
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
-        GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.DataType());
+        GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.Type());
         imgout.CopyMeta(images[0]);
         imgout.CopyColorTable(images[0]);
         for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].CopyMeta(images[0][b]);
@@ -367,7 +367,7 @@ namespace gip {
         if (Options::Verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
-        GeoImage imgout(filename, image, GDT_Byte, 5);
+        GeoImage imgout(filename, image, DataType("UInt8"), 5);
         int b_final(0); imgout[b_final].SetDescription("finalmask");
         int b_clouds(1);  imgout[b_clouds].SetDescription("cloudmask");
         int b_pcp(2);   imgout[b_pcp].SetDescription("PCP");
@@ -377,7 +377,7 @@ namespace gip {
         imgout.SetMeta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
-        GeoImage probout(filename + "-prob", image, GDT_Float32, 2);
+        GeoImage probout(filename + "-prob", image, DataType("Float32"), 2);
         probout[0].SetDescription("wcloud");
         probout[1].SetDescription("lcloud");
         probout.SetNoData(nodataval);
@@ -616,7 +616,7 @@ namespace gip {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
             if (Options::Verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
             prodname = iprod->first;
-            imagesout[prodname] = GeoImage(iprod->second, image, GDT_Int16, 1);
+            imagesout[prodname] = GeoImage(iprod->second, image, DataType("Int16"), 1);
             imagesout[prodname].SetNoData(nodataout);
             imagesout[prodname].SetGain(0.0001);
             imagesout[prodname].SetUnits("other");
@@ -728,7 +728,7 @@ namespace gip {
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))
             throw std::runtime_error("Coefficient array needs to be of size NumBands x NumBands!");
         float nodataout = -32768;
-        GeoImage imgout(filename, img, GDT_Float32);
+        GeoImage imgout(filename, img, DataType("Float32"));
         imgout.SetNoData(nodataout);
         //imgout.SetGain(0.0001);
         imgout.CopyMeta(img);
@@ -756,7 +756,7 @@ namespace gip {
     GeoImage RXD(const GeoImage& img, string filename) {
         if (img.NumBands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
 
-        GeoImage imgout(filename, img, GDT_Byte, 1);
+        GeoImage imgout(filename, img, DataType("UInt8"), 1);
         imgout.SetBandName("RXD", 1);
 
         CImg<double> covariance = SpectralCovariance(img);
@@ -787,7 +787,7 @@ namespace gip {
         if (img.NumBands() < 2) {
             throw std::runtime_error("Must have at least 2 bands!");
         }
-        GeoImage imgout(filename, img, GDT_Float32, 2);
+        GeoImage imgout(filename, img, DataType("Float32"), 2);
         imgout.SetNoData(img[0].NoDataValue());
         imgout.CopyMeta(img);
         imgout.SetBandName("Mean", 1);

@@ -38,7 +38,7 @@ namespace gip {
     float Options::_ChunkSize(128.0);
     int Options::_Verbose(1);
     int Options::_NumCores(2);
-    string Options::_WorkDir("/tmp/");
+    string Options::_WorkDir("/tmp/");  
 
     // Constructors
     GeoResource::GeoResource(string filename, bool update)
@@ -68,7 +68,7 @@ namespace gip {
     }
 
 
-    GeoResource::GeoResource(int xsz, int ysz, int bsz, GDALDataType datatype, string filename, dictionary options)
+    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, dictionary options)
         : _Filename(filename) {
 
         // format, driver, and file extension
@@ -91,7 +91,7 @@ namespace gip {
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         if (Options::Verbose() > 4)
             std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
-        _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz,datatype, papszOptions) );
+        _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz, dt.GDALType(), papszOptions) );
         if (_GDALDataset.get() == NULL) {
             //BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
             std::cout << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;

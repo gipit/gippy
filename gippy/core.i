@@ -58,6 +58,7 @@ namespace std {
 
 // Wrap GIPS
 %{
+    #include <python2.7/Python.h>
     #include <gip/gip.h>
     #include <gip/Utils.h>
     #include <gip/geometry.h>
@@ -65,6 +66,15 @@ namespace std {
     #include <gip/GeoImages.h>
     #include <gip/GeoVector.h>
     using namespace gip;
+
+
+    // custom conversions
+    // string to DataType
+    gip::DataType StringToDataType(PyObject* str) {
+        const char* s = PyString_AsString(str);
+        return gip::DataType(std::string(s));
+    }
+
 %}
 
 // GIP headers and classes to be wrapped - order is important!
@@ -89,11 +99,6 @@ namespace gip {
         static void SetWorkDir(std::string workdir);
     };
 }
-
-// TODO - SWIG3 supports C++11 and scoped enums
-enum GDALDataType { GDT_Unknown, GDT_Byte, GDT_UInt16, GDT_Int16, GDT_UInt32, GDT_Int32, GDT_Float32, GDT_Float64 };
-//GDT_CInt16, GDT_CInt32, GDT_CFloat32, GDT_Float64
-
 
 // Geometry
 %ignore gip::Point::operator=;
@@ -126,10 +131,30 @@ namespace gip {
     }
 }
 
+// DataType
+%ignore gip::DataTypes;
+%ignore gip::DataType::GDALType;
+%include "gip/DataType.h"
+//%typemap(typecheck) gip::DataType = PyObject*;
+//%typemap(in) gip::DataType {
+//    $1 = StringToDataType($input);
+//}
+
+/*
+namesace gip {
+    %extend DataType {
+        char* __str__() {
+            return self->String().c_str();
+        }
+    }
+}
+*/
 
 // GeoResource
 %ignore gip::GeoResource::operator=;
 %include "gip/GeoResource.h"
+
+
 
 
 // GeoRaster
@@ -141,7 +166,7 @@ namespace gip {
                  "Enjoy!\n ");
         PyObject* Read(Rect<int> chunk=Rect<int>()) {
             if (self->Gain() == 1.0 && self->Offset() == 0.0) {
-                switch(self->DataType()) {
+                switch(self->Type().Int()) {
                     case 1: return CImgToArr(self->Read<unsigned char>(chunk));
                     case 2: return CImgToArr(self->Read<unsigned short>(chunk));
                     case 3: return CImgToArr(self->Read<short>(chunk));
@@ -186,7 +211,7 @@ namespace gip {
 namespace gip {
     %extend GeoImage {
         /*%feature("kwargs") static GeoImage New(std::string filename, const GeoImage& template=GeoImage(),
-            int xsz=0, int ysz, int bands=1, GDALDataType dt=GDT_Byte) {
+            int xsz=0, int ysz, int bands=1, DataType dt=DataType.UInt8) {
             if (template.Basename() != "") {
             }
         }*/
@@ -207,7 +232,7 @@ namespace gip {
         unsigned long int __len__() {
             return self->size();
         }
-        GeoImage Process(std::string filename, GDALDataType dtype=GDT_Unknown) {
+        GeoImage Process(std::string filename, DataType dtype=DataType("Unknown")) {
             return self->Process<double>(filename, dtype);
         }
         GeoImage& Process() {
@@ -234,7 +259,7 @@ namespace gip {
         PyObject* Read(Rect<int> chunk=Rect<int>()) {
             // Only looks at first band for gain and offset
             if ((*self)[0].Gain() == 1.0 && (*self)[0].Offset() == 0.0) {
-                switch(self->DataType()) {
+                switch(self->Type().Int()) {
                     case 1: return CImgToArr(self->Read<unsigned char>(chunk));
                     case 2: return CImgToArr(self->Read<unsigned short>(chunk));
                     case 3: return CImgToArr(self->Read<short>(chunk));

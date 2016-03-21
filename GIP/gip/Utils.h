@@ -49,19 +49,20 @@ namespace gip {
     }
 
     //! Returns GDAL Type corresponding to type passed in
-    inline GDALDataType type2GDALtype(const std::type_info& info) {
-        if (info == typeid(unsigned char)) return GDT_Byte;
-        else if (info == typeid(unsigned short)) return GDT_UInt16;
-        else if (info == typeid(short)) return GDT_Int16;
-        else if (info == typeid(unsigned int)) return GDT_UInt32;
-        else if (info == typeid(int)) return GDT_Int32;
-        else if (info == typeid(float)) return GDT_Float32;
-        else if (info == typeid(double)) return GDT_Float64;
+    inline GDALDataType type2GDALType(const std::type_info& info) {
+        if (info == typeid(unsigned char)) return GDALDataType::GDT_Byte;
+        else if (info == typeid(unsigned short)) return GDALDataType::GDT_UInt16;
+        else if (info == typeid(short)) return GDALDataType::GDT_Int16;
+        else if (info == typeid(unsigned int)) return GDALDataType::GDT_UInt32;
+        else if (info == typeid(int)) return GDALDataType::GDT_Int32;
+        else if (info == typeid(float)) return GDALDataType::GDT_Float32;
+        else if (info == typeid(double)) return GDALDataType::GDT_Float64;
         else {
             std::cout << "Data Type " << info.name() << " not supported" << std::endl;
             throw(std::exception());
         }
     }
+
 
     class Options {
     public:

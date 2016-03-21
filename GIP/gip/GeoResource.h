@@ -29,6 +29,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <gip/DataType.h>
 #include <gdal/gdal_priv.h>
 #include <gip/gip_CImg.h>
 #include <gip/geometry.h>
@@ -45,7 +46,7 @@ namespace gip {
         //! Open existing file constructor
         GeoResource(std::string filename, bool update=false);
         //! Create new file - TODO how specify OGRLayer
-        GeoResource(int, int, int, GDALDataType, std::string, dictionary = dictionary());
+        GeoResource(int, int, int, DataType, std::string, dictionary = dictionary());
 
         //! Copy constructor
         GeoResource(const GeoResource& resource);

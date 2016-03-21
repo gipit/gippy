@@ -72,7 +72,7 @@ namespace gip {
         //! Band Y Size
         unsigned int YSize() const { return _GDALRasterBand->GetYSize(); }
         //! Get GDALDatatype
-        GDALDataType DataType() const { return _GDALRasterBand->GetRasterDataType(); }
+        DataType Type() const { return DataType(_GDALRasterBand->GetRasterDataType()); }
         //! Output file info
         std::string Info(bool showstats=false) const;
 
@@ -148,34 +148,10 @@ namespace gip {
         }
         //! Clear NoData
         void ClearNoData() {
-            _GDALRasterBand->SetNoDataValue( MaxValue() + 1 );
+            _GDALRasterBand->SetNoDataValue( Type().MaxValue() + 1 );
             _NoData = false;
         }
-        //! Return maximum value based on datatype
-        double MaxValue() const {
-            // TODO - base this on platform, not hard-coded
-            switch ( DataType() ) {
-                case GDT_Byte: return 255;
-                case GDT_UInt16: return 65535;
-                case GDT_Int16: return 32767;
-                case GDT_UInt32: return 4294967295;
-                case GDT_Int32: return 2147183647;
-                case GDT_Float32: return 3.4E38;
-                default: return 1.79E308;
-            }
-        }
-        //! Return minimum value based on datatype (TODO - get from limits?)
-        double MinValue() const {
-            switch (DataType()) {
-                case GDT_Byte: return 0;
-                case GDT_UInt16: return 0;
-                case GDT_Int16: return -32768;
-                case GDT_UInt32: return 0;
-                case GDT_Int32: return -2147183648;
-                case GDT_Float32: return -3.4E38;
-                default: return -1.79E308;
-            }
-        }
+
         //! Copy all meta data from another raster
         GeoRaster& CopyMeta(const GeoRaster& img) {
             SetDescription(img.Description());
@@ -258,9 +234,12 @@ namespace gip {
             return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator^=), _1, 1) );
         }
 
-        //! \name Convolution functions
+        //! \name Filter functions
         GeoRaster convolve(const CImg<double> kernel) const {
             return GeoRaster(*this, boost::bind((&CImg<double>::convolve_nodata), _1, kernel, this->NoDataValue()));
+        }
+        GeoRaster laplacian() const {
+            return GeoRaster(*this, boost::bind(&CImg<double>::laplacian, _1));
         }
 
         // Arithmetic
@@ -394,14 +373,14 @@ namespace gip {
 
          //! Get Saturation mask: 1's where it's saturated
         CImg<unsigned char> SaturationMask(iRect chunk=iRect()) const {
-            switch (DataType()) {
-                case GDT_Byte: return _Mask<unsigned char>(_maxDC, chunk);
-                case GDT_UInt16: return _Mask<unsigned short>(_maxDC, chunk);
-                case GDT_Int16: return _Mask<short>(_maxDC, chunk);
-                case GDT_UInt32: return _Mask<unsigned int>(_maxDC, chunk);
-                case GDT_Int32: return _Mask<int>(_maxDC, chunk);
-                case GDT_Float32: return _Mask<float>(_maxDC, chunk);
-                case GDT_Float64: return _Mask<double>(_maxDC, chunk);
+            switch (Type().Int()) {
+                case 1: return _Mask<unsigned char>(_maxDC, chunk);
+                case 2: return _Mask<unsigned short>(_maxDC, chunk);
+                case 3: return _Mask<short>(_maxDC, chunk);
+                case 4: return _Mask<unsigned int>(_maxDC, chunk);
+                case 5: return _Mask<int>(_maxDC, chunk);
+                case 6: return _Mask<float>(_maxDC, chunk);
+                case 7: return _Mask<double>(_maxDC, chunk);
                 default: return _Mask<double>(_maxDC, chunk);
             }
         }
@@ -411,14 +390,14 @@ namespace gip {
             if (!chunk.valid()) chunk = iRect(0,0,XSize(),YSize());
             // if NoData not set, return all 1s
             if (!NoData()) return CImg<unsigned char>(chunk.width(),chunk.height(),1,1,0);
-            switch (DataType()) {
-                case GDT_Byte: return _Mask<unsigned char>(NoDataValue(), chunk);
-                case GDT_UInt16: return _Mask<unsigned short>(NoDataValue(), chunk);
-                case GDT_Int16: return _Mask<short>(NoDataValue(), chunk);
-                case GDT_UInt32: return _Mask<unsigned int>(NoDataValue(), chunk);
-                case GDT_Int32: return _Mask<int>(NoDataValue(), chunk);
-                case GDT_Float32: return _Mask<float>(NoDataValue(), chunk);
-                case GDT_Float64: return _Mask<double>(NoDataValue(), chunk);
+            switch (Type().Int()) {
+                case 1: return _Mask<unsigned char>(NoDataValue(), chunk);
+                case 2: return _Mask<unsigned short>(NoDataValue(), chunk);
+                case 3: return _Mask<short>(NoDataValue(), chunk);
+                case 4: return _Mask<unsigned int>(NoDataValue(), chunk);
+                case 5: return _Mask<int>(NoDataValue(), chunk);
+                case 6: return _Mask<float>(NoDataValue(), chunk);
+                case 7: return _Mask<double>(NoDataValue(), chunk);
                 default: return _Mask<double>(NoDataValue(), chunk);
             }
         }
@@ -531,7 +510,7 @@ namespace gip {
 
         CImg<T> img(width, height);
         CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height, 
-            img.data(), width, height, type2GDALtype(typeid(T)), 0, 0);
+            img.data(), width, height, type2GDALType(typeid(T)), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error reading " << CPLGetLastErrorMsg();
@@ -614,7 +593,7 @@ namespace gip {
         }
         CPLErr err = _GDALRasterBand->RasterIO(GF_Write, chunk.x0(), chunk.y0(), 
             chunk.width(), chunk.height(), img.data(), img.width(), img.height(), 
-            type2GDALtype(typeid(T)), 0, 0);
+            DataType(typeid(T)).GDALType(), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error writing " << CPLGetLastErrorMsg();

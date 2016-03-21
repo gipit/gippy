@@ -63,7 +63,7 @@ namespace gip {
     string GeoRaster::Info(bool showstats) const {
         std::stringstream info;
         //info << _GeoImage->Basename() << " - b" << _GDALRasterBand->GetBand() << ":" << endl;
-        info << XSize() << " x " << YSize() << " " << DataType() << ": " << Description();
+        info << XSize() << " x " << YSize() << " " << Type().String() << ": " << Description();
         //info << " (GeoData: " << _GDALDataset.use_count() << " " << _GDALDataset << ")";
         //info << " RasterBand &" << _GDALRasterBand << endl;
         info << "   Gain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
@@ -91,7 +91,7 @@ namespace gip {
 
         CImg<double> cimg;
         double count(0), total(0), val;
-        double min(MaxValue()), max(MinValue());
+        double min(Type().MaxValue()), max(Type().MinValue());
         ChunkSet chunks(XSize(),YSize());
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
