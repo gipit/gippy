@@ -25,8 +25,8 @@ setup for GIP and gippy
 
 import os
 import glob
-from setuptools import setup, Extension, find_packages
-
+import distutils.sysconfig
+from setuptools import setup, Extension
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.build_ext import build_ext
@@ -36,6 +36,12 @@ import numpy
 import imp
 
 __version__ = imp.load_source('gippy.version', 'gippy/version.py').__version__
+
+# Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
+cfg_vars = distutils.sysconfig.get_config_vars()
+for key, value in cfg_vars.items():
+    if type(value) == str:
+        cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 
 
 class gippy_build_ext(build_ext):
@@ -51,6 +57,7 @@ class gippy_develop(develop):
         develop.finalize_options(self)
         for m in swig_modules:
             m.runtime_library_dirs.append(os.path.abspath('./'))
+
     def run(self):
         self.run_command('build_ext')
         develop.run(self)
@@ -60,6 +67,7 @@ class gippy_install(install):
     def finalize_options(self):
         install.finalize_options(self)
         add_runtime_library_dirs(self.install_lib)
+
     def run(self):
         # ensure swig extension built before packaging
         self.run_command('build_ext')
@@ -116,7 +124,7 @@ setup(
     author='Matthew Hanson',
     author_email='matt.a.hanson@gmail.com',
     license='Apache v2.0',
-    #platform_tag='linux_x86_64',
+    # platform_tag='linux_x86_64',
     classifiers=[
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: C++',
