@@ -131,6 +131,7 @@ namespace gip {
     }
 }
 
+
 // DataType
 %ignore gip::DataTypes;
 %ignore gip::DataType::GDALType;
@@ -150,11 +151,10 @@ namesace gip {
 }
 */
 
+
 // GeoResource
 %ignore gip::GeoResource::operator=;
 %include "gip/GeoResource.h"
-
-
 
 
 // GeoRaster

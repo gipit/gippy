@@ -13,4 +13,5 @@ def get_test_image():
     geoimg = gippy.GeoImage(fnames)
     geoimg.SetBandName('RED', 1)
     geoimg.SetBandName('NIR', 2)
+    geoimg.SetNoData(0)
     return geoimg

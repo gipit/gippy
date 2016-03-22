@@ -21,7 +21,7 @@ class GeoRasterTests(unittest.TestCase):
     def setUp(self):
         """ Configure options """
         gippy.Options.SetVerbose(3)
-        gippy.Options.SetChunkSize(1024.0)
+        gippy.Options.SetChunkSize(4.0)
 
     def test_sqrt(self):
         """ Test sqrt using gippy """
@@ -67,13 +67,9 @@ class GeoRasterTests(unittest.TestCase):
         nodata = geoimg[0].NoDataValue()
         red = geoimg['RED'].Read().astype('double')
         nir = geoimg['NIR'].Read().astype('double')
-        start = datetime.now()
-        ndvi = np.ones(red.shape)
-        #inds = red != nodata
-        #ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
-        ndvi = np.true_divide(nir - red, nir + red)
-        ndvi[red == nodata] = nodata
-        print 'calc and processed in %s' % (datetime.now() - start)
+        ndvi = np.zeros(red.shape) + nodata
+        inds = np.logical_and(red != nodata, nir != nodata)
+        ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
         fout = os.path.splitext(geoimg.Filename())[0] + '_numpy_ndvi'
         geoimgout = gippy.GeoImage(fout, geoimg, gippy.DataType("Float64"), 1)
         geoimgout[0].Write(ndvi)

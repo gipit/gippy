@@ -14,7 +14,7 @@ class GeoRasterTests(unittest.TestCase):
     def setUp(self):
         """ Configure options """
         gippy.Options.SetVerbose(3)
-        gippy.Options.SetChunkSize(1024.0)
+        gippy.Options.SetChunkSize(4.0)
 
     def test_open(self):
         """ Test opening of an image """
@@ -25,7 +25,7 @@ class GeoRasterTests(unittest.TestCase):
     def test_create(self):
         """ Test creation of image """
         fout = 'test.tif'
-        geoimg = gippy.GeoImage(fout, 1000, 1000, gippy.DataType("UInt8"), 1)
+        geoimg = gippy.GeoImage(fout, 1000, 1000, 1, gippy.DataType("UInt8"))
         self.assertTrue(geoimg.XSize() == 1000)
         self.assertTrue(geoimg.XSize() == 1000)
         os.remove(fout)
