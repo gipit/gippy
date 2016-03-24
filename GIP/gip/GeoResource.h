@@ -22,12 +22,12 @@
 #ifndef GIP_GEORESOURCE_H
 #define GIP_GEORESOURCE_H
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <map>
 
 #include <boost/filesystem.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <gip/DataType.h>
 #include <gdal/gdal_priv.h>
@@ -160,7 +160,7 @@ namespace gip {
         boost::filesystem::path _Filename;
 
         //! Underlying GDALDataset of this file
-        boost::shared_ptr<GDALDataset> _GDALDataset;
+        std::shared_ptr<GDALDataset> _GDALDataset;
 
         //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
         GDALMajorObject* GetGDALObject() const {

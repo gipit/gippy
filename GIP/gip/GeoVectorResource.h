@@ -22,10 +22,10 @@
 #ifndef GIP_GEOVECTORRESOURCE_H
 #define GIP_GEOVECTORRESOURCE_H
 
+#include <memory>
 #include <string>
 
 #include <gdal/ogrsf_frmts.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
 #include <gip/geometry.h>
@@ -104,7 +104,7 @@ namespace gip {
         boost::filesystem::path _Filename;
 
         //! Underlying OGRDataSource
-        boost::shared_ptr<OGRDataSource> _OGRDataSource;
+        std::shared_ptr<OGRDataSource> _OGRDataSource;
 
         // OGRLayer - ptr linked to dataset
         OGRLayer* _Layer;

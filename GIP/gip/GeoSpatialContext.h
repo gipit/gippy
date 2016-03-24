@@ -82,7 +82,7 @@ namespace gip {
         GeoResource& SetCoordinateSystem(const GeoResource& res);
 
     private:
-    	boost::shared_ptr<GeoResource> _GeoResource;
+    	std::shared_ptr<GeoResource> _GeoResource;
     	*/
 
     }; // class GeoSpatialContext
