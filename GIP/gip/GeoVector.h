@@ -23,9 +23,9 @@
 #define GIP_GEOVECTOR_H
 
 #include <string>
+#include <algorithm>
 
 #include <gdal/ogrsf_frmts.h>
-#include <boost/filesystem.hpp>
 
 #include <gip/geometry.h>
 #include <gip/GeoVectorResource.h>
