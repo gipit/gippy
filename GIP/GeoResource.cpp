@@ -22,10 +22,6 @@
 #include <gip/GeoResource.h>
 #include <boost/filesystem.hpp>
 
-// logging
-//#include <boost/log/core.hpp>
-//#include <boost/log/trivial.hpp>
-//#include <boost/log/expressions.hpp>
 
 namespace gip {
     using std::string;
@@ -59,9 +55,6 @@ namespace gip {
             throw std::runtime_error(to_string(CPLGetLastErrorNo()) + ": " + string(CPLGetLastErrorMsg()));
         }
         _GDALDataset.reset(ds);
-
-        // boost logging test
-        //BOOST_LOG_TRIVIAL(trace) << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
 
         if (Options::Verbose() > 4)
             std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;

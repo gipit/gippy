@@ -22,11 +22,6 @@
 #ifndef GIP_H
 #define GIP_H
 
-// logging
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-
 #include <gdal/gdal_priv.h>
 #include <gdal/ogrsf_frmts.h>
 
@@ -35,12 +30,6 @@
 */
 
 namespace gip {
-
-    void LogLevel(int level) {
-        boost::log::core::get()->set_filter(
-            boost::log::trivial::severity >= (5-level)
-        );
-    }
 
     // Register file formats with GDAL and OGR
     void gdalinit() {
