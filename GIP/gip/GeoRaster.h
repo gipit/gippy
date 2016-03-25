@@ -22,20 +22,17 @@
 #ifndef GIP_GEORASTER_H
 #define GIP_GEORASTER_H
 
-#include <boost/function.hpp>
-
-#include <gip/GeoResource.h>
-#include <boost/bind.hpp>
-
 #include <iostream>
 #include <iomanip>
-
-// for tolowercase
-#include <boost/algorithm/string.hpp>
-
 #include <typeinfo>
 #include <chrono>
 #include <stdint.h>
+
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
+#include <gip/GeoResource.h>
+
 
 namespace gip {
     typedef Rect<int> iRect;
@@ -117,7 +114,6 @@ namespace gip {
         //! Get GDAL Unit type
         std::string Units() const {
             std::string units( _GDALRasterBand->GetUnitType() );
-            boost::algorithm::to_lower(units);
             return units;
         }
         //! Get gain

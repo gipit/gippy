@@ -111,7 +111,7 @@ for n in ['gippy', 'algorithms', 'tests']:
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include(), '/usr/include/gdal'],
-            libraries=['gip', 'gdal', 'boost_system', 'pthread'],  # ,'X11'],
+            libraries=['gip', 'gdal', 'boost_system'], #, 'pthread'],  # ,'X11'],
             extra_compile_args=['-fPIC', '-std=c++11', '-O3', '-DBOOST_LOG_DYN_LINK']
         )
     )
