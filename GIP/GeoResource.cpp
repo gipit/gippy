@@ -20,16 +20,13 @@
 ##############################################################################*/
 
 #include <gip/GeoResource.h>
-#include <boost/filesystem.hpp>
 
 
 namespace gip {
     using std::string;
     using std::vector;
-    using boost::filesystem::path;
 
     // Options given initial values here
-    //boost::filesystem::path Options::_ConfigDir("/usr/share/gip/");
     string Options::_DefaultFormat("GTiff");
     float Options::_ChunkSize(128.0);
     int Options::_Verbose(1);
@@ -47,10 +44,10 @@ namespace gip {
         else CPLSetConfigOption("GDAL_PAM_ENABLED",NULL);
 
         // open dataset
-        GDALDataset* ds = (GDALDataset*)GDALOpen(_Filename.string().c_str(), access);
+        GDALDataset* ds = (GDALDataset*)GDALOpen(_Filename.c_str(), access);
         // Check if Update access not supported
         if (ds == NULL) // && CPLGetLastErrorNo() == 6)
-            ds = (GDALDataset*)GDALOpen(_Filename.string().c_str(), GA_ReadOnly);
+            ds = (GDALDataset*)GDALOpen(_Filename.c_str(), GA_ReadOnly);
         if (ds == NULL) {
             throw std::runtime_error(to_string(CPLGetLastErrorNo()) + ": " + string(CPLGetLastErrorMsg()));
         }
@@ -71,7 +68,9 @@ namespace gip {
         // TODO check for null driver and create method
         // Check extension
         string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
-        if (ext != "" && _Filename.extension().string() != ('.'+ext)) _Filename = boost::filesystem::path(_Filename.string() + '.' + ext);
+        // TODO check if extension (case insensitive) is already in filename
+        //if (ext != "" && _Filename.extension().string() != ('.'+ext)) _Filename = std::filesystem::path(_Filename.string() + '.' + ext);
+        if (ext != "") _Filename = _Filename + '.' + ext;
 
         // add options
         char **papszOptions = NULL;
@@ -84,10 +83,9 @@ namespace gip {
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         if (Options::Verbose() > 4)
             std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
-        _GDALDataset.reset( driver->Create(_Filename.string().c_str(), xsz,ysz,bsz, dt.GDALType(), papszOptions) );
+        _GDALDataset.reset( driver->Create(_Filename.c_str(), xsz,ysz,bsz, dt.GDALType(), papszOptions) );
         if (_GDALDataset.get() == NULL) {
-            //BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
-            std::cout << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
+            std::cout << "Error creating " << _Filename << CPLGetLastErrorMsg() << std::endl;
         }
     }
 
@@ -112,15 +110,11 @@ namespace gip {
 
     // Info
     string GeoResource::Filename() const {
-        return _Filename.string();
-    }
-
-    path GeoResource::Path() const {
         return _Filename;
     }
 
     string GeoResource::Basename() const {
-        return _Filename.stem().string();
+        return _GDALDataset->GetDescription(); //_Filename.stem().string();
     }
 
     // Geospatial

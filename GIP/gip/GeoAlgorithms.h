@@ -58,7 +58,7 @@ namespace gip {
     GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
     //! Stretch image into byte
-    std::string BrowseImage(const GeoImage&, int quality=75);
+    std::string BrowseImage(const GeoImage&, std::string, int quality=75);
 
     //! Create single image from multiple input images using vector file footprint
     GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 

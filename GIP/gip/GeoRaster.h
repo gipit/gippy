@@ -22,7 +22,6 @@
 #ifndef GIP_GEORASTER_H
 #define GIP_GEORASTER_H
 
-#include <boost/filesystem.hpp>
 #include <boost/function.hpp>
 
 #include <gip/GeoResource.h>

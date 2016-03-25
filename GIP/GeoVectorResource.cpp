@@ -30,14 +30,12 @@ namespace gip {
     using std::string;
     using std::cout;
     using std::endl;
-    using boost::filesystem::path;
 
     // Constructors
     GeoVectorResource::GeoVectorResource(string filename, string layer) 
         : _Filename(filename), _PrimaryKey("") {
         _OGRDataSource.reset(OGRSFDriverRegistrar::Open(filename.c_str()), OGRDataSource::DestroyDataSource);
         if (_OGRDataSource == NULL) {
-            //BOOST_LOG_TRIVIAL(fatal) << "Error creating " << _Filename.string() << CPLGetLastErrorMsg() << std::endl;
             throw std::runtime_error("Error opening " + filename + ": " + string(CPLGetLastErrorMsg()));
         }
         OpenLayer(layer);
@@ -74,10 +72,6 @@ namespace gip {
 
     // Info
     string GeoVectorResource::Filename() const {
-        return _Filename.string();
-    }
-
-    path GeoVectorResource::Path() const {
         return _Filename;
     }
 

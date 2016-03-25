@@ -27,8 +27,6 @@
 #include <vector>
 #include <map>
 
-#include <boost/filesystem.hpp>
-
 #include <gip/DataType.h>
 #include <gdal/gdal_priv.h>
 #include <gip/gip_CImg.h>
@@ -58,8 +56,6 @@ namespace gip {
         //! \name Resource Information
         //! Get the filename of the resource
         std::string Filename() const;
-        //! Get path (boost filesystem path)
-        boost::filesystem::path Path() const;
         //! Basename, or short name of filename
         std::string Basename() const;
         //! File format of dataset
@@ -157,7 +153,7 @@ namespace gip {
 
     protected:
         //! Filename, or some other resource identifier
-        boost::filesystem::path _Filename;
+        std::string _Filename;
 
         //! Underlying GDALDataset of this file
         std::shared_ptr<GDALDataset> _GDALDataset;
