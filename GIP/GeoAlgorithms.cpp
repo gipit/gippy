@@ -36,7 +36,6 @@ namespace gip {
     using std::cout;
     using std::cerr;
     using std::endl;
-    namespace fs = boost::filesystem;
 
     /** ACCA (Automatic Cloud Cover Assessment). Takes in TOA Reflectance,
      * temperature, sun elevation, solar azimuth, and number of pixels to
@@ -233,7 +232,7 @@ namespace gip {
     }
 
     //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
-    std::string BrowseImage(const GeoImage& image, int quality) {
+    std::string BrowseImage(const GeoImage& image, std::string filename, int quality) {
         // TODO - take in output filename rather then autogenerating
         //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
 
@@ -243,12 +242,6 @@ namespace gip {
         } else {
             img.PruneBands({img[0].Description()});
         }
-        boost::filesystem::path dir(img.Path().parent_path() / "browse");
-        if (!fs::is_directory(dir)) {
-            if(!boost::filesystem::create_directory(dir)) 
-                throw std::runtime_error("Could not create browse directory " + dir.string());
-        }
-        std::string filename = (dir / img.Path().stem()).string() + ".jpg";
 
         CImg<double> stats;
         float lo, hi;

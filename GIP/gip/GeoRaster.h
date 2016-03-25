@@ -22,21 +22,15 @@
 #ifndef GIP_GEORASTER_H
 #define GIP_GEORASTER_H
 
-#include <boost/filesystem.hpp>
-#include <boost/function.hpp>
-
-#include <gip/GeoResource.h>
-#include <boost/bind.hpp>
-
 #include <iostream>
 #include <iomanip>
-
-// for tolowercase
-#include <boost/algorithm/string.hpp>
-
 #include <typeinfo>
 #include <chrono>
 #include <stdint.h>
+#include <functional>
+
+#include <gip/GeoResource.h>
+
 
 namespace gip {
     typedef Rect<int> iRect;
@@ -48,8 +42,9 @@ namespace gip {
     */
     class GeoRaster : public GeoResource {
         friend class GeoImage;
+
     public:
-        typedef boost::function< CImg<double>& (CImg<double>&) > func;
+        typedef std::function< CImg<double>&(CImg<double>&) > func;
         //! \name Constructors/Destructors
         //! Constructor for new band
         GeoRaster(const GeoResource& georesource, int bandnum=1)
@@ -118,7 +113,6 @@ namespace gip {
         //! Get GDAL Unit type
         std::string Units() const {
             std::string units( _GDALRasterBand->GetUnitType() );
-            boost::algorithm::to_lower(units);
             return units;
         }
         //! Get gain
@@ -213,129 +207,131 @@ namespace gip {
         //! \name Processing functions
         // Logical operators
         GeoRaster operator>(const double &val) const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::threshold, _1, val, false, true));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, true); });
         }
         GeoRaster operator>=(const double &val) const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::threshold, _1, val, false, false));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, false); });
         }
         GeoRaster operator<(const double &val) const {
-            GeoRaster r(*this, boost::bind(&CImg<double>::threshold, _1, val, false, false) );
+            GeoRaster r(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, false); });
             return r.BXOR(1);
         }
         GeoRaster operator<=(const double &val) const {
-            GeoRaster r(*this, boost::bind(&CImg<double>::threshold, _1, val, false, true));
+            GeoRaster r(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, true); });
             return r.BXOR(1);
         }
+        //! Thresholding equality operator
         GeoRaster operator==(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator==), _1, val));
-        }        
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img == val; });
+        }
         //! Bitwise XOR
-        GeoRaster BXOR(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator^=), _1, 1) );
+        GeoRaster BXOR(const double val) const {
+            return GeoRaster(*this, [=] (CImg<double>& imgin) -> CImg<double>& { return imgin^=(val); });
         }
 
         //! \name Filter functions
         GeoRaster convolve(const CImg<double> kernel) const {
-            return GeoRaster(*this, boost::bind((&CImg<double>::convolve_nodata), _1, kernel, this->NoDataValue()));
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->NoDataValue()); });
         }
         GeoRaster laplacian() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::laplacian, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.laplacian(); });
         }
 
         // Arithmetic
         GeoRaster operator+(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator+=), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img += val; });
         }
         GeoRaster operator-(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator-=), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img -= val; });
         }
         GeoRaster operator*(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator*=), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img *= val; });
         }
         GeoRaster operator/(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double&>(&CImg<double>::operator/=), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img /= val; });
         }
         //friend GeoRaster operator/(const double &val, const GeoRaster& raster) {
         //    return raster.pow(-1)*val;
         //}
         //! Pointwise max operator
         GeoRaster max(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double>(&CImg<double>::max), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.max(val); });
         }
         //! Pointwise min operator
         GeoRaster min(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double>(&CImg<double>::min), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.min(val); });
         }
 
         //! Exponent
         GeoRaster pow(const double &val) const {
-            return GeoRaster(*this, boost::bind(boost::mem_fn<CImg<double>&,CImg<double>,const double>(&CImg<double>::pow), _1, val));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.pow(val); });
         }
         //! Square root
         GeoRaster sqrt() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::sqrt, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.sqrt(); });
         }
         //! Natural logarithm
         GeoRaster log() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::log, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.log(); });
         }
         //! Log (base 10)
         GeoRaster log10() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::log10, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.log10(); });
+
         }
         //! Exponential
         GeoRaster exp() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::exp, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.exp(); });
         }
 
         //! Absolute value
         GeoRaster abs() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::abs, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.abs(); });
         }
         //! Compute sign (-1 if < 0, +1 if > 0, 0 if 0)
         GeoRaster sign() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::sign, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.sign(); });
         }
 
         // Cosine
         GeoRaster cos() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::cos, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.cos(); });
         }
         //! Sine
         GeoRaster sin() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::sin, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.sin(); });
         }
         //! Tangent
         GeoRaster tan() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::tan, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.tan(); });
         }
         //! arccosine
         GeoRaster acos() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::acos, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.acos(); });
         }
         //! arccosine
         GeoRaster asin() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::asin, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.asin(); });
         }
         //! arctangent
         GeoRaster atan() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::atan, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.atan(); });
         }
         //! Hyperbolic cosine
         GeoRaster cosh() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::cosh, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.cosh(); });
         }
         //! Hyperbolic sine
         GeoRaster sinh() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::sinh, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.sinh(); });
         }
         //! Hyperbolic tagent
         GeoRaster tanh() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::tanh, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.tanh(); });
         }
         //! Sinc
         GeoRaster sinc() const {
-            return GeoRaster(*this, boost::bind(&CImg<double>::sinc, _1));
+            return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.sinc(); });
         }
 
 
@@ -466,7 +462,7 @@ namespace gip {
         int _maxDC;
 
         //! List of processing functions to apply on reads (in class GeoProcess)
-        //std::vector< boost::function< CImg<double>& (CImg<double>&) > > _Functions;
+        //std::vector< std::function< CImg<double>& (CImg<double>&) > > _Functions;
         std::vector<func> _Functions;
 
     private:

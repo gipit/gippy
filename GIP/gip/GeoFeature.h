@@ -22,11 +22,11 @@
 #ifndef GIP_GEOFEATURE_H
 #define GIP_GEOFEATURE_H
 
+#include <memory>
+
 #include <gdal/ogrsf_frmts.h>
 #include <gdal/ogr_feature.h>
 #include <gdal/cpl_error.h>
-#include <boost/shared_ptr.hpp>
-
 #include <gdal/ogr_api.h>
 
 #include <gip/GeoVectorResource.h>
@@ -40,7 +40,7 @@ namespace gip {
         explicit GeoFeature() 
             : GeoVectorResource(), _Feature() {}
         //! New feature constructor
-        /*explicit GeoFeature(const GeoVectorResource& vector, boost::shared_ptr<OGRFeature> feature) 
+        /*explicit GeoFeature(const GeoVectorResource& vector, std::shared_ptr<OGRFeature> feature) 
             : GeoVectorResource(vector) {
             _Feature = feature;
             if (Options::Verbose() > 4) use_counts("constructor");
@@ -147,7 +147,7 @@ namespace gip {
         }
 
     protected:
-        boost::shared_ptr<OGRFeature> _Feature;
+        std::shared_ptr<OGRFeature> _Feature;
 
     private:
         void OpenFeature(long int fid) {

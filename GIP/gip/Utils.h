@@ -28,7 +28,6 @@
 #include <typeinfo>
 #include <gdal/gdal_priv.h>
 #include <vector>
-#include <boost/filesystem.hpp>
 
 namespace gip {
 
@@ -103,8 +102,6 @@ namespace gip {
 
     private:
             // Static options
-        //! Configuration file directory
-        //static boost::filesystem::path _ConfigDir;
         //! Default format
         static std::string _DefaultFormat;
         //! Chunk size used when chunking up an image

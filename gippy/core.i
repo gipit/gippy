@@ -47,7 +47,6 @@ namespace std {
 %ignore std::cout;
 %ignore std::endl;
 %ignore operator<<;
-%ignore boost::filesystem::path;
 
 %{
     #include <gip/gip_CImg.h>
