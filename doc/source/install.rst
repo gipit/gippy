@@ -9,7 +9,7 @@ There are a few dependencies that must be installed first. These notes are for U
     $ sudo apt-get update
 
     2) Installed required dependencies
-    $ sudo apt-get install python-dev python-setuptools python-numpy python-gdal g++ libgdal1-dev gdal-bin libboost-all-dev swig2.0 swig
+    $ sudo apt-get install python-dev python-setuptools python-numpy python-gdal g++ libgdal1-dev gdal-bin swig2.0 swig
 
     3) Install pip (if not installed)
     $ sudo easy_install pip
