@@ -109,7 +109,7 @@ for n in ['gippy', 'algorithms', 'tests']:
         Extension(
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
-            swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
+            swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include(), '/usr/include/gdal'],
             libraries=['gip', 'gdal'], #, 'pthread'],  # ,'X11'],
             extra_compile_args=['-fPIC', '-std=c++11', '-O3']
