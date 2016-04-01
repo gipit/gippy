@@ -25,6 +25,7 @@
 #include <gip/GeoResource.h>
 #include <gip/GeoRaster.h>
 #include <stdint.h>
+#include <gip/Utils.h>
 
 namespace gip {
     //using std::string;
@@ -140,20 +141,7 @@ namespace gip {
         }
 
         //! Get band index for provided band name
-        int BandIndex(std::string name) const {
-            for (unsigned int i=0; i<_BandNames.size(); i++) {
-                if (name == _BandNames[i]) return i;
-            }
-            throw std::out_of_range("No band " + name);
-        }
-        bool BandExists(std::string desc) const {
-            try {
-                (*this)[desc];
-                return true;
-            } catch(...) {
-                return false;
-            } 
-        }
+
         bool BandsExist(std::vector<std::string> desc) const {
             for (std::vector<std::string>::const_iterator i=desc.begin(); i!=desc.end(); i++) {
                 if (!BandExists(*i)) return false;
@@ -531,6 +519,25 @@ namespace gip {
 
         // Convert vector of band descriptions to band indices
         std::vector<int> Descriptions2Indices(std::vector<std::string> bands) const;
+
+    private:
+        int BandIndex(std::string name) const {
+            name = to_lower(name);
+            std::string bname;
+            for (unsigned int i=0; i<_BandNames.size(); i++) {
+                bname = _BandNames[i];
+                if (name == to_lower(bname)) return i;
+            }
+            throw std::out_of_range("No band " + name);
+        }
+        bool BandExists(std::string desc) const {
+            try {
+                (*this)[desc];
+                return true;
+            } catch(...) {
+                return false;
+            } 
+        }        
 
     }; // class GeoImage
 
