@@ -71,9 +71,6 @@ namespace gip {
         unsigned long int NumFeatures() const {
             return _Layer->GetFeatureCount();
         }
-        unsigned long int size() const {
-            return NumFeatures();
-        }
 
         std::string PrimaryKey() const {
             return _PrimaryKey;

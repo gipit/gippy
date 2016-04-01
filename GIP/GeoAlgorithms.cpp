@@ -266,7 +266,7 @@ namespace gip {
     GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         if (Options::Verbose() > 1)
-            cout << "GIPPY: CookieCutter (" << images.size() << " files) - " << filename << endl;
+            cout << "GIPPY: CookieCutter (" << images.NumImages() << " files) - " << filename << endl;
         Rect<double> extent = feature.Extent();
 
         if (crop) {
@@ -345,7 +345,7 @@ namespace gip {
 
         OGRGeometry* geom = feature.Geometry();
 
-        for (unsigned int i=0; i<images.size(); i++) {
+        for (unsigned int i=0; i<images.NumImages(); i++) {
             WarpToImage(images[i], imgout, psWarpOptions, geom);
             psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
         }

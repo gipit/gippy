@@ -91,7 +91,7 @@ namespace gip {
         }
         //! Get feature (0-based index), const version
         const GeoFeature operator[](unsigned int index) const {
-            if (index >= size())
+            if (index >= NumFeatures())
                 throw std::out_of_range("No feature " + to_string(index));
             _Layer->ResetReading();
             _Layer->SetNextByIndex(index);
@@ -118,7 +118,7 @@ namespace gip {
             std::vector<std::string> vals;
             _Layer->ResetReading();
             GeoFeature f;
-            for (unsigned int i=0; i<size(); i++) {
+            for (unsigned int i=0; i<NumFeatures(); i++) {
                 f = GeoFeature(*this, _Layer->GetNextFeature());
                 vals.push_back(f[attr]);
             }
@@ -130,7 +130,7 @@ namespace gip {
             std::vector<GeoFeature> matches;
             _Layer->ResetReading();
             GeoFeature f;
-            for (unsigned int i=0; i<size(); i++) {
+            for (unsigned int i=0; i<NumFeatures(); i++) {
                 f = GeoFeature(*this, _Layer->GetNextFeature());
                 if (f[attr] == val)
                     matches.push_back(f);

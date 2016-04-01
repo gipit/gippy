@@ -118,8 +118,6 @@ namespace gip {
         //! \name File Information
         //! Number of bands
         unsigned int NumBands() const { return _RasterBands.size(); }
-        //! Number of bands
-        unsigned int size() const { return _RasterBands.size(); }
         //! Get datatype of image (check all raster bands, return 'largest')
         DataType Type() const { return _RasterBands[0].Type(); }
         //! Return information on image as string
