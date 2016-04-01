@@ -28,6 +28,7 @@
 #include <typeinfo>
 #include <gdal/gdal_priv.h>
 #include <vector>
+#include <algorithm>
 
 namespace gip {
 
@@ -44,6 +45,16 @@ namespace gip {
         std::string str("");
         for (unsigned int i=0; i<vector.size(); i++) 
             str = str + " " + vector[i];
+        return str;
+    }
+
+    inline std::string& to_lower(std::string& str) {
+        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+        return str;
+    }
+
+    inline std::string& to_upper(std::string& str) {
+        std::transform(str.begin(), str.end(), str.begin(), ::toupper);
         return str;
     }
 
