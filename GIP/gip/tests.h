@@ -28,6 +28,8 @@ namespace gip {
 
     GeoImage test_reading(std::string filename);
 
+    GeoImage create_test_image();
+
 	GeoImage test_chunking(int=0, int=100);
 
     /*template<class T> CImg<T> _test(CImg<T> cimg) {
