@@ -24,50 +24,105 @@ setup for GIP and gippy
 """
 
 import os
+import sys
 import glob
-import distutils.sysconfig
+import re
+import subprocess
+import logging
 from setuptools import setup, Extension
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.build_ext import build_ext
 from setuptools.command.bdist_egg import bdist_egg
+from distutils import sysconfig
+
 from wheel.bdist_wheel import bdist_wheel
 import numpy
 import imp
 
+logging.basicConfig()
+log = logging.getLogger(__file__)
 __version__ = imp.load_source('gippy.version', 'gippy/version.py').__version__
 
-# Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
-cfg_vars = distutils.sysconfig.get_config_vars()
-for key, value in cfg_vars.items():
-    if type(value) == str:
-        cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
+
+class CConfig(object):
+    """Interface to config options from any utility"""
+
+    def __init__(self, cmd):
+        self.cmd = cmd
+        self.get_include()
+        self.get_libs()
+
+    def get(self, option):
+        try:
+            stdout, stderr = subprocess.Popen(
+                [self.cmd, option],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+        except OSError:
+            # e.g., [Errno 2] No such file or directory
+            raise OSError("Could not find script")
+        if stderr and not stdout:
+            raise ValueError(stderr.strip())
+        if sys.version_info[0] >= 3:
+            result = stdout.decode('ascii').strip()
+        else:
+            result = stdout.strip()
+        log.debug('%s %s: %r', self.cmd, option, result)
+        return result
+
+    def get_include(self):
+        self.include = []
+        for item in self.get('--cflags').split():
+            if item.startswith("-I"):
+                self.include.extend(item[2:].split(":"))
+        return self.include
+
+    def get_libs(self):
+        self.libs = []
+        self.lib_dirs = []
+        self.extra_link_args = []
+        for item in self.get('--libs').split():
+            if item.startswith("-L"):
+                self.lib_dirs.extend(item[2:].split(":"))
+            elif item.startswith("-l"):
+                self.libs.append(item[2:])
+            else:
+                # e.g. -framework GEOS
+                self.extra_link_args.append(item)
+
+    def version(self):
+        match = re.match(r'(\d+)\.(\d+)\.(\d+)', self.get('--version').strip())
+        return tuple(map(int, match.groups()))
 
 
 class gippy_build_ext(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)
+        mock = gippy_install(self.distribution)
+        mock.finalize_options()
+        install_dir = os.path.join(mock.install_lib, "gippy")
+
+        # Workaround for OSX because rpath doesn't work there, is to build
+        # in final module directory. This requires `pip uninstall gippy`
+        # before re-installing
+        if sys.platform == 'darwin':
+            self.build_lib = mock.install_lib
+
         # ensure that swig modules can find libgip
         for m in swig_modules:
-            m.library_dirs.append(os.path.join(self.build_lib, os.path.dirname(m.name)))
+            m.library_dirs.append(install_dir)
+            if sys.platform != 'darwin':
+                m.library_dirs.append(os.path.join(self.build_lib, "gippy"))
+            m.runtime_library_dirs.append(install_dir)
 
 
 class gippy_develop(develop):
-    def finalize_options(self):
-        develop.finalize_options(self)
-        for m in swig_modules:
-            m.runtime_library_dirs.append(os.path.abspath('./'))
-
     def run(self):
         self.run_command('build_ext')
         develop.run(self)
 
 
 class gippy_install(install):
-    def finalize_options(self):
-        install.finalize_options(self)
-        add_runtime_library_dirs(self.install_lib)
-
     def run(self):
         # ensure swig extension built before packaging
         self.run_command('build_ext')
@@ -76,32 +131,54 @@ class gippy_install(install):
 
 class gippy_bdist_egg(bdist_egg):
     def run(self):
-        self.distribution.ext_modules = [gip_module] + swig_modules
+        self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_egg.run(self)
 
 
 class gippy_bdist_wheel(bdist_wheel):
     def run(self):
-        self.distribution.ext_modules = [gip_module] + swig_modules
+        self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_wheel.run(self)
 
 
-def add_runtime_library_dirs(path):
-    for m in swig_modules:
-        m.runtime_library_dirs.append(os.path.join(path, os.path.dirname(m.name)))
+# GDAL config parameters
+gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
+extra_compile_args = ['-fPIC', '-O3', '-std=c++11']
 
-# libgip - dynamic shared library
-gip_module = Extension(
-    name='gippy/libgip',
+extra_link_args = gdal_config.extra_link_args
+
+if sys.platform == 'darwin':
+    extra_compile_args.append('-stdlib=libc++')
+    extra_link_args.append('-stdlib=libc++')
+
+    ldshared = sysconfig.get_config_var('LDSHARED')
+
+    sysconfig._config_vars['LDSHARED'] = re.sub(
+        ' +', ' ',
+        ldshared.replace('-bundle', '-dynamiclib')
+    )
+
+    extra_compile_args.append('-mmacosx-version-min=10.8')
+    extra_compile_args.append('-Wno-absolute-value')
+    # silence warning coming from boost python macros which
+    # would is hard to silence via pragma
+    extra_compile_args.append('-Wno-parentheses-equality')
+    extra_link_args.append('-mmacosx-version-min=10.8')
+
+gip_module =  Extension(
+    name=os.path.join("gippy", "libgip"),
     sources=glob.glob('GIP/*.cpp'),
-    include_dirs=['GIP'],
-    language='c++',
-    extra_compile_args=['-std=c++11', '-O3'],
+    include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+    library_dirs=gdal_config.lib_dirs,
+    libraries=[
+        'pthread'
+    ] + gdal_config.libs,
+    extra_compile_args=extra_compile_args,
+    extra_link_args=extra_link_args
 )
-
 
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
@@ -109,10 +186,14 @@ for n in ['gippy', 'algorithms', 'tests']:
         Extension(
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
-            swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
-            include_dirs=['GIP', numpy.get_include(), '/usr/include/gdal'],
-            libraries=['gip', 'gdal'], #, 'pthread'],  # ,'X11'],
-            extra_compile_args=['-fPIC', '-std=c++11', '-O3']
+            swig_opts=['-c++', '-w509', '-IGIP'],  # '-keyword'],,
+            include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+            library_dirs=gdal_config.lib_dirs,
+            libraries=[
+                'gip', 'pthread'
+            ] + gdal_config.libs,  # ,'X11'],
+            extra_compile_args=extra_compile_args,
+            extra_link_args=extra_link_args
         )
     )
 
