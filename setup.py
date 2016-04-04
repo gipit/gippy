@@ -38,6 +38,7 @@ import imp
 
 __version__ = imp.load_source('gippy.version', 'gippy/version.py').__version__
 
+
 # Remove the "-Wstrict-prototypes" compiler option, which isn't valid for C++.
 cfg_vars = distutils.sysconfig.get_config_vars()
 for key, value in cfg_vars.items():
@@ -94,16 +95,19 @@ def add_runtime_library_dirs(path):
         m.runtime_library_dirs.append(os.path.join(path, os.path.dirname(m.name)))
 
 
+# Flags required for GDAL
+flags = subprocess.check_output(['gdal-config', '--cflags']).split('\n')
+flags = [f for f in flags if f != '']
+
 # libgip - dynamic shared library
 gip_module = Extension(
     name='gippy/libgip',
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP'],
     language='c++',
-    extra_compile_args=['-std=c++11', '-O3'],
+    extra_compile_args=['-std=c++11', '-O3'] + flags,
 )
 
-gdal_flags = subprocess.check_output(['gdal_config', '--cflags'])
 
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
@@ -114,7 +118,7 @@ for n in ['gippy', 'algorithms', 'tests']:
             swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
             include_dirs=['GIP', numpy.get_include()],
             libraries=['gip', 'gdal'], #, 'pthread'],  # ,'X11'],
-            extra_compile_args=['-fPIC', '-std=c++11', '-O3'] + gdal_flags
+            extra_compile_args=['-fPIC', '-std=c++11', '-O3'] + flags
         )
     )
 
