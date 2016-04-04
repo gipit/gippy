@@ -25,7 +25,7 @@
 #include <string>
 #include <algorithm>
 
-#include <gdal/ogrsf_frmts.h>
+#include <ogrsf_frmts.h>
 
 #include <gip/geometry.h>
 #include <gip/GeoVectorResource.h>

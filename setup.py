@@ -25,6 +25,7 @@ setup for GIP and gippy
 
 import os
 import glob
+import subprocess
 import distutils.sysconfig
 from setuptools import setup, Extension
 from setuptools.command.install import install
@@ -102,6 +103,7 @@ gip_module = Extension(
     extra_compile_args=['-std=c++11', '-O3'],
 )
 
+gdal_flags = subprocess.check_output(['gdal_config', '--cflags'])
 
 swig_modules = []
 for n in ['gippy', 'algorithms', 'tests']:
@@ -110,9 +112,9 @@ for n in ['gippy', 'algorithms', 'tests']:
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
-            include_dirs=['GIP', numpy.get_include(), '/usr/include/gdal'],
+            include_dirs=['GIP', numpy.get_include()],
             libraries=['gip', 'gdal'], #, 'pthread'],  # ,'X11'],
-            extra_compile_args=['-fPIC', '-std=c++11', '-O3']
+            extra_compile_args=['-fPIC', '-std=c++11', '-O3'] + gdal_flags
         )
     )
 

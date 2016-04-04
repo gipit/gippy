@@ -26,8 +26,6 @@
 #include <gip/GeoAlgorithms.h>
 #include <gip/gip_gdal.h>
 
-//#include <gdal/ogrsf_frmts.h>
-//#include <gdal/gdalwarper.h>
 
 namespace gip {
     namespace algorithms {

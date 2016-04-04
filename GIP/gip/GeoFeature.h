@@ -24,10 +24,10 @@
 
 #include <memory>
 
-#include <gdal/ogrsf_frmts.h>
-#include <gdal/ogr_feature.h>
-#include <gdal/cpl_error.h>
-#include <gdal/ogr_api.h>
+#include <ogrsf_frmts.h>
+#include <ogr_feature.h>
+#include <cpl_error.h>
+#include <ogr_api.h>
 
 #include <gip/GeoVectorResource.h>
 
