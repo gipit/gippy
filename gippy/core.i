@@ -122,7 +122,7 @@ namespace gip {
             return self->ChunkSet::operator[](index);
         }
         unsigned long int __len__() {
-            return self->size();
+            return self->Size();
         }        
         ChunkSet __deepcopy__(ChunkSet chunks) {
             return ChunkSet(chunks);
@@ -229,7 +229,7 @@ namespace gip {
             return self->operator[](col);
         }
         unsigned long int __len__() {
-            return self->size();
+            return self->NumBands();
         }
         GeoImage Process(std::string filename, DataType dtype=DataType("Unknown")) {
             return self->Process<double>(filename, dtype);
@@ -301,7 +301,7 @@ namespace gip {
             return self->GeoImages::operator[](index);
         }
         unsigned long int __len__() {
-            return self->GeoImages::size();
+            return self->GeoImages::NumImages();
         }
     }
 }
@@ -313,7 +313,7 @@ namespace gip {
 namespace gip {
     %extend GeoVectorResource {
         unsigned long int __len__() {
-            return self->GeoVectorResource::size();
+            return self->GeoVectorResource::NumFeatures();
         }
     }
 }
@@ -330,9 +330,6 @@ namespace gip {
         }
         std::string __getitem__(std::string att) {
             return self->GeoFeature::operator[](att);
-        }
-        unsigned long int __len__() {
-            return self->size();
         }
     }
 }

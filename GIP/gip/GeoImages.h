@@ -66,7 +66,6 @@ namespace gip {
         }
         //! Number of bands
         unsigned int NumImages() const { return _GeoImages.size(); }
-        unsigned int size() const { return _GeoImages.size(); }
 
         //! Best datatype of all bands
         DataType Type() const {
