@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 #include <typeinfo>
-#include <gdal/gdal_priv.h>
+#include <gdal_priv.h>
 #include <vector>
 #include <algorithm>
 

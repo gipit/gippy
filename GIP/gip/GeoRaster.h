@@ -361,9 +361,9 @@ namespace gip {
         }*/
 
         //! \name File I/O
-        template<class T> CImg<T> ReadRaw(iRect& chunk=iRect()) const;
+        template<class T> CImg<T> ReadRaw(iRect chunk=iRect()) const;
         template<class T> CImg<T> Read(iRect chunk=iRect()) const;
-        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect& chunk=iRect());
+        template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Write(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Process(GeoRaster& raster);
 
@@ -494,7 +494,7 @@ namespace gip {
 
     //! \name File I/O
     //! Read raw chunk given bounding box
-    template<class T> CImg<T> GeoRaster::ReadRaw(iRect& chunk) const {
+    template<class T> CImg<T> GeoRaster::ReadRaw(iRect chunk) const {
         if (!chunk.valid())
             chunk = Rect<int>(0,0,XSize(),YSize());
         else if (chunk.Padding() > 0)
@@ -505,7 +505,7 @@ namespace gip {
         int height = chunk.y1()-chunk.y0()+1;
 
         CImg<T> img(width, height);
-        CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height, 
+        CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height,
             img.data(), width, height, type2GDALType(typeid(T)), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
@@ -573,7 +573,7 @@ namespace gip {
     }
 
     //! Write raw CImg to file
-    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect& chunk) {
+    template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect chunk) {
         if (!chunk.valid()) chunk = Rect<int>(0,0,XSize(),YSize());
         // Depad this if needed
         if (chunk.Padding() > 0) {
@@ -584,11 +584,11 @@ namespace gip {
         }
 
         if (Options::Verbose() > 4) {
-            std::cout << Basename() << ": writing " << img.width() << " x " 
+            std::cout << Basename() << ": writing " << img.width() << " x "
                 << img.height() << " image to rect " << chunk << std::endl;
         }
-        CPLErr err = _GDALRasterBand->RasterIO(GF_Write, chunk.x0(), chunk.y0(), 
-            chunk.width(), chunk.height(), img.data(), img.width(), img.height(), 
+        CPLErr err = _GDALRasterBand->RasterIO(GF_Write, chunk.x0(), chunk.y0(),
+            chunk.width(), chunk.height(), img.data(), img.width(), img.height(),
             DataType(typeid(T)).GDALType(), 0, 0);
         if (err != CE_None) {
             std::stringstream err;

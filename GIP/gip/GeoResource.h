@@ -28,7 +28,7 @@
 #include <map>
 
 #include <gip/DataType.h>
-#include <gdal/gdal_priv.h>
+#include <gdal_priv.h>
 #include <gip/gip_CImg.h>
 #include <gip/geometry.h>
 

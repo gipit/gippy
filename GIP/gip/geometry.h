@@ -26,8 +26,8 @@
 #include <vector>
 #include <stdexcept>
 #include <gip/Utils.h>
-//#include <gdal/ogr_srs_api.h>
-#include <gdal/ogr_spatialref.h>
+//#include <ogr_srs_api.h>
+#include <ogr_spatialref.h>
 
 namespace gip {
 

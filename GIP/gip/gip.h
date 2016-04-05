@@ -22,8 +22,8 @@
 #ifndef GIP_H
 #define GIP_H
 
-#include <gdal/gdal_priv.h>
-#include <gdal/ogrsf_frmts.h>
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
 
 /*
     Utility functions that are called only from Python (not used internally)
