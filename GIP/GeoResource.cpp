@@ -181,21 +181,6 @@ namespace gip {
         return (item == NULL) ? "": item;
     }
 
-    // Get metadata group
-    vector<string> GeoResource::MetaGroup(string group, string filter) const {
-        char** meta= GetGDALObject()->GetMetadata(group.c_str());
-        int num = CSLCount(meta);
-        vector<string> items;
-        for (int i=0;i<num; i++) {
-                if (filter != "") {
-                        string md = string(meta[i]);
-                        string::size_type pos = md.find(filter);
-                        if (pos != string::npos) items.push_back(md.substr(pos+filter.length()));
-                } else items.push_back( meta[i] );
-        }
-        return items;
-    }
-
     GeoResource& GeoResource::SetMeta(string key, string item) {
         GetGDALObject()->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
@@ -213,5 +198,20 @@ namespace gip {
         return *this;
     }
 
+
+    // Get metadata group
+    vector<string> GeoResource::MetaGroup(string group, string filter) const {
+        char** meta= GetGDALObject()->GetMetadata(group.c_str());
+        int num = CSLCount(meta);
+        vector<string> items;
+        for (int i=0;i<num; i++) {
+                if (filter != "") {
+                        string md = string(meta[i]);
+                        string::size_type pos = md.find(filter);
+                        if (pos != string::npos) items.push_back(md.substr(pos+filter.length()));
+                } else items.push_back( meta[i] );
+        }
+        return items;
+    }
 
 } // namespace gip

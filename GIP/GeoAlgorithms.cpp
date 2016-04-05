@@ -295,7 +295,6 @@ namespace gip {
         // set projection and affine transformation
         imgout.SetProjection(feature.Projection());
         // TODO - set affine based on extent and resolution (?)
-        //double affine[6];
         CImg<double> affine(6);
         affine[0] = extent.x0();
         affine[1] = xres;

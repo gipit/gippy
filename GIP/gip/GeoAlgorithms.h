@@ -46,12 +46,6 @@ namespace gip {
         {"msavi2", {"NIR","RED"}},
         {"vari", {"RED","GREEN","BLUE"}},
         {"brgt", {"RED","GREEN","BLUE","NIR"}},
-        // Tillage indices
-        {"ndti", {"SWIR2","SWIR1"}},
-        {"crc", {"SWIR1","SWIR2","BLUE"}},
-        {"crcm", {"SWIR1","SWIR2","GREEN"}},
-        {"isti", {"SWIR1","SWIR2"}},
-        {"sti", {"SWIR1","SWIR2"}}
     };
 
     //! Create cloudmask using ACCA
