@@ -184,7 +184,7 @@ gip_module =  Extension(
 )
 
 swig_modules = []
-for n in ['gippy', 'algorithms', 'tests']:
+for n in ['gippy', 'algorithms']:
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),

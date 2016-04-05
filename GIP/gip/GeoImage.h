@@ -462,7 +462,8 @@ namespace gip {
                 T pix[1];
                 badpix = false;
                 for (unsigned int j=0; j<NumBands(); j++) {
-                    _RasterBands[j].GetGDALRasterBand()->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, type2GDALType(typeid(T)), 0, 0);
+                    DataType dt(typeid(T));
+                    _RasterBands[j].GetGDALRasterBand()->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.GDALType(), 0, 0);
                     if (_RasterBands[j].NoData() && pix[0] == _RasterBands[j].NoDataValue()) {
                         badpix = true;
                     } else {

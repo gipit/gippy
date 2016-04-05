@@ -20,6 +20,7 @@
 ##############################################################################*/
 
 #include <gip/GeoResource.h>
+#include <gip/Utils.h>
 
 
 namespace gip {
@@ -66,11 +67,12 @@ namespace gip {
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
-        // Check extension
+        // check if extension (case insensitive) is already in filename
         string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
-        // TODO check if extension (case insensitive) is already in filename
-        //if (ext != "" && _Filename.extension().string() != ('.'+ext)) _Filename = std::filesystem::path(_Filename.string() + '.' + ext);
-        if (ext != "") _Filename = _Filename + '.' + ext;
+        string curext = Extension(_Filename);
+        if ((to_lower(ext) != to_lower(curext)) && ext != "") {
+            _Filename = _Filename + '.' + ext;
+        }
 
         // add options
         char **papszOptions = NULL;
