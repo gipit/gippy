@@ -174,7 +174,7 @@ if sys.platform == 'darwin':
 gip_module =  Extension(
     name=os.path.join("gippy", "libgip"),
     sources=glob.glob('GIP/*.cpp'),
-    include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+    include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
     library_dirs=gdal_config.lib_dirs,
     libraries=[
         'pthread'
@@ -190,7 +190,7 @@ for n in ['gippy', 'algorithms', 'tests']:
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
-            include_dirs=['GIP', numpy.get_include()] + gdal_config.include,
+            include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
             library_dirs=gdal_config.lib_dirs,
             libraries=[
                 'gip', 'pthread'
