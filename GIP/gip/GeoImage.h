@@ -137,8 +137,12 @@ namespace gip {
                 _RasterBands[bandnum-1].SetDescription(desc);
             }            
         }
-
-        //! Get band index for provided band name
+        void SetBandNames(std::vector<std::string> names) {
+            assert(names.size() == NumBands())s
+            for (int i=0; i< (len(names) + 1); i++) {
+                SetBandName(names[i], i+1);
+            }
+        }
 
         bool BandsExist(std::vector<std::string> desc) const {
             for (std::vector<std::string>::const_iterator i=desc.begin(); i!=desc.end(); i++) {
