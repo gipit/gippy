@@ -505,8 +505,9 @@ namespace gip {
         int height = chunk.y1()-chunk.y0()+1;
 
         CImg<T> img(width, height);
+        DataType dt(typeid(T));
         CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height,
-            img.data(), width, height, type2GDALType(typeid(T)), 0, 0);
+            img.data(), width, height, dt.GDALType(), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error reading " << CPLGetLastErrorMsg();
