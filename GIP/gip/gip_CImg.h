@@ -31,7 +31,7 @@ This header file
 #define cimg_display 0
 #define cimg_plugin "CImg_plugins.h"
 
-#include <CImg_152.h>
+#include <CImg.h>
 
 using cimg_library::CImg;
 using cimg_library::CImgList;
