@@ -106,10 +106,6 @@ namespace gip {
             _GDALDataset->SetGeoTransform(affine.data());
             return *this;
         }
-        GeoResource& SetAffine(double affine[6]) {
-            _GDALDataset->SetGeoTransform(affine);
-            return *this;
-        }
         GeoResource& SetGCPs(CImg<double> gcps, std::string projection) {
             int numgcps(gcps.height());
             GDAL_GCP gdal_gcps[numgcps];
