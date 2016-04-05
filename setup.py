@@ -29,20 +29,23 @@ import glob
 import re
 import subprocess
 import logging
+from numpy import get_include as numpy_get_include
+from imp import load_source
+
+# setup imports
 from setuptools import setup, Extension
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 from setuptools.command.build_ext import build_ext
 from setuptools.command.bdist_egg import bdist_egg
 from distutils import sysconfig
-
 from wheel.bdist_wheel import bdist_wheel
-import numpy
-import imp
 
+__version__ = load_source('gippy.version', 'gippy/version.py').__version__
+
+# logging
 logging.basicConfig()
 log = logging.getLogger(__file__)
-__version__ = imp.load_source('gippy.version', 'gippy/version.py').__version__
 
 
 class CConfig(object):
@@ -162,9 +165,9 @@ if sys.platform == 'darwin':
     )
 
     extra_compile_args.append('-mmacosx-version-min=10.8')
+    # silence various warnings
     extra_compile_args.append('-Wno-absolute-value')
-    # silence warning coming from boost python macros which
-    # would is hard to silence via pragma
+    extra_compile_args.append('-Wno-shift-negative-value')
     extra_compile_args.append('-Wno-parentheses-equality')
     extra_link_args.append('-mmacosx-version-min=10.8')
 

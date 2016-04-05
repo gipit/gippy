@@ -18,6 +18,11 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v0.4.0:
+- Compiles and installs on MacOS
+- GDAL data types now replaced with gip DataType class
+- Tests added
+
 v0.3.5:
 - fixed install issues through PyPi
 - removed uncessary swig generated functions

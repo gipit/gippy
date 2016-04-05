@@ -201,7 +201,7 @@ namespace gip {
         Rect get_Intersect(const Rect& rect) const {
             return Rect<T>(*this).Intersect(rect);
         }
-        // Calculates untion of Rect with argument Rect
+        // Calculates union of Rect with argument Rect
         Rect& Union(const Rect& rect) {
             _p0 = Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) );
             _p1 = Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) );

@@ -106,10 +106,7 @@ namespace gip {
             _GDALDataset->SetGeoTransform(affine.data());
             return *this;
         }
-        GeoResource& SetAffine(double affine[6]) {
-            _GDALDataset->SetGeoTransform(affine);
-            return *this;
-        }
+	/* remove for now, add back in when required, with tests
         GeoResource& SetGCPs(CImg<double> gcps, std::string projection) {
             int numgcps(gcps.height());
             GDAL_GCP gdal_gcps[numgcps];
@@ -123,13 +120,12 @@ namespace gip {
             }
             _GDALDataset->SetGCPs(numgcps, &gdal_gcps[0], projection.c_str());
             return *this;
-        }
+        }*/
 
         //! Get resolution convenience function
         Point<double> Resolution() const;
         //! Set coordinate system from another GeoResource
         GeoResource& SetCoordinateSystem(const GeoResource& res);
-
 
         //! Get chunkset chunking up image
         ChunkSet Chunks(unsigned int padding=0, unsigned int numchunks=0) const;
@@ -137,8 +133,7 @@ namespace gip {
         //! \name Metadata functions
         //! Get metadata item
         std::string Meta(std::string key) const;
-        // Get group of metadata
-        std::vector<std::string> MetaGroup(std::string group, std::string filter="") const;
+
         //! Set metadata item
         GeoResource& SetMeta(std::string key, std::string item);
         //! Set multiple metadata items
@@ -162,6 +157,10 @@ namespace gip {
         GDALMajorObject* GetGDALObject() const {
             return _GDALDataset.get();
         }
+
+        // Protected functions for inside use
+        // Get group of metadata
+        std::vector<std::string> MetaGroup(std::string group, std::string filter="") const;
 
     }; // class GeoResource
 } // namespace gip
