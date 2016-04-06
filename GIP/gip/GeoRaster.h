@@ -79,28 +79,6 @@ namespace gip {
         std::string Description() const {
             return _GDALRasterBand->GetDescription();
         }
-        //! Set Band Description
-        void SetDescription(std::string desc) {
-            _GDALRasterBand->SetDescription(desc.c_str());
-            // Also set description in dataset metadata since band desc doesn't work at least in GTiff
-            //this->SetMeta("Band "+to_string(_GDALRasterBand->GetBand()), desc);
-        }
-        //! Set Color Interp
-        void SetColor(std::string col) {
-            //SetDescription(col);
-            // Is this used in other GDAL aware programs?
-            GDALColorInterp gdalcol;
-            if (col == "Red")
-                gdalcol = GCI_RedBand;
-            else if (col == "Green")
-                gdalcol = GCI_GreenBand;
-            else if (col == "Blue")
-                gdalcol = GCI_BlueBand;
-            else gdalcol = GCI_GrayIndex;
-            if (_GDALDataset->GetAccess() == GA_Update) {
-                _GDALRasterBand->SetColorInterpretation(gdalcol);
-            }
-        }
         //! Get gain
         float Gain() const { return _GDALRasterBand->GetScale(); }
         //! Get offset
@@ -132,7 +110,6 @@ namespace gip {
 
         //! Copy all meta data from another raster
         GeoRaster& CopyMeta(const GeoRaster& img) {
-            SetDescription(img.Description());
             SetGain(img.Gain());
             SetOffset(img.Offset());
             SetNoData(img.NoDataValue());
@@ -596,7 +573,6 @@ namespace gip {
     //! Process into input band "raster"
     template<class T> GeoRaster& GeoRaster::Process(GeoRaster& raster) {
         GDALRasterBand* band = raster._GDALRasterBand;
-        band->SetDescription(_GDALRasterBand->GetDescription());
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
         raster.SetCoordinateSystem(*this);

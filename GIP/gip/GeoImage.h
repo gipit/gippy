@@ -134,7 +134,7 @@ namespace gip {
                 throw std::out_of_range ("Band " + desc + " already exists in GeoImage!");
             } catch(...) {
                 _BandNames[bandnum-1] = desc;
-                _RasterBands[bandnum-1].SetDescription(desc);
+                _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(desc.c_str());
             }            
         }
         void SetBandNames(std::vector<std::string> names) {
@@ -178,14 +178,6 @@ namespace gip {
             std::vector<std::string> cols({"RED","GREEN","BLUE"});
             return PruneBands(cols);
         }
-
-        //! Copy color table from another image
-        /*void CopyColorTable(const GeoImage& raster) {
-            if (NumBands() == 1) {
-                GDALColorTable* table( raster[0]._GDALRasterBand->GetColorTable() );
-                if (table != NULL) _RasterBands[0]._GDALRasterBand->SetColorTable(table);
-            }
-        }*/
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands
@@ -565,9 +557,9 @@ namespace gip {
         GeoImage imgout(filename, *this, dt);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
-            imgout[i].SetDescription(_BandNames[i]);
             (*this)[i].Process<T>(imgout[i]);
         }
+	imgout.SetBandNames(_BandNames);
         return imgout;
     }
 
