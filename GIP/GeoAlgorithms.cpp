@@ -54,7 +54,6 @@ namespace gip {
 
         GeoImage imgout(filename, image, DataType("UInt8"), 4);
         imgout.SetNoData(0);
-        imgout.SetUnits("other");
         // Band indices
         int b_pass1(3);
         int b_ambclouds(2);
@@ -610,7 +609,6 @@ namespace gip {
             imagesout[prodname] = GeoImage(iprod->second, image, DataType("Int16"), 1);
             imagesout[prodname].SetNoData(nodataout);
             imagesout[prodname].SetGain(0.0001);
-            imagesout[prodname].SetUnits("other");
             imagesout[prodname].SetMeta(metadata);
             imagesout[prodname][0].SetDescription(prodname);
             filenames[prodname] = imagesout[prodname].Filename();

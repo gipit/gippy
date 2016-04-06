@@ -110,17 +110,10 @@ namespace gip {
         void CopyCategoryNames(const GeoRaster& raster) {
             _GDALRasterBand->SetCategoryNames(raster.GetGDALRasterBand()->GetCategoryNames());
         }
-        //! Get GDAL Unit type
-        std::string Units() const {
-            std::string units( _GDALRasterBand->GetUnitType() );
-            return units;
-        }
         //! Get gain
         float Gain() const { return _GDALRasterBand->GetScale(); }
         //! Get offset
         float Offset() const { return _GDALRasterBand->GetOffset(); }
-        //! Set Unit type
-        GeoRaster& SetUnits(std::string units) { _GDALRasterBand->SetUnitType(units.c_str()); return *this; }
         //! Set gain
         GeoRaster& SetGain(float gain) { _GDALRasterBand->SetScale(gain); return *this; }
         //! Set offset
@@ -149,7 +142,6 @@ namespace gip {
         //! Copy all meta data from another raster
         GeoRaster& CopyMeta(const GeoRaster& img) {
             SetDescription(img.Description());
-            SetUnits(img.Units());
             SetGain(img.Gain());
             SetOffset(img.Offset());
             SetNoData(img.NoDataValue());
