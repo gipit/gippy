@@ -116,14 +116,15 @@ namespace gip {
         ~GeoImage() { _RasterBands.clear(); }
 
         //! \name File Information
-        //! Number of bands
-        unsigned int NumBands() const { return _RasterBands.size(); }
-        //! Get datatype of image (check all raster bands, return 'largest')
+
         DataType Type() const { return _RasterBands[0].Type(); }
         //! Return information on image as string
         std::string Info(bool=true, bool=false) const;
 
         //! \name Bands and colors
+        //! Number of bands
+        unsigned int NumBands() const { return _RasterBands.size(); }
+        //! Get datatype of image (TODO - check all raster bands, return 'largest')
         //! Get vector of band names
         std::vector<std::string> BandNames() const { return _BandNames; }
         //! Set a band name
@@ -137,14 +138,29 @@ namespace gip {
                 _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(desc.c_str());
             }            
         }
+        //! Set all band names with vector size equal to # bands
         void SetBandNames(std::vector<std::string> names) {
-	    if (names.size() != NumBands())
+	       if (names.size() != NumBands())
             	throw std::out_of_range("Band list size must be equal to # of bands");
             for (int i=0; i< (names.size() + 1); i++) {
-                SetBandName(names[i], i+1);
+                try {
+                    SetBandName(names[i], i+1);
+                } catch(...) {
+                    // TODO - print to stderr ? or log?
+                    std::cout << "Band " + names[i] + " already exists" << std::endl;
+                }
             }
         }
-
+        //! Check if this band exists
+        bool BandExists(std::string desc) const {
+            try {
+                (*this)[desc];
+                return true;
+            } catch(...) {
+                return false;
+            } 
+        }   
+        //! Check if ALL these bands exist
         bool BandsExist(std::vector<std::string> desc) const {
             for (std::vector<std::string>::const_iterator i=desc.begin(); i!=desc.end(); i++) {
                 if (!BandExists(*i)) return false;
@@ -172,12 +188,7 @@ namespace gip {
         //! Remove band
         GeoImage& RemoveBand(unsigned int bandnum);
         //! Prune bands to only provided names
-        GeoImage& PruneBands(std::vector<std::string>);
-        //! Prune bands to RGB
-        GeoImage& PruneToRGB() {
-            std::vector<std::string> cols({"RED","GREEN","BLUE"});
-            return PruneBands(cols);
-        }
+        GeoImage& PruneBands(std::vector<std::string> = {"red", "green", "blue"});
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands
@@ -518,15 +529,7 @@ namespace gip {
                 if (name == to_lower(bname)) return i;
             }
             throw std::out_of_range("No band " + name);
-        }
-        bool BandExists(std::string desc) const {
-            try {
-                (*this)[desc];
-                return true;
-            } catch(...) {
-                return false;
-            } 
-        }        
+        }     
 
     }; // class GeoImage
 

@@ -227,7 +227,7 @@ namespace gip {
 
         GeoImage img(image);
         if (img.BandsExist({"RED","GREEN","BLUE"})) {
-            img.PruneToRGB();
+            img.PruneBands();
         } else {
             img.PruneBands({img[0].Description()});
         }
