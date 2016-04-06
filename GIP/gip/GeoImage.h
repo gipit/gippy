@@ -116,6 +116,14 @@ namespace gip {
         ~GeoImage() { _RasterBands.clear(); }
 
         //! \name File Information
+        //! Return list of filename for each band (could be duplicated)
+        std::vector<std::string> Filenames() const {
+            std::vector<std::string> fnames;
+            for (unsigned int i=0;i<_RasterBands.size();i++) {
+                fnames.push_back(_RasterBands[i].Filename());
+            }
+            return fnames;
+        }
 
         DataType Type() const { return _RasterBands[0].Type(); }
         //! Return information on image as string

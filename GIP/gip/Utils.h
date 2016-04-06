@@ -115,6 +115,13 @@ namespace gip {
         return ext;
     }
 
+    inline std::string Basename(const std::string& s) {
+        std::size_t loc = s.find_last_of("/\\") + 1;
+        if (loc == std::string::npos) loc = 0;
+        std::string bname = s.substr(loc);
+        return bname.substr(0, bname.length()-Extension(bname).length()-1);
+    }
+
     //! Parse string to array of ints
     inline std::vector<unsigned int> ParseToInts(const std::string& s) {
         std::vector<std::string> str = Split(s, " ,");
