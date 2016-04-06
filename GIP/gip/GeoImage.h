@@ -258,6 +258,7 @@ namespace gip {
         }
 
         //! Calculate mean, stddev for chunk - must contain data for all bands
+        // TODO - review this function
         CImgList<double> SpectralStatistics(iRect chunk=iRect()) const {
             CImg<unsigned char> mask;
             CImg<double> band, total, mean;
@@ -292,6 +293,7 @@ namespace gip {
         }
 
         //! Mean (per pixel) of all bands, written to raster
+        // TODO - review this function
         GeoRaster& Mean(GeoRaster& raster) const {
             CImg<unsigned char> mask;
             CImg<int> totalpixels;
@@ -318,6 +320,7 @@ namespace gip {
             return raster;
         }
 
+        // Generate Masks: NoData, Data, Saturation
         //! NoData mask.  1's where it is nodata
         CImg<uint8_t> NoDataMask(std::vector<std::string> bands, iRect chunk=iRect()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
@@ -379,7 +382,7 @@ namespace gip {
         }
 
         //! Extract, and interpolate, time series (C is time axis)
-        // TODO - times can be a fixed datatype CImg
+        // TODO - review this function to be more general extraction over bands
         template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk=iRect()) {
             CImg<T> cimg = Read<T>(chunk);
             T nodata = _RasterBands[0].NoData();
@@ -413,6 +416,7 @@ namespace gip {
         }
 
         //! Extract spectra from select pixels (where mask > 0)
+        // TODO - review this function to be more general, combined with TimeSeries
         template<class T> CImg<T> Extract(const GeoRaster& mask) {
             if (Options::Verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
             CImg<unsigned char> cmask;
@@ -441,6 +445,8 @@ namespace gip {
         }
 
         //! Get a number of random pixel vectors (spectral vectors)
+        // TODO - review this function, which is used by k-means, likely too specific
+        // generalize to get spectra of passed in indices maybe?
         template<class T> CImg<T> GetRandomPixels(int NumPixels) const {
             CImg<T> Pixels(NumBands(), NumPixels);
             srand( time(NULL) );
@@ -466,6 +472,7 @@ namespace gip {
         }
 
         //! Get a number of pixel vectors that are spectrally distant from each other
+        // TODO - review this function for generality, maybe specific to kmeans?
         template<class T> CImg<T> GetPixelClasses(int NumClasses) const {
             int RandPixelsPerClass = 500;
             CImg<T> stats;
