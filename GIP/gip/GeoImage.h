@@ -268,7 +268,7 @@ namespace gip {
             CImg<double> band, total, mean;
             unsigned int iBand;
             mask = DataMask({}, chunk);
-            double nodata = _RasterBands[0].NoDataValue();
+            double nodata = _RasterBands[0].NoData();
             for (iBand=0;iBand<NumBands();iBand++) {
                 band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
                 if (iBand == 0) {
@@ -316,7 +316,7 @@ namespace gip {
                 }
                 total = total.div(totalpixels);
                 cimg_for(total,ptr,double) {
-                    if (*ptr != *ptr) *ptr = raster.NoDataValue();
+                    if (*ptr != *ptr) *ptr = raster.NoData();
                 }
                 raster.Write(total, chunks[iChunk]);
             }
@@ -387,7 +387,7 @@ namespace gip {
         // TODO - times can be a fixed datatype CImg
         template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk=iRect()) {
             CImg<T> cimg = Read<T>(chunk);
-            T nodata = _RasterBands[0].NoDataValue();
+            T nodata = _RasterBands[0].NoData();
             if (cimg.spectrum() > 2) {
                 int lowi, highi;
                 float y0, y1, x0, x1;
@@ -428,7 +428,7 @@ namespace gip {
                 cmask = mask.Read<unsigned char>(chunks[iChunk]);
                 cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
             }
-            CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
+            CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoData());
             count = 0;
             unsigned int c;
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
@@ -459,7 +459,7 @@ namespace gip {
                 for (unsigned int j=0; j<NumBands(); j++) {
                     DataType dt(typeid(T));
                     _RasterBands[j]._GDALRasterBand->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.GDALType(), 0, 0);
-                    if (_RasterBands[j].NoData() && pix[0] == _RasterBands[j].NoDataValue()) {
+                    if (_RasterBands[j].NoData() && pix[0] == _RasterBands[j].NoData()) {
                         badpix = true;
                     } else {
                         Pixels(j,p) = pix[0];

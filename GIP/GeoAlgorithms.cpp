@@ -243,7 +243,7 @@ namespace gip {
         }
         CImg<double> cimg(img.Read<double>());
         // TODO - alpha channel?
-        cimg_for(cimg, ptr, double) { if (*ptr == img[0].NoDataValue()) *ptr = 0; }
+        cimg_for(cimg, ptr, double) { if (*ptr == img[0].NoData()) *ptr = 0; }
 
         cimg.round().save_jpeg(filename.c_str(), quality);
 
@@ -307,8 +307,8 @@ namespace gip {
         for (unsigned int b=0;b<imgout.NumBands();b++) {
             psWarpOptions->panSrcBands[b] = b+1;
             psWarpOptions->panDstBands[b] = b+1;
-            psWarpOptions->padfSrcNoDataReal[b] = images[0][b].NoDataValue();
-            psWarpOptions->padfDstNoDataReal[b] = imgout[b].NoDataValue();
+            psWarpOptions->padfSrcNoDataReal[b] = images[0][b].NoData();
+            psWarpOptions->padfDstNoDataReal[b] = imgout[b].NoData();
             psWarpOptions->padfSrcNoDataImag[b] = 0.0;
             psWarpOptions->padfDstNoDataImag[b] = 0.0;
         }
@@ -763,7 +763,7 @@ namespace gip {
             throw std::runtime_error("Must have at least 2 bands!");
         }
         GeoImage imgout(filename, img, DataType("Float32"), 2);
-        imgout.SetNoData(img[0].NoDataValue());
+        imgout.SetNoData(img[0].NoData());
         imgout.CopyMeta(img);
         imgout.SetBandName("Mean", 1);
         imgout.SetBandName("StdDev", 2);

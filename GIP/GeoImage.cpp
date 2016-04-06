@@ -133,14 +133,14 @@ namespace gip {
         return *this;
     }
 
-    // Replaces all Inf or NaN pixels with NoDataValue
+    // Replaces all Inf or NaN pixels with NoData
     GeoImage& GeoImage::FixBadPixels() {
         typedef float T;
         ChunkSet chunks(XSize(),YSize());
         for (unsigned int b=0;b<NumBands();b++) {
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 CImg<T> img = (*this)[b].ReadRaw<T>(chunks[iChunk]);
-                T nodata = (*this)[b].NoDataValue();
+                T nodata = (*this)[b].NoData();
                 cimg_for(img,ptr,T) if ( std::isinf(*ptr) || std::isnan(*ptr) ) *ptr = nodata;
                 (*this)[b].WriteRaw(img,chunks[iChunk]);
             }

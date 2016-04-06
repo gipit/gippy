@@ -87,47 +87,30 @@ namespace gip {
         GeoRaster& SetGain(float gain) { _GDALRasterBand->SetScale(gain); return *this; }
         //! Set offset
         GeoRaster& SetOffset(float offset) { _GDALRasterBand->SetOffset(offset); return *this; }
-        //! Flag indicating if NoData value is used or not
-        bool NoData() const { return _NoData; }
-        //! Get NoDataValue
-        double NoDataValue() const {
-            //std::cout << "NoDataValue" << std::endl;
-            //if (_NoData) return _GDALRasterBand->GetNoDataValue(); else return 0;
+
+        //! Get NoData value
+        double NoData() const {
             return _GDALRasterBand->GetNoDataValue();
+        }
+        //! deprecated
+        double NoDataValue()) const {
+            std::cout << "DEPRECATION WARNING: Use NoData() instead of NoDataValue()" << std::endl;
+            return NoData();
         }
         //! Set No Data value
         GeoRaster& SetNoData(double val) {
-            //std::cout << "SetNoData " << val << std::endl;
             _GDALRasterBand->SetNoDataValue(val);
-            _NoData = true;
             return *this;
-        }
-        //! Clear NoData
-        void ClearNoData() {
-            _GDALRasterBand->SetNoDataValue( Type().MaxValue() + 1 );
-            _NoData = false;
         }
 
         //! Copy all meta data from another raster
         GeoRaster& CopyMeta(const GeoRaster& img) {
             SetGain(img.Gain());
             SetOffset(img.Offset());
-            SetNoData(img.NoDataValue());
+            SetNoData(img.NoData());
             //_GDALRasterBand->SetMetadata(img._GDALRasterBand->GetMetadata());
             return *this;
         }
-        // Set NoDataValue to a default based on datatype of band
-        /*GeoRaster& SetNoData() {
-            //std::cout << "SetNoData" << std::endl;
-            // only set if not already set
-            if (_NoData) return;
-            double val = -32766;
-            GDALDataType dt = DataType();
-            if (dt == GDT_Byte) val = 255;
-            else if (dt == GDT_UInt16 || dt == GDT_UInt32) val = -val;
-            SetNoData(val);
-            return *this;
-        }*/
 
         //! \name Calibration and atmospheric functions
         //! Sets dyanmic range of sensor (min to max digital counts)
@@ -191,7 +174,7 @@ namespace gip {
 
         //! \name Filter functions
         GeoRaster convolve(const CImg<double> kernel) const {
-            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->NoDataValue()); });
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->NoData()); });
         }
         GeoRaster laplacian() const {
             return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.laplacian(); });
@@ -347,14 +330,14 @@ namespace gip {
             // if NoData not set, return all 1s
             if (!NoData()) return CImg<unsigned char>(chunk.width(),chunk.height(),1,1,0);
             switch (Type().Int()) {
-                case 1: return _Mask<unsigned char>(NoDataValue(), chunk);
-                case 2: return _Mask<unsigned short>(NoDataValue(), chunk);
-                case 3: return _Mask<short>(NoDataValue(), chunk);
-                case 4: return _Mask<unsigned int>(NoDataValue(), chunk);
-                case 5: return _Mask<int>(NoDataValue(), chunk);
-                case 6: return _Mask<float>(NoDataValue(), chunk);
-                case 7: return _Mask<double>(NoDataValue(), chunk);
-                default: return _Mask<double>(NoDataValue(), chunk);
+                case 1: return _Mask<unsigned char>(NoData(), chunk);
+                case 2: return _Mask<unsigned short>(NoData(), chunk);
+                case 3: return _Mask<short>(NoData(), chunk);
+                case 4: return _Mask<unsigned int>(NoData(), chunk);
+                case 5: return _Mask<int>(NoData(), chunk);
+                case 6: return _Mask<float>(NoData(), chunk);
+                case 7: return _Mask<double>(NoData(), chunk);
+                default: return _Mask<double>(NoData(), chunk);
             }
         }
 
@@ -362,7 +345,7 @@ namespace gip {
             return NoDataMask(chunk)^=1;
         }
 
-        //! Smooth/convolution (3x3) taking into account NoDataValue
+        //! Smooth/convolution (3x3) taking into account NoData
         GeoRaster Smooth(GeoRaster raster) {
             CImg<double> kernel(3,3,1,1,1);
             int m0((kernel.width())/2);
@@ -381,20 +364,20 @@ namespace gip {
                     total = 0;
                     norm = 0;
                     cimg_forXY(kernel,m,n) {
-                        if (subcimg(m,n) != NoDataValue()) {
+                        if (subcimg(m,n) != NoData()) {
                             total = total + (subcimg(m,n) * kernel(m,n));
                             norm = norm + kernel(m,n);
                         }
                     }
                     if (norm == 0)
-                        cimg(x,y) = raster.NoDataValue();
+                        cimg(x,y) = raster.NoData();
                     else
                         cimg(x,y) = total/norm;
-                    if (cimg(x,y) == NoDataValue()) cimg(x,y) = raster.NoDataValue();
+                    if (cimg(x,y) == NoData()) cimg(x,y) = raster.NoData();
                 }
                 // Update nodata values in border region
                 cimg_for_borderXY(cimg,x,y,border) {
-                    if (cimg(x,y) == NoDataValue()) cimg(x,y) = raster.NoDataValue();
+                    if (cimg(x,y) == NoData()) cimg(x,y) = raster.NoData();
                 }
                 raster.Write(cimg, chunks[iChunk]);
             }
@@ -481,7 +464,7 @@ namespace gip {
                 cmask.mul(_Masks[i].Read<float>(chunk));
             }
             cimg_forXY(img,x,y) {
-                if (cmask(x,y) != 1) img(x,y) = NoDataValue();
+                if (cmask(x,y) != 1) img(x,y) = NoData();
             }
         }
 
@@ -502,7 +485,7 @@ namespace gip {
             // Update NoData now so applied functions have proper NoData value set (?)
             if (NoData()) {
                 cimg_forXY(img,x,y) {
-                    if (imgorig(x,y) == NoDataValue()) img(x,y) = NoDataValue();
+                    if (imgorig(x,y) == NoData()) img(x,y) = NoData();
                 }
             }
         }
@@ -523,7 +506,7 @@ namespace gip {
         // If processing was applied update NoData values where needed
         if (NoData() && updatenodata) {
             cimg_forXY(img,x,y) {
-                if (imgorig(x,y) == NoDataValue()) img(x,y) = NoDataValue();
+                if (imgorig(x,y) == NoData()) img(x,y) = NoData();
             }
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);
@@ -563,7 +546,7 @@ namespace gip {
     //! Write a Cimg to the file
     template<class T> GeoRaster& GeoRaster::Write(CImg<T> img, iRect chunk) {
         if (Gain() != 1.0 || Offset() != 0.0) {
-            cimg_for(img,ptr,T) if (*ptr != NoDataValue()) *ptr = (*ptr-Offset())/Gain();
+            cimg_for(img,ptr,T) if (*ptr != NoData()) *ptr = (*ptr-Offset())/Gain();
         }
         if (Options::Verbose() > 3 && (chunk.p0()==iPoint(0,0)))
             std::cout << Basename() << ": Writing (" << Gain() << "x + " << Offset() << ")" << std::endl;
@@ -581,8 +564,8 @@ namespace gip {
             std::cout << Basename() << ": Processing in " << chunks.Size() << " chunks" << std::endl;
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 CImg<T> cimg = Read<T>(chunks[iChunk]);
-                if (NoDataValue() != raster.NoDataValue()) {
-                    cimg_for(cimg,ptr,T) { if (*ptr == NoDataValue()) *ptr = raster.NoDataValue(); }
+                if (NoData() != raster.NoData()) {
+                    cimg_for(cimg,ptr,T) { if (*ptr == NoData()) *ptr = raster.NoData(); }
                 }
                 raster.Write(cimg,chunks[iChunk]);
         }
