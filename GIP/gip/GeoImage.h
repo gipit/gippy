@@ -367,10 +367,11 @@ namespace gip {
 
         //! Whiteness (created from red, green, blue)
         CImg<float> Whiteness(iRect chunk=iRect()) const {
-            // RAW or RADIANCE ?
-            CImg<float> red = operator[]("RED").ReadRaw<float>(chunk);
-            CImg<float> green = operator[]("GREEN").ReadRaw<float>(chunk);
-            CImg<float> blue = operator[]("BLUE").ReadRaw<float>(chunk);
+            if (!BandsExist({"red", "green", "blue"}))
+                throw std::out_of_range("Need RGB bands to calculate whiteness");
+            CImg<float> red = operator[]("red").ReadRaw<float>(chunk);
+            CImg<float> green = operator[]("green").ReadRaw<float>(chunk);
+            CImg<float> blue = operator[]("blue").ReadRaw<float>(chunk);
             CImg<float> white(red.width(),red.height());
             float mu;
             cimg_forXY(white,x,y) {
