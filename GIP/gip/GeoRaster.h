@@ -483,11 +483,7 @@ namespace gip {
         if (Gain() != 1.0 || Offset() != 0.0) {
             img = Gain() * (img-_minDC) + Offset();
             // Update NoData now so applied functions have proper NoData value set (?)
-            if (NoData()) {
-                cimg_forXY(img,x,y) {
-                    if (imgorig(x,y) == NoData()) img(x,y) = NoData();
-                }
-            }
+            updatenodata = true;
         }
 
         // Apply Processing functions
@@ -504,9 +500,10 @@ namespace gip {
         }
 
         // If processing was applied update NoData values where needed
-        if (NoData() && updatenodata) {
+        if (updatenodata) {
             cimg_forXY(img,x,y) {
-                if (imgorig(x,y) == NoData()) img(x,y) = NoData();
+                if (imgorig(x,y) == NoData() || std::isinf(imgorig(x,y)) || std::isnan(imgorig(x,y)))
+                    img(x,y) = NoData();
             }
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);

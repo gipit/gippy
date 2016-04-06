@@ -205,9 +205,6 @@ namespace gip {
             return *this;
         }
 
-        //! Replace all 'Inf' or 'NaN' results with the bands NoData value
-        GeoImage& FixBadPixels();
-
         // hmm, what's this do?
         //const GeoImage& ComputeStats() const;
 
