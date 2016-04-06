@@ -69,7 +69,7 @@ namespace gip {
         // TODO check for null driver and create method
         // check if extension (case insensitive) is already in filename
         string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
-        string curext = Extension(_Filename);
+        string curext = Extension();
         if ((to_lower(ext) != to_lower(curext)) && ext != "") {
             _Filename = _Filename + '.' + ext;
         }
@@ -111,12 +111,19 @@ namespace gip {
     }
 
     // Info
+    //! Get full filename
     string GeoResource::Filename() const {
         return _Filename;
     }
 
+    //! Return basename of filename (no path, no extension)
     string GeoResource::Basename() const {
-        return _GDALDataset->GetDescription(); //_Filename.stem().string();
+        return gip::Basename(_Filename);
+    }
+
+    //! Get extension of filename
+    string GeoResource::Extension() const {
+        return gip::Extension(_Filename);
     }
 
     // Geospatial

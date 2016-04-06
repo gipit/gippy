@@ -153,6 +153,8 @@ extra_compile_args = ['-fPIC', '-O3', '-std=c++11']
 
 extra_link_args = gdal_config.extra_link_args
 
+lib_dirs = gdal_config.lib_dirs + ['./']
+
 if sys.platform == 'darwin':
     extra_compile_args.append('-stdlib=libc++')
     extra_link_args.append('-stdlib=libc++')
@@ -175,7 +177,7 @@ gip_module =  Extension(
     name=os.path.join("gippy", "libgip"),
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
-    library_dirs=gdal_config.lib_dirs,
+    library_dirs=lib_dirs,
     libraries=[
         'pthread'
     ] + gdal_config.libs,
@@ -191,7 +193,7 @@ for n in ['gippy', 'algorithms']:
             sources=[os.path.join('gippy', n + '.i')],
             swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
             include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
-            library_dirs=gdal_config.lib_dirs,
+            library_dirs=lib_dirs,
             libraries=[
                 'gip', 'pthread'
             ] + gdal_config.libs,  # ,'X11'],

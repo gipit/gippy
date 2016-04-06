@@ -58,6 +58,8 @@ namespace gip {
         std::string Filename() const;
         //! Basename, or short name of filename
         std::string Basename() const;
+        //! Extension of filename
+        std::string Extension() const;
         //! File format of dataset
         std::string Format() const { return _GDALDataset->GetDriver()->GetDescription(); }
 

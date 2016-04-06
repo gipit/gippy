@@ -68,7 +68,7 @@ namespace gip {
         //info << " RasterBand &" << _GDALRasterBand << endl;
         info << "   Gain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
         if (_NoData)
-            info << ", NoData = " << NoDataValue() << endl;
+            info << ", NoData = " << NoData() << endl;
         else info << endl;
         if (showstats) {
             CImg<float> stats = this->Stats();
@@ -97,7 +97,7 @@ namespace gip {
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             cimg = Read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != NoDataValue()) {
+                if (*ptr != NoData()) {
                     total += *ptr;
                     count++;
                     if (*ptr > max) max = *ptr;
@@ -111,7 +111,7 @@ namespace gip {
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             cimg = Read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != NoDataValue()) {
+                if (*ptr != NoData()) {
                     val = *ptr-mean;
                     total += (val*val);
                     total3 += (val*val*val);
@@ -148,7 +148,7 @@ namespace gip {
         CImg<float> stats = Stats();
         CImg<float> hist(bins,1,1,1,0);
         long numpixels(0);
-        float nodata = NoDataValue();
+        float nodata = NoData();
         ChunkSet chunks(XSize(),YSize());
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             cimg = Read<double>(chunks[iChunk]);
@@ -169,7 +169,7 @@ namespace gip {
         CImg<double> cimg = ReadRaw<double>(chunk);
         if (!mask.is_sameXY(cimg))
             throw std::runtime_error("mask wrong size for chunk " + to_string(chunk));
-        cimg_forXY(cimg,x,y) if (mask(x,y) == 0) cimg(x,y) = NoDataValue();
+        cimg_forXY(cimg,x,y) if (mask(x,y) == 0) cimg(x,y) = NoData();
         WriteRaw(cimg, chunk);
         return *this;
     }

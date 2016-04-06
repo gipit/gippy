@@ -116,14 +116,23 @@ namespace gip {
         ~GeoImage() { _RasterBands.clear(); }
 
         //! \name File Information
-        //! Number of bands
-        unsigned int NumBands() const { return _RasterBands.size(); }
-        //! Get datatype of image (check all raster bands, return 'largest')
+        //! Return list of filename for each band (could be duplicated)
+        std::vector<std::string> Filenames() const {
+            std::vector<std::string> fnames;
+            for (unsigned int i=0;i<_RasterBands.size();i++) {
+                fnames.push_back(_RasterBands[i].Filename());
+            }
+            return fnames;
+        }
+
         DataType Type() const { return _RasterBands[0].Type(); }
         //! Return information on image as string
         std::string Info(bool=true, bool=false) const;
 
         //! \name Bands and colors
+        //! Number of bands
+        unsigned int NumBands() const { return _RasterBands.size(); }
+        //! Get datatype of image (TODO - check all raster bands, return 'largest')
         //! Get vector of band names
         std::vector<std::string> BandNames() const { return _BandNames; }
         //! Set a band name
@@ -134,17 +143,32 @@ namespace gip {
                 throw std::out_of_range ("Band " + desc + " already exists in GeoImage!");
             } catch(...) {
                 _BandNames[bandnum-1] = desc;
-                _RasterBands[bandnum-1].SetDescription(desc);
+                _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(desc.c_str());
             }            
         }
+        //! Set all band names with vector size equal to # bands
         void SetBandNames(std::vector<std::string> names) {
-	    if (names.size() != NumBands())
+	       if (names.size() != NumBands())
             	throw std::out_of_range("Band list size must be equal to # of bands");
             for (int i=0; i< (names.size() + 1); i++) {
-                SetBandName(names[i], i+1);
+                try {
+                    SetBandName(names[i], i+1);
+                } catch(...) {
+                    // TODO - print to stderr ? or log?
+                    std::cout << "Band " + names[i] + " already exists" << std::endl;
+                }
             }
         }
-
+        //! Check if this band exists
+        bool BandExists(std::string desc) const {
+            try {
+                (*this)[desc];
+                return true;
+            } catch(...) {
+                return false;
+            } 
+        }   
+        //! Check if ALL these bands exist
         bool BandsExist(std::vector<std::string> desc) const {
             for (std::vector<std::string>::const_iterator i=desc.begin(); i!=desc.end(); i++) {
                 if (!BandExists(*i)) return false;
@@ -172,32 +196,15 @@ namespace gip {
         //! Remove band
         GeoImage& RemoveBand(unsigned int bandnum);
         //! Prune bands to only provided names
-        GeoImage& PruneBands(std::vector<std::string>);
-        //! Prune bands to RGB
-        GeoImage& PruneToRGB() {
-            std::vector<std::string> cols({"RED","GREEN","BLUE"});
-            return PruneBands(cols);
-        }
-
-        //! Copy color table from another image
-        void CopyColorTable(const GeoImage& raster) {
-            if (NumBands() == 1) {
-                GDALColorTable* table( raster[0].GetGDALRasterBand()->GetColorTable() );
-                if (table != NULL) _RasterBands[0].GetGDALRasterBand()->SetColorTable(table);
-            }
-        }
+        GeoImage& PruneBands(std::vector<std::string> = {"red", "green", "blue"});
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands
         void SetGain(float gain) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetGain(gain); }
         //! Set gain for all bands
         void SetOffset(float offset) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetOffset(offset); }
-        //! Set  for all bands
-        void SetUnits(std::string units) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetUnits(units); }
         //! Set NoData for all bands
         void SetNoData(double val) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetNoData(val); }
-        //! Unset NoData for all bands
-        void ClearNoData() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ClearNoData(); }
 
         //! \name Processing functions
         template<class T> GeoImage& Process();
@@ -217,9 +224,6 @@ namespace gip {
             return *this;
         }
 
-        //! Replace all 'Inf' or 'NaN' results with the bands NoData value
-        GeoImage& FixBadPixels();
-
         // hmm, what's this do?
         //const GeoImage& ComputeStats() const;
 
@@ -238,7 +242,6 @@ namespace gip {
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->ReadRaw<T>(chunk) );
             }
-            //return images.get_append('c','p');
             return images.get_append('v','p');
         }
 
@@ -249,7 +252,6 @@ namespace gip {
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->Read<T>(chunk) );
             }
-            //return images.get_append('c','p');
             return images.get_append('v','p');
         }
 
@@ -262,77 +264,8 @@ namespace gip {
             }
             return *this;
         }
-        // Read Cube as list
-        template<class T> CImgList<T> ReadAsList(iRect chunk=iRect()) const {
-            CImgList<T> images;
-            typename std::vector< GeoRaster >::const_iterator iBand;
-            for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
-                images.insert( iBand->Read<T>(chunk) );
-            }
-            return images;
-        }
 
-        //! Calculate mean, stddev for chunk - must contain data for all bands
-        CImgList<double> SpectralStatistics(iRect chunk=iRect()) const {
-            CImg<unsigned char> mask;
-            CImg<double> band, total, mean;
-            unsigned int iBand;
-            mask = DataMask({}, chunk);
-            double nodata = _RasterBands[0].NoDataValue();
-            for (iBand=0;iBand<NumBands();iBand++) {
-                band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
-                if (iBand == 0) {
-                    total = band;
-                } else {
-                    total += band;
-                }
-            }
-            mean = total / NumBands();
-            for (iBand=0;iBand<NumBands();iBand++) {
-                band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
-                if (iBand == 0) {
-                    total = (band - mean).pow(2);
-                } else {
-                    total += (band - mean).pow(2);
-                }
-            }
-            CImgList<double> stats(mean, (total / (NumBands()-1)).sqrt());
-            cimg_forXY(mask,x,y) { 
-                if (mask(x,y) == 0) {
-                    stats[0](x,y) = nodata;
-                    stats[1](x,y) = nodata; 
-                }
-            }
-            return stats;          
-        }
-
-        //! Mean (per pixel) of all bands, written to raster
-        GeoRaster& Mean(GeoRaster& raster) const {
-            CImg<unsigned char> mask;
-            CImg<int> totalpixels;
-            CImg<double> band, total;
-            ChunkSet chunks(XSize(),YSize());
-            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                for (unsigned int iBand=0;iBand<NumBands();iBand++) {
-                    mask = _RasterBands[iBand].DataMask(chunks[iChunk]);
-                    band = _RasterBands[iBand].Read<double>(chunks[iChunk]).mul(mask);
-                    if (iBand == 0) {
-                        totalpixels = mask;
-                        total = band;
-                    } else {
-                        totalpixels += mask;
-                        total += band;
-                    }
-                }
-                total = total.div(totalpixels);
-                cimg_for(total,ptr,double) {
-                    if (*ptr != *ptr) *ptr = raster.NoDataValue();
-                }
-                raster.Write(total, chunks[iChunk]);
-            }
-            return raster;
-        }
-
+        // Generate Masks: NoData, Data, Saturation
         //! NoData mask.  1's where it is nodata
         CImg<uint8_t> NoDataMask(std::vector<std::string> bands, iRect chunk=iRect()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
@@ -379,10 +312,11 @@ namespace gip {
 
         //! Whiteness (created from red, green, blue)
         CImg<float> Whiteness(iRect chunk=iRect()) const {
-            // RAW or RADIANCE ?
-            CImg<float> red = operator[]("RED").ReadRaw<float>(chunk);
-            CImg<float> green = operator[]("GREEN").ReadRaw<float>(chunk);
-            CImg<float> blue = operator[]("BLUE").ReadRaw<float>(chunk);
+            if (!BandsExist({"red", "green", "blue"}))
+                throw std::out_of_range("Need RGB bands to calculate whiteness");
+            CImg<float> red = operator[]("red").ReadRaw<float>(chunk);
+            CImg<float> green = operator[]("green").ReadRaw<float>(chunk);
+            CImg<float> blue = operator[]("blue").ReadRaw<float>(chunk);
             CImg<float> white(red.width(),red.height());
             float mu;
             cimg_forXY(white,x,y) {
@@ -392,125 +326,6 @@ namespace gip {
             // Saturation?  If pixel saturated make Whiteness 0 ?
             return white;
         }
-
-        //! Extract, and interpolate, time series (C is time axis)
-        // TODO - times can be a fixed datatype CImg
-        template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk=iRect()) {
-            CImg<T> cimg = Read<T>(chunk);
-            T nodata = _RasterBands[0].NoDataValue();
-            if (cimg.spectrum() > 2) {
-                int lowi, highi;
-                float y0, y1, x0, x1;
-                for (int c=1; c<cimg.spectrum()-1;c++) {
-                    cimg_forXY(cimg,x,y) {
-                        if (cimg(x,y,c) == nodata) {
-                            // Find next lowest point
-                            lowi = highi = 1;
-                            while ((cimg(x,y,c-lowi) == nodata) && (lowi<c)) lowi++;
-                            while ((cimg(x,y,c+highi) == nodata) && (c+highi < cimg.spectrum()-1) ) highi++;
-                            y0 = cimg(x,y,c-lowi);
-                            y1 = cimg(x,y,c+highi);
-                            x0 = times(c-lowi);
-                            x1 = times(c+highi);
-                            if ((y0 != nodata) && (y1 != nodata)) {
-                                cimg(x,y,c) = y0 + (y1-y0) * ((times(c)-x0)/(x1-x0));
-                            }
-                        } else if (cimg(x,y,c-1) == nodata) {
-                            T val = cimg(x,y,c);
-                            for (int i=c-1; i>=0; i--) {
-                                if (cimg(x,y,i) == nodata) cimg(x,y,i) = val;
-                            }
-                        }
-                    }
-                }
-            }
-            return cimg;
-        }
-
-        //! Extract spectra from select pixels (where mask > 0)
-        template<class T> CImg<T> Extract(const GeoRaster& mask) {
-            if (Options::Verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
-            CImg<unsigned char> cmask;
-            CImg<T> cimg;
-            long count = 0;
-            ChunkSet chunks(XSize(),YSize());
-            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                cmask = mask.Read<unsigned char>(chunks[iChunk]);
-                cimg_for(cmask,ptr,unsigned char) if (*ptr > 0) count++;
-            }
-            CImg<T> pixels(count,NumBands()+1,1,1,_RasterBands[0].NoDataValue());
-            count = 0;
-            unsigned int c;
-            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                if (Options::Verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
-                cimg = Read<T>(chunks[iChunk]);
-                cmask = mask.Read<unsigned char>(chunks[iChunk]);
-                cimg_forXY(cimg,x,y) {
-                    if (cmask(x,y) > 0) {
-                        for (c=0;c<NumBands();c++) pixels(count,c+1) = cimg(x,y,c);
-                        pixels(count++,0) = cmask(x,y);
-                    }
-                }
-            }
-            return pixels;
-        }
-
-        //! Get a number of random pixel vectors (spectral vectors)
-        template<class T> CImg<T> GetRandomPixels(int NumPixels) const {
-            CImg<T> Pixels(NumBands(), NumPixels);
-            srand( time(NULL) );
-            bool badpix;
-            int p = 0;
-            while(p < NumPixels) {
-                int col = (double)rand()/RAND_MAX * (XSize()-1);
-                int row = (double)rand()/RAND_MAX * (YSize()-1);
-                T pix[1];
-                badpix = false;
-                for (unsigned int j=0; j<NumBands(); j++) {
-                    DataType dt(typeid(T));
-                    _RasterBands[j].GetGDALRasterBand()->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.GDALType(), 0, 0);
-                    if (_RasterBands[j].NoData() && pix[0] == _RasterBands[j].NoDataValue()) {
-                        badpix = true;
-                    } else {
-                        Pixels(j,p) = pix[0];
-                    }
-                }
-                if (!badpix) p++;
-            }
-            return Pixels;
-        }
-
-        //! Get a number of pixel vectors that are spectrally distant from each other
-        template<class T> CImg<T> GetPixelClasses(int NumClasses) const {
-            int RandPixelsPerClass = 500;
-            CImg<T> stats;
-            CImg<T> ClassMeans(NumBands(), NumClasses);
-            // Get Random Pixels
-            CImg<T> RandomPixels = GetRandomPixels<T>(NumClasses * RandPixelsPerClass);
-            // First pixel becomes first class
-            cimg_forX(ClassMeans,x) ClassMeans(x,0) = RandomPixels(x,0);
-            for (int i=1; i<NumClasses; i++) {
-                CImg<T> ThisClass = ClassMeans.get_row(i-1);
-                long validpixels = 0;
-                CImg<T> Dist(RandomPixels.height());
-                for (long j=0; j<RandomPixels.height(); j++) {
-                    // Get current pixel vector
-                    CImg<T> ThisPixel = RandomPixels.get_row(j);
-                    // Find distance to last class
-                    Dist(j) = ThisPixel.sum() ? (ThisPixel-ThisClass).dot( (ThisPixel-ThisClass).transpose() ) : 0;
-                    if (Dist(j) != 0) validpixels++;
-                }
-                stats = Dist.get_stats();
-                // The pixel farthest away from last class make the new class
-                cimg_forX(ClassMeans,x) ClassMeans(x,i) = RandomPixels(x,stats(8));
-                // Toss a bunch of pixels away (make zero)
-                CImg<T> DistSort = Dist.get_sort();
-                T cutoff = DistSort[RandPixelsPerClass*i]; //(stats.max-stats.min)/10 + stats.min;
-                cimg_forX(Dist,x) if (Dist(x) < cutoff) cimg_forX(RandomPixels,x1) RandomPixels(x1,x) = 0;
-            }
-            return ClassMeans;
-        }
-
 
     protected:
         //! Vector of raster bands
@@ -533,15 +348,7 @@ namespace gip {
                 if (name == to_lower(bname)) return i;
             }
             throw std::out_of_range("No band " + name);
-        }
-        bool BandExists(std::string desc) const {
-            try {
-                (*this)[desc];
-                return true;
-            } catch(...) {
-                return false;
-            } 
-        }        
+        }     
 
     }; // class GeoImage
 
@@ -567,10 +374,9 @@ namespace gip {
         GeoImage imgout(filename, *this, dt);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
-            imgout[i].SetDescription(_BandNames[i]);
             (*this)[i].Process<T>(imgout[i]);
         }
-        imgout.CopyColorTable(*this);
+	imgout.SetBandNames(_BandNames);
         return imgout;
     }
 
