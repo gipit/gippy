@@ -93,7 +93,7 @@ namespace gip {
             return _GDALRasterBand->GetNoDataValue();
         }
         //! deprecated
-        double NoDataValue()) const {
+        double NoDataValue() const {
             std::cout << "DEPRECATION WARNING: Use NoData() instead of NoDataValue()" << std::endl;
             return NoData();
         }

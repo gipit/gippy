@@ -186,8 +186,6 @@ namespace gip {
         void SetOffset(float offset) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetOffset(offset); }
         //! Set NoData for all bands
         void SetNoData(double val) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetNoData(val); }
-        //! Unset NoData for all bands
-        void ClearNoData() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ClearNoData(); }
 
         //! \name Processing functions
         template<class T> GeoImage& Process();
