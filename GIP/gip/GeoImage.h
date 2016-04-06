@@ -234,7 +234,6 @@ namespace gip {
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->ReadRaw<T>(chunk) );
             }
-            //return images.get_append('c','p');
             return images.get_append('v','p');
         }
 
@@ -245,7 +244,6 @@ namespace gip {
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->Read<T>(chunk) );
             }
-            //return images.get_append('c','p');
             return images.get_append('v','p');
         }
 
@@ -257,15 +255,6 @@ namespace gip {
                 iBand->Write(img.get_channel(i++), chunk);
             }
             return *this;
-        }
-        // Read Cube as list
-        template<class T> CImgList<T> ReadAsList(iRect chunk=iRect()) const {
-            CImgList<T> images;
-            typename std::vector< GeoRaster >::const_iterator iBand;
-            for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
-                images.insert( iBand->Read<T>(chunk) );
-            }
-            return images;
         }
 
         //! Calculate mean, stddev for chunk - must contain data for all bands
