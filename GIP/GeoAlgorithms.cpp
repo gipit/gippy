@@ -503,14 +503,14 @@ namespace gip {
 
 
     //void Indices(const GeoImage& ImageIn, string basename, std::vector<std::string> products) {
-    dictionary Indices(const GeoImage& image, dictionary products, dictionary metadata) {
+    GeoImage Indices(const GeoImage& image, dictionary products, dictionary metadata) {
         if (Options::Verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
 
         std::map< string, GeoImage > imagesout;
         std::map<string, string>::const_iterator iprod;
-        std::map<string, string> filenames;
+        std::vector<string> filenames;
         string prodname;
         for (iprod=products.begin(); iprod!=products.end(); iprod++) {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
@@ -521,7 +521,7 @@ namespace gip {
             imagesout[prodname].SetGain(0.0001);
             imagesout[prodname].SetMeta(metadata);
             imagesout[prodname].SetBandName(prodname, 1);
-            filenames[prodname] = imagesout[prodname].Filename();
+            filenames.push_back(imagesout[prodname].Filename());
         }
         if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
 
@@ -617,7 +617,7 @@ namespace gip {
                 imagesout[prodname].Write(cimgout,chunks[iChunk]);
             }
         }
-        return filenames;
+        return GeoImage(filenames);
     }
 
     //! Perform linear transform with given coefficients (e.g., PC transform)
