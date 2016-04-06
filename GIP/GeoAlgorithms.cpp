@@ -283,7 +283,6 @@ namespace gip {
         int ysize = std::ceil(extent.height() / yres);
         GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.Type());
         imgout.CopyMeta(images[0]);
-        imgout.CopyColorTable(images[0]);
         for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].CopyMeta(images[0][b]);
 
         // add additional metadata to output

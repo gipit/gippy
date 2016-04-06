@@ -180,12 +180,12 @@ namespace gip {
         }
 
         //! Copy color table from another image
-        void CopyColorTable(const GeoImage& raster) {
+        /*void CopyColorTable(const GeoImage& raster) {
             if (NumBands() == 1) {
-                GDALColorTable* table( raster[0].GetGDALRasterBand()->GetColorTable() );
-                if (table != NULL) _RasterBands[0].GetGDALRasterBand()->SetColorTable(table);
+                GDALColorTable* table( raster[0]._GDALRasterBand->GetColorTable() );
+                if (table != NULL) _RasterBands[0]._GDALRasterBand->SetColorTable(table);
             }
-        }
+        }*/
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands
@@ -466,7 +466,7 @@ namespace gip {
                 badpix = false;
                 for (unsigned int j=0; j<NumBands(); j++) {
                     DataType dt(typeid(T));
-                    _RasterBands[j].GetGDALRasterBand()->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.GDALType(), 0, 0);
+                    _RasterBands[j]._GDALRasterBand->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.GDALType(), 0, 0);
                     if (_RasterBands[j].NoData() && pix[0] == _RasterBands[j].NoDataValue()) {
                         badpix = true;
                     } else {
@@ -568,7 +568,6 @@ namespace gip {
             imgout[i].SetDescription(_BandNames[i]);
             (*this)[i].Process<T>(imgout[i]);
         }
-        imgout.CopyColorTable(*this);
         return imgout;
     }
 

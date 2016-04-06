@@ -73,11 +73,6 @@ namespace gip {
 
         // Total Valid Pixels
         //unsigned int ValidSize() const { return _ValidSize; }
-        // Get datatype
-        //std::string DataTypeStr() const { return GDALGetDataTypeName(DataType()); }
-
-        //! Get GDALRasterBand object - use cautiously
-        GDALRasterBand* GetGDALRasterBand() const { return _GDALRasterBand; }
 
         //! \name Metadata functions
         //! Get Band Description
@@ -105,10 +100,6 @@ namespace gip {
             if (_GDALDataset->GetAccess() == GA_Update) {
                 _GDALRasterBand->SetColorInterpretation(gdalcol);
             }
-        }
-        //! Copy category names from another band
-        void CopyCategoryNames(const GeoRaster& raster) {
-            _GDALRasterBand->SetCategoryNames(raster.GetGDALRasterBand()->GetCategoryNames());
         }
         //! Get gain
         float Gain() const { return _GDALRasterBand->GetScale(); }
@@ -604,8 +595,7 @@ namespace gip {
 
     //! Process into input band "raster"
     template<class T> GeoRaster& GeoRaster::Process(GeoRaster& raster) {
-        GDALRasterBand* band = raster.GetGDALRasterBand();
-        raster.CopyCategoryNames(*this);
+        GDALRasterBand* band = raster._GDALRasterBand;
         band->SetDescription(_GDALRasterBand->GetDescription());
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
