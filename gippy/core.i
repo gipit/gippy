@@ -237,18 +237,6 @@ namespace gip {
         GeoImage& Process() {
             return self->Process<double>();
         }
-        PyObject* TimeSeries(CImg<double> C, Rect<int> chunk) {
-            return CImgToArr(self->TimeSeries<double>(C, chunk));
-        }
-        PyObject* Extract(const GeoRaster& mask) {
-            return CImgToArr(self->Extract<double>(mask));
-        }
-        PyObject* GetRandomPixels(int NumPixels) {
-            return CImgToArr(self->GetRandomPixels<double>(NumPixels));
-        }
-        PyObject* GetPixelClasses(int NumClasses) {
-            return CImgToArr(self->GetPixelClasses<double>(NumClasses));
-        }
         GeoImage __deepcopy__(GeoImage image) {
             return GeoImage(image);
         }
