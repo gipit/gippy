@@ -31,7 +31,7 @@
 namespace gip {
     namespace algorithms {
 
-    std::map< std::string, std::vector<std::string> > ProductBands = {
+    std::map< std::string, std::vector<std::string> > RequiredBands = {
         {"acca", {"RED","GREEN","NIR","SWIR1","LWIR"}},
         {"truecolor", {"RED","GREEN","BLUE"}},
         {"fmask", {"BLUE", "RED", "GREEN", "NIR", "SWIR1", "SWIR2", "LWIR"}},
@@ -74,7 +74,7 @@ namespace gip {
     GeoImage RXD(const GeoImage&, std::string);
 
     //! Calculate spectral statistics and output to new image
-    GeoImage SpectralStatistics(const GeoImage&, std::string);
+    //GeoImage SpectralStatistics(const GeoImage&, std::string);
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);
