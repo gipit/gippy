@@ -28,13 +28,13 @@ namespace gip {
 
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image)
-        : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
+        : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), 
             _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {}
 
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image, func f)
-        : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), _NoData(image._NoData), 
+        : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), 
             _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {
         //if (func.Function() != "") AddFunction(func);
@@ -49,7 +49,6 @@ namespace gip {
         GeoResource::operator=(image);
         _GDALRasterBand = image._GDALRasterBand;
         _Masks = image._Masks;
-        _NoData = image._NoData;
         _ValidStats = image._ValidStats;
         _Stats = image._Stats;
         //_ValidSize = image._ValidSize;
@@ -67,9 +66,7 @@ namespace gip {
         //info << " (GeoData: " << _GDALDataset.use_count() << " " << _GDALDataset << ")";
         //info << " RasterBand &" << _GDALRasterBand << endl;
         info << "   Gain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
-        if (_NoData)
-            info << ", NoData = " << NoData() << endl;
-        else info << endl;
+        info << ", NoData = " << NoData() << endl;
         if (showstats) {
             CImg<float> stats = this->Stats();
             info << "      Min = " << stats(0) << ", Max = " << stats(1) << ", Mean = " << stats(2) << " =/- " << stats(3) << endl;
