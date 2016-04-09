@@ -48,7 +48,7 @@ namespace gip {
         //! \name Constructors/Destructors
         //! Constructor for new band
         GeoRaster(const GeoResource& georesource, int bandnum=1)
-            : GeoResource(georesource), _NoData(false), _ValidStats(false),
+            : GeoResource(georesource), _ValidStats(false),
             _minDC(1), _maxDC(255) {
             LoadBand(bandnum);
         }
@@ -327,8 +327,6 @@ namespace gip {
         //! NoData mask: 1's where it's bad data
         CImg<unsigned char> NoDataMask(iRect chunk=iRect()) const {
             if (!chunk.valid()) chunk = iRect(0,0,XSize(),YSize());
-            // if NoData not set, return all 1s
-            if (!NoData()) return CImg<unsigned char>(chunk.width(),chunk.height(),1,1,0);
             switch (Type().Int()) {
                 case 1: return _Mask<unsigned char>(NoData(), chunk);
                 case 2: return _Mask<unsigned short>(NoData(), chunk);
@@ -392,9 +390,6 @@ namespace gip {
         //! Vector of masks to apply
         mutable std::vector< GeoRaster > _Masks;
 
-        //! Bool if nodata value is used
-        bool _NoData;
-
         //! Valid Stats Flag
         mutable bool _ValidStats;
         //! Statistics
@@ -418,12 +413,12 @@ namespace gip {
             // In practice this is called right after GDALDataset is set, so not needed
             _GDALRasterBand = _GDALDataset->GetRasterBand(bandnum);
             int pbSuccess(0);
-            _NoData = false;
             _GDALRasterBand->GetNoDataValue(&pbSuccess);
-            if (pbSuccess != 0) {
-                if (pbSuccess == 1) _NoData = true;
+            // if not valid then set a nodata value
+            if (pbSuccess == 0) {
+                // TODO - also check for out of range value ?
+                SetNoData(Type().NoData());
             }
-            //Chunk();
         }
 
         template<class T> inline CImg<unsigned char> _Mask(T val, iRect chunk=iRect()) const {
