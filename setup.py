@@ -44,8 +44,8 @@ from wheel.bdist_wheel import bdist_wheel
 __version__ = load_source('gippy.version', 'gippy/version.py').__version__
 
 # logging
-logging.basicConfig()
-log = logging.getLogger(__file__)
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(os.path.basename(__file__))
 
 
 class CConfig(object):
@@ -70,7 +70,7 @@ class CConfig(object):
             result = stdout.decode('ascii').strip()
         else:
             result = stdout.strip()
-        log.debug('%s %s: %r', self.cmd, option, result)
+        # log.info('%s %s: %r', self.cmd, option, result)
         return result
 
     def get_include(self):
@@ -98,52 +98,80 @@ class CConfig(object):
         return tuple(map(int, match.groups()))
 
 
-class gippy_build_ext(build_ext):
+class _build_ext(build_ext):
     def finalize_options(self):
+        log.debug('_build_ext finalize_options') # %s %s' % (install_dir, self.distribution))
         build_ext.finalize_options(self)
-        mock = gippy_install(self.distribution)
-        mock.finalize_options()
-        install_dir = os.path.join(mock.install_lib, "gippy")
+
+        #print self.distribution  
+        #mock = _install(self.distribution)
+        #mock.finalize_options()
+        #install_dir = os.path.join(mock.install_lib, "gippy")
 
         # Workaround for OSX because rpath doesn't work there, is to build
         # in final module directory. This requires `pip uninstall gippy`
         # before re-installing
-        if sys.platform == 'darwin':
-            self.build_lib = mock.install_lib
+        #if sys.platform == 'darwin':
+        #    self.build_lib = mock.install_lib
 
         # ensure that swig modules can find libgip
+        # extensions seems to be referenced, adding it to the first one updates all swig_modules
+        swig_modules[0].library_dirs.append(os.path.join(self.build_lib, 'gippy'))
         for m in swig_modules:
-            m.library_dirs.append(install_dir)
-            if sys.platform != 'darwin':
-                m.library_dirs.append(os.path.join(self.build_lib, "gippy"))
-            m.runtime_library_dirs.append(install_dir)
+            log.debug('%s library_dirs: %s' % (m.name, ' '.join(m.library_dirs)))
+            #if sys.platform != 'darwin':
+            #    m.library_dirs.append(os.path.join(self.build_lib, "gippy"))
 
+# ensure swig extension built before packaging
 
-class gippy_develop(develop):
+class _develop(develop):
+    def finalize_options(self):
+        log.debug('_develop finalize_options')
+        print self.build_directory
+        develop.finalize_options(self)
+        add_runtime_library_dirs(os.path.abspath('./'))
+
     def run(self):
+        log.debug('_develop run')
         self.run_command('build_ext')
         develop.run(self)
 
 
-class gippy_install(install):
+class _install(install):
+    def finalize_options(self):
+        install.finalize_options(self)
+        log.debug('_install finalize_options')
+        print self.install_lib, self.build_lib
+        if sys.platform == 'darwin':
+            self.build_lib = self.install_lib
+        add_runtime_library_dirs(os.path.join(self.install_lib, 'gippy'))
+
     def run(self):
-        # ensure swig extension built before packaging
+        log.debug('_install run')
         self.run_command('build_ext')
         install.run(self)
 
 
-class gippy_bdist_egg(bdist_egg):
+class _bdist_egg(bdist_egg):
     def run(self):
+        log.debug('_bdist_egg run')
         self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_egg.run(self)
 
 
-class gippy_bdist_wheel(bdist_wheel):
+class _bdist_wheel(bdist_wheel):
     def run(self):
+        log.debug('_bdist_wheel run')
         self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_wheel.run(self)
+
+
+def add_runtime_library_dirs(path):
+    for m in swig_modules:
+        m.runtime_library_dirs.append(path)
+        log.debug('%s runtime_library_dirs: %s' % (m.name, ' '.join(m.runtime_library_dirs)))    
 
 
 # GDAL config parameters
@@ -179,7 +207,7 @@ else:
         if type(value) == str:
             cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 
-gip_module =  Extension(
+gip_module = Extension(
     name=os.path.join("gippy", "libgip"),
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
@@ -226,10 +254,10 @@ setup(
     ext_modules=[gip_module] + swig_modules,
     packages=['gippy'],
     cmdclass={
-        "build_ext": gippy_build_ext,
-        "develop": gippy_develop,
-        "install": gippy_install,
-        "bdist_egg": gippy_bdist_egg,
-        "bdist_wheel": gippy_bdist_wheel,
+        "build_ext": _build_ext,
+        "develop": _develop,
+        "install": _install,
+        "bdist_egg": _bdist_egg,
+        "bdist_wheel": _bdist_wheel,
     }
 )
