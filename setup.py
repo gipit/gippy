@@ -172,6 +172,12 @@ if sys.platform == 'darwin':
     extra_compile_args.append('-Wno-shift-negative-value')
     extra_compile_args.append('-Wno-parentheses-equality')
     extra_link_args.append('-mmacosx-version-min=10.8')
+else:
+    # Remove the "-Wstrict-prototypes" compiler option that swig adds, which isn't valid for C++.
+    cfg_vars = sysconfig.get_config_vars()
+    for key, value in cfg_vars.items():
+        if type(value) == str:
+            cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
 
 gip_module =  Extension(
     name=os.path.join("gippy", "libgip"),
