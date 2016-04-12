@@ -48,7 +48,7 @@ class GeoRasterTests(unittest.TestCase):
         """ Test statistics speed using numpy for speed comparison """
         geoimg = get_test_image()
         for band in geoimg:
-            nodata = band.NoDataValue()
+            nodata = band.NoData()
             img = band.Read()
             subimg = img[img != nodata]
             stats = [subimg.min(), subimg.max(), subimg.mean(), subimg.std()]
@@ -64,7 +64,7 @@ class GeoRasterTests(unittest.TestCase):
     def test_ndvi_numpy(self):
         """ Test NDVI using numpy for speed comparison """
         geoimg = get_test_image()
-        nodata = geoimg[0].NoDataValue()
+        nodata = geoimg[0].NoData()
         red = geoimg['RED'].Read().astype('double')
         nir = geoimg['NIR'].Read().astype('double')
         ndvi = np.zeros(red.shape) + nodata

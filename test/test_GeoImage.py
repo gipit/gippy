@@ -24,7 +24,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def test_create(self):
         """ Test creation of image """
-        fout = 'test'
+        fout = 'test.tif'
         geoimg = gippy.GeoImage(fout, 1000, 1000, 1, gippy.DataType("UInt8"))
         self.assertTrue(geoimg.XSize() == 1000)
         self.assertTrue(geoimg.XSize() == 1000)
