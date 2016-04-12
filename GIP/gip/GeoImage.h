@@ -150,7 +150,7 @@ namespace gip {
         void SetBandNames(std::vector<std::string> names) {
 	       if (names.size() != NumBands())
             	throw std::out_of_range("Band list size must be equal to # of bands");
-            for (int i=0; i< (names.size() + 1); i++) {
+            for (unsigned int i=0; i< (names.size() + 1); i++) {
                 try {
                     SetBandName(names[i], i+1);
                 } catch(...) {
