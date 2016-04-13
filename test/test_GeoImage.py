@@ -13,7 +13,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.SetVerbose(3)
+        gippy.Options.SetVerbose(1)
         gippy.Options.SetChunkSize(4.0)
 
     def test_open(self):
