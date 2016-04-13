@@ -197,8 +197,8 @@ namespace gip {
             }
             return *self;
         }
-        GeoRaster& Process(GeoRaster& raster) {
-            return self->Process<double>(raster);
+        GeoRaster& Save(GeoRaster& raster) {
+            return self->Save<double>(raster);
         }
     }
 }
@@ -231,12 +231,12 @@ namespace gip {
         unsigned long int __len__() {
             return self->NumBands();
         }
-        GeoImage Process(std::string filename, DataType dtype=DataType("Unknown")) {
-            return self->Process<double>(filename, dtype);
+        GeoImage Save(std::string filename, DataType dtype=DataType("Unknown")) {
+            return self->Save<double>(filename, dtype);
         }
-        GeoImage& Process() {
-            return self->Process<double>();
-        }
+        /*GeoImage& Save() {
+            return self->Save<double>();
+        }*/
         GeoImage __deepcopy__(GeoImage image) {
             return GeoImage(image);
         }

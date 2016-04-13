@@ -207,9 +207,9 @@ namespace gip {
         void SetNoData(double val) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetNoData(val); }
 
         //! \name Processing functions
-        template<class T> GeoImage& Process();
+        //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage Process(std::string, DataType = 0);
+        template<class T> GeoImage Save(std::string, DataType = 0);
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& AddMask(const GeoRaster& band) {
@@ -356,7 +356,7 @@ namespace gip {
     //! Process in-place
     //! This is broken
     /*
-    template<class T> GeoImage& GeoImage::Process() {
+    template<class T> GeoImage& GeoImage::Save() {
         // Create chunks
         ChunkSet chunks(XSize(), YSize());
         for (unsigned int i=0; i<NumBands(); i++) {
@@ -377,7 +377,7 @@ namespace gip {
         GeoImage imgout(filename, *this, dt);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
-            (*this)[i].Process<T>(imgout[i]);
+            (*this)[i].Save<T>(imgout[i]);
         }
 	    imgout.SetBandNames(_BandNames);
         return imgout;
