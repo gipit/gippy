@@ -354,6 +354,8 @@ namespace gip {
 
     // GeoImage template function definitions
     //! Process in-place
+    //! This is broken
+    /*
     template<class T> GeoImage& GeoImage::Process() {
         // Create chunks
         ChunkSet chunks(XSize(), YSize());
@@ -366,9 +368,10 @@ namespace gip {
         }
         return *this;
     }
+    */
 
-    // Copy input file into new output file
-    template<class T> GeoImage GeoImage::Process(std::string filename, DataType dt) {
+    // Save input file with processing applied into new output file
+    template<class T> GeoImage GeoImage::Save(std::string filename, DataType dt) {
         // TODO: if not supplied base output datatype on units?
         if (dt.Int() == 0) dt = this->Type();
         GeoImage imgout(filename, *this, dt);
@@ -376,7 +379,7 @@ namespace gip {
             imgout[i].CopyMeta((*this)[i]);
             (*this)[i].Process<T>(imgout[i]);
         }
-	imgout.SetBandNames(_BandNames);
+	    imgout.SetBandNames(_BandNames);
         return imgout;
     }
 

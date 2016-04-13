@@ -20,39 +20,22 @@ class GeoRasterTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.SetVerbose(3)
-        gippy.Options.SetChunkSize(4.0)
+        gippy.Options.SetVerbose(1)
+        gippy.Options.SetChunkSize(128.0)
 
     def test_sqrt(self):
         """ Test sqrt using gippy """
         geoimg = get_test_image()
         for band in geoimg:
             vals = band.sqrt().Read()
-            print 'gippy', band.Basename(), vals.shape
-
-    def test_sqrt_numpy(self):
-        """ Test sqrt using numpy for speed comparison """
-        geoimg = get_test_image()
-        for band in geoimg:
-            vals = np.sqrt(band.Read())
-            print 'numpy', band.Basename(), vals.shape
+            # check against numpy
 
     def test_stats(self):
         """ Test statistics speed using gippy """
         geoimg = get_test_image()
         for band in geoimg:
             stats = band.Stats()
-            print '%s: %s' % (band.Basename(), ', '.join(map(str, stats)))
-
-    def test_stats_numpy(self):
-        """ Test statistics speed using numpy for speed comparison """
-        geoimg = get_test_image()
-        for band in geoimg:
-            nodata = band.NoData()
-            img = band.Read()
-            subimg = img[img != nodata]
-            stats = [subimg.min(), subimg.max(), subimg.mean(), subimg.std()]
-            print '%s: %s' % (band.Basename(), ', '.join(map(str, stats)))
+            # check against numpy
 
     def test_ndvi(self):
         """ Test NDVI using gippy """
@@ -62,7 +45,7 @@ class GeoRasterTests(unittest.TestCase):
         geoimg = None
 
     def test_ndvi_numpy(self):
-        """ Test NDVI using numpy for speed comparison """
+        """ Test NDVI separately using numpy for speed comparison """
         geoimg = get_test_image()
         nodata = geoimg[0].NoData()
         red = geoimg['RED'].Read().astype('double')
