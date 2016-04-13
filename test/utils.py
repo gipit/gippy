@@ -1,15 +1,16 @@
 
 import os
+import glob
 import gippy
 
 # TODO - download landsat test image if not already
 def get_test_image():
     """ get test image """
-    sid = 'LC80080672015244LGN00'
-    path = os.path.dirname(__file__)
-    fname = os.path.join(path, sid, sid)
+    # look in samples directory
+    #dirs = [d for d in os.listdir(os.path.join(path, 'samples')) if os.path.isdir(d)]
+    bname = os.path.join(os.path.dirname(__file__), 'samples/landsat8/test')
     bands = [4, 5]
-    fnames = ['%s_B%s.TIF' % (fname, b) for b in bands]
+    fnames = ['%s_B%s.tif' % (bname, b) for b in bands]
     geoimg = gippy.GeoImage(fnames)
     geoimg.SetBandName('RED', 1)
     geoimg.SetBandName('NIR', 2)
