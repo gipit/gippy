@@ -308,7 +308,7 @@ namespace gip {
         template<class T> CImg<T> Read(iRect chunk=iRect()) const;
         template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Write(CImg<T> img, iRect chunk=iRect());
-        template<class T> GeoRaster& Process(GeoRaster& raster);
+        template<class T> GeoRaster& Save(GeoRaster& raster);
 
          //! Get Saturation mask: 1's where it's saturated
         CImg<unsigned char> SaturationMask(iRect chunk=iRect()) const {
@@ -546,7 +546,7 @@ namespace gip {
     }
 
     //! Process into input band "raster"
-    template<class T> GeoRaster& GeoRaster::Process(GeoRaster& raster) {
+    template<class T> GeoRaster& GeoRaster::Save(GeoRaster& raster) {
         GDALRasterBand* band = raster._GDALRasterBand;
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
