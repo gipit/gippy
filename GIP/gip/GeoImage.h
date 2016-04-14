@@ -144,13 +144,14 @@ namespace gip {
             } catch(...) {
                 _BandNames[bandnum-1] = desc;
                 _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(desc.c_str());
+                _RasterBands[bandnum-1].SetColor(desc);
             }            
         }
         //! Set all band names with vector size equal to # bands
         void SetBandNames(std::vector<std::string> names) {
 	       if (names.size() != NumBands())
             	throw std::out_of_range("Band list size must be equal to # of bands");
-            for (unsigned int i=0; i< (names.size() + 1); i++) {
+            for (unsigned int i=0; i<names.size(); i++) {
                 try {
                     SetBandName(names[i], i+1);
                 } catch(...) {
@@ -193,10 +194,10 @@ namespace gip {
 
         //! Adds a band (as last band)
         GeoImage& AddBand(GeoRaster band);
-        //! Remove band
-        GeoImage& RemoveBand(unsigned int bandnum);
-        //! Prune bands to only provided names
-        GeoImage& PruneBands(std::vector<std::string> = {"red", "green", "blue"});
+        //! Keep only these band names
+        GeoImage& select(std::vector<std::string>);
+        //! Keep only these band numbers
+        GeoImage& select(std::vector<int>);
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands

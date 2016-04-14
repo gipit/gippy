@@ -113,25 +113,25 @@ namespace gip {
         _BandNames.push_back(name);
         return *this;
     }
-    // Remove a band
-    GeoImage& GeoImage::RemoveBand(unsigned int bandnum) {
-        if (bandnum <= _RasterBands.size()) {
-            _RasterBands.erase(_RasterBands.begin()+bandnum-1);
-            _BandNames.erase(_BandNames.begin()+bandnum-1);
+    // Keep only these band names
+    GeoImage& GeoImage::select(vector<string> names) {
+        return select(Descriptions2Indices(names));
+    }
+    // Keep only these band numbers
+    GeoImage& GeoImage::select(vector<int> nums) {
+        vector<GeoRaster> _bands;
+        vector<string> _names;
+        vector<int> _bandnums;
+        // TODO - for fun, replace with lambda function and map
+        for (vector<int>::const_iterator i=nums.begin(); i!=nums.end(); i++) {
+            _bands.push_back(_RasterBands[*i]);
+            _names.push_back(_BandNames[*i]);
         }
+        _RasterBands = _bands;
+        _BandNames = _names;
         return *this;
     }
-    // Remove bands except given band names
-    GeoImage& GeoImage::PruneBands(vector<string> names) {
-        bool keep;
-        vector<int> inds = Descriptions2Indices(names);
-        for (int b=NumBands(); b>=0; b--) {
-            keep = false;
-            for (vector<int>::const_iterator i=inds.begin(); i!=inds.end(); i++) if (*i == b) keep = true;
-            if (!keep) RemoveBand(b+1);
-        }
-        return *this;
-    }
+
 
     /*const GeoImage& GeoImage::ComputeStats() const {
         for (unsigned int b=0;b<NumBands();b++) _RasterBands[b].ComputeStats();

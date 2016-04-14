@@ -112,6 +112,21 @@ namespace gip {
             return *this;
         }
 
+        //! Set Color Interp
+        void SetColor(std::string col) {
+            _GDALRasterBand->SetDescription(col.c_str());
+            to_lower(col);
+            GDALColorInterp gdalcol;
+            if (col == "red")
+                gdalcol = GCI_RedBand;
+            else if (col == "green")
+                gdalcol = GCI_GreenBand;
+            else if (col == "blue")
+                gdalcol = GCI_BlueBand;
+            else gdalcol = GCI_GrayIndex;
+            _GDALRasterBand->SetColorInterpretation(gdalcol);
+        }
+
         //! \name Calibration and atmospheric functions
         //! Sets dyanmic range of sensor (min to max digital counts)
         void SetDynamicRange(int min, int max) {
