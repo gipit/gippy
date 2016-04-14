@@ -194,10 +194,10 @@ namespace gip {
 
         //! Adds a band (as last band)
         GeoImage& AddBand(GeoRaster band);
-        //! Remove band
-        GeoImage& RemoveBand(unsigned int bandnum);
-        //! Prune bands to only provided names
-        GeoImage& PruneBands(std::vector<std::string> = {"red", "green", "blue"});
+        //! Keep only these band names
+        GeoImage& select(std::vector<std::string>);
+        //! Keep only these band numbers
+        GeoImage& select(std::vector<int>);
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands

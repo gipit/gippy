@@ -226,10 +226,10 @@ namespace gip {
         //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
 
         GeoImage img(image);
-        if (img.BandsExist({"RED","GREEN","BLUE"})) {
-            img.PruneBands();
+        if (img.BandsExist({"red","green","blue"})) {
+            img.select({"red","green","blue"});
         } else {
-            img.PruneBands({img[0].Description()});
+            img.select({img[0].Description()});
         }
 
         CImg<double> stats;

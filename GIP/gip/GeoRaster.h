@@ -114,6 +114,7 @@ namespace gip {
 
         //! Set Color Interp
         void SetColor(std::string col) {
+            _GDALRasterBand->SetDescription(col.c_str());
             to_lower(col);
             GDALColorInterp gdalcol;
             if (col == "red")
