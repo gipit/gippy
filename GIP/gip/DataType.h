@@ -24,6 +24,7 @@
 
 #include <string>
 #include <vector>
+#include <gip/Utils.h>
 #include <gdal_priv.h>
 
 namespace gip {
@@ -39,13 +40,13 @@ namespace gip {
 	    DataType(GDALDataType dtype) : _Type(dtype) {}
 
 	    DataType(std::string dtype) {
-	        if (dtype == "UInt8") _Type = 1;
-	        else if (dtype == "UInt16") _Type = 2;
-	        else if (dtype == "Int16") _Type = 3;
-	        else if (dtype == "UInt32") _Type = 4;
-	        else if (dtype == "Int32") _Type = 5;
-	        else if (dtype == "Float32") _Type = 6;
-	        else if (dtype == "Float64") _Type = 7;
+	        if (to_lower(dtype) == "uint8") _Type = 1;
+	        else if (to_lower(dtype) == "uint16") _Type = 2;
+	        else if (to_lower(dtype) == "int16") _Type = 3;
+	        else if (to_lower(dtype) == "uint32") _Type = 4;
+	        else if (to_lower(dtype) == "int32") _Type = 5;
+	        else if (to_lower(dtype) == "float32") _Type = 6;
+	        else if (to_lower(dtype) == "float64") _Type = 7;
 	        else _Type = 0;
 	    }
 
@@ -71,7 +72,7 @@ namespace gip {
 	    }
 
 	    std::string String() {
-	        std::vector<std::string> dts = {"Unknown", "UInt8", "UInt16", "Int16", "UInt32", "Int32", "Float32", "Float64"};
+	        std::vector<std::string> dts = {"unknown", "uint8", "uint16", "int16", "uint32", "int32", "float32", "float64"};
 	        return dts[_Type];
 	    }
 

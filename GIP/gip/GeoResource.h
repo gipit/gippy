@@ -86,17 +86,17 @@ namespace gip {
         Point<double> MaxXY() const;
         //! Extent
         Rect<double> Extent() const { return Rect<double>(LowerLeft(), TopRight()); }
-        //! Return projection definition in Well Known Text format
-        std::string Projection() const {
+        //! Return Spatial Reference system  in Well Known Text format
+        std::string SRS() const {
             return _GDALDataset->GetProjectionRef();
         }
         //! Set projection definition in Well Known Text format
-        GeoResource& SetProjection(std::string proj) {
+        GeoResource& SetSRS(std::string proj) {
             _GDALDataset->SetProjection(proj.c_str());
             return *this;
         }
         //! Return projection as OGRSpatialReference
-        OGRSpatialReference SRS() const;
+        //OGRSpatialReference ogr_srs() const;
         //! Get Affine transformation
         CImg<double> Affine() const {
             double affine[6];
@@ -143,6 +143,7 @@ namespace gip {
         //! Copy Meta data from another resource
         GeoResource& CopyMeta(const GeoResource& img);
 
+        // TODO - refactor out this function
         //! Retrieve the GDALdataset this is a member of
         GDALDataset* GetGDALDataset() const {
             return _GDALDataset.get();
@@ -156,9 +157,9 @@ namespace gip {
         std::shared_ptr<GDALDataset> _GDALDataset;
 
         //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
-        GDALMajorObject* GetGDALObject() const {
+        /*GDALMajorObject* GetGDALObject() const {
             return _GDALDataset.get();
-        }
+        }*/
 
         // Protected functions for inside use
         // Get group of metadata

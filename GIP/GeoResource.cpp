@@ -163,19 +163,13 @@ namespace gip {
         return Point<double>(MaxX, MaxY);
     }
 
-
-    OGRSpatialReference GeoResource::SRS() const {
-        string s(Projection());
-        return OGRSpatialReference(s.c_str());
-    }
-
     Point<double> GeoResource::Resolution() const {
         CImg<double> affine = Affine();
         return Point<double>(affine[1], affine[5]);
     }
 
     GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
-        SetProjection(res.Projection());
+        SetSRS(res.SRS());
         SetAffine(res.Affine());
         return *this;
     }
@@ -186,12 +180,12 @@ namespace gip {
 
     // Metadata
     string GeoResource::Meta(string key) const {
-        const char* item = GetGDALObject()->GetMetadataItem(key.c_str());
+        const char* item = _GDALDataset->GetMetadataItem(key.c_str());
         return (item == NULL) ? "": item;
     }
 
     GeoResource& GeoResource::SetMeta(string key, string item) {
-        GetGDALObject()->SetMetadataItem(key.c_str(), item.c_str());
+        _GDALDataset->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
@@ -203,14 +197,14 @@ namespace gip {
     }
 
     GeoResource& GeoResource::CopyMeta(const GeoResource& resource) {
-        GetGDALObject()->SetMetadata(resource.GetGDALObject()->GetMetadata());
+        _GDALDataset->SetMetadata(resource._GDALDataset->GetMetadata());
         return *this;
     }
 
 
     // Get metadata group
     vector<string> GeoResource::MetaGroup(string group, string filter) const {
-        char** meta= GetGDALObject()->GetMetadata(group.c_str());
+        char** meta= _GDALDataset->GetMetadata(group.c_str());
         int num = CSLCount(meta);
         vector<string> items;
         for (int i=0;i<num; i++) {

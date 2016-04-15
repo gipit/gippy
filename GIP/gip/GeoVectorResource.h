@@ -59,10 +59,10 @@ namespace gip {
 
         // Geospatial
         //! Return spatial reference system as an OGRSpatialReference
-        OGRSpatialReference SRS() const;
+        std::string SRS() const;
 
         //! Return spatial reference system as WKT
-        std::string Projection() const;
+        //std::string Projection() const;
 
         //! Get bounding box in projected units
         Rect<double> Extent() const;

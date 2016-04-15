@@ -84,11 +84,11 @@ namespace gip {
     }
 
     // Geospatial
-    OGRSpatialReference GeoVectorResource::SRS() const {
+    /*OGRSpatialReference GeoVectorResource::SRS() const {
        return *_Layer->GetSpatialRef();
-    }
+    }*/
 
-    std::string GeoVectorResource::Projection() const {
+    std::string GeoVectorResource::SRS() const {
         char* wkt(NULL);
         _Layer->GetSpatialRef()->exportToWkt(&wkt);
         return std::string(wkt); 

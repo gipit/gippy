@@ -36,7 +36,7 @@ namespace gip {
 
         // Create cutline transform to pixel coordinates
         char **papszOptionsCutline = NULL;
-        papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.Projection().c_str() );
+        papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.SRS().c_str() );
         papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
         CutlineTransformer oTransformer;
 

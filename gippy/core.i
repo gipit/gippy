@@ -197,8 +197,8 @@ namespace gip {
             }
             return *self;
         }
-        GeoRaster& Save(GeoRaster& raster) {
-            return self->Save<double>(raster);
+        GeoRaster& save(GeoRaster& raster) {
+            return self->save<double>(raster);
         }
     }
 }
@@ -231,11 +231,11 @@ namespace gip {
         unsigned long int __len__() {
             return self->NumBands();
         }
-        GeoImage Save(std::string filename, DataType dtype=DataType("Unknown")) {
-            return self->Save<double>(filename, dtype);
+        GeoImage save(std::string filename, DataType dtype=DataType("Unknown")) {
+            return self->save<double>(filename, dtype);
         }
-        /*GeoImage& Save() {
-            return self->Save<double>();
+        /*GeoImage& save() {
+            return self->save<double>();
         }*/
         GeoImage __deepcopy__(GeoImage image) {
             return GeoImage(image);
