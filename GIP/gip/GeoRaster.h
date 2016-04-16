@@ -54,6 +54,7 @@ namespace gip {
         }
         //! Copy constructor
         GeoRaster(const GeoRaster& image);
+        //! Copy with a processing function added
         GeoRaster(const GeoRaster& image, func f);
         //! Assignment Operator
         GeoRaster& operator=(const GeoRaster& image);
@@ -91,11 +92,6 @@ namespace gip {
         //! Get NoData value
         double NoData() const {
             return _GDALRasterBand->GetNoDataValue();
-        }
-        //! deprecated
-        double NoDataValue() const {
-            std::cout << "DEPRECATION WARNING: Use NoData() instead of NoDataValue()" << std::endl;
-            return NoData();
         }
         //! Set No Data value
         GeoRaster& SetNoData(double val) {
