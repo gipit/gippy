@@ -90,6 +90,6 @@ class GeoImageTests(unittest.TestCase):
         geoimg = get_test_image().autoscale(1.0, 255.0).save(fname, 'uint8')
         geoimg = None
         geoimg = gp.GeoImage(fname)
-        self.assertEqual(geoimg.Type().String(), 'uint8')
+        self.assertEqual(geoimg.Type().string(), 'uint8')
         self.assertEqual(geoimg[0].min(), 1.0)
         self.assertEqual(geoimg[0].max(), 255.0)

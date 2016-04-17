@@ -144,7 +144,7 @@ namespace gip {
 namesace gip {
     %extend DataType {
         char* __str__() {
-            return self->String().c_str();
+            return self->string().c_str();
         }
     }
 }
@@ -165,7 +165,7 @@ namespace gip {
                  "Enjoy!\n ");
         PyObject* Read(Rect<int> chunk=Rect<int>()) {
             if (self->Gain() == 1.0 && self->Offset() == 0.0) {
-                switch(self->Type().Int()) {
+                switch(self->Type().type()) {
                     case 1: return CImgToArr(self->Read<unsigned char>(chunk));
                     case 2: return CImgToArr(self->Read<unsigned short>(chunk));
                     case 3: return CImgToArr(self->Read<short>(chunk));
@@ -209,11 +209,6 @@ namespace gip {
 %include "gip/GeoImage.h"
 namespace gip {
     %extend GeoImage {
-        /*%feature("kwargs") static GeoImage New(std::string filename, const GeoImage& template=GeoImage(),
-            int xsz=0, int ysz, int bands=1, DataType dt=DataType.UInt8) {
-            if (template.Basename() != "") {
-            }
-        }*/
         GeoRaster __getitem__(std::string col) {
             return self->GeoImage::operator[](col);
         }
@@ -246,7 +241,7 @@ namespace gip {
         PyObject* Read(Rect<int> chunk=Rect<int>()) {
             // Only looks at first band for gain and offset
             if ((*self)[0].Gain() == 1.0 && (*self)[0].Offset() == 0.0) {
-                switch(self->Type().Int()) {
+                switch(self->Type().type()) {
                     case 1: return CImgToArr(self->Read<unsigned char>(chunk));
                     case 2: return CImgToArr(self->Read<unsigned short>(chunk));
                     case 3: return CImgToArr(self->Read<short>(chunk));

@@ -80,7 +80,7 @@ namespace gip {
             unsigned int _ys(geoimg.YSize());
             unsigned int _bs(geoimg.NumBands());
             std::string _srs(geoimg.SRS());
-            std::string _dtype(geoimg.Type().String());
+            std::string _dtype(geoimg.Type().string());
             _bs = bsize > 0 ? bsize : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
             return create(filename, _xs, _ys, _bs, _dtype, _srs, temp);
@@ -387,7 +387,7 @@ namespace gip {
     // Save input file with processing applied into new output file
     template<class T> GeoImage GeoImage::save(std::string filename, std::string dt, bool overviews) {
         // TODO: if not supplied base output datatype on units?
-        if (dt == "unknown") dt = this->Type().String();
+        if (dt == "unknown") dt = this->Type().string();
         GeoImage imgout = GeoImage::create_from(filename, *this, NumBands(), dt);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);

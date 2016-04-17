@@ -307,7 +307,7 @@ namespace gip {
 
          //! Get Saturation mask: 1's where it's saturated
         CImg<unsigned char> SaturationMask(iRect chunk=iRect()) const {
-            switch (Type().Int()) {
+            switch (Type().type()) {
                 case 1: return _Mask<unsigned char>(_maxDC, chunk);
                 case 2: return _Mask<unsigned short>(_maxDC, chunk);
                 case 3: return _Mask<short>(_maxDC, chunk);
@@ -322,7 +322,7 @@ namespace gip {
         //! NoData mask: 1's where it's bad data
         CImg<unsigned char> NoDataMask(iRect chunk=iRect()) const {
             if (!chunk.valid()) chunk = iRect(0,0,XSize(),YSize());
-            switch (Type().Int()) {
+            switch (Type().type()) {
                 case 1: return _Mask<unsigned char>(NoData(), chunk);
                 case 2: return _Mask<unsigned short>(NoData(), chunk);
                 case 3: return _Mask<short>(NoData(), chunk);
@@ -422,7 +422,7 @@ namespace gip {
             // if not valid then set a nodata value
             if (pbSuccess == 0) {
                 // TODO - also check for out of range value ?
-                SetNoData(Type().NoData());
+                SetNoData(Type().nodata());
             }
         }
 
@@ -451,7 +451,7 @@ namespace gip {
         CImg<T> img(width, height);
         DataType dt(typeid(T));
         CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height,
-            img.data(), width, height, dt.GDALType(), 0, 0);
+            img.data(), width, height, dt.gdal(), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error reading " << CPLGetLastErrorMsg();
@@ -531,7 +531,7 @@ namespace gip {
         }
         CPLErr err = _GDALRasterBand->RasterIO(GF_Write, chunk.x0(), chunk.y0(),
             chunk.width(), chunk.height(), img.data(), img.width(), img.height(),
-            DataType(typeid(T)).GDALType(), 0, 0);
+            DataType(typeid(T)).gdal(), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error writing " << CPLGetLastErrorMsg();
