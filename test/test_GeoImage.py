@@ -16,10 +16,10 @@ class GeoImageTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gp.Options.SetVerbose(5)
+        gp.Options.SetVerbose(3)
         gp.Options.SetChunkSize(4.0)
 
-    def create_image(self, filename, size=(1, 1000, 1000), dtype='uint8', temp=False):
+    def create_image(self, filename='', size=(1, 1000, 1000), dtype='uint8', temp=False):
         return gp.GeoImage.create(filename, xsize=size[1], ysize=size[2], bsize=size[0],
                                   dtype=dtype, temp=temp)
 
@@ -52,6 +52,7 @@ class GeoImageTests(unittest.TestCase):
         os.remove(fout)
 
     def test_create_temp_file(self):
+        """ Create a temp file that is deleted when last reference gone """
         fout = self.prefix + '_temp.tif'
         geoimg = self.create_image(fout, size=(5, 1000, 1000), temp=True)
         self.assertTrue(os.path.exists(fout))
@@ -63,3 +64,11 @@ class GeoImageTests(unittest.TestCase):
         band = None
         # file should now have been deleted
         self.assertFalse(os.path.exists(fout))
+
+    def test_create_autoname_temp(self):
+        """ Create temp file with auto-generated filename """
+        geoimg = self.create_image(size=(5, 1000, 1000))
+        fname = geoimg.Filename()
+        self.assertTrue(os.path.exists(fname))
+        geoimg = None
+        self.assertFalse(os.path.exists(fname))

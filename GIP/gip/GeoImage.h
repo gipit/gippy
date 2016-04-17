@@ -22,6 +22,7 @@
 #ifndef GIP_GEOIMAGE_H
 #define GIP_GEOIMAGE_H
 
+#include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/GeoRaster.h>
 #include <stdint.h>
@@ -62,6 +63,10 @@ namespace gip {
         static GeoImage create(std::string filename, 
                 unsigned int xsize=0, unsigned int ysize=0, unsigned int bsize=0, 
                 std::string dtype="unknown", std::string srs="", bool temp=false) {
+            if (filename == "") {
+                filename = std::tmpnam(nullptr);
+                temp = true;
+            }
             GeoImage geoimg(filename, xsize, ysize, bsize, DataType(dtype), temp);
             geoimg.SetSRS(srs);
             // TODO: what about setting GeoTransorm
@@ -78,7 +83,7 @@ namespace gip {
             std::string _dtype(geoimg.Type().String());
             _bs = bsize > 0 ? bsize : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
-            return GeoImage(filename, _xs, _ys, _bs, DataType(_dtype), temp);  
+            return create(filename, _xs, _ys, _bs, _dtype, _srs, temp);
         }
 
         //static GeoImage New(string filename, const GeoImage& template=GeoImage(), int xsz=0, int ysz=0, int bands=1, DataType dt=GDT_Byte)

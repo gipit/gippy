@@ -46,16 +46,8 @@ namespace gip {
     public:
         typedef std::function< CImg<double>&(CImg<double>&) > func;
         //! \name Constructors/Destructors
-        //! Constructor for new band
-        GeoRaster(const GeoResource& georesource, int bandnum=1)
-            : GeoResource(georesource), _ValidStats(false),
-            _minDC(1), _maxDC(255) {
-            LoadBand(bandnum);
-        }
         //! Copy constructor
         GeoRaster(const GeoRaster& image);
-        //! Copy with a processing function added
-        GeoRaster(const GeoRaster& image, func f);
         //! Assignment Operator
         GeoRaster& operator=(const GeoRaster& image);
         //! Destructor
@@ -415,8 +407,18 @@ namespace gip {
         std::vector<func> _Functions;
 
     private:
+        // Private constructors (callable by GeoImage friend)
         //! Default constructor - private so not callable
-        explicit GeoRaster() {}
+        GeoRaster() {}
+
+        //! Constructor for new band
+        GeoRaster(const GeoResource& georesource, int bandnum=1)
+            : GeoResource(georesource), _ValidStats(false),
+            _minDC(1), _maxDC(255) {
+            LoadBand(bandnum);
+        }
+        //! Copy with a processing function added
+        GeoRaster(const GeoRaster& image, func f);
 
         //! Load band from GDALDataset
         void LoadBand(int bandnum=1) {
