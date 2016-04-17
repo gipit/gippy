@@ -222,6 +222,15 @@ namespace gip {
         void SetNoData(double val) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].SetNoData(val); }
 
         //! \name Processing functions
+        //! Auto rescale all bands
+        GeoImage autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
+            GeoImage geoimg(*this);
+            for (unsigned int i=0; i<_RasterBands.size(); i++) {
+                geoimg[i] = geoimg[i].autoscale(minout, maxout, percent);
+            }
+            return geoimg;
+        }
+
         //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
         template<class T> GeoImage save(std::string, std::string="unknown", bool=false);

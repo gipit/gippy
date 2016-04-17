@@ -24,18 +24,26 @@ class GeoRasterTests(unittest.TestCase):
         gippy.Options.SetChunkSize(128.0)
 
     def test_sqrt(self):
-        """ Test sqrt using gippy """
+        """ Calculate sqrt of image """
         geoimg = get_test_image()
         for band in geoimg:
             vals = band.sqrt().Read()
+            mask = band.DataMask() == 1
             # check against numpy
+            arr = band.Read()
+
 
     def test_stats(self):
-        """ Test statistics speed using gippy """
+        """ Calculate statistics using gippy """
         geoimg = get_test_image()
         for band in geoimg:
             stats = band.Stats()
+            mask = band.DataMask() == 1
             # check against numpy
+            arr = band.Read()
+            self.assertAlmostEqual(arr[mask].min(), stats[0])
+            self.assertAlmostEqual(arr[mask].max(), stats[1])
+            self.assertAlmostEqual(arr[mask].mean(), stats[2], places=3)
 
     def test_ndvi(self):
         """ Test NDVI using gippy """
@@ -58,3 +66,12 @@ class GeoRasterTests(unittest.TestCase):
         geoimgout[0].Write(ndvi)
         geoimgout = None
         geoimg = None
+
+    def test_scale(self):
+        """ Scale image to byte range """
+        geoimg = get_test_image()
+        for i, band in enumerate(geoimg):
+            band = band.autoscale(minout=1, maxout=255, percent=2.0)
+            self.assertTrue(band.min() == 1)
+            self.assertTrue(band.max() == 255)
+            geoimg[i] = band
