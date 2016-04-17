@@ -83,3 +83,13 @@ class GeoImageTests(unittest.TestCase):
         for band in geoimg2:
             self.assertTrue(band.min() == 1)
             self.assertTrue(band.max() == 255)
+
+    def test_save(self):
+        """ Save image as new image with different datatype """
+        fname = 'test-byte.tif'
+        geoimg = get_test_image().autoscale(1.0, 255.0).save(fname, 'uint8')
+        geoimg = None
+        geoimg = gp.GeoImage(fname)
+        self.assertEqual(geoimg.Type().String(), 'uint8')
+        self.assertEqual(geoimg[0].min(), 1.0)
+        self.assertEqual(geoimg[0].max(), 255.0)

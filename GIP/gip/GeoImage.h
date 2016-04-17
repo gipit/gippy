@@ -242,11 +242,6 @@ namespace gip {
         }
         //! Clear all masks
         void ClearMasks() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ClearMasks(); }
-        //! Apply a mask directly to a file
-        GeoImage& ApplyMask(CImg<uint8_t> mask, iRect chunk=iRect()) {
-            for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].ApplyMask(mask, chunk);
-            return *this;
-        }
 
         // hmm, what's this do?
         //const GeoImage& ComputeStats() const;

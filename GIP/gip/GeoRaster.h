@@ -115,14 +115,12 @@ namespace gip {
             _GDALRasterBand->SetColorInterpretation(gdalcol);
         }
 
-        //! \name Calibration and atmospheric functions
+        //! \name Calibration functions
         //! Sets dyanmic range of sensor (min to max digital counts)
         void SetDynamicRange(int min, int max) {
             _minDC = min;
             _maxDC = max;
         }
-
-        //! \name Processing functions
 
         //! Adds a mask band (1 for valid), applied on read
         const GeoRaster& AddMask(const GeoRaster& band) const {
@@ -134,19 +132,6 @@ namespace gip {
         const GeoRaster& ClearMasks() const {
             if (!_Masks.empty()) _ValidStats = false;
             _Masks.clear();
-            return *this;
-        }
-        //! Apply a mask directly to a file (inplace)
-        GeoRaster& ApplyMask(CImg<uint8_t> mask, iRect chunk=iRect());
-
-        GeoRaster& AddFunction(func f) {
-            _ValidStats = false;
-            _Functions.push_back(f);
-            return *this;
-        }
-        GeoRaster& ClearFunctions() {
-            if (!_Functions.empty()) _ValidStats = false;
-            _Functions.clear();
             return *this;
         }
 
@@ -300,30 +285,18 @@ namespace gip {
         }
 
 
-        // Statistics - should these be stored?
+        // Statistics
+        CImg<float> Stats() const;
         double min() const { return (Stats())[0]; }
         double max() const { return (Stats())[1]; }
         double mean() const { return (Stats())[2]; }
         double stddev() const { return (Stats())[3]; }
-        CImg<float> Stats() const;
-
+    
+        //! Calculate histogram with provided bins
         CImg<float> Histogram(int bins=100, bool cumulative=false) const;
 
+        //! Get value for this percentile in the cumulative distribution histogram
         float Percentile(float p) const;
-
-        // TODO - If RAW then can use GDAL Statistics, but compare speeds
-        // Compute Statistics
-        /*CImg<double> ComputeGDALStats() const {
-            double min, max, mean, stddev;
-            _GDALRasterBand->GetStatistics(false, true, &min, &max, &mean, &stddev);
-            _GDALRasterBand->ComputeStatistics(false, &min, &max, &mean, &stddev, NULL, NULL);
-            CImg<double> stats(4);
-            stats(0) = min;
-            stats(1) = max;
-            stats(2) = mean;
-            stats(3) = stddev;
-            return stats;
-        }*/
 
         //! \name File I/O
         template<class T> CImg<T> ReadRaw(iRect chunk=iRect()) const;
@@ -453,6 +426,7 @@ namespace gip {
             }
         }
 
+        //! inline function for creating a mask showing this value
         template<class T> inline CImg<unsigned char> _Mask(T val, iRect chunk=iRect()) const {
             CImg<T> img = ReadRaw<T>(chunk);
             CImg<unsigned char> mask(img.width(),img.height(),1,1,0);
