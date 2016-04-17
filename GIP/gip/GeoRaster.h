@@ -122,8 +122,6 @@ namespace gip {
             _maxDC = max;
         }
 
-        //! \name Processing functions
-
         //! Adds a mask band (1 for valid), applied on read
         const GeoRaster& AddMask(const GeoRaster& band) const {
             _ValidStats = false;
@@ -134,19 +132,6 @@ namespace gip {
         const GeoRaster& ClearMasks() const {
             if (!_Masks.empty()) _ValidStats = false;
             _Masks.clear();
-            return *this;
-        }
-        //! Apply a mask directly to a file (inplace)
-        GeoRaster& ApplyMask(CImg<uint8_t> mask, iRect chunk=iRect());
-
-        GeoRaster& AddFunction(func f) {
-            _ValidStats = false;
-            _Functions.push_back(f);
-            return *this;
-        }
-        GeoRaster& ClearFunctions() {
-            if (!_Functions.empty()) _ValidStats = false;
-            _Functions.clear();
             return *this;
         }
 
