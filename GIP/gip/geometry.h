@@ -158,9 +158,11 @@ namespace gip {
         }*/
 
         //! Transform between coordinate systems
-        Rect& Transform(OGRSpatialReference src, OGRSpatialReference dst) {
-            if (src.IsSame(&dst)) return *this;
-            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&src, &dst);
+        Rect& Transform(std::string src, std::string dst) {
+            if (src == dst) return *this;
+            OGRSpatialReference _src = OGRSpatialReference(src.c_str());
+            OGRSpatialReference _dst = OGRSpatialReference(src.c_str());
+            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
             double x, y;
             x = _p0.x();
             y = _p0.y();

@@ -54,6 +54,7 @@ namespace gip {
         }
         //! Copy constructor
         GeoRaster(const GeoRaster& image);
+        //! Copy with a processing function added
         GeoRaster(const GeoRaster& image, func f);
         //! Assignment Operator
         GeoRaster& operator=(const GeoRaster& image);
@@ -91,11 +92,6 @@ namespace gip {
         //! Get NoData value
         double NoData() const {
             return _GDALRasterBand->GetNoDataValue();
-        }
-        //! deprecated
-        double NoDataValue() const {
-            std::cout << "DEPRECATION WARNING: Use NoData() instead of NoDataValue()" << std::endl;
-            return NoData();
         }
         //! Set No Data value
         GeoRaster& SetNoData(double val) {
@@ -323,7 +319,7 @@ namespace gip {
         template<class T> CImg<T> Read(iRect chunk=iRect()) const;
         template<class T> GeoRaster& WriteRaw(CImg<T> img, iRect chunk=iRect());
         template<class T> GeoRaster& Write(CImg<T> img, iRect chunk=iRect());
-        template<class T> GeoRaster& Save(GeoRaster& raster);
+        template<class T> GeoRaster& save(GeoRaster& raster);
 
          //! Get Saturation mask: 1's where it's saturated
         CImg<unsigned char> SaturationMask(iRect chunk=iRect()) const {
@@ -561,7 +557,7 @@ namespace gip {
     }
 
     //! Process into input band "raster"
-    template<class T> GeoRaster& GeoRaster::Save(GeoRaster& raster) {
+    template<class T> GeoRaster& GeoRaster::save(GeoRaster& raster) {
         GDALRasterBand* band = raster._GDALRasterBand;
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());

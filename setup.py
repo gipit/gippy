@@ -251,7 +251,7 @@ for n in ['gippy', 'algorithms']:
         Extension(
             name=os.path.join('gippy', '_' + n),
             sources=[os.path.join('gippy', n + '.i')],
-            swig_opts=['-c++', '-w509', '-IGIP', '-fcompact', '-fvirtual'],  # '-keyword'],,
+            swig_opts=['-c++', '-w509', '-w511', '-IGIP', '-fcompact', '-fvirtual', '-keyword'],
             include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
             library_dirs=lib_dirs,
             libraries=[

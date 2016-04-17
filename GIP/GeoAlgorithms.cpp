@@ -52,9 +52,9 @@ namespace gip {
         float th_nirswir1(1.0);
         //float th_warm(210);
 
-        GeoImage imgout(filename, image, DataType("UInt8"), 4);
+        GeoImage imgout = GeoImage::create_from(filename, image, 4, "uint8");
         imgout.SetNoData(0);
-	imgout.SetBandNames({"finalmask", "cloudmask", "ambclouds", "pass1"});
+        imgout.SetBandNames({"finalmask", "cloudmask", "ambclouds", "pass1"});
         imgout.SetMeta(metadata);
 
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
@@ -283,7 +283,7 @@ namespace gip {
         imgout.SetMeta(metadata);
 
         // set projection and affine transformation
-        imgout.SetProjection(feature.Projection());
+        imgout.SetSRS(feature.SRS());
         // TODO - set affine based on extent and resolution (?)
         CImg<double> affine(6);
         affine[0] = extent.x0();
@@ -348,14 +348,14 @@ namespace gip {
         if (Options::Verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
-        GeoImage imgout(filename, image, DataType("UInt8"), 5);
-	imgout.SetBandNames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
+        GeoImage imgout = GeoImage::create_from(filename, image, 5, "uint8");
+        imgout.SetBandNames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
         imgout.SetNoData(0);
         imgout.SetMeta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
-        GeoImage probout(filename + "-prob", image, DataType("Float32"), 2);
-	probout.SetBandNames({"wcloud", "lcloud"});
+        GeoImage probout = GeoImage::create_from(filename + "-prob", image, 2, "float32");
+        probout.SetBandNames({"wcloud", "lcloud"});
         probout.SetNoData(nodataval);
 
         CImg<unsigned char> clouds, pcp, wmask, lmask, mask, redsatmask, greensatmask;
@@ -370,13 +370,13 @@ namespace gip {
         ChunkSet chunks(image.XSize(),image.YSize());
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            blue = image["BLUE"].Read<double>(chunks[iChunk]);
-            red = image["RED"].Read<double>(chunks[iChunk]);
-            green = image["GREEN"].Read<double>(chunks[iChunk]);
-            nir = image["NIR"].Read<double>(chunks[iChunk]);
-            swir1 = image["SWIR1"].Read<double>(chunks[iChunk]);
-            swir2 = image["SWIR2"].Read<double>(chunks[iChunk]);
-            BT = image["LWIR"].Read<double>(chunks[iChunk]);
+            blue = image["blue"].Read<double>(chunks[iChunk]);
+            red = image["red"].Read<double>(chunks[iChunk]);
+            green = image["green"].Read<double>(chunks[iChunk]);
+            nir = image["nir"].Read<double>(chunks[iChunk]);
+            swir1 = image["swir1"].Read<double>(chunks[iChunk]);
+            swir2 = image["swir2"].Read<double>(chunks[iChunk]);
+            BT = image["lwir"].Read<double>(chunks[iChunk]);
             mask = image.NoDataMask(chunks[iChunk])^=1;
             ndvi = (nir-red).div(nir+red);
             ndsi = (green-swir1).div(green+swir1);
@@ -395,8 +395,8 @@ namespace gip {
                 & white.get_threshold(0.7,false,true)^=1
                 & nir.get_div(swir1).threshold(0.75);
 
-            redsatmask = image["RED"].SaturationMask(chunks[iChunk]);
-            greensatmask = image["GREEN"].SaturationMask(chunks[iChunk]);
+            redsatmask = image["red"].SaturationMask(chunks[iChunk]);
+            greensatmask = image["green"].SaturationMask(chunks[iChunk]);
             vprob = red;
             // Calculate "variability probability"
             cimg_forXY(vprob,x,y) {
@@ -427,10 +427,10 @@ namespace gip {
         //if (landpixels < (0.001*imgout[0].Size())) msk = imgout[1];
 
         // Clear-sky water
-        double Twater(image["LWIR"].AddMask(image["SWIR2"] < 0.03).AddMask(imgout["water"]).AddMask(imgout["pcp"]).Percentile(82.5));
-        image["LWIR"].ClearMasks();
-        GeoRaster landBT(image["LWIR"].AddMask(imgout["land"]));
-        image["LWIR"].ClearMasks();
+        double Twater(image["lwir"].AddMask(image["swir2"] < 0.03).AddMask(imgout["water"]).AddMask(imgout["pcp"]).Percentile(82.5));
+        image["lwir"].ClearMasks();
+        GeoRaster landBT(image["lwir"].AddMask(imgout["land"]));
+        image["lwir"].ClearMasks();
         double Tlo(landBT.Percentile(17.5));
         double Thi(landBT.Percentile(82.5));
 
@@ -444,8 +444,8 @@ namespace gip {
         CImg<float> wprob, lprob;
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             mask = image.NoDataMask(chunks[iChunk])^=1;
-            BT = image["LWIR"].Read<double>(chunks[iChunk]);
-            swir1 = image["SWIR1"].Read<double>(chunks[iChunk]);
+            BT = image["lwir"].Read<double>(chunks[iChunk]);
+            swir1 = image["swir1"].Read<double>(chunks[iChunk]);
 
             // Water Clouds = temp probability x brightness probability
             wprob = ((Twater - BT)/=4.0).mul( swir1.min(0.11)/=0.11 ).mul(mask);
@@ -475,7 +475,7 @@ namespace gip {
             mask = image.NoDataMask(chunks[iChunk])^=1;
             pcp = imgout["pcp"].Read<double>(chunks[iChunk]);
             wmask = imgout["water"].Read<double>(chunks[iChunk]);
-            BT = image["LWIR"].Read<double>(chunks[iChunk]);
+            BT = image["lwir"].Read<double>(chunks[iChunk]);
 
             lprob = probout["lcloud"].Read<double>(chunks[iChunk]);
             
@@ -516,7 +516,7 @@ namespace gip {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
             if (Options::Verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
             prodname = iprod->first;
-            imagesout[prodname] = GeoImage(iprod->second, image, DataType("Int16"), 1);
+            imagesout[prodname] = GeoImage::create_from(iprod->second, image, 1, "int16");
             imagesout[prodname].SetNoData(nodataout);
             imagesout[prodname].SetGain(0.0001);
             imagesout[prodname].SetMeta(metadata);
@@ -526,22 +526,22 @@ namespace gip {
         if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
 
         std::map< string, std::vector<string> > colors;
-        colors["ndvi"] = {"NIR","RED"};
-        colors["evi"] = {"NIR","RED","BLUE"};
-        colors["lswi"] = {"NIR","SWIR1"};
-        colors["ndsi"] = {"SWIR1","GREEN"};
-        colors["ndwi"] = {"GREEN","NIR"};
-        colors["bi"] = {"BLUE","NIR"};
-        colors["satvi"] = {"SWIR1","RED", "SWIR2"};
-        colors["msavi2"] = {"NIR","RED"};
-        colors["vari"] = {"RED","GREEN","BLUE"};
-        colors["brgt"] = {"RED","GREEN","BLUE","NIR"};
+        colors["ndvi"] = {"nir","red"};
+        colors["evi"] = {"nir","red","blue"};
+        colors["lswi"] = {"nir","swir1"};
+        colors["ndsi"] = {"swir1","green"};
+        colors["ndwi"] = {"green","nir"};
+        colors["bi"] = {"blue","nir"};
+        colors["satvi"] = {"swir1","red", "swir2"};
+        colors["msavi2"] = {"nir","red"};
+        colors["vari"] = {"red","green","blue"};
+        colors["brgt"] = {"red","green","blue","nir"};
         // Tillage indices
-        colors["ndti"] = {"SWIR2","SWIR1"};
-        colors["crc"] = {"SWIR1","SWIR2","BLUE"};
-        colors["crcm"] = {"SWIR1","SWIR2","GREEN"};
-        colors["isti"] = {"SWIR1","SWIR2"};
-        colors["sti"] = {"SWIR1","SWIR2"};
+        colors["ndti"] = {"swir2","swir1"};
+        colors["crc"] = {"swir1","swir2","blue"};
+        colors["crcm"] = {"swir1","swir2","green"};
+        colors["isti"] = {"swir1","swir2"};
+        colors["sti"] = {"swir1","swir2"};
 
         // Figure out what colors are needed
         std::set< string > used_colors;
@@ -566,12 +566,12 @@ namespace gip {
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].Size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
-                if (*isstr == "RED") red = image["RED"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "GREEN") green = image["GREEN"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "BLUE") blue = image["BLUE"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "NIR") nir = image["NIR"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "SWIR1") swir1 = image["SWIR1"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "SWIR2") swir2 = image["SWIR2"].Read<float>(chunks[iChunk]);
+                if (*isstr == "red") red = image["red"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "green") green = image["green"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "blue") blue = image["blue"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "nir") nir = image["nir"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "swir1") swir1 = image["swir1"].Read<float>(chunks[iChunk]);
+                else if (*isstr == "swir2") swir2 = image["swir2"].Read<float>(chunks[iChunk]);
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
@@ -627,7 +627,7 @@ namespace gip {
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))
             throw std::runtime_error("Coefficient array needs to be of size NumBands x NumBands!");
         float nodataout = -32768;
-        GeoImage imgout(filename, img, DataType("Float32"));
+        GeoImage imgout = GeoImage::create_from(filename, img, img.NumBands(), "float32");
         imgout.SetNoData(nodataout);
         //imgout.SetGain(0.0001);
         imgout.CopyMeta(img);
@@ -655,7 +655,7 @@ namespace gip {
     GeoImage RXD(const GeoImage& img, string filename) {
         if (img.NumBands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
 
-        GeoImage imgout(filename, img, DataType("UInt8"), 1);
+        GeoImage imgout = GeoImage::create_from(filename, img, 1, "uint8");
         imgout.SetBandName("RXD", 1);
 
         CImg<double> covariance = SpectralCovariance(img);

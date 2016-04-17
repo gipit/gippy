@@ -19,6 +19,7 @@
 #    limitations under the License.
 ##############################################################################*/
 
+#include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/Utils.h>
 
@@ -35,8 +36,8 @@ namespace gip {
     string Options::_WorkDir("/tmp/");  
 
     // Constructors
-    GeoResource::GeoResource(string filename, bool update)
-        : _Filename(filename) {
+    GeoResource::GeoResource(string filename, bool update, bool temp)
+        : _Filename(filename), _temp(temp) {
 
         // read/write permissions
         GDALAccess access = update ? GA_Update : GA_ReadOnly;
@@ -58,9 +59,9 @@ namespace gip {
             std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
     }
 
-
-    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, dictionary options)
-        : _Filename(filename) {
+    //! Create new file
+    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, bool temp)
+        : _Filename(filename), _temp(temp) {
 
         // format, driver, and file extension
         string format = Options::DefaultFormat();
@@ -76,10 +77,10 @@ namespace gip {
 
         // add options
         char **papszOptions = NULL;
-        if (options.size()) {
+        /*if (options.size()) {
             for (dictionary::const_iterator imap=options.begin(); imap!=options.end(); imap++)
                 papszOptions = CSLSetNameValue(papszOptions,imap->first.c_str(),imap->second.c_str());
-        }
+        }*/
 
         // create file
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
@@ -92,12 +93,13 @@ namespace gip {
     }
 
     GeoResource::GeoResource(const GeoResource& resource)
-        : _Filename(resource._Filename), _GDALDataset(resource._GDALDataset) {}
+        : _Filename(resource._Filename), _GDALDataset(resource._GDALDataset), _temp(resource._temp) {}
 
     GeoResource& GeoResource::operator=(const GeoResource& resource) {
         if (this == &resource) return *this;
         _Filename = resource._Filename;
         _GDALDataset = resource._GDALDataset;
+        _temp = resource._temp;
         return *this;
     }
 
@@ -107,6 +109,9 @@ namespace gip {
             _GDALDataset->FlushCache();
             //BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
             if (Options::Verbose() > 4) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (_temp) {
+                std::remove(_Filename.c_str());
+            }
         }
     }
 
@@ -163,19 +168,13 @@ namespace gip {
         return Point<double>(MaxX, MaxY);
     }
 
-
-    OGRSpatialReference GeoResource::SRS() const {
-        string s(Projection());
-        return OGRSpatialReference(s.c_str());
-    }
-
     Point<double> GeoResource::Resolution() const {
         CImg<double> affine = Affine();
         return Point<double>(affine[1], affine[5]);
     }
 
     GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
-        SetProjection(res.Projection());
+        SetSRS(res.SRS());
         SetAffine(res.Affine());
         return *this;
     }
@@ -186,12 +185,12 @@ namespace gip {
 
     // Metadata
     string GeoResource::Meta(string key) const {
-        const char* item = GetGDALObject()->GetMetadataItem(key.c_str());
+        const char* item = _GDALDataset->GetMetadataItem(key.c_str());
         return (item == NULL) ? "": item;
     }
 
     GeoResource& GeoResource::SetMeta(string key, string item) {
-        GetGDALObject()->SetMetadataItem(key.c_str(), item.c_str());
+        _GDALDataset->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
@@ -203,14 +202,14 @@ namespace gip {
     }
 
     GeoResource& GeoResource::CopyMeta(const GeoResource& resource) {
-        GetGDALObject()->SetMetadata(resource.GetGDALObject()->GetMetadata());
+        _GDALDataset->SetMetadata(resource._GDALDataset->GetMetadata());
         return *this;
     }
 
 
     // Get metadata group
     vector<string> GeoResource::MetaGroup(string group, string filter) const {
-        char** meta= GetGDALObject()->GetMetadata(group.c_str());
+        char** meta= _GDALDataset->GetMetadata(group.c_str());
         int num = CSLCount(meta);
         vector<string> items;
         for (int i=0;i<num; i++) {
