@@ -52,18 +52,8 @@ namespace gip {
         explicit GeoImage(std::vector<std::string> filenames);
 
         //! Constructor for creating new file
-        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, DataType dt=DataType("uint8")) :
-            GeoResource(xsz, ysz, bsz, dt, filename) {
-            //SetCoordinateSytem(image);
-            LoadBands();
-        }
-
-        //! Constructor for creating new file with same properties (xsize, ysize, metadata) as existing file
-        explicit GeoImage(std::string filename, const GeoImage& image, int bsz, DataType dt) :
-            GeoResource(image.XSize(), image.YSize(), bsz, dt, filename) {
-            //if (datatype == GDT_Unknown) datatype = image->Type();
-            //CopyMeta(image);
-            SetCoordinateSystem(image);
+        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, DataType dt=DataType("uint8"), bool temp=false) :
+            GeoResource(xsz, ysz, bsz, dt, filename, temp) {
             LoadBands();
         }
 
@@ -71,26 +61,24 @@ namespace gip {
         //! Create new image
         static GeoImage create(std::string filename, 
                 unsigned int xsize=0, unsigned int ysize=0, unsigned int bsize=0, 
-                std::string dtype="unknown", std::string srs="",
-                GeoImage geoimg=GeoImage()) {
-            unsigned int _xsize(xsize);
-            unsigned int _ysize(ysize);
-            unsigned int _bsize(bsize);
-            std::string _dtype(dtype);
-            std::string _srs(srs);
-            if (geoimg.Filename() != "") {
-                _xsize = geoimg.XSize();
-                _ysize = geoimg.YSize();
-                _bsize = geoimg.NumBands();
-                _dtype = geoimg.Type().String();
-                _srs = geoimg.SRS();
-            }
-            _xsize = xsize > 0 ? xsize : _xsize;
-            _ysize = ysize > 0 ? ysize : _ysize;
-            _bsize = bsize > 0 ? bsize : _bsize;
-            _dtype = dtype != "unknown" ? geoimg.Type().String() : _dtype;
-            _srs = srs != "" ? geoimg.SRS() : _srs;
-            return GeoImage(filename, _xsize, _ysize, _bsize, DataType(_dtype));
+                std::string dtype="unknown", std::string srs="", bool temp=false) {
+            GeoImage geoimg(filename, xsize, ysize, bsize, DataType(dtype), temp);
+            geoimg.SetSRS(srs);
+            // TODO: what about setting GeoTransorm
+            return geoimg;
+        }
+
+        //! Create new image using foorprint of another
+        static GeoImage create_from(std::string filename, GeoImage geoimg, 
+                                    unsigned int bsize=0, std::string dtype="unknown", bool temp=false) {
+            unsigned int _xs(geoimg.XSize());
+            unsigned int _ys(geoimg.YSize());
+            unsigned int _bs(geoimg.NumBands());
+            std::string _srs(geoimg.SRS());
+            std::string _dtype(geoimg.Type().String());
+            _bs = bsize > 0 ? bsize : _bs;
+            _dtype = dtype != "unknown" ? dtype : _dtype;
+            return GeoImage(filename, _xs, _ys, _bs, DataType(_dtype), temp);  
         }
 
         //static GeoImage New(string filename, const GeoImage& template=GeoImage(), int xsz=0, int ysz=0, int bands=1, DataType dt=GDT_Byte)
@@ -231,7 +219,7 @@ namespace gip {
         //! \name Processing functions
         //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string, DataType = DataType(0), bool = false);
+        template<class T> GeoImage save(std::string, std::string="unknown", bool=false);
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& AddMask(const GeoRaster& band) {
@@ -388,10 +376,10 @@ namespace gip {
     */
 
     // Save input file with processing applied into new output file
-    template<class T> GeoImage GeoImage::save(std::string filename, DataType dt, bool overviews) {
+    template<class T> GeoImage GeoImage::save(std::string filename, std::string dt, bool overviews) {
         // TODO: if not supplied base output datatype on units?
-        if (dt.Int() == 0) dt = this->Type();
-        GeoImage imgout(filename, *this, NumBands(), dt);
+        if (dt == "unknown") dt = this->Type().String();
+        GeoImage imgout = GeoImage::create_from(filename, *this, NumBands(), dt);
         for (unsigned int i=0; i<imgout.NumBands(); i++) {
             imgout[i].CopyMeta((*this)[i]);
             (*this)[i].save<T>(imgout[i]);

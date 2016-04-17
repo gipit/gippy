@@ -19,6 +19,7 @@
 #    limitations under the License.
 ##############################################################################*/
 
+#include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/Utils.h>
 
@@ -35,8 +36,8 @@ namespace gip {
     string Options::_WorkDir("/tmp/");  
 
     // Constructors
-    GeoResource::GeoResource(string filename, bool update)
-        : _Filename(filename) {
+    GeoResource::GeoResource(string filename, bool update, bool temp)
+        : _Filename(filename), _temp(temp) {
 
         // read/write permissions
         GDALAccess access = update ? GA_Update : GA_ReadOnly;
@@ -58,9 +59,9 @@ namespace gip {
             std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
     }
 
-
-    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, dictionary options)
-        : _Filename(filename) {
+    //! Create new file
+    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, bool temp)
+        : _Filename(filename), _temp(temp) {
 
         // format, driver, and file extension
         string format = Options::DefaultFormat();
@@ -76,10 +77,10 @@ namespace gip {
 
         // add options
         char **papszOptions = NULL;
-        if (options.size()) {
+        /*if (options.size()) {
             for (dictionary::const_iterator imap=options.begin(); imap!=options.end(); imap++)
                 papszOptions = CSLSetNameValue(papszOptions,imap->first.c_str(),imap->second.c_str());
-        }
+        }*/
 
         // create file
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
@@ -92,12 +93,13 @@ namespace gip {
     }
 
     GeoResource::GeoResource(const GeoResource& resource)
-        : _Filename(resource._Filename), _GDALDataset(resource._GDALDataset) {}
+        : _Filename(resource._Filename), _GDALDataset(resource._GDALDataset), _temp(resource._temp) {}
 
     GeoResource& GeoResource::operator=(const GeoResource& resource) {
         if (this == &resource) return *this;
         _Filename = resource._Filename;
         _GDALDataset = resource._GDALDataset;
+        _temp = resource._temp;
         return *this;
     }
 
@@ -107,6 +109,9 @@ namespace gip {
             _GDALDataset->FlushCache();
             //BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
             if (Options::Verbose() > 4) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (_temp) {
+                std::remove(_Filename.c_str());
+            }
         }
     }
 

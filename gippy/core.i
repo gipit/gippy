@@ -231,7 +231,7 @@ namespace gip {
         unsigned long int __len__() {
             return self->NumBands();
         }
-        GeoImage save(std::string filename, DataType dtype=DataType("Unknown")) {
+        GeoImage save(std::string filename, std::string dtype="unknown") {
             return self->save<double>(filename, dtype);
         }
         /*GeoImage& save() {

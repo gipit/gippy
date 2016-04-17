@@ -42,9 +42,9 @@ namespace gip {
         //! Default constructor
         GeoResource() : _GDALDataset() {}
         //! Open existing file constructor
-        GeoResource(std::string filename, bool update=false);
+        GeoResource(std::string filename, bool update=false, bool temp=false);
         //! Create new file - TODO how specify OGRLayer
-        GeoResource(int, int, int, DataType, std::string, dictionary = dictionary());
+        GeoResource(int, int, int, DataType, std::string, bool=false); //, dictionary = dictionary());
 
         //! Copy constructor
         GeoResource(const GeoResource& resource);
@@ -155,6 +155,9 @@ namespace gip {
 
         //! Underlying GDALDataset of this file
         std::shared_ptr<GDALDataset> _GDALDataset;
+
+        //! Flag indicating temporary file (deleted when last reference gone)
+        bool _temp;
 
         //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
         /*GDALMajorObject* GetGDALObject() const {

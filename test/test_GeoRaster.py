@@ -54,7 +54,7 @@ class GeoRasterTests(unittest.TestCase):
         inds = np.logical_and(red != nodata, nir != nodata)
         ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
         fout = os.path.splitext(geoimg.Filename())[0] + '_numpy_ndvi'
-        geoimgout = gippy.GeoImage(fout, geoimg, 1, gippy.DataType("Float64"))
+        geoimgout = gippy.GeoImage.create_from(fout, geoimg, 1, "float64")
         geoimgout[0].Write(ndvi)
         geoimgout = None
         geoimg = None

@@ -2,7 +2,7 @@
 
 import os
 import numpy as np
-import gippy
+import gippy as gp
 import unittest
 from datetime import datetime
 import gippy.algorithms as alg
@@ -16,14 +16,12 @@ class GeoImageTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.SetVerbose(4)
-        gippy.Options.SetChunkSize(4.0)
+        gp.Options.SetVerbose(5)
+        gp.Options.SetChunkSize(4.0)
 
-    def create_image(self, filename, size=(1, 1000, 1000), dtype='UInt8'):
-        geoimg = gippy.GeoImage(filename, size[1], size[2], size[0], gippy.DataType(dtype))
-        self.assertTrue(geoimg.XSize() == 1000)
-        self.assertTrue(geoimg.XSize() == 1000)
-        return geoimg
+    def create_image(self, filename, size=(1, 1000, 1000), dtype='uint8', temp=False):
+        return gp.GeoImage.create(filename, xsize=size[1], ysize=size[2], bsize=size[0],
+                                  dtype=dtype, temp=temp)
 
     def test_open(self):
         """ Test opening of an image """
@@ -52,3 +50,16 @@ class GeoImageTests(unittest.TestCase):
         geoimg = None
         geoimg2 = None
         os.remove(fout)
+
+    def test_create_temp_file(self):
+        fout = self.prefix + '_temp.tif'
+        geoimg = self.create_image(fout, size=(5, 1000, 1000), temp=True)
+        self.assertTrue(os.path.exists(fout))
+        # keep a band
+        band = geoimg[1]
+        geoimg = None
+        # band still references file
+        self.assertTrue(os.path.exists(fout))
+        band = None
+        # file should now have been deleted
+        self.assertFalse(os.path.exists(fout))
