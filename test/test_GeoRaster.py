@@ -49,7 +49,7 @@ class GeoRasterTests(unittest.TestCase):
         """ Test NDVI using gippy """
         geoimg = get_test_image()
         fout = os.path.splitext(geoimg.Filename())[0] + '_gippy_ndvi'
-        alg.Indices(geoimg, {'ndvi': fout})
+        alg.indices(geoimg, {'ndvi': fout})
         geoimg = None
 
     def test_ndvi_numpy(self):

@@ -49,29 +49,29 @@ namespace gip {
     };
 
     //! Create cloudmask using ACCA
-    GeoImage ACCA(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
+    GeoImage acca(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
 
     //! Stretch image into byte
-    std::string BrowseImage(const GeoImage&, std::string, int quality=75);
+    std::string browse_image(const GeoImage&, std::string, int quality=75);
 
     //! Create single image from multiple input images using vector file footprint
-    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
+    GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop=false, unsigned char interpolation=0, dictionary metadata=dictionary());
 
     //! Create new file with a Fmask cloud mask
-    GeoImage Fmask(const GeoImage&, std::string, int=3, int=5, dictionary=dictionary());
+    GeoImage fmask(const GeoImage&, std::string, int=3, int=5, dictionary=dictionary());
 
     //! Kmeans
     //GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
-    GeoImage Indices(const GeoImage&, dictionary, dictionary=dictionary());
+    GeoImage indices(const GeoImage&, dictionary, dictionary=dictionary());
 
     //! Create output based on linear combinations of input
-    GeoImage LinearTransform(const GeoImage&, std::string, CImg<float>);
+    GeoImage linear_transform(const GeoImage&, std::string, CImg<float>);
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
-    GeoImage RXD(const GeoImage&, std::string);
+    GeoImage rxd(const GeoImage&, std::string);
 
     //! Calculate spectral statistics and output to new image
     //GeoImage SpectralStatistics(const GeoImage&, std::string);
@@ -83,7 +83,7 @@ namespace gip {
     //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
     //! Calculate spectral covariance
-    CImg<double> SpectralCovariance(const GeoImage&);
+    CImg<double> spectral_covariance(const GeoImage&);
     }
 } // namespace gip
 

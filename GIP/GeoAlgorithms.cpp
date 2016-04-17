@@ -39,7 +39,7 @@ namespace gip {
      * temperature, sun elevation, solar azimuth, and number of pixels to
      * dilate.
      */
-    GeoImage ACCA(const GeoImage& image, std::string filename, float se_degrees,
+    GeoImage acca(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
         if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.Basename() << endl;
 
@@ -221,7 +221,7 @@ namespace gip {
     }
 
     //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
-    std::string BrowseImage(const GeoImage& image, std::string filename, int quality) {
+    std::string browse_image(const GeoImage& image, std::string filename, int quality) {
         // TODO - take in output filename rather then autogenerating
         //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
 
@@ -252,10 +252,10 @@ namespace gip {
     }
 
     //! Merge images into one file and crop to vector
-    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
+    GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         if (Options::Verbose() > 1)
-            cout << "GIPPY: CookieCutter (" << images.NumImages() << " files) - " << filename << endl;
+            cout << "GIPPY: cookie_cutter (" << images.NumImages() << " files) - " << filename << endl;
         Rect<double> extent = feature.Extent();
 
         if (crop) {
@@ -344,7 +344,7 @@ namespace gip {
 
 
     //! Fmask cloud mask
-    GeoImage Fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
+    GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
         if (Options::Verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
@@ -501,9 +501,7 @@ namespace gip {
         return imgout;
     }
 
-
-    //void Indices(const GeoImage& ImageIn, string basename, std::vector<std::string> products) {
-    GeoImage Indices(const GeoImage& image, dictionary products, dictionary metadata) {
+    GeoImage indices(const GeoImage& image, dictionary products, dictionary metadata) {
         if (Options::Verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
@@ -621,7 +619,7 @@ namespace gip {
     }
 
     //! Perform linear transform with given coefficients (e.g., PC transform)
-    GeoImage LinearTransform(const GeoImage& img, string filename, CImg<float> coef) {
+    GeoImage linear_transform(const GeoImage& img, string filename, CImg<float> coef) {
         // Verify size of array
         unsigned int numbands = img.NumBands();
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))
@@ -652,13 +650,13 @@ namespace gip {
     }
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
-    GeoImage RXD(const GeoImage& img, string filename) {
+    GeoImage rxd(const GeoImage& img, string filename) {
         if (img.NumBands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
 
         GeoImage imgout = GeoImage::create_from(filename, img, 1, "uint8");
         imgout.SetBandName("RXD", 1);
 
-        CImg<double> covariance = SpectralCovariance(img);
+        CImg<double> covariance = spectral_covariance(img);
         CImg<double> K = covariance.invert();
         CImg<double> chip, chipout, pixel;
 
@@ -683,7 +681,7 @@ namespace gip {
 
 
     //! Calculates spectral covariance of image
-    CImg<double> SpectralCovariance(const GeoImage& img) {
+    CImg<double> spectral_covariance(const GeoImage& img) {
         unsigned int NumBands(img.NumBands());
 
         CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;        
