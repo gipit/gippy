@@ -32,10 +32,10 @@ namespace gip {
             _ValidStats(image._ValidStats), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {}
 
-    // Copy constructor
+    // Copy constructor with added processing
     GeoRaster::GeoRaster(const GeoRaster& image, func f)
         : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), 
-            _ValidStats(image._ValidStats), _Stats(image._Stats),
+            _ValidStats(false), _Stats(image._Stats),
             _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {
         //if (func.Function() != "") AddFunction(func);
         _Functions.push_back(f);

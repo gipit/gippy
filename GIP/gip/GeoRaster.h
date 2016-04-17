@@ -150,6 +150,25 @@ namespace gip {
             return *this;
         }
 
+        // Scale input image range (minin, maxin) to output range (minout, maxout)
+        GeoRaster scale(const double& minin, const double& maxin, const double& minout, const double& maxout) {
+            // Calculate gain and offset
+            double gain = (maxout-minout)/(maxin-minin);
+            double offset = minout - gain*minin;
+            return ((*this) * gain + offset).min(maxout).max(minout);
+        }
+
+        //! Scale image to given range (minout, maxout)
+        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
+            double minin = this->min();
+            double maxin = this->max();
+            if (percent > 0.0) {
+                minin = Percentile(percent);
+                maxin = Percentile(100.0 - percent);
+            }
+            return scale(minin, maxin, minout, maxout);
+        }
+
         //! \name Processing functions
         // Logical operators
         GeoRaster operator>(const double &val) const {
@@ -282,10 +301,10 @@ namespace gip {
 
 
         // Statistics - should these be stored?
-        //double Min() const { return (GetGDALStats())[0]; }
-        //double Max() const { return (GetGDALStats())[1]; }
-        //double Mean() const { return (GetGDALStats())[2]; }
-        //double StdDev() const { return (GetGDALStats())[3]; }
+        double min() const { return (Stats())[0]; }
+        double max() const { return (Stats())[1]; }
+        double mean() const { return (Stats())[2]; }
+        double stddev() const { return (Stats())[3]; }
         CImg<float> Stats() const;
 
         CImg<float> Histogram(int bins=100, bool cumulative=false) const;

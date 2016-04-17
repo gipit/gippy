@@ -24,13 +24,13 @@ class GeoImageTests(unittest.TestCase):
                                   dtype=dtype, temp=temp)
 
     def test_open(self):
-        """ Test opening of an image """
+        """ Open existing image """
         geoimg = get_test_image()
         self.assertTrue(geoimg.XSize() > 0)
         self.assertTrue(geoimg.YSize() > 0)
 
     def test_create(self):
-        """ Test creation of image """
+        """ Create single band image """
         fout = 'test.tif'
         geoimg = self.create_image(fout)
         self.assertTrue(geoimg.XSize() == 1000)
@@ -39,7 +39,7 @@ class GeoImageTests(unittest.TestCase):
         os.remove(fout)
 
     def test_create_multiband(self):
-        """ Test creation of an RGB image """
+        """ Create an RGB image """
         fout = 'test_3band.tif'
         geoimg = self.create_image(fout, (3, 1000, 1000))
         geoimg.SetBandNames(['green', 'red', 'blue'])
@@ -72,3 +72,14 @@ class GeoImageTests(unittest.TestCase):
         self.assertTrue(os.path.exists(fname))
         geoimg = None
         self.assertFalse(os.path.exists(fname))
+
+    def test_autoscale(self):
+        """ Auto scale each band in image """
+        geoimg = get_test_image()
+        for band in geoimg:
+            self.assertTrue(band.min() != 1.0)
+            self.assertTrue(band.max() != 255.0)
+        geoimg2 = geoimg.autoscale(minout=1.0, maxout=255.0)
+        for band in geoimg2:
+            self.assertTrue(band.min() == 1)
+            self.assertTrue(band.max() == 255)
