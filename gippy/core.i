@@ -25,7 +25,7 @@
 namespace std {
     %template(vectors) std::vector<std::string>;
     %template(vectori) std::vector<int>;
-    %template(mapss) std::map<std::string, std::string>;
+    %template() std::map<std::string, std::string>;
 }
 
 %include "exception.i"
