@@ -348,8 +348,8 @@ namespace gip {
             CImg<double> cimg0, cimg, subcimg;
 
             ChunkSet chunks(xsize(),ysize());
-            chunks.Padding(border);
-            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            chunks.padding(border);
+            for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
                 cimg0 = read<double>(chunks[iChunk]);
                 cimg = cimg0;
                 cimg_for_insideXY(cimg,x,y,border) {
@@ -441,8 +441,8 @@ namespace gip {
     template<class T> CImg<T> GeoRaster::read_raw(iRect chunk) const {
         if (!chunk.valid())
             chunk = Rect<int>(0,0,xsize(),ysize());
-        else if (chunk.Padding() > 0)
-            chunk = chunk.Pad().Intersect(Rect<int>(0,0,xsize(),ysize()));
+        else if (chunk.padding() > 0)
+            chunk = chunk.pad().intersect(Rect<int>(0,0,xsize(),ysize()));
 
         // This doesn't check for in bounds, should it?
         int width = chunk.x1()-chunk.x0()+1;
@@ -518,8 +518,8 @@ namespace gip {
     template<class T> GeoRaster& GeoRaster::write_raw(CImg<T> img, iRect chunk) {
         if (!chunk.valid()) chunk = Rect<int>(0,0,xsize(),ysize());
         // Depad this if needed
-        if (chunk.Padding() > 0) {
-            Rect<int> pchunk = chunk.get_Pad().Intersect(Rect<int>(0,0,xsize(),ysize()));
+        if (chunk.padding() > 0) {
+            Rect<int> pchunk = chunk.get_pad().intersect(Rect<int>(0,0,xsize(),ysize()));
             Point<int> p0(chunk.p0()-pchunk.p0());
             Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
             img.crop(p0.x(),p0.y(),p1.x(),p1.y());
@@ -559,8 +559,8 @@ namespace gip {
         raster.SetCoordinateSystem(*this);
         ChunkSet chunks(xsize(), ysize());
         if (Options::Verbose() > 3)
-            std::cout << basename() << ": Processing in " << chunks.Size() << " chunks" << std::endl;
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            std::cout << basename() << ": Processing in " << chunks.size() << " chunks" << std::endl;
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
                 CImg<T> cimg = read<T>(chunks[iChunk]);
                 if (nodata() != raster.nodata()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == nodata()) *ptr = raster.nodata(); }

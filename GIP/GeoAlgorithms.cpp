@@ -67,7 +67,7 @@ namespace gip {
         Rect<int> chunk;
 
         //if (Options::Verbose()) cout << image.basename() << " - ACCA (dev-version)" << endl;
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chunk = chunks[iChunk];
             red = image["RED"].read<float>(chunk);
             green = image["GREEN"].read<float>(chunk);
@@ -116,7 +116,7 @@ namespace gip {
             imgout["pass1"].write<unsigned char>(clouds,chunk);
             imgout["ambclouds"].write<unsigned char>(ambclouds,chunk);
             //imgout[0].write(nonclouds,iChunk);
-            if (Options::Verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.Size() << endl;
+            if (Options::Verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.size() << endl;
         }
         // Cloud statistics
         float cloudcover = cloudsum / scenesize;
@@ -191,11 +191,11 @@ namespace gip {
                  << "xstep  = " << signX*xstep << endl
                  << "ystep  = " << signY*ystep << endl ;
 
-        chunks.Padding(padding);
+        chunks.padding(padding);
 
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chunk = chunks[iChunk];
-            if (Options::Verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
+            if (Options::Verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.size() << endl;
             clouds = imgout["pass1"].read<unsigned char>(chunk);
             // should this be a |= ?
             if (addclouds) clouds += imgout["ambclouds"].read<unsigned char>(chunk);
@@ -256,12 +256,12 @@ namespace gip {
         float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
         if (Options::Verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << images.nimages() << " files) - " << filename << endl;
-        Rect<double> extent = feature.Extent();
+        Rect<double> extent = feature.extent();
 
         if (crop) {
-            Rect<double> _extent = images.extent(feature.SRS());
+            Rect<double> _extent = images.extent(feature.srs());
             // limit to feature extent
-            _extent.Intersect(extent);
+            _extent.intersect(extent);
             // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
             extent = Rect<double>(
                 Point<double>(extent.x0() + std::floor((_extent.x0()-extent.x0()) / xres) * xres, _extent.y0()),
@@ -283,7 +283,7 @@ namespace gip {
         imgout.set_meta(metadata);
 
         // set projection and affine transformation
-        imgout.setsrs(feature.SRS());
+        imgout.setsrs(feature.srs());
         // TODO - set affine based on extent and resolution (?)
         CImg<double> affine(6);
         affine[0] = extent.x0();
@@ -331,7 +331,7 @@ namespace gip {
         papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::NumCores()).c_str());
         psWarpOptions->papszWarpOptions = papszOptions;
 
-        OGRGeometry* geom = feature.Geometry();
+        OGRGeometry* geom = feature.geometry();
 
         for (unsigned int i=0; i<images.nimages(); i++) {
             WarpToImage(images[i], imgout, psWarpOptions, geom);
@@ -369,7 +369,7 @@ namespace gip {
 
         ChunkSet chunks(image.xsize(),image.ysize());
 
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             blue = image["blue"].read<double>(chunks[iChunk]);
             red = image["red"].read<double>(chunks[iChunk]);
             green = image["green"].read<double>(chunks[iChunk]);
@@ -442,7 +442,7 @@ namespace gip {
 
         // Calculate cloud probabilities for over water and land
         CImg<float> wprob, lprob;
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             mask = image.nodata_mask(chunks[iChunk])^=1;
             BT = image["lwir"].read<double>(chunks[iChunk]);
             swir1 = image["swir1"].read<double>(chunks[iChunk]);
@@ -470,8 +470,8 @@ namespace gip {
         //CImg<int> filter(3,3,1,1, 1);
         int erode = 5;
         int padding(double(std::max(dilate,erode)+1)/2);
-        chunks.Padding(padding);
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        chunks.padding(padding);
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             mask = image.nodata_mask(chunks[iChunk])^=1;
             pcp = imgout["pcp"].read<double>(chunks[iChunk]);
             wmask = imgout["water"].read<double>(chunks[iChunk]);
@@ -561,7 +561,7 @@ namespace gip {
         ChunkSet chunks(image.xsize(),image.ysize());
 
         // need to add overlap
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
                 if (*isstr == "red") red = image["red"].read<float>(chunks[iChunk]);
@@ -636,7 +636,7 @@ namespace gip {
 
         for (unsigned int bout=0; bout<numbands; bout++) {
             //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
-            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+            for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
                 cimg = img[0].read<float>(chunks[iChunk]) * coef(0, bout);;
                 for (unsigned int bin=1; bin<numbands; bin++) {
                     cimg = cimg + (img[bin].read<float>(chunks[iChunk]) * coef(bin, bout));
@@ -667,7 +667,7 @@ namespace gip {
         }
 
         ChunkSet chunks(img.xsize(),img.ysize());
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chip = img.read<double>(chunks[iChunk]);
             chipout = CImg<double>(chip, "xyzc");
             cimg_forXY(chip,x,y) {
@@ -689,7 +689,7 @@ namespace gip {
         int validsize;
 
         ChunkSet chunks = img.chunks();
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             // Bands x NumPixels
             matrixchunk = CImg<double>(NumBands, chunks[iChunk].area(),1,1,0);
             mask = img.nodata_mask(chunks[iChunk]);

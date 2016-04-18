@@ -50,46 +50,41 @@ namespace gip {
         ~GeoVectorResource();
 
         //! \name Resource information
-        std::string Filename() const;
+        std::string filename() const;
         //! Basename, or short name of filename
-        std::string Basename() const;
+        std::string basename() const;
         //! File format of dataset
         //std::string Format() const;
-        std::string LayerName() const;
+        std::string layer_name() const;
 
         // Geospatial
         //! Return spatial reference system as an OGRSpatialReference
-        std::string SRS() const;
+        std::string srs() const;
 
         //! Return spatial reference system as WKT
         //std::string Projection() const;
 
         //! Get bounding box in projected units
-        Rect<double> Extent() const;
+        Rect<double> extent() const;
 
         //! Get number of features
-        unsigned long int NumFeatures() const {
+        unsigned long int nfeatures() const {
             return _Layer->GetFeatureCount();
         }
 
-        std::string PrimaryKey() const {
+        std::string primary_key() const {
             return _PrimaryKey;
         }
 
 
         //! Get list of attributes
-        std::vector<std::string> Attributes() const {
+        std::vector<std::string> attributes() const {
             std::vector<std::string> atts;
             OGRFeatureDefn* att = _Layer->GetLayerDefn();
             for (int i=0; i<att->GetFieldCount(); i++) {
                 atts.push_back(std::string(att->GetFieldDefn(i)->GetNameRef()));
             }
             return atts;
-        }
-
-        void use_count(std::string s = "") const {
-            std::cout << Basename() << " GeoVectorResource " << s 
-                << " use_count = " << _OGRDataSource.use_count() << std::endl;
         }
 
     protected:
@@ -104,6 +99,11 @@ namespace gip {
         OGRLayer* _Layer;
 
         std::string _PrimaryKey;
+
+        void use_count(std::string s = "") const {
+            std::cout << basename() << " GeoVectorResource " << s 
+                << " use_count = " << _OGRDataSource.use_count() << std::endl;
+        }
 
     private:
         void OpenLayer(std::string layer="");

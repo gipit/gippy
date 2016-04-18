@@ -91,7 +91,7 @@ namespace gip {
         double min(type().maxval()), max(type().minval());
         ChunkSet chunks(xsize(),ysize());
 
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             cimg = read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nodata()) {
@@ -105,7 +105,7 @@ namespace gip {
         float mean = total/count;
         total = 0;
         double total3(0);
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             cimg = read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nodata()) {
@@ -147,7 +147,7 @@ namespace gip {
         long numpixels(0);
         float nd = nodata();
         ChunkSet chunks(xsize(),ysize());
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             cimg = read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nd) {

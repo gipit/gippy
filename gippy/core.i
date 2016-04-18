@@ -122,7 +122,7 @@ namespace gip {
             return self->ChunkSet::operator[](index);
         }
         unsigned long int __len__() {
-            return self->Size();
+            return self->size();
         }        
         ChunkSet __deepcopy__(ChunkSet chunks) {
             return ChunkSet(chunks);
@@ -296,7 +296,7 @@ namespace gip {
 namespace gip {
     %extend GeoVectorResource {
         unsigned long int __len__() {
-            return self->GeoVectorResource::NumFeatures();
+            return self->GeoVectorResource::nfeatures();
         }
     }
 }
