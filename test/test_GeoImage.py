@@ -42,11 +42,11 @@ class GeoImageTests(unittest.TestCase):
         """ Create an RGB image """
         fout = 'test_3band.tif'
         geoimg = self.create_image(fout, (3, 1000, 1000))
-        geoimg.SetBandNames(['green', 'red', 'blue'])
+        geoimg.set_bandnames(['green', 'red', 'blue'])
         # test selection of bands
         geoimg2 = geoimg.select(["red"])
-        self.assertTrue(geoimg2.NumBands() == 1)
-        self.assertTrue(geoimg["red"].Description() == "red")
+        self.assertTrue(geoimg2.nbands() == 1)
+        self.assertTrue(geoimg["red"].description() == "red")
         geoimg = None
         geoimg2 = None
         os.remove(fout)
@@ -90,6 +90,6 @@ class GeoImageTests(unittest.TestCase):
         geoimg = get_test_image().autoscale(1.0, 255.0).save(fname, 'uint8')
         geoimg = None
         geoimg = gp.GeoImage(fname)
-        self.assertEqual(geoimg.Type().string(), 'uint8')
+        self.assertEqual(geoimg.type().string(), 'uint8')
         self.assertEqual(geoimg[0].min(), 1.0)
         self.assertEqual(geoimg[0].max(), 255.0)

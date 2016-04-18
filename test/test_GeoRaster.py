@@ -27,20 +27,20 @@ class GeoRasterTests(unittest.TestCase):
         """ Calculate sqrt of image """
         geoimg = get_test_image()
         for band in geoimg:
-            vals = band.sqrt().Read()
-            mask = band.DataMask() == 1
+            vals = band.sqrt().read()
+            mask = band.data_mask() == 1
             # check against numpy
-            arr = band.Read()
+            arr = band.read()
 
 
     def test_stats(self):
         """ Calculate statistics using gippy """
         geoimg = get_test_image()
         for band in geoimg:
-            stats = band.Stats()
-            mask = band.DataMask() == 1
+            stats = band.stats()
+            mask = band.data_mask() == 1
             # check against numpy
-            arr = band.Read()
+            arr = band.read()
             self.assertAlmostEqual(arr[mask].min(), stats[0])
             self.assertAlmostEqual(arr[mask].max(), stats[1])
             self.assertAlmostEqual(arr[mask].mean(), stats[2], places=3)
@@ -56,15 +56,15 @@ class GeoRasterTests(unittest.TestCase):
     def test_ndvi_numpy(self):
         """ Test NDVI separately using numpy for speed comparison """
         geoimg = get_test_image()
-        nodata = geoimg[0].NoData()
-        red = geoimg['RED'].Read().astype('double')
-        nir = geoimg['NIR'].Read().astype('double')
+        nodata = geoimg[0].nodata()
+        red = geoimg['RED'].read().astype('double')
+        nir = geoimg['NIR'].read().astype('double')
         ndvi = np.zeros(red.shape) + nodata
         inds = np.logical_and(red != nodata, nir != nodata)
         ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
         fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
         geoimgout = gippy.GeoImage.create_from(fout, geoimg, 1, "float64")
-        geoimgout[0].Write(ndvi)
+        geoimgout[0].write(ndvi)
         geoimgout = None
         geoimg = None
         os.remove(fout)

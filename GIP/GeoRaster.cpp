@@ -59,42 +59,42 @@ namespace gip {
         return *this;
     }
 
-    string GeoRaster::Info(bool showstats) const {
+    string GeoRaster::info(bool showstats) const {
         std::stringstream info;
         //info << _GeoImage->Basename() << " - b" << _GDALRasterBand->GetBand() << ":" << endl;
-        info << xsize() << " x " << ysize() << " " << Type().string() << ": " << Description();
+        info << xsize() << " x " << ysize() << " " << type().string() << ": " << description();
         //info << " (GeoData: " << _GDALDataset.use_count() << " " << _GDALDataset << ")";
         //info << " RasterBand &" << _GDALRasterBand << endl;
-        info << "   Gain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
-        info << ", NoData = " << NoData() << endl;
+        info << "   Gain = " << gain() << ", Offset = " << offset(); //<< ", Units = " << Units();
+        info << ", NoData = " << nodata() << endl;
         if (showstats) {
-            CImg<float> stats = this->Stats();
-            info << "      Min = " << stats(0) << ", Max = " << stats(1) << ", Mean = " << stats(2) << " =/- " << stats(3) << endl;
+            CImg<float> st = this->stats();
+            info << "      Min = " << st(0) << ", Max = " << st(1) << ", Mean = " << st(2) << " =/- " << st(3) << endl;
         }
         /*if (!_Functions.empty()) info << "      Functions:" << endl;
         for (unsigned int i=0;i<_Functions.size();i++) {
           info << "      " << _Functions[i] << endl; //" " << _Functions[i].Operand() << endl;
         }*/
         if (!_Masks.empty()) info << "\tMasks:" << endl;
-        for (unsigned int i=0;i<_Masks.size();i++) info << "      " << _Masks[i].Info() << endl;
+        for (unsigned int i=0;i<_Masks.size();i++) info << "      " << _Masks[i].info() << endl;
         //_GeoImage->GetGDALDataset()->Reference(); int ref = _GeoImage->GetGDALDataset()->Dereference();
         //info << "  GDALDataset: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << endl;
         return info.str();
     }
 
     //! Compute stats
-    CImg<float> GeoRaster::Stats() const {
+    CImg<float> GeoRaster::stats() const {
         if (_ValidStats) return _Stats;
 
         CImg<double> cimg;
         double count(0), total(0), val;
-        double min(Type().maxval()), max(Type().minval());
+        double min(type().maxval()), max(type().minval());
         ChunkSet chunks(xsize(),ysize());
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            cimg = Read<double>(chunks[iChunk]);
+            cimg = read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != NoData()) {
+                if (*ptr != nodata()) {
                     total += *ptr;
                     count++;
                     if (*ptr > max) max = *ptr;
@@ -106,9 +106,9 @@ namespace gip {
         total = 0;
         double total3(0);
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            cimg = Read<double>(chunks[iChunk]);
+            cimg = read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != NoData()) {
+                if (*ptr != nodata()) {
                     val = *ptr-mean;
                     total += (val*val);
                     total3 += (val*val*val);
@@ -124,15 +124,15 @@ namespace gip {
         return _Stats;
     }
 
-    float GeoRaster::Percentile(float p) const {
-        CImg<float> stats = Stats();
+    float GeoRaster::percentile(float p) const {
+        CImg<float> st = stats();
         unsigned int bins(100);
-        CImg<float> hist = Histogram(bins,true) * 100;
+        CImg<float> hist = histogram(bins,true) * 100;
         CImg<float> xaxis(bins);
-        float interval( (stats(1)-stats(0))/((float)bins-1) );
-        for (unsigned int i=0;i<bins;i++) xaxis[i] = stats(0) + i * interval;
-        if (p == 0) return stats(0);
-        if (p == 99) return stats(1);
+        float interval( (st(1)-st(0))/((float)bins-1) );
+        for (unsigned int i=0;i<bins;i++) xaxis[i] = st(0) + i * interval;
+        if (p == 0) return st(0);
+        if (p == 99) return st(1);
         int ind(1);
         while(hist[ind] < p) ind++;
         float xind( (p-hist[ind-1])/(hist[ind]-hist[ind-1]) );
@@ -140,25 +140,25 @@ namespace gip {
     }
 
     //! Compute histogram
-    CImg<float> GeoRaster::Histogram(int bins, bool cumulative) const {
+    CImg<float> GeoRaster::histogram(int bins, bool cumulative) const {
         CImg<double> cimg;
-        CImg<float> stats = Stats();
+        CImg<float> st = stats();
         CImg<float> hist(bins,1,1,1,0);
         long numpixels(0);
-        float nodata = NoData();
+        float nd = nodata();
         ChunkSet chunks(xsize(),ysize());
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            cimg = Read<double>(chunks[iChunk]);
+            cimg = read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != nodata) {
-                    hist[(unsigned int)( (*ptr-stats(0))*bins / (stats(1)-stats(0)) )]++;
+                if (*ptr != nd) {
+                    hist[(unsigned int)( (*ptr-st(0))*bins / (st(1)-st(0)) )]++;
                     numpixels++;
                 }
             }
         }
         hist/=numpixels;
         if (cumulative) for (int i=1;i<bins;i++) hist[i] += hist[i-1];
-        //if (Options::Verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",stats(0),stats(1));
+        //if (Options::Verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
         return hist;
     }
 

@@ -189,19 +189,19 @@ namespace gip {
         return (item == NULL) ? "": item;
     }
 
-    GeoResource& GeoResource::setmeta(string key, string item) {
+    GeoResource& GeoResource::set_meta(string key, string item) {
         _GDALDataset->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
-    GeoResource& GeoResource::setmeta(std::map<string, string> items) {
+    GeoResource& GeoResource::set_meta(std::map<string, string> items) {
         for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
-            setmeta(i->first, i->second);
+            set_meta(i->first, i->second);
         }
         return *this;
     }
 
-    GeoResource& GeoResource::copymeta(const GeoResource& resource) {
+    GeoResource& GeoResource::copy_meta(const GeoResource& resource) {
         _GDALDataset->SetMetadata(resource._GDALDataset->GetMetadata());
         return *this;
     }

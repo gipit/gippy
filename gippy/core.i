@@ -133,7 +133,7 @@ namespace gip {
 
 // DataType
 %ignore gip::DataTypes;
-%ignore gip::DataType::GDALType;
+%ignore gip::DataType::gdal;
 %include "gip/DataType.h"
 //%typemap(typecheck) gip::DataType = PyObject*;
 //%typemap(in) gip::DataType {
@@ -163,35 +163,35 @@ namespace gip {
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
-        PyObject* Read(Rect<int> chunk=Rect<int>()) {
-            if (self->Gain() == 1.0 && self->Offset() == 0.0) {
-                switch(self->Type().type()) {
-                    case 1: return CImgToArr(self->Read<unsigned char>(chunk));
-                    case 2: return CImgToArr(self->Read<unsigned short>(chunk));
-                    case 3: return CImgToArr(self->Read<short>(chunk));
-                    case 4: return CImgToArr(self->Read<unsigned int>(chunk));
-                    case 5: return CImgToArr(self->Read<int>(chunk));
-                    case 6: return CImgToArr(self->Read<float>(chunk));
-                    case 7: return CImgToArr(self->Read<double>(chunk));
+        PyObject* read(Rect<int> chunk=Rect<int>()) {
+            if (self->gain() == 1.0 && self->offset() == 0.0) {
+                switch(self->type().type()) {
+                    case 1: return CImgToArr(self->read<unsigned char>(chunk));
+                    case 2: return CImgToArr(self->read<unsigned short>(chunk));
+                    case 3: return CImgToArr(self->read<short>(chunk));
+                    case 4: return CImgToArr(self->read<unsigned int>(chunk));
+                    case 5: return CImgToArr(self->read<int>(chunk));
+                    case 6: return CImgToArr(self->read<float>(chunk));
+                    case 7: return CImgToArr(self->read<double>(chunk));
                     default: throw(std::exception());
                 }
             }
-            return CImgToArr(self->Read<float>(chunk));
+            return CImgToArr(self->read<float>(chunk));
         }
         %feature("docstring",
                  "PyObject passed in is a numpy.array.\n"
                  "Comply!\n ");
-        GeoRaster& Write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
+        GeoRaster& write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
             switch( PyArray_TYPE((PyArrayObject*)obj)) {
-                case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
-                case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(obj), chunk); break;
-                case NPY_INT16: self->Write(ArrToCImg<short>(obj), chunk); break;
-                case NPY_UINT32: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT32: self->Write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_UINT64: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT64: self->Write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_FLOAT32: self->Write(ArrToCImg<float>(obj), chunk); break;
-                case NPY_FLOAT64: self->Write(ArrToCImg<double>(obj), chunk); break;
+                case NPY_UINT8: self->write(ArrToCImg<unsigned char>(obj), chunk); break;
+                case NPY_UINT16: self->write(ArrToCImg<unsigned short>(obj), chunk); break;
+                case NPY_INT16: self->write(ArrToCImg<short>(obj), chunk); break;
+                case NPY_UINT32: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT32: self->write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_UINT64: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT64: self->write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_FLOAT32: self->write(ArrToCImg<float>(obj), chunk); break;
+                case NPY_FLOAT64: self->write(ArrToCImg<double>(obj), chunk); break;
                 default:
                     throw(std::exception());
             }
@@ -224,7 +224,7 @@ namespace gip {
             return self->operator[](col);
         }
         unsigned long int __len__() {
-            return self->NumBands();
+            return self->nbands();
         }
         GeoImage save(std::string filename, std::string dtype="unknown") {
             return self->save<double>(filename, dtype);
@@ -238,33 +238,33 @@ namespace gip {
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
-        PyObject* Read(Rect<int> chunk=Rect<int>()) {
+        PyObject* read(Rect<int> chunk=Rect<int>()) {
             // Only looks at first band for gain and offset
-            if ((*self)[0].Gain() == 1.0 && (*self)[0].Offset() == 0.0) {
-                switch(self->Type().type()) {
-                    case 1: return CImgToArr(self->Read<unsigned char>(chunk));
-                    case 2: return CImgToArr(self->Read<unsigned short>(chunk));
-                    case 3: return CImgToArr(self->Read<short>(chunk));
-                    case 4: return CImgToArr(self->Read<unsigned int>(chunk));
-                    case 5: return CImgToArr(self->Read<int>(chunk));
-                    case 6: return CImgToArr(self->Read<float>(chunk));
-                    case 7: return CImgToArr(self->Read<double>(chunk));
+            if ((*self)[0].gain() == 1.0 && (*self)[0].offset() == 0.0) {
+                switch(self->type().type()) {
+                    case 1: return CImgToArr(self->read<unsigned char>(chunk));
+                    case 2: return CImgToArr(self->read<unsigned short>(chunk));
+                    case 3: return CImgToArr(self->read<short>(chunk));
+                    case 4: return CImgToArr(self->read<unsigned int>(chunk));
+                    case 5: return CImgToArr(self->read<int>(chunk));
+                    case 6: return CImgToArr(self->read<float>(chunk));
+                    case 7: return CImgToArr(self->read<double>(chunk));
                     default: throw(std::exception());
                 }
             }
-            return CImgToArr(self->Read<float>(chunk));
+            return CImgToArr(self->read<float>(chunk));
         }
-        GeoImage& Write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
+        GeoImage& write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
             switch( PyArray_TYPE((PyArrayObject*)obj)) {
-                case NPY_UINT8: self->Write(ArrToCImg<unsigned char>(obj), chunk); break;
-                case NPY_UINT16: self->Write(ArrToCImg<unsigned short>(obj), chunk); break;
-                case NPY_INT16: self->Write(ArrToCImg<short>(obj), chunk); break;
-                case NPY_UINT32: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT32: self->Write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_UINT64: self->Write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT64: self->Write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_FLOAT32: self->Write(ArrToCImg<float>(obj), chunk); break;
-                case NPY_FLOAT64: self->Write(ArrToCImg<double>(obj), chunk); break;
+                case NPY_UINT8: self->write(ArrToCImg<unsigned char>(obj), chunk); break;
+                case NPY_UINT16: self->write(ArrToCImg<unsigned short>(obj), chunk); break;
+                case NPY_INT16: self->write(ArrToCImg<short>(obj), chunk); break;
+                case NPY_UINT32: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT32: self->write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_UINT64: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
+                case NPY_INT64: self->write(ArrToCImg<int>(obj), chunk); break;
+                case NPY_FLOAT32: self->write(ArrToCImg<float>(obj), chunk); break;
+                case NPY_FLOAT64: self->write(ArrToCImg<double>(obj), chunk); break;
                 default:
                     throw(std::exception());
             }
@@ -284,7 +284,7 @@ namespace gip {
             return self->GeoImages::operator[](index);
         }
         unsigned long int __len__() {
-            return self->GeoImages::NumImages();
+            return self->GeoImages::nimages();
         }
     }
 }

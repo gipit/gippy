@@ -12,9 +12,9 @@ def get_test_image():
     bands = [4, 5]
     fnames = ['%s_B%s.tif' % (bname, b) for b in bands]
     geoimg = gippy.GeoImage(fnames)
-    geoimg.SetBandName('RED', 1)
-    geoimg.SetBandName('NIR', 2)
-    geoimg.SetNoData(0)
+    geoimg.set_bandname('RED', 1)
+    geoimg.set_bandname('NIR', 2)
+    geoimg.set_nodata(0)
     return geoimg
 
 

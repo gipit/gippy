@@ -137,11 +137,11 @@ namespace gip {
         std::string meta(std::string key) const;
 
         //! Set metadata item
-        GeoResource& setmeta(std::string key, std::string item);
+        GeoResource& set_meta(std::string key, std::string item);
         //! Set multiple metadata items
-        GeoResource& setmeta(dictionary items);
+        GeoResource& set_meta(dictionary items);
         //! Copy Meta data from another resource
-        GeoResource& copymeta(const GeoResource& img);
+        GeoResource& copy_meta(const GeoResource& img);
 
         // TODO - refactor out this function
         //! Retrieve the GDALdataset this is a member of
