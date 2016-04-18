@@ -30,8 +30,8 @@ namespace gip {
         Rect<double> ext;
         vector< Rect<double> > extents;
         for (vector<GeoImage>::const_iterator i=_GeoImages.begin(); i!=_GeoImages.end(); i++) {
-            ext = i->Extent();
-            ext.Transform(i->SRS(), srs);
+            ext = i->extent();
+            ext.Transform(i->srs(), srs);
             extents.push_back(ext);
         }
         return Union<double>(extents);

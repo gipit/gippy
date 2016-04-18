@@ -61,7 +61,7 @@ namespace gip {
         std::vector<std::string> Basenames() const {
             std::vector<std::string> names;
             for (unsigned int i=0; i<_GeoImages.size(); i++)
-                names.push_back(_GeoImages[i].Basename());
+                names.push_back(_GeoImages[i].basename());
             return names;
         }
         //! Number of bands

@@ -43,7 +43,7 @@ namespace gip {
         cout << "Chunking test with padding=" + to_string(pad) + " and " + to_string(chunk) + " chunks" << endl;
         // Create new image
         GeoImage img("test_chunking.tif", 100, 100, 1, DataType("UInt8"));
-        ChunkSet chunks = img.Chunks(pad, chunk);
+        ChunkSet chunks = img.chunks(pad, chunk);
         CImg<unsigned char> cimg_in, cimg_out;
         for (unsigned int i=0; i<chunks.Size(); i++) {
             cimg_in = img.Read<unsigned char>(chunks[i]);

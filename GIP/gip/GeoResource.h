@@ -55,56 +55,56 @@ namespace gip {
 
         //! \name Resource Information
         //! Get the filename of the resource
-        std::string Filename() const;
+        std::string filename() const;
         //! Basename, or short name of filename
-        std::string Basename() const;
+        std::string basename() const;
         //! Extension of filename
-        std::string Extension() const;
+        std::string extension() const;
         //! File format of dataset
-        std::string Format() const { return _GDALDataset->GetDriver()->GetDescription(); }
+        std::string format() const { return _GDALDataset->GetDriver()->GetDescription(); }
 
         //! \name Geospatial information
         //! X Size of resource, in pixels
-        unsigned int XSize() const { return _GDALDataset->GetRasterXSize(); }
+        unsigned int xsize() const { return _GDALDataset->GetRasterXSize(); }
         //! Y Size of resource, in pixels
-        unsigned int YSize() const { return _GDALDataset->GetRasterYSize(); }
+        unsigned int ysize() const { return _GDALDataset->GetRasterYSize(); }
         //! Total size
-        unsigned long Size() const { return XSize() * YSize(); }
+        unsigned long size() const { return xsize() * ysize(); }
         //! Geolocated coordinates of a point within the resource
-        Point<double> GeoLoc(float xloc, float yloc) const;
+        Point<double> geoloc(float xloc, float yloc) const;
         //! Coordinates of top left
-        Point<double> TopLeft() const;
+        //Point<double> TopLeft() const;
         //! Coordinates of lower left
-        Point<double> LowerLeft() const;
+        //Point<double> LowerLeft() const;
         //! Coordinates of top right
-        Point<double> TopRight() const;
+        //Point<double> TopRight() const;
         //! Coordinates of bottom right
-        Point<double> LowerRight() const;
+        //Point<double> LowerRight() const;
         //! Minimum Coordinates of X and Y
-        Point<double> MinXY() const;
+        Point<double> minxy() const;
         //! Maximum Coordinates of X and Y
-        Point<double> MaxXY() const;
+        Point<double> maxxy() const;
         //! Extent
-        Rect<double> Extent() const { return Rect<double>(LowerLeft(), TopRight()); }
+        Rect<double> extent() const { return Rect<double>(geoloc(0, ysize()-1), geoloc(xsize()-1, 0)); }
         //! Return Spatial Reference system  in Well Known Text format
-        std::string SRS() const {
+        std::string srs() const {
             return _GDALDataset->GetProjectionRef();
         }
         //! Set projection definition in Well Known Text format
-        GeoResource& SetSRS(std::string proj) {
+        GeoResource& setsrs(std::string proj) {
             _GDALDataset->SetProjection(proj.c_str());
             return *this;
         }
         //! Return projection as OGRSpatialReference
         //OGRSpatialReference ogr_srs() const;
         //! Get Affine transformation
-        CImg<double> Affine() const {
+        CImg<double> affine() const {
             double affine[6];
             _GDALDataset->GetGeoTransform(affine);
             return CImg<double>(&affine[0], 6);
         }
         //! Set Affine transformation
-        GeoResource& SetAffine(CImg<double> affine) {
+        GeoResource& setaffine(CImg<double> affine) {
             _GDALDataset->SetGeoTransform(affine.data());
             return *this;
         }
@@ -125,23 +125,23 @@ namespace gip {
         }*/
 
         //! Get resolution convenience function
-        Point<double> Resolution() const;
+        Point<double> resolution() const;
         //! Set coordinate system from another GeoResource
         GeoResource& SetCoordinateSystem(const GeoResource& res);
 
         //! Get chunkset chunking up image
-        ChunkSet Chunks(unsigned int padding=0, unsigned int numchunks=0) const;
+        ChunkSet chunks(unsigned int padding=0, unsigned int numchunks=0) const;
 
         //! \name Metadata functions
         //! Get metadata item
-        std::string Meta(std::string key) const;
+        std::string meta(std::string key) const;
 
         //! Set metadata item
-        GeoResource& SetMeta(std::string key, std::string item);
+        GeoResource& setmeta(std::string key, std::string item);
         //! Set multiple metadata items
-        GeoResource& SetMeta(dictionary items);
+        GeoResource& setmeta(dictionary items);
         //! Copy Meta data from another resource
-        GeoResource& CopyMeta(const GeoResource& img);
+        GeoResource& copymeta(const GeoResource& img);
 
         // TODO - refactor out this function
         //! Retrieve the GDALdataset this is a member of
@@ -166,7 +166,7 @@ namespace gip {
 
         // Protected functions for inside use
         // Get group of metadata
-        std::vector<std::string> MetaGroup(std::string group, std::string filter="") const;
+        std::vector<std::string> metagroup(std::string group, std::string filter="") const;
 
     }; // class GeoResource
 } // namespace gip

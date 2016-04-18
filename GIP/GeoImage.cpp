@@ -35,13 +35,13 @@ namespace gip {
         LoadBands();
         unsigned int b;
         for (b=0; b<NumBands(); b++) {
-            _BandNames[b] = Basename() + (NumBands() > 1 ? "-" + _BandNames[b] : "");
+            _BandNames[b] = basename() + (NumBands() > 1 ? "-" + _BandNames[b] : "");
         }
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
             GeoImage img(*f);
             for (b=0; b<img.NumBands(); b++) {
                 AddBand(img[b]);
-                _BandNames[NumBands()-1] = img.Basename() + (img.NumBands() > 1 ? "-" + img[b].Description() : "");
+                _BandNames[NumBands()-1] = img.basename() + (img.NumBands() > 1 ? "-" + img[b].Description() : "");
             }
         }
     }
@@ -67,11 +67,11 @@ namespace gip {
 
     string GeoImage::Info(bool bandinfo, bool stats) const {
         std::stringstream info;
-        info << Filename() << " - " << _RasterBands.size() << " bands ("
-                << XSize() << "x" << YSize() << ") " << endl;
+        info << filename() << " - " << _RasterBands.size() << " bands ("
+                << xsize() << "x" << ysize() << ") " << endl;
         info << "   References: " << _GDALDataset.use_count() << " (&" << _GDALDataset << ")" << endl;
-        info << "   Geo Coordinates (top left): " << TopLeft().x() << ", " << TopLeft().y() << endl;
-        info << "   Geo Coordinates (lower right): " << LowerRight().x() << ", " << LowerRight().y() << endl;
+        info << "   Geo Coordinates (min xy): " << minxy().x() << ", " << minxy().y() << endl;
+        info << "   Geo Coordinates (max xy): " << maxxy().x() << ", " << maxxy().y() << endl;
         //info << "   References - GeoImage: " << _Ref << " (&" << this << ")";
         //_GDALDataset->Reference(); int ref = _GDALDataset->Dereference();
         //info << "  GDALDataset: " << ref << " (&" << _GDALDataset << ")" << endl;
@@ -142,7 +142,7 @@ namespace gip {
     void GeoImage::LoadBands() {
         vector<unsigned int> bandnums; // = _Options.Bands();
         // Check for subdatasets
-        vector<string> names = this->MetaGroup("SUBDATASETS","_NAME=");
+        vector<string> names = this->metagroup("SUBDATASETS","_NAME=");
         unsigned int numbands(names.size());
         if (names.empty()) numbands = _GDALDataset->GetRasterCount();
         unsigned int b;
@@ -171,7 +171,7 @@ namespace gip {
             // Replace this dataset with first full frame band
             unsigned int index(0);
             for (unsigned int i=0;i<NumBands();i++) {
-                if (_RasterBands[i].XSize() > _RasterBands[index].XSize()) index = i;
+                if (_RasterBands[i].xsize() > _RasterBands[index].xsize()) index = i;
             }
             // Release current dataset, point to new one
             _GDALDataset.reset();

@@ -56,7 +56,7 @@ namespace gip {
         _GDALDataset.reset(ds);
 
         if (Options::Verbose() > 4)
-            std::cout << Basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            std::cout << basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
     }
 
     //! Create new file
@@ -70,7 +70,7 @@ namespace gip {
         // TODO check for null driver and create method
         // check if extension (case insensitive) is already in filename
         string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
-        string curext = Extension();
+        string curext = extension();
         if ((to_lower(ext) != to_lower(curext)) && ext != "") {
             _Filename = _Filename + '.' + ext;
         }
@@ -85,7 +85,7 @@ namespace gip {
         // create file
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         if (Options::Verbose() > 4)
-            std::cout << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
+            std::cout << basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         _GDALDataset.reset( driver->Create(_Filename.c_str(), xsz,ysz,bsz, dt.gdal(), papszOptions) );
         if (_GDALDataset.get() == NULL) {
             std::cout << "Error creating " << _Filename << CPLGetLastErrorMsg() << std::endl;
@@ -108,7 +108,7 @@ namespace gip {
         if (_GDALDataset.unique()) {
             _GDALDataset->FlushCache();
             //BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
-            if (Options::Verbose() > 4) std::cout << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (Options::Verbose() > 4) std::cout << basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
             if (_temp) {
                 std::remove(_Filename.c_str());
             }
@@ -117,98 +117,97 @@ namespace gip {
 
     // Info
     //! Get full filename
-    string GeoResource::Filename() const {
+    string GeoResource::filename() const {
         return _Filename;
     }
 
     //! Return basename of filename (no path, no extension)
-    string GeoResource::Basename() const {
+    string GeoResource::basename() const {
         return gip::Basename(_Filename);
     }
 
     //! Get extension of filename
-    string GeoResource::Extension() const {
+    string GeoResource::extension() const {
         return gip::Extension(_Filename);
     }
 
     // Geospatial
-    Point<double> GeoResource::GeoLoc(float xloc, float yloc) const {
-        CImg<double> affine = Affine();
-        Point<double> pt(affine[0] + xloc*affine[1] + yloc*affine[2], affine[3] + xloc*affine[4] + yloc*affine[5]);
+    Point<double> GeoResource::geoloc(float xloc, float yloc) const {
+        CImg<double> aff = affine();
+        Point<double> pt(aff[0] + xloc*aff[1] + yloc*aff[2], aff[3] + xloc*aff[4] + yloc*aff[5]);
         return pt;
     }
 
-    Point<double> GeoResource::TopLeft() const { 
-        return GeoLoc(0, 0); 
+    /*Point<double> GeoResource::topleft() const { 
+        return geoloc(0, 0); 
     }
 
-    Point<double> GeoResource::LowerLeft() const {
-        return GeoLoc(0, YSize()-1); 
+    Point<double> GeoResource::lowerleft() const {
+        return geoloc(0, YSize()-1); 
     }
 
-    Point<double> GeoResource::TopRight() const { 
-        return GeoLoc(XSize()-1, 0);
+    Point<double> GeoResource::topright() const { 
+        return geoloc(XSize()-1, 0);
     }
 
-    Point<double> GeoResource::LowerRight() const { 
-        return GeoLoc(XSize()-1, YSize()-1);
-    }
+    Point<double> GeoResource::lowerright() const { 
+        return geoloc(XSize()-1, YSize()-1);
+    }*/
 
-    Point<double> GeoResource::MinXY() const {
-        Point<double> pt1(TopLeft()), pt2(LowerRight());
+    Point<double> GeoResource::minxy() const {
+        Point<double> pt1(geoloc(0,0)), pt2(geoloc(xsize()-1, ysize()-1));
         double MinX(std::min(pt1.x(), pt2.x()));
         double MinY(std::min(pt1.y(), pt2.y()));
         return Point<double>(MinX, MinY);           
     }
 
-    Point<double> GeoResource::MaxXY() const { 
-        Point<double> pt1(TopLeft()), pt2(LowerRight());
+    Point<double> GeoResource::maxxy() const { 
+        Point<double> pt1(geoloc(0,0)), pt2(geoloc(xsize()-1, ysize()-1));
         double MaxX(std::max(pt1.x(), pt2.x()));
         double MaxY(std::max(pt1.y(), pt2.y()));
         return Point<double>(MaxX, MaxY);
     }
 
-    Point<double> GeoResource::Resolution() const {
-        CImg<double> affine = Affine();
-        return Point<double>(affine[1], affine[5]);
+    Point<double> GeoResource::resolution() const {
+        CImg<double> aff = affine();
+        return Point<double>(aff[1], aff[5]);
     }
 
     GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
-        SetSRS(res.SRS());
-        SetAffine(res.Affine());
+        setsrs(res.srs());
+        setaffine(res.affine());
         return *this;
     }
 
-    ChunkSet GeoResource::Chunks(unsigned int padding, unsigned int numchunks) const {
-        return ChunkSet(XSize(), YSize(), padding, numchunks);
+    ChunkSet GeoResource::chunks(unsigned int padding, unsigned int numchunks) const {
+        return ChunkSet(xsize(), ysize(), padding, numchunks);
     }
 
     // Metadata
-    string GeoResource::Meta(string key) const {
+    string GeoResource::meta(string key) const {
         const char* item = _GDALDataset->GetMetadataItem(key.c_str());
         return (item == NULL) ? "": item;
     }
 
-    GeoResource& GeoResource::SetMeta(string key, string item) {
+    GeoResource& GeoResource::setmeta(string key, string item) {
         _GDALDataset->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
-    GeoResource& GeoResource::SetMeta(std::map<string, string> items) {
+    GeoResource& GeoResource::setmeta(std::map<string, string> items) {
         for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
-            SetMeta(i->first, i->second);
+            setmeta(i->first, i->second);
         }
         return *this;
     }
 
-    GeoResource& GeoResource::CopyMeta(const GeoResource& resource) {
+    GeoResource& GeoResource::copymeta(const GeoResource& resource) {
         _GDALDataset->SetMetadata(resource._GDALDataset->GetMetadata());
         return *this;
     }
 
-
-    // Get metadata group
-    vector<string> GeoResource::MetaGroup(string group, string filter) const {
+    // Get metadata group - used internally
+    vector<string> GeoResource::metagroup(string group, string filter) const {
         char** meta= _GDALDataset->GetMetadata(group.c_str());
         int num = CSLCount(meta);
         vector<string> items;

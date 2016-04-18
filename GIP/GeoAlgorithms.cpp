@@ -41,7 +41,7 @@ namespace gip {
      */
     GeoImage acca(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
-        if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.Basename() << endl;
+        if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.basename() << endl;
 
         float th_red(0.08);
         float th_ndsi(0.7);
@@ -55,7 +55,7 @@ namespace gip {
         GeoImage imgout = GeoImage::create_from(filename, image, 4, "uint8");
         imgout.SetNoData(0);
         imgout.SetBandNames({"finalmask", "cloudmask", "ambclouds", "pass1"});
-        imgout.SetMeta(metadata);
+        imgout.setmeta(metadata);
 
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
 
@@ -63,10 +63,10 @@ namespace gip {
         CImg<unsigned char> nonclouds, ambclouds, clouds, mask, temp2;
         float cloudsum(0), scenesize(0);
 
-        ChunkSet chunks(image.XSize(),image.YSize());
+        ChunkSet chunks(image.xsize(),image.ysize());
         Rect<int> chunk;
 
-        //if (Options::Verbose()) cout << image.Basename() << " - ACCA (dev-version)" << endl;
+        //if (Options::Verbose()) cout << image.basename() << " - ACCA (dev-version)" << endl;
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             chunk = chunks[iChunk];
             red = image["RED"].Read<float>(chunk);
@@ -223,7 +223,7 @@ namespace gip {
     //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
     std::string browse_image(const GeoImage& image, std::string filename, int quality) {
         // TODO - take in output filename rather then autogenerating
-        //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
+        //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.basename() << endl;
 
         GeoImage img(image);
         if (img.BandsExist({"red","green","blue"})) {
@@ -247,7 +247,7 @@ namespace gip {
 
         cimg.round().save_jpeg(filename.c_str(), quality);
 
-        if (Options::Verbose() > 1) cout << image.Basename() << ": BrowseImage written to " << filename << endl;
+        if (Options::Verbose() > 1) cout << image.basename() << ": BrowseImage written to " << filename << endl;
         return filename;
     }
 
@@ -274,16 +274,16 @@ namespace gip {
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
         GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.Type());
-        imgout.CopyMeta(images[0]);
+        imgout.copymeta(images[0]);
         for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].CopyMeta(images[0][b]);
 
         // add additional metadata to output
         metadata["SourceFiles"] = to_string(images.Basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
-        imgout.SetMeta(metadata);
+        imgout.setmeta(metadata);
 
         // set projection and affine transformation
-        imgout.SetSRS(feature.SRS());
+        imgout.setsrs(feature.SRS());
         // TODO - set affine based on extent and resolution (?)
         CImg<double> affine(6);
         affine[0] = extent.x0();
@@ -292,7 +292,7 @@ namespace gip {
         affine[3] = extent.y1();
         affine[4] = 0;
         affine[5] = -std::abs(yres);
-        imgout.SetAffine(affine);
+        imgout.setaffine(affine);
 
         // warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
@@ -351,7 +351,7 @@ namespace gip {
         GeoImage imgout = GeoImage::create_from(filename, image, 5, "uint8");
         imgout.SetBandNames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
         imgout.SetNoData(0);
-        imgout.SetMeta(metadata);
+        imgout.setmeta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
         GeoImage probout = GeoImage::create_from(filename + "-prob", image, 2, "float32");
@@ -367,7 +367,7 @@ namespace gip {
         //CImg<double> wstats(image.Size()), lstats(image.Size());
         //int wloc(0), lloc(0);
 
-        ChunkSet chunks(image.XSize(),image.YSize());
+        ChunkSet chunks(image.xsize(),image.ysize());
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             blue = image["blue"].Read<double>(chunks[iChunk]);
@@ -421,7 +421,7 @@ namespace gip {
         //shadowmask = nir.draw_fill(nir.width()/2,nir.height()/2,)
 
         // If not enough non-cloud pixels then return existing mask
-        if (cloudpixels >= (0.999*imgout[0].Size())) return imgout;
+        if (cloudpixels >= (0.999*imgout[0].size())) return imgout;
         // If not enough clear-sky land pixels then use all
         //GeoRaster msk;
         //if (landpixels < (0.001*imgout[0].Size())) msk = imgout[1];
@@ -517,9 +517,9 @@ namespace gip {
             imagesout[prodname] = GeoImage::create_from(iprod->second, image, 1, "int16");
             imagesout[prodname].SetNoData(nodataout);
             imagesout[prodname].SetGain(0.0001);
-            imagesout[prodname].SetMeta(metadata);
+            imagesout[prodname].setmeta(metadata);
             imagesout[prodname].SetBandName(prodname, 1);
-            filenames.push_back(imagesout[prodname].Filename());
+            filenames.push_back(imagesout[prodname].filename());
         }
         if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
 
@@ -558,11 +558,11 @@ namespace gip {
 
         CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg;
 
-        ChunkSet chunks(image.XSize(),image.YSize());
+        ChunkSet chunks(image.xsize(),image.ysize());
 
         // need to add overlap
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].Size() << endl;
+            if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
                 if (*isstr == "red") red = image["red"].Read<float>(chunks[iChunk]);
                 else if (*isstr == "green") green = image["green"].Read<float>(chunks[iChunk]);
@@ -628,11 +628,11 @@ namespace gip {
         GeoImage imgout = GeoImage::create_from(filename, img, img.NumBands(), "float32");
         imgout.SetNoData(nodataout);
         //imgout.SetGain(0.0001);
-        imgout.CopyMeta(img);
+        imgout.copymeta(img);
         CImg<float> cimg;
         CImg<unsigned char> mask;
 
-        ChunkSet chunks(img.XSize(),img.YSize());
+        ChunkSet chunks(img.xsize(),img.ysize());
 
         for (unsigned int bout=0; bout<numbands; bout++) {
             //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
@@ -666,7 +666,7 @@ namespace gip {
             bandmeans(x) = img[x].Stats()[2];
         }
 
-        ChunkSet chunks(img.XSize(),img.YSize());
+        ChunkSet chunks(img.xsize(),img.ysize());
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             chip = img.Read<double>(chunks[iChunk]);
             chipout = CImg<double>(chip, "xyzc");
@@ -688,7 +688,7 @@ namespace gip {
         CImg<unsigned char> mask;
         int validsize;
 
-        ChunkSet chunks = img.Chunks();
+        ChunkSet chunks = img.chunks();
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             // Bands x NumPixels
             matrixchunk = CImg<double>(NumBands, chunks[iChunk].area(),1,1,0);
@@ -703,7 +703,7 @@ namespace gip {
                     if (mask(x,y)==0) matrixchunk(b,p++) = bandchunk(x,y);
                 }
             }
-            if (p != (int)img.Size()) matrixchunk.crop(0,0,NumBands-1,p-1);
+            if (p != (int)img.size()) matrixchunk.crop(0,0,NumBands-1,p-1);
             covariance += (matrixchunk.get_transpose() * matrixchunk)/(validsize-1);
         }
         // Subtract Mean
@@ -712,7 +712,7 @@ namespace gip {
         covariance -= (means.get_transpose() * means);
 
         if (Options::Verbose() > 2) {
-            cout << img.Basename() << " Spectral Covariance Matrix:" << endl;
+            cout << img.basename() << " Spectral Covariance Matrix:" << endl;
             cimg_forY(covariance,y) {
                 cout << "\t";
                 cimg_forX(covariance,x) {

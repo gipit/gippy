@@ -48,9 +48,10 @@ class GeoRasterTests(unittest.TestCase):
     def test_ndvi(self):
         """ Test NDVI using gippy """
         geoimg = get_test_image()
-        fout = os.path.splitext(geoimg.Filename())[0] + '_gippy_ndvi'
+        fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
         alg.indices(geoimg, {'ndvi': fout})
         geoimg = None
+        os.remove(fout)
 
     def test_ndvi_numpy(self):
         """ Test NDVI separately using numpy for speed comparison """
@@ -61,11 +62,12 @@ class GeoRasterTests(unittest.TestCase):
         ndvi = np.zeros(red.shape) + nodata
         inds = np.logical_and(red != nodata, nir != nodata)
         ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
-        fout = os.path.splitext(geoimg.Filename())[0] + '_numpy_ndvi'
+        fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
         geoimgout = gippy.GeoImage.create_from(fout, geoimg, 1, "float64")
         geoimgout[0].Write(ndvi)
         geoimgout = None
         geoimg = None
+        os.remove(fout)
 
     def test_scale(self):
         """ Scale image to byte range """

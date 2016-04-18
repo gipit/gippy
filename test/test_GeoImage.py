@@ -26,15 +26,15 @@ class GeoImageTests(unittest.TestCase):
     def test_open(self):
         """ Open existing image """
         geoimg = get_test_image()
-        self.assertTrue(geoimg.XSize() > 0)
-        self.assertTrue(geoimg.YSize() > 0)
+        self.assertTrue(geoimg.xsize() > 0)
+        self.assertTrue(geoimg.ysize() > 0)
 
     def test_create(self):
         """ Create single band image """
         fout = 'test.tif'
         geoimg = self.create_image(fout)
-        self.assertTrue(geoimg.XSize() == 1000)
-        self.assertTrue(geoimg.XSize() == 1000)
+        self.assertTrue(geoimg.xsize() == 1000)
+        self.assertTrue(geoimg.ysize() == 1000)
         self.assertTrue(os.path.exists(fout))
         os.remove(fout)
 
@@ -68,7 +68,7 @@ class GeoImageTests(unittest.TestCase):
     def test_create_autoname_temp(self):
         """ Create temp file with auto-generated filename """
         geoimg = self.create_image(size=(5, 1000, 1000))
-        fname = geoimg.Filename()
+        fname = geoimg.filename()
         self.assertTrue(os.path.exists(fname))
         geoimg = None
         self.assertFalse(os.path.exists(fname))

@@ -54,11 +54,11 @@ namespace gip {
         ~GeoRaster() {}
 
         //! \name File Information
-        std::string Basename() const { return GeoResource::Basename() + "[" + Description() + "]"; }
+        std::string Basename() const { return GeoResource::basename() + "[" + Description() + "]"; }
         //! Band X Size
-        unsigned int XSize() const { return _GDALRasterBand->GetXSize(); }
+        unsigned int xsize() const { return _GDALRasterBand->GetXSize(); }
         //! Band Y Size
-        unsigned int YSize() const { return _GDALRasterBand->GetYSize(); }
+        unsigned int ysize() const { return _GDALRasterBand->GetYSize(); }
         //! Get GDALDatatype
         DataType Type() const { return DataType(_GDALRasterBand->GetRasterDataType()); }
         //! Output file info
@@ -321,7 +321,7 @@ namespace gip {
 
         //! NoData mask: 1's where it's bad data
         CImg<unsigned char> NoDataMask(iRect chunk=iRect()) const {
-            if (!chunk.valid()) chunk = iRect(0,0,XSize(),YSize());
+            if (!chunk.valid()) chunk = iRect(0,0,xsize(),ysize());
             switch (Type().type()) {
                 case 1: return _Mask<unsigned char>(NoData(), chunk);
                 case 2: return _Mask<unsigned short>(NoData(), chunk);
@@ -347,7 +347,7 @@ namespace gip {
             double total, norm;
             CImg<double> cimg0, cimg, subcimg;
 
-            ChunkSet chunks(XSize(),YSize());
+            ChunkSet chunks(xsize(),ysize());
             chunks.Padding(border);
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
                 cimg0 = Read<double>(chunks[iChunk]);
@@ -440,9 +440,9 @@ namespace gip {
     //! Read raw chunk given bounding box
     template<class T> CImg<T> GeoRaster::ReadRaw(iRect chunk) const {
         if (!chunk.valid())
-            chunk = Rect<int>(0,0,XSize(),YSize());
+            chunk = Rect<int>(0,0,xsize(),ysize());
         else if (chunk.Padding() > 0)
-            chunk = chunk.Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
+            chunk = chunk.Pad().Intersect(Rect<int>(0,0,xsize(),ysize()));
 
         // This doesn't check for in bounds, should it?
         int width = chunk.x1()-chunk.x0()+1;
@@ -516,10 +516,10 @@ namespace gip {
 
     //! Write raw CImg to file
     template<class T> GeoRaster& GeoRaster::WriteRaw(CImg<T> img, iRect chunk) {
-        if (!chunk.valid()) chunk = Rect<int>(0,0,XSize(),YSize());
+        if (!chunk.valid()) chunk = Rect<int>(0,0,xsize(),ysize());
         // Depad this if needed
         if (chunk.Padding() > 0) {
-            Rect<int> pchunk = chunk.get_Pad().Intersect(Rect<int>(0,0,XSize(),YSize()));
+            Rect<int> pchunk = chunk.get_Pad().Intersect(Rect<int>(0,0,xsize(),ysize()));
             Point<int> p0(chunk.p0()-pchunk.p0());
             Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
             img.crop(p0.x(),p0.y(),p1.x(),p1.y());
@@ -557,7 +557,7 @@ namespace gip {
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
         raster.SetCoordinateSystem(*this);
-        ChunkSet chunks(XSize(), YSize());
+        ChunkSet chunks(xsize(), ysize());
         if (Options::Verbose() > 3)
             std::cout << Basename() << ": Processing in " << chunks.Size() << " chunks" << std::endl;
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {

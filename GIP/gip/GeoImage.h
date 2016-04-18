@@ -68,7 +68,7 @@ namespace gip {
                 temp = true;
             }
             GeoImage geoimg(filename, xsize, ysize, bsize, DataType(dtype), temp);
-            geoimg.SetSRS(srs);
+            geoimg.setsrs(srs);
             // TODO: what about setting GeoTransorm
             return geoimg;
         }
@@ -76,10 +76,10 @@ namespace gip {
         //! Create new image using foorprint of another
         static GeoImage create_from(std::string filename, GeoImage geoimg, 
                                     unsigned int bsize=0, std::string dtype="unknown", bool temp=false) {
-            unsigned int _xs(geoimg.XSize());
-            unsigned int _ys(geoimg.YSize());
+            unsigned int _xs(geoimg.xsize());
+            unsigned int _ys(geoimg.ysize());
             unsigned int _bs(geoimg.NumBands());
-            std::string _srs(geoimg.SRS());
+            std::string _srs(geoimg.srs());
             std::string _dtype(geoimg.Type().string());
             _bs = bsize > 0 ? bsize : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
@@ -134,7 +134,7 @@ namespace gip {
         std::vector<std::string> Filenames() const {
             std::vector<std::string> fnames;
             for (unsigned int i=0;i<_RasterBands.size();i++) {
-                fnames.push_back(_RasterBands[i].Filename());
+                fnames.push_back(_RasterBands[i].filename());
             }
             return fnames;
         }

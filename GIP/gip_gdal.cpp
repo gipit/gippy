@@ -32,11 +32,11 @@ namespace gip {
 
     //! Warp a single image into output image with cutline
     GeoImage& WarpToImage(const GeoImage& imgin, GeoImage& imgout, GDALWarpOptions *psWarpOptions, OGRGeometry* site) {
-        if (Options::Verbose() > 2) cout << imgin.Basename() << " warping into " << imgout.Basename() << " " << std::flush;
+        if (Options::Verbose() > 2) cout << imgin.basename() << " warping into " << imgout.basename() << " " << std::flush;
 
         // Create cutline transform to pixel coordinates
         char **papszOptionsCutline = NULL;
-        papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.SRS().c_str() );
+        papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.srs().c_str() );
         papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
         CutlineTransformer oTransformer;
 
@@ -61,7 +61,7 @@ namespace gip {
         GDALWarpOperation oOperation;
         oOperation.Initialize( psWarpOptions );
         //if (Options::Verbose() > 3) cout << "Error: " << CPLGetLastErrorMsg() << endl;
-        oOperation.ChunkAndWarpMulti( 0, 0, imgout.XSize(), imgout.YSize() );
+        oOperation.ChunkAndWarpMulti( 0, 0, imgout.xsize(), imgout.ysize() );
 
         // destroy things
         GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );

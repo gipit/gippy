@@ -62,7 +62,7 @@ namespace gip {
     string GeoRaster::Info(bool showstats) const {
         std::stringstream info;
         //info << _GeoImage->Basename() << " - b" << _GDALRasterBand->GetBand() << ":" << endl;
-        info << XSize() << " x " << YSize() << " " << Type().string() << ": " << Description();
+        info << xsize() << " x " << ysize() << " " << Type().string() << ": " << Description();
         //info << " (GeoData: " << _GDALDataset.use_count() << " " << _GDALDataset << ")";
         //info << " RasterBand &" << _GDALRasterBand << endl;
         info << "   Gain = " << Gain() << ", Offset = " << Offset(); //<< ", Units = " << Units();
@@ -89,7 +89,7 @@ namespace gip {
         CImg<double> cimg;
         double count(0), total(0), val;
         double min(Type().maxval()), max(Type().minval());
-        ChunkSet chunks(XSize(),YSize());
+        ChunkSet chunks(xsize(),ysize());
 
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             cimg = Read<double>(chunks[iChunk]);
@@ -146,7 +146,7 @@ namespace gip {
         CImg<float> hist(bins,1,1,1,0);
         long numpixels(0);
         float nodata = NoData();
-        ChunkSet chunks(XSize(),YSize());
+        ChunkSet chunks(xsize(),ysize());
         for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
             cimg = Read<double>(chunks[iChunk]);
             cimg_for(cimg,ptr,double) {
