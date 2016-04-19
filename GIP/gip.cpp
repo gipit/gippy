@@ -19,21 +19,15 @@
 #    limitations under the License.
 ##############################################################################*/
 
-#ifndef GIPCIMG_H
-#define GIPCIMG_H
+#include <gip/gip.h>
 
-/*
-This header file 
-*/
+namespace gip {
 
-//#define cimg_debug 0
-#define cimg_verbosity 1
-#define cimg_display 0
-#define cimg_plugin "CImg_plugins.h"
+    // Register file formats with GDAL and OGR
+    void init() {
+        GDALAllRegister();
+        OGRRegisterAll();
+        CPLPushErrorHandler(CPLQuietErrorHandler);
+    }
 
-#include <CImg.h>
-
-using cimg_library::CImg;
-using cimg_library::CImgList;
-
-#endif
+} // namespace gip

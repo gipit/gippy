@@ -49,7 +49,7 @@ namespace std {
 %ignore operator<<;
 
 %{
-    #include <gip/gip_CImg.h>
+    #include <gip/gip.h>
 %}
 // Wrap CImg
 %include "cimg.i"

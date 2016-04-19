@@ -25,18 +25,22 @@
 #include <gdal_priv.h>
 #include <ogrsf_frmts.h>
 
+//#define cimg_debug 0
+#define cimg_verbosity 1
+#define cimg_display 0
+#define cimg_plugin "CImg_plugins.h"
+
+#include <CImg.h>
+
 /*
     Utility functions that are called only from Python (not used internally)
 */
 
 namespace gip {
+    using cimg_library::CImg;
+    using cimg_library::CImgList;
 
-    // Register file formats with GDAL and OGR
-    void gdalinit() {
-        GDALAllRegister();
-        OGRRegisterAll();
-        CPLPushErrorHandler(CPLQuietErrorHandler);
-    }
+    void init();
 
 }
 

@@ -27,9 +27,9 @@
 #include <vector>
 #include <map>
 
+#include <gip/gip.h>
 #include <gip/DataType.h>
 #include <gdal_priv.h>
-#include <gip/gip_CImg.h>
 #include <gip/geometry.h>
 
 namespace gip {
