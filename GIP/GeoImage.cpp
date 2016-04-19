@@ -179,6 +179,50 @@ namespace gip {
         }
     }
 
+    //! Calculates spectral covariance of image
+    CImg<double> GeoImage::spectral_covariance() const {
+        unsigned int NumBands(nbands());
+
+        CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;        
+        CImg<unsigned char> mask;
+        int validsize;
+
+        ChunkSet chset = chunks();
+        for (unsigned int iChunk=0; iChunk<chset.size(); iChunk++) {
+            // Bands x NumPixels
+            matrixchunk = CImg<double>(NumBands, chset[iChunk].area(),1,1,0);
+            mask = nodata_mask(chset[iChunk]);
+            validsize = mask.size() - mask.sum();
+
+            int p(0);
+            for (unsigned int b=0;b<NumBands;b++) {
+                bandchunk = (*this)[b].read<double>(chset[iChunk]);
+                p = 0;
+                cimg_forXY(bandchunk,x,y) {
+                    if (mask(x,y)==0) matrixchunk(b,p++) = bandchunk(x,y);
+                }
+            }
+            if (p != (int)size()) matrixchunk.crop(0,0,NumBands-1,p-1);
+            covariance += (matrixchunk.get_transpose() * matrixchunk)/(validsize-1);
+        }
+        // Subtract Mean
+        CImg<double> means(NumBands);
+        for (unsigned int b=0; b<NumBands; b++) means(b) = (*this)[b].stats()[2]; //cout << "Mean b" << b << " = " << means(b) << endl; }
+        covariance -= (means.get_transpose() * means);
+
+        if (Options::Verbose() > 2) {
+            std::cout << basename() << " Spectral Covariance Matrix:" << endl;
+            cimg_forY(covariance,y) {
+                std::cout << "\t";
+                cimg_forX(covariance,x) {
+                    std::cout << std::setw(18) << covariance(x,y);
+                }
+                std::cout << std::endl;
+            }
+        }
+        return covariance;
+    }
+
     std::vector<int> GeoImage::Descriptions2Indices(std::vector<std::string> bands) const {
         std::vector<int> ibands;
         std::vector<int>::const_iterator b;

@@ -233,6 +233,9 @@ namespace gip {
             return geoimg;
         }
 
+        //! Calculate spectral covariance
+        CImg<double> spectral_covariance() const;
+
         //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
         template<class T> GeoImage save(std::string, std::string="unknown", bool=false);
