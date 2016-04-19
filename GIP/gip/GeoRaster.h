@@ -510,7 +510,7 @@ namespace gip {
         if (!chunk.valid()) chunk = Rect<int>(0,0,xsize(),ysize());
         // Depad this if needed
         if (chunk.padding() > 0) {
-            Rect<int> pchunk = chunk.get_pad().intersect(Rect<int>(0,0,xsize(),ysize()));
+            Rect<int> pchunk = chunk.pad().intersect(Rect<int>(0,0,xsize(),ysize()));
             Point<int> p0(chunk.p0()-pchunk.p0());
             Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
             img.crop(p0.x(),p0.y(),p1.x(),p1.y());

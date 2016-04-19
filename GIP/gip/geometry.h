@@ -159,7 +159,7 @@ namespace gip {
         }*/
 
         //! Transform between coordinate systems
-        Rect& transform(std::string src, std::string dst) {
+        Rect transform(std::string src, std::string dst) {
             if (src == dst) return *this;
             OGRSpatialReference _src = OGRSpatialReference(src.c_str());
             OGRSpatialReference _dst = OGRSpatialReference(src.c_str());
@@ -168,13 +168,13 @@ namespace gip {
             x = _p0.x();
             y = _p0.y();
             trans->Transform(1, &x, &y);
-            _p0 = Point<T>(x, y);
+            Point<T> pt0 (x, y);
             x = _p1.x();
             y = _p1.y();
             trans->Transform(1, &x, &y);
-            _p1 = Point<T>(x, y);
+            Point<T> pt1(x, y);
             delete trans;
-            return *this;
+            return Rect<T>(pt0, pt1);
         }
 
         Rect& pad() {
@@ -187,35 +187,23 @@ namespace gip {
             return *this;
         }
 
-        Rect get_pad() const {
-            return get_pad(_padding);
-        }
-
-        Rect get_pad(int pad) const {
-            return Rect<T>(*this).pad(pad);
-        }
-
         //! Intersects Rect with argument Rect
-        Rect& intersect(const Rect& rect) {
-            _p0 = Point<T>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) );
-            _p1 = Point<T>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) );
-            return *this;
-        }
-        //! Returns intersection of two Rects
-        Rect get_intersect(const Rect& rect) const {
-            return Rect<T>(*this).intersect(rect);
+        Rect intersect(const Rect& rect) {
+            // transform rect
+            return Rect<T>(
+                Point<T>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) ),
+                Point<T>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) )
+            );
         }
 
-        // Calculates union of Rect with argument Rect
+        // Calculates union (outer bounding box) of Rect with argument Rect
         Rect& union_with(const Rect& rect) {
-            _p0 = Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) );
-            _p1 = Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) );
-            return *this;            
+            return Rect<T>(
+                Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) ),
+                Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) )
+            );
         }
-        //! Returns outer bounding box of two rects
-        /*Rect get_union(const Rect& rect) const {
-            return Rect<T>(*this).union(rect);
-        }*/
+
         friend std::ostream& operator<<(std::ostream& stream,const Rect& r) {
             return stream << r._p0 << "-" << r._p1;
         }
