@@ -237,6 +237,9 @@ namespace gip {
         //! Calculate spectral covariance
         CImg<double> spectral_covariance() const;
 
+        //! Calculate spectral correlation
+        //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
+
         //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
         template<class T> GeoImage save(std::string, std::string="unknown", bool=false);
