@@ -24,7 +24,6 @@
 #include <set>
 
 #include <gip/GeoAlgorithms.h>
-#include <gip/gip_gdal.h>
 
 
 namespace gip {
@@ -268,50 +267,13 @@ namespace gip {
         imgout.set_affine(affine);
 
         // warp options
-        GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
-        psWarpOptions->hDstDS = imgout.GetGDALDataset();
-        psWarpOptions->nBandCount = imgout.nbands();
-        psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
-        psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
-        psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        for (unsigned int b=0;b<imgout.nbands();b++) {
-            psWarpOptions->panSrcBands[b] = b+1;
-            psWarpOptions->panDstBands[b] = b+1;
-            psWarpOptions->padfSrcNoDataReal[b] = images[0][b].nodata();
-            psWarpOptions->padfDstNoDataReal[b] = imgout[b].nodata();
-            psWarpOptions->padfSrcNoDataImag[b] = 0.0;
-            psWarpOptions->padfDstNoDataImag[b] = 0.0;
-        }
-        psWarpOptions->dfWarpMemoryLimit = Options::chunksize() * 1024.0 * 1024.0;
-        switch (interpolation) {
-            case 1: psWarpOptions->eResampleAlg = GRA_Bilinear;
-                break;
-            case 2: psWarpOptions->eResampleAlg = GRA_Cubic;
-                break;
-            default: psWarpOptions->eResampleAlg = GRA_NearestNeighbour;
-        }
-        if (Options::verbose() > 2)
-            psWarpOptions->pfnProgress = GDALTermProgress;
-        else psWarpOptions->pfnProgress = GDALDummyProgress;
-
-        char **papszOptions = NULL;
-        //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
-        papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
-        papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
-        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::cores()).c_str());
-        psWarpOptions->papszWarpOptions = papszOptions;
-
-        OGRGeometry* geom = feature.geometry();
-
+        
+        bool noinit(false);
         for (unsigned int i=0; i<images.nimages(); i++) {
-            WarpToImage(images[i], imgout, psWarpOptions, geom);
-            psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
+            images[i].warp_into(imgout, feature, interpolation, noinit);
+            noinit = true;
         }
-        GDALDestroyWarpOptions( psWarpOptions );
-
+    
         return imgout;
     }
 

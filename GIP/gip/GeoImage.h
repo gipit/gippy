@@ -25,6 +25,7 @@
 #include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/GeoRaster.h>
+#include <gip/GeoFeature.h>
 #include <stdint.h>
 #include <gip/Utils.h>
 
@@ -344,7 +345,7 @@ namespace gip {
             return white;
         }
 
-        //GeoImage& warp_into(GeoImage&, GDALWarpOptions*, OGRGeometry*)
+        GeoImage& warp_into(GeoImage&, GeoFeature=GeoFeature(), int=0, bool=false);
 
     protected:
         //! Vector of raster bands
@@ -367,7 +368,7 @@ namespace gip {
                 if (name == to_lower(bname)) return i;
             }
             throw std::out_of_range("No band " + name);
-        }     
+        }
 
     }; // class GeoImage
 

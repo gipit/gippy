@@ -78,6 +78,10 @@ namespace gip {
             //if (Options::verbose() > 4) use_count("destructor");
         }
 
+        bool valid() const {
+            return _Feature ? true : false;
+        }
+
         //! Get value for the PrimaryKey
         std::string value() const {
             if (_PrimaryKey == "")
