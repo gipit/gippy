@@ -248,16 +248,19 @@ gip_module = Extension(
 # the swig .so modules containing the C++ code that wraps libgip.so
 swig_modules = []
 for n in ['gippy', 'algorithms']:
+    src = os.path.join('gippy', n + '_wrap.cpp')
+    if not os.path.exists(src):
+        src = os.path.join('gippy', n + '.i')
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),
-            sources=[os.path.join('gippy', n + '.i')],
+            sources=[src],
             swig_opts=['-c++', '-w509', '-w511', '-w315', '-IGIP', '-fcompact', '-fvirtual', '-keyword'],
             include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
             library_dirs=lib_dirs,
             libraries=[
                 'gip', 'pthread'
-            ] + gdal_config.libs,  # ,'X11'],
+            ] + gdal_config.libs,
             extra_compile_args=extra_compile_args,
             extra_link_args=extra_link_args
         )
