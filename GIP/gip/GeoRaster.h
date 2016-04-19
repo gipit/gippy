@@ -547,7 +547,8 @@ namespace gip {
         GDALRasterBand* band = raster._GDALRasterBand;
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
-        raster.SetCoordinateSystem(*this);
+        raster.set_srs(this->srs());
+        raster.set_affine(this->affine());
         ChunkSet chunks(xsize(), ysize());
         if (Options::Verbose() > 3)
             std::cout << basename() << ": Processing in " << chunks.size() << " chunks" << std::endl;

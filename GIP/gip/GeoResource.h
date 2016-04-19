@@ -126,8 +126,6 @@ namespace gip {
 
         //! Get resolution convenience function
         Point<double> resolution() const;
-        //! Set coordinate system from another GeoResource
-        GeoResource& SetCoordinateSystem(const GeoResource& res);
 
         //! Get chunkset chunking up image
         ChunkSet chunks(unsigned int padding=0, unsigned int numchunks=0) const;

@@ -173,12 +173,6 @@ namespace gip {
         return Point<double>(aff[1], aff[5]);
     }
 
-    GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
-        set_srs(res.srs());
-        set_affine(res.affine());
-        return *this;
-    }
-
     ChunkSet GeoResource::chunks(unsigned int padding, unsigned int numchunks) const {
         return ChunkSet(xsize(), ysize(), padding, numchunks);
     }
