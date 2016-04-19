@@ -27,5 +27,6 @@
 	using namespace gip;
 %}
 
-%include "core.i"
+%include "cimg.i"
+%import "gippy.i"
 %include <gip/GeoAlgorithms.h>

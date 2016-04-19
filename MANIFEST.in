@@ -1,3 +1,2 @@
 recursive-include GIP *
-include gippy/core.i
 include gippy/cimg.i
