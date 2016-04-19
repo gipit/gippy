@@ -189,6 +189,21 @@ namespace gip {
         return (item == NULL) ? "": item;
     }
 
+    dictionary GeoResource::meta() const {
+        char** meta = _GDALDataset->GetMetadata();
+        int num = CSLCount(meta);
+        dictionary items;
+        for (int i=0;i<num; i++) {
+            string md = string(meta[i]);
+            string::size_type pos = md.find("=");
+            if (pos != string::npos) {
+                items[md.substr(0, pos)] = md.substr(pos+1);
+            }
+        }
+        return items;
+    }
+
+
     GeoResource& GeoResource::set_meta(string key, string item) {
         _GDALDataset->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
@@ -198,11 +213,6 @@ namespace gip {
         for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
             set_meta(i->first, i->second);
         }
-        return *this;
-    }
-
-    GeoResource& GeoResource::copy_meta(const GeoResource& resource) {
-        _GDALDataset->SetMetadata(resource._GDALDataset->GetMetadata());
         return *this;
     }
 

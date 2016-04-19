@@ -274,8 +274,12 @@ namespace gip {
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
         GeoImage imgout(filename, xsize, ysize, images.nbands(), images.type());
-        imgout.copy_meta(images[0]);
-        for (unsigned int b=0;b<imgout.nbands();b++) imgout[b].copy_meta(images[0][b]);
+        imgout.set_meta(images[0].meta());
+        for (unsigned int b=0;b<imgout.nbands();b++) {
+            imgout[b].set_gain(images[0][b].gain());
+            imgout[b].set_offset(images[0][b].offset());
+            imgout[b].set_nodata(images[0][b].nodata());
+        }
 
         // add additional metadata to output
         metadata["SourceFiles"] = to_string(images.basenames());
@@ -627,8 +631,7 @@ namespace gip {
         float nodataout = -32768;
         GeoImage imgout = GeoImage::create_from(filename, img, img.nbands(), "float32");
         imgout.set_nodata(nodataout);
-        //imgout.set_gain(0.0001);
-        imgout.copy_meta(img);
+        imgout.set_meta(img.meta());
         CImg<float> cimg;
         CImg<unsigned char> mask;
 

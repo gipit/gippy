@@ -91,15 +91,6 @@ namespace gip {
             return *this;
         }
 
-        //! Copy all meta data from another raster
-        GeoRaster& copy_meta(const GeoRaster& img) {
-            set_gain(img.gain());
-            set_offset(img.offset());
-            set_nodata(img.nodata());
-            //_GDALRasterBand->SetMetadata(img._GDALRasterBand->GetMetadata());
-            return *this;
-        }
-
         //! Set Color Interp
         void set_color(std::string col) {
             _GDALRasterBand->SetDescription(col.c_str());

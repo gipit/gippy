@@ -88,7 +88,10 @@ namespace gip {
             std::string _dtype(geoimg.type().string());
             _bs = bsize > 0 ? bsize : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
-            return create(filename, _xs, _ys, _bs, _dtype, _srs, temp);
+            GeoImage img = create(filename, _xs, _ys, _bs, _dtype, _srs, temp);
+            img.set_meta(geoimg.meta());
+            // TODO - set per band meta, or nodata, gain, offset by band?
+            return img;
         }
 
         //static GeoImage New(string filename, const GeoImage& template=GeoImage(), int xsz=0, int ysz=0, int bands=1, DataType dt=GDT_Byte)
@@ -389,7 +392,9 @@ namespace gip {
         if (dt == "unknown") dt = this->type().string();
         GeoImage imgout = GeoImage::create_from(filename, *this, nbands(), dt);
         for (unsigned int i=0; i<imgout.nbands(); i++) {
-            imgout[i].copy_meta((*this)[i]);
+            imgout[i].set_gain((*this)[i].gain());
+            imgout[i].set_offset((*this)[i].offset());
+            imgout[i].set_nodata((*this)[i].nodata());
             (*this)[i].save<T>(imgout[i]);
         }
 	    imgout.set_bandnames(_BandNames);
