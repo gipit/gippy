@@ -135,7 +135,7 @@ namespace gip {
         }
 
         //! Scale image to given range (minout, maxout)
-        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
+        GeoRaster autoscale(const double& minout, const double& maxout, const double percent=0.0) {
             double minin = this->min();
             double maxin = this->max();
             if (percent > 0.0) {
