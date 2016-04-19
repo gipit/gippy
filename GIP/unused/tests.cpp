@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <gip/tests.h>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 
 namespace gip {
     using std::string;

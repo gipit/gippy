@@ -21,7 +21,7 @@
 
 #include <cstdio>
 #include <gip/GeoResource.h>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 
 
 namespace gip {

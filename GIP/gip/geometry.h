@@ -28,7 +28,7 @@
 //#include <ogr_srs_api.h>
 #include <ogr_spatialref.h>
 #include <gip/gip.h>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 
 namespace gip {
 
