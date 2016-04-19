@@ -51,9 +51,6 @@ namespace gip {
         }
     };
 
-    //! Get file extension for currently set file format
-    std::string FileExtension();
-
     GeoImage& WarpToImage(const GeoImage&, GeoImage&, GDALWarpOptions*, OGRGeometry*);
 
 }
