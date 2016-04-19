@@ -52,12 +52,12 @@ namespace gip {
     //! Create cloudmask using ACCA
     GeoImage acca(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000);
 
+    //! Create new file with a Fmask cloud mask
+    GeoImage fmask(const GeoImage&, std::string, int=3, int=5);
+
     //! Create single image from multiple input images using vector file footprint
     GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop=false, unsigned char interpolation=0);
-
-    //! Create new file with a Fmask cloud mask
-    GeoImage fmask(const GeoImage&, std::string, int=3, int=5);
 
     //! Kmeans
     //GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);
@@ -76,9 +76,6 @@ namespace gip {
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);
-
-    //! Calculate spectral correlation
-    //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
     }
 } // namespace gip
