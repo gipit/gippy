@@ -4594,6 +4594,92 @@ SWIG_AsVal_int (PyObject * obj, int *val)
 
 
 SWIGINTERN int
+SWIG_AsVal_bool (PyObject *obj, bool *val)
+{
+  int r = PyObject_IsTrue(obj);
+  if (r == -1)
+    return SWIG_ERROR;
+  if (val) *val = r ? true : false;
+  return SWIG_OK;
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
+{
+#if PY_VERSION_HEX < 0x03000000
+  if (PyInt_Check(obj)) {
+    long v = PyInt_AsLong(obj);
+    if (v >= 0) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      return SWIG_OverflowError;
+    }
+  } else
+#endif
+  if (PyLong_Check(obj)) {
+    unsigned long v = PyLong_AsUnsignedLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_OK;
+    } else {
+      PyErr_Clear();
+#if PY_VERSION_HEX >= 0x03000000
+      {
+        long v = PyLong_AsLong(obj);
+        if (!PyErr_Occurred()) {
+          if (v < 0) {
+            return SWIG_OverflowError;
+          }
+        } else {
+          PyErr_Clear();
+        }
+      }
+#endif
+    }
+  }
+#ifdef SWIG_PYTHON_CAST_MODE
+  {
+    int dispatch = 0;
+    unsigned long v = PyLong_AsUnsignedLong(obj);
+    if (!PyErr_Occurred()) {
+      if (val) *val = v;
+      return SWIG_AddCast(SWIG_OK);
+    } else {
+      PyErr_Clear();
+    }
+    if (!dispatch) {
+      double d;
+      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
+      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
+	if (val) *val = (unsigned long)(d);
+	return res;
+      }
+    }
+  }
+#endif
+  return SWIG_TypeError;
+}
+
+
+SWIGINTERN int
+SWIG_AsVal_unsigned_SS_char (PyObject * obj, unsigned char *val)
+{
+  unsigned long v;
+  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
+  if (SWIG_IsOK(res)) {
+    if ((v > UCHAR_MAX)) {
+      return SWIG_OverflowError;
+    } else {
+      if (val) *val = static_cast< unsigned char >(v);
+    }
+  }  
+  return res;
+}
+
+
+SWIGINTERN int
 SWIG_AsVal_std_string (PyObject * obj, std::string *val)
 {
   std::string* v = (std::string *) 0;
@@ -5048,104 +5134,18 @@ namespace swig {
 	};
       }
     
-
-SWIGINTERN int
-SWIG_AsVal_bool (PyObject *obj, bool *val)
-{
-  int r = PyObject_IsTrue(obj);
-  if (r == -1)
-    return SWIG_ERROR;
-  if (val) *val = r ? true : false;
-  return SWIG_OK;
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
-{
-#if PY_VERSION_HEX < 0x03000000
-  if (PyInt_Check(obj)) {
-    long v = PyInt_AsLong(obj);
-    if (v >= 0) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      return SWIG_OverflowError;
-    }
-  } else
-#endif
-  if (PyLong_Check(obj)) {
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      PyErr_Clear();
-#if PY_VERSION_HEX >= 0x03000000
-      {
-        long v = PyLong_AsLong(obj);
-        if (!PyErr_Occurred()) {
-          if (v < 0) {
-            return SWIG_OverflowError;
-          }
-        } else {
-          PyErr_Clear();
-        }
-      }
-#endif
-    }
-  }
-#ifdef SWIG_PYTHON_CAST_MODE
-  {
-    int dispatch = 0;
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_AddCast(SWIG_OK);
-    } else {
-      PyErr_Clear();
-    }
-    if (!dispatch) {
-      double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
-	if (val) *val = (unsigned long)(d);
-	return res;
-      }
-    }
-  }
-#endif
-  return SWIG_TypeError;
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_char (PyObject * obj, unsigned char *val)
-{
-  unsigned long v;
-  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
-  if (SWIG_IsOK(res)) {
-    if ((v > UCHAR_MAX)) {
-      return SWIG_OverflowError;
-    } else {
-      if (val) *val = static_cast< unsigned char >(v);
-    }
-  }  
-  return res;
-}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 SWIGINTERN PyObject *_wrap_acca(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) { PyObject *resultobj = 0;
   gip::GeoImage *arg1 = 0 ; std::string arg2 ; float arg3 ; float arg4 ; int arg5 = (int) 5 ; int arg6 = (int) 10 ;
-  int arg7 = (int) 4000 ; gip::dictionary arg8 = (gip::dictionary) gip::dictionary() ; void *argp1 = 0 ; int res1 = 0 ;
-  float val3 ; int ecode3 = 0 ; float val4 ; int ecode4 = 0 ; int val5 ; int ecode5 = 0 ; int val6 ; int ecode6 = 0 ; int val7 ;
-  int ecode7 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; PyObject * obj3 = 0 ; PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ; PyObject * obj6 = 0 ; PyObject * obj7 = 0 ; char *  kwnames[] = {
-    (char *)"arg1",(char *)"arg2",(char *)"arg3",(char *)"arg4",(char *)"arg5",(char *)"arg6",(char *)"arg7",(char *)"arg8", NULL }
-  ; gip::GeoImage result;
-  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OOOO|OOOO:acca",kwnames,&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7)) SWIG_fail;
+  int arg7 = (int) 4000 ; void *argp1 = 0 ; int res1 = 0 ; float val3 ; int ecode3 = 0 ; float val4 ; int ecode4 = 0 ;
+  int val5 ; int ecode5 = 0 ; int val6 ; int ecode6 = 0 ; int val7 ; int ecode7 = 0 ; PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; PyObject * obj3 = 0 ; PyObject * obj4 = 0 ; PyObject * obj5 = 0 ;
+  PyObject * obj6 = 0 ; char *  kwnames[] = {
+    (char *)"arg1",(char *)"arg2",(char *)"arg3",(char *)"arg4",(char *)"arg5",(char *)"arg6",(char *)"arg7", NULL } ;
+  gip::GeoImage result;
+  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OOOO|OOO:acca",kwnames,&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_gip__GeoImage,  0  | 0); if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "acca" "', argument " "1"" of type '" "gip::GeoImage const &""'");  }
    if (!argp1) {
@@ -5163,26 +5163,21 @@ SWIGINTERN PyObject *_wrap_acca(PyObject *SWIGUNUSEDPARM(self), PyObject *args, 
       SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "acca" "', argument " "6"" of type '" "int""'"); }  
     arg6 = static_cast< int >(val6); }  if (obj6) { ecode7 = SWIG_AsVal_int(obj6, &val7); if (!SWIG_IsOK(ecode7)) {
       SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "acca" "', argument " "7"" of type '" "int""'"); }  
-    arg7 = static_cast< int >(val7); }  if (obj7) { {
-      std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *ptr = (std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *)0;
-      int res = swig::asptr(obj7, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "acca" "', argument " "8"" of type '" "gip::dictionary""'");  }
-       arg8 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  }  { try {
-      result = gip::algorithms::acca((gip::GeoImage const &)*arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8); }
+    arg7 = static_cast< int >(val7); }  { try {
+      result = gip::algorithms::acca((gip::GeoImage const &)*arg1,arg2,arg3,arg4,arg5,arg6,arg7); }
      catch (const std::out_of_range& e) {  PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }
      catch (const std::exception& e) { PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
   resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
   return resultobj; fail: return NULL; }
 SWIGINTERN PyObject *_wrap_cookie_cutter(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) {
   PyObject *resultobj = 0; gip::GeoImages arg1 ; gip::GeoFeature arg2 ; std::string arg3 ; float arg4 ; float arg5 ;
-  bool arg6 = (bool) false ; unsigned char arg7 = (unsigned char) 0 ;
-  gip::dictionary arg8 = (gip::dictionary) gip::dictionary() ; void *argp1 ; int res1 = 0 ; void *argp2 ; int res2 = 0 ;
+  bool arg6 = (bool) false ; unsigned char arg7 = (unsigned char) 0 ; void *argp1 ; int res1 = 0 ; void *argp2 ; int res2 = 0 ;
   float val4 ; int ecode4 = 0 ; float val5 ; int ecode5 = 0 ; bool val6 ; int ecode6 = 0 ; unsigned char val7 ; int ecode7 = 0 ;
   PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; PyObject * obj3 = 0 ; PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ; PyObject * obj6 = 0 ; PyObject * obj7 = 0 ; char *  kwnames[] = {
-    (char *) "images",(char *) "feature",(char *) "filename",(char *) "xres",(char *) "yres",(char *) "crop",(char *) "interpolation",(char *) "metadata", NULL }
+  PyObject * obj5 = 0 ; PyObject * obj6 = 0 ; char *  kwnames[] = {
+    (char *) "images",(char *) "feature",(char *) "filename",(char *) "xres",(char *) "yres",(char *) "crop",(char *) "interpolation", NULL }
   ; gip::GeoImage result;
-  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OOOOO|OOO:cookie_cutter",kwnames,&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7)) SWIG_fail;
+  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OOOOO|OO:cookie_cutter",kwnames,&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
   { res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_gip__GeoImages,  0  | 0); if (!SWIG_IsOK(res1)) {
       SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cookie_cutter" "', argument " "1"" of type '" "gip::GeoImages""'");  }
        if (!argp1) {
@@ -5206,23 +5201,18 @@ SWIGINTERN PyObject *_wrap_cookie_cutter(PyObject *SWIGUNUSEDPARM(self), PyObjec
     arg6 = static_cast< bool >(val6); }  if (obj6) { ecode7 = SWIG_AsVal_unsigned_SS_char(obj6, &val7);
     if (!SWIG_IsOK(ecode7)) {
       SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cookie_cutter" "', argument " "7"" of type '" "unsigned char""'"); }
-      arg7 = static_cast< unsigned char >(val7); }  if (obj7) { {
-      std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *ptr = (std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *)0;
-      int res = swig::asptr(obj7, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "cookie_cutter" "', argument " "8"" of type '" "gip::dictionary""'");  }
-       arg8 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  }  { try {
-      result = gip::algorithms::cookie_cutter(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8); }  catch (const std::out_of_range& e) { 
+      arg7 = static_cast< unsigned char >(val7); }  { try {
+      result = gip::algorithms::cookie_cutter(arg1,arg2,arg3,arg4,arg5,arg6,arg7); }  catch (const std::out_of_range& e) { 
       PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }  catch (const std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
   resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
   return resultobj; fail: return NULL; }
 SWIGINTERN PyObject *_wrap_fmask(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) { PyObject *resultobj = 0;
-  gip::GeoImage *arg1 = 0 ; std::string arg2 ; int arg3 = (int) 3 ; int arg4 = (int) 5 ;
-  gip::dictionary arg5 = (gip::dictionary) gip::dictionary() ; void *argp1 = 0 ; int res1 = 0 ; int val3 ; int ecode3 = 0 ;
-  int val4 ; int ecode4 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ; char *  kwnames[] = { (char *)"arg1",(char *)"arg2",(char *)"arg3",(char *)"arg4",(char *)"arg5", NULL }
-  ; gip::GeoImage result;
-  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO|OOO:fmask",kwnames,&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  gip::GeoImage *arg1 = 0 ; std::string arg2 ; int arg3 = (int) 3 ; int arg4 = (int) 5 ; void *argp1 = 0 ; int res1 = 0 ;
+  int val3 ; int ecode3 = 0 ; int val4 ; int ecode4 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ; char *  kwnames[] = { (char *)"arg1",(char *)"arg2",(char *)"arg3",(char *)"arg4", NULL } ;
+  gip::GeoImage result;
+  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO|OO:fmask",kwnames,&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_gip__GeoImage,  0  | 0); if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "fmask" "', argument " "1"" of type '" "gip::GeoImage const &""'");  }
    if (!argp1) {
@@ -5235,21 +5225,15 @@ SWIGINTERN PyObject *_wrap_fmask(PyObject *SWIGUNUSEDPARM(self), PyObject *args,
       SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "fmask" "', argument " "3"" of type '" "int""'"); }  
     arg3 = static_cast< int >(val3); }  if (obj3) { ecode4 = SWIG_AsVal_int(obj3, &val4); if (!SWIG_IsOK(ecode4)) {
       SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "fmask" "', argument " "4"" of type '" "int""'"); }  
-    arg4 = static_cast< int >(val4); }  if (obj4) { {
-      std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *ptr = (std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *)0;
-      int res = swig::asptr(obj4, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "fmask" "', argument " "5"" of type '" "gip::dictionary""'");  }
-       arg5 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  }  { try {
-      result = gip::algorithms::fmask((gip::GeoImage const &)*arg1,arg2,arg3,arg4,arg5); }  catch (const std::out_of_range& e) {
-       PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }  catch (const std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
+    arg4 = static_cast< int >(val4); }  { try { result = gip::algorithms::fmask((gip::GeoImage const &)*arg1,arg2,arg3,arg4); }
+     catch (const std::out_of_range& e) {  PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }
+     catch (const std::exception& e) { PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
   resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
   return resultobj; fail: return NULL; }
 SWIGINTERN PyObject *_wrap_indices(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) { PyObject *resultobj = 0;
-  gip::GeoImage *arg1 = 0 ; gip::dictionary arg2 ; gip::dictionary arg3 = (gip::dictionary) gip::dictionary() ;
-  void *argp1 = 0 ; int res1 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; char *  kwnames[] = {
-    (char *)"arg1",(char *)"arg2",(char *)"arg3", NULL } ; gip::GeoImage result;
-  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO|O:indices",kwnames,&obj0,&obj1,&obj2)) SWIG_fail;
+  gip::GeoImage *arg1 = 0 ; gip::dictionary arg2 ; void *argp1 = 0 ; int res1 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ;
+  char *  kwnames[] = { (char *)"arg1",(char *)"arg2", NULL } ; gip::GeoImage result;
+  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO:indices",kwnames,&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_gip__GeoImage,  0  | 0); if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "indices" "', argument " "1"" of type '" "gip::GeoImage const &""'");  }
    if (!argp1) {
@@ -5258,18 +5242,14 @@ SWIGINTERN PyObject *_wrap_indices(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
     std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *ptr = (std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *)0;
     int res = swig::asptr(obj1, &ptr); if (!SWIG_IsOK(res) || !ptr) {
       SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "indices" "', argument " "2"" of type '" "gip::dictionary""'");  }
-     arg2 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  if (obj2) { {
-      std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *ptr = (std::map<std::string,std::string,std::less< std::string >,std::allocator< std::pair< std::string const,std::string > > > *)0;
-      int res = swig::asptr(obj2, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "indices" "', argument " "3"" of type '" "gip::dictionary""'");  }
-       arg3 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  }  { try {
-      result = gip::algorithms::indices((gip::GeoImage const &)*arg1,arg2,arg3); }  catch (const std::out_of_range& e) { 
+     arg2 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  { try {
+      result = gip::algorithms::indices((gip::GeoImage const &)*arg1,arg2); }  catch (const std::out_of_range& e) { 
       PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }  catch (const std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
   resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
   return resultobj; fail: return NULL; }
 SWIGINTERN PyObject *_wrap_linear_transform(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) {
-  PyObject *resultobj = 0; gip::GeoImage *arg1 = 0 ; std::string arg2 ; CImg< float > arg3 ; void *argp1 = 0 ; int res1 = 0 ;
+  PyObject *resultobj = 0; gip::GeoImage *arg1 = 0 ; CImg< float > arg2 ; std::string arg3 ; void *argp1 = 0 ; int res1 = 0 ;
   PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; char *  kwnames[] = {
     (char *)"arg1",(char *)"arg2",(char *)"arg3", NULL } ; gip::GeoImage result;
   if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OOO:linear_transform",kwnames,&obj0,&obj1,&obj2)) SWIG_fail;
@@ -5277,27 +5257,27 @@ SWIGINTERN PyObject *_wrap_linear_transform(PyObject *SWIGUNUSEDPARM(self), PyOb
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "linear_transform" "', argument " "1"" of type '" "gip::GeoImage const &""'");  }
    if (!argp1) {
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "linear_transform" "', argument " "1"" of type '" "gip::GeoImage const &""'"); }
-   arg1 = reinterpret_cast< gip::GeoImage * >(argp1); { std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj1, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "linear_transform" "', argument " "2"" of type '" "std::string""'");  }
-     arg2 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  {  arg3 = ArrToCImg<float>(obj2);  }  { try {
+   arg1 = reinterpret_cast< gip::GeoImage * >(argp1); {  arg2 = ArrToCImg<float>(obj1);  }  {
+    std::string *ptr = (std::string *)0; int res = SWIG_AsPtr_std_string(obj2, &ptr); if (!SWIG_IsOK(res) || !ptr) {
+      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "linear_transform" "', argument " "3"" of type '" "std::string""'");  }
+     arg3 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  { try {
       result = gip::algorithms::linear_transform((gip::GeoImage const &)*arg1,arg2,arg3); }
      catch (const std::out_of_range& e) {  PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }
      catch (const std::exception& e) { PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
   resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
   return resultobj; fail: return NULL; }
 SWIGINTERN PyObject *_wrap_rxd(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) { PyObject *resultobj = 0;
-  gip::GeoImage *arg1 = 0 ; std::string arg2 ; void *argp1 = 0 ; int res1 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ;
-  char *  kwnames[] = { (char *)"arg1",(char *)"arg2", NULL } ; gip::GeoImage result;
-  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OO:rxd",kwnames,&obj0,&obj1)) SWIG_fail;
+  gip::GeoImage *arg1 = 0 ; std::string arg2 = (std::string) "" ; void *argp1 = 0 ; int res1 = 0 ; PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ; char *  kwnames[] = { (char *)"arg1",(char *)"arg2", NULL } ; gip::GeoImage result;
+  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"O|O:rxd",kwnames,&obj0,&obj1)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_gip__GeoImage,  0  | 0); if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "rxd" "', argument " "1"" of type '" "gip::GeoImage const &""'");  } 
   if (!argp1) {
     SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "rxd" "', argument " "1"" of type '" "gip::GeoImage const &""'"); }
-   arg1 = reinterpret_cast< gip::GeoImage * >(argp1); { std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj1, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "rxd" "', argument " "2"" of type '" "std::string""'");  }
-     arg2 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  { try {
+   arg1 = reinterpret_cast< gip::GeoImage * >(argp1); if (obj1) { { std::string *ptr = (std::string *)0;
+      int res = SWIG_AsPtr_std_string(obj1, &ptr); if (!SWIG_IsOK(res) || !ptr) {
+        SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "rxd" "', argument " "2"" of type '" "std::string""'");  }
+       arg2 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  }  { try {
       result = gip::algorithms::rxd((gip::GeoImage const &)*arg1,arg2); }  catch (const std::out_of_range& e) { 
       PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }  catch (const std::exception& e) {
       PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
@@ -5307,7 +5287,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
 	 { (char *)"acca", (PyCFunction) _wrap_acca, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
 		"acca(GeoImage arg1, std::string arg2, float arg3, float arg4, int arg5=5, int arg6=10, \n"
-		"    int arg7=4000, gip::dictionary arg8=gip::dictionary()) -> GeoImage\n"
+		"    int arg7=4000) -> GeoImage\n"
 		"\n"
 		"Parameters:\n"
 		"    arg1: gip::GeoImage const &\n"
@@ -5317,12 +5297,11 @@ static PyMethodDef SwigMethods[] = {
 		"    arg5: int\n"
 		"    arg6: int\n"
 		"    arg7: int\n"
-		"    arg8: gip::dictionary\n"
 		"\n"
 		""},
 	 { (char *)"cookie_cutter", (PyCFunction) _wrap_cookie_cutter, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
 		"cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, float xres, float yres, \n"
-		"    bool crop=False, unsigned char interpolation=0, gip::dictionary metadata=gip::dictionary()) -> GeoImage\n"
+		"    bool crop=False, unsigned char interpolation=0) -> GeoImage\n"
 		"\n"
 		"Parameters:\n"
 		"    images: gip::GeoImages\n"
@@ -5332,40 +5311,37 @@ static PyMethodDef SwigMethods[] = {
 		"    yres: float\n"
 		"    crop: bool\n"
 		"    interpolation: unsigned char\n"
-		"    metadata: gip::dictionary\n"
 		"\n"
 		""},
 	 { (char *)"fmask", (PyCFunction) _wrap_fmask, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
-		"fmask(GeoImage arg1, std::string arg2, int arg3=3, int arg4=5, gip::dictionary arg5=gip::dictionary()) -> GeoImage\n"
+		"fmask(GeoImage arg1, std::string arg2, int arg3=3, int arg4=5) -> GeoImage\n"
 		"\n"
 		"Parameters:\n"
 		"    arg1: gip::GeoImage const &\n"
 		"    arg2: std::string\n"
 		"    arg3: int\n"
 		"    arg4: int\n"
-		"    arg5: gip::dictionary\n"
 		"\n"
 		""},
 	 { (char *)"indices", (PyCFunction) _wrap_indices, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
-		"indices(GeoImage arg1, gip::dictionary arg2, gip::dictionary arg3=gip::dictionary()) -> GeoImage\n"
+		"indices(GeoImage arg1, gip::dictionary arg2) -> GeoImage\n"
 		"\n"
 		"Parameters:\n"
 		"    arg1: gip::GeoImage const &\n"
 		"    arg2: gip::dictionary\n"
-		"    arg3: gip::dictionary\n"
 		"\n"
 		""},
 	 { (char *)"linear_transform", (PyCFunction) _wrap_linear_transform, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
-		"linear_transform(GeoImage arg1, std::string arg2, CImg< float > arg3) -> GeoImage\n"
+		"linear_transform(GeoImage arg1, CImg< float > arg2, std::string arg3) -> GeoImage\n"
 		"\n"
 		"Parameters:\n"
 		"    arg1: gip::GeoImage const &\n"
-		"    arg2: std::string\n"
-		"    arg3: CImg< float >\n"
+		"    arg2: CImg< float >\n"
+		"    arg3: std::string\n"
 		"\n"
 		""},
 	 { (char *)"rxd", (PyCFunction) _wrap_rxd, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
-		"rxd(GeoImage arg1, std::string arg2) -> GeoImage\n"
+		"rxd(GeoImage arg1, std::string arg2=\"\") -> GeoImage\n"
 		"\n"
 		"Parameters:\n"
 		"    arg1: gip::GeoImage const &\n"

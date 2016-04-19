@@ -40,7 +40,7 @@ namespace gip {
      * dilate.
      */
     GeoImage acca(const GeoImage& image, std::string filename, float se_degrees,
-                  float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
+                  float sa_degrees, int erode, int dilate, int cloudheight) {
         if (Options::verbose() > 1) cout << "GIPPY: ACCA - " << image.basename() << endl;
 
         float th_red(0.08);
@@ -55,8 +55,6 @@ namespace gip {
         GeoImage imgout = GeoImage::create_from(filename, image, 4, "uint8");
         imgout.set_nodata(0);
         imgout.set_bandnames({"finalmask", "cloudmask", "ambclouds", "pass1"});
-        imgout.set_meta(metadata);
-
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
 
         CImg<float> red, green, nir, swir1, temp, ndsi, b56comp;
@@ -223,7 +221,7 @@ namespace gip {
 
     //! Merge images into one file and crop to vector
     GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
-        float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
+        float xres, float yres, bool crop, unsigned char interpolation) {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << images.nimages() << " files) - " << filename << endl;
         Rect<double> extent = feature.extent();
@@ -252,6 +250,7 @@ namespace gip {
         }
 
         // add additional metadata to output
+        dictionary metadata;
         metadata["SourceFiles"] = to_string(images.basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
         imgout.set_meta(metadata);
@@ -318,14 +317,13 @@ namespace gip {
 
 
     //! Fmask cloud mask
-    GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
+    GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate) {
         if (Options::verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
         GeoImage imgout = GeoImage::create_from(filename, image, 5, "uint8");
         imgout.set_bandnames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
         imgout.set_nodata(0);
-        imgout.set_meta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
         GeoImage probout = GeoImage::create_from(filename + "-prob", image, 2, "float32");
@@ -475,7 +473,7 @@ namespace gip {
         return imgout;
     }
 
-    GeoImage indices(const GeoImage& image, dictionary products, dictionary metadata) {
+    GeoImage indices(const GeoImage& image, dictionary products) {
         if (Options::verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
@@ -491,7 +489,6 @@ namespace gip {
             imagesout[prodname] = GeoImage::create_from(iprod->second, image, 1, "int16");
             imagesout[prodname].set_nodata(nodataout);
             imagesout[prodname].set_gain(0.0001);
-            imagesout[prodname].set_meta(metadata);
             imagesout[prodname].set_bandname(prodname, 1);
             filenames.push_back(imagesout[prodname].filename());
         }
@@ -593,7 +590,7 @@ namespace gip {
     }
 
     //! Perform linear transform with given coefficients (e.g., PC transform)
-    GeoImage linear_transform(const GeoImage& img, string filename, CImg<float> coef) {
+    GeoImage linear_transform(const GeoImage& img, CImg<float> coef, string filename) {
         // Verify size of array
         unsigned int numbands = img.nbands();
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))

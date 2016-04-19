@@ -74,7 +74,7 @@ import gippy
 def acca(*args, **kwargs):
   """
     acca(GeoImage arg1, std::string arg2, float arg3, float arg4, int arg5=5, int arg6=10, 
-        int arg7=4000, gip::dictionary arg8=gip::dictionary()) -> GeoImage
+        int arg7=4000) -> GeoImage
 
     Parameters:
         arg1: gip::GeoImage const &
@@ -84,7 +84,6 @@ def acca(*args, **kwargs):
         arg5: int
         arg6: int
         arg7: int
-        arg8: gip::dictionary
 
     """
   return _algorithms.acca(*args, **kwargs)
@@ -92,7 +91,7 @@ def acca(*args, **kwargs):
 def cookie_cutter(*args, **kwargs):
   """
     cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, float xres, float yres, 
-        bool crop=False, unsigned char interpolation=0, gip::dictionary metadata=gip::dictionary()) -> GeoImage
+        bool crop=False, unsigned char interpolation=0) -> GeoImage
 
     Parameters:
         images: gip::GeoImages
@@ -102,52 +101,49 @@ def cookie_cutter(*args, **kwargs):
         yres: float
         crop: bool
         interpolation: unsigned char
-        metadata: gip::dictionary
 
     """
   return _algorithms.cookie_cutter(*args, **kwargs)
 
 def fmask(*args, **kwargs):
   """
-    fmask(GeoImage arg1, std::string arg2, int arg3=3, int arg4=5, gip::dictionary arg5=gip::dictionary()) -> GeoImage
+    fmask(GeoImage arg1, std::string arg2, int arg3=3, int arg4=5) -> GeoImage
 
     Parameters:
         arg1: gip::GeoImage const &
         arg2: std::string
         arg3: int
         arg4: int
-        arg5: gip::dictionary
 
     """
   return _algorithms.fmask(*args, **kwargs)
 
 def indices(*args, **kwargs):
   """
-    indices(GeoImage arg1, gip::dictionary arg2, gip::dictionary arg3=gip::dictionary()) -> GeoImage
+    indices(GeoImage arg1, gip::dictionary arg2) -> GeoImage
 
     Parameters:
         arg1: gip::GeoImage const &
         arg2: gip::dictionary
-        arg3: gip::dictionary
 
     """
   return _algorithms.indices(*args, **kwargs)
 
 def linear_transform(*args, **kwargs):
   """
-    linear_transform(GeoImage arg1, std::string arg2, CImg< float > arg3) -> GeoImage
+    linear_transform(GeoImage arg1, CImg< float > arg2, std::string arg3) -> GeoImage
 
     Parameters:
         arg1: gip::GeoImage const &
-        arg2: std::string
-        arg3: CImg< float >
+        arg2: CImg< float >
+        arg3: std::string
 
     """
   return _algorithms.linear_transform(*args, **kwargs)
 
 def rxd(*args, **kwargs):
   """
-    rxd(GeoImage arg1, std::string arg2) -> GeoImage
+    rxd(GeoImage arg1, std::string arg2="") -> GeoImage
 
     Parameters:
         arg1: gip::GeoImage const &

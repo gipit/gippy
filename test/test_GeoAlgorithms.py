@@ -17,4 +17,4 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertEqual(rxd.nbands(), 1)
         fname = rxd.filename()
         rxd = None
-        self.assertTrue(os.path.exists(fname))
+        self.assertFalse(os.path.exists(fname))
