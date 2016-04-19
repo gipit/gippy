@@ -224,6 +224,51 @@ namespace gip {
         return covariance;
     }
 
+    GeoImage GeoImage::warp(std::string filename, GeoFeature feature,
+                bool crop, std::string srs,
+                float xres, float yres, int interpolation) {
+
+        // get the desired Spatial Reference System from feature or override with srs argument
+        // TODO - check for valid srs
+        srs = feature.valid() ? feature.srs() : srs;
+
+        // Calculate extent of final output
+        Rect<double> ext = extent();
+        // warp to desired SRS
+        if (srs != srs()) {
+            ext = ext.transform(srs(), srs);
+        }
+        // if desired, and feature is provided, then get intersection
+        if (crop && feature.valid()) {
+            Rect<double> _ext = feature.extent();
+            std::string fsrs = feature.srs();
+            if (feature.srs != srs)
+                _ext = _ext.transform(feature.srs(), srs);
+            // limit to feature extent
+            _ext.intersect(ext);
+            // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
+            ext = Rect<double>(
+                Point<double>(ext.x0() + std::floor((_ext.x0()-ext.x0()) / xres) * xres, _ext.y0()),
+                Point<double>(_ext.x1(), ext.y1() - std::floor((ext.y1()-_ext.y1()) / yres) * yres)
+            );
+        }
+
+        // create output file
+        // convert extent to resolution units
+        // create an image here
+        GeoImage imgout(filename, xsize, ysize, nbands(), type());
+        imgout.set_meta(meta());
+        for (unsigned int b=0;b<imgout.nbands();b++) {
+            imgout[b].set_gain((*this)[b].gain());
+            imgout[b].set_offset((*this)[b].offset());
+            imgout[b].set_nodata((*this)[b].nodata());
+        }
+        // set SRS
+
+        // warp into this output image
+        return warp_into(imgout, feature, interpolation);
+    }
+
 
     GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit) {
         if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << " " << std::flush;
