@@ -20,8 +20,15 @@
 ##############################################################################*/
 
 #include <gip/gip.h>
+#include <ogrsf_frmts.h>
 
 namespace gip {
+
+    // Global options given initial values here
+    std::string Options::_DefaultFormat("GTiff");
+    float Options::_ChunkSize(128.0);
+    int Options::_Verbose(1);
+    int Options::_Cores(2);
 
     // Register file formats with GDAL and OGR
     void init() {

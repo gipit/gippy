@@ -16,8 +16,8 @@ class GeoImageTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gp.Options.SetVerbose(3)
-        gp.Options.SetChunkSize(4.0)
+        gp.Options.set_verbose(3)
+        gp.Options.set_chunksize(4.0)
 
     def create_image(self, filename='', size=(1, 1000, 1000), dtype='uint8', temp=False):
         return gp.GeoImage.create(filename, xsize=size[1], ysize=size[2], bsize=size[0],

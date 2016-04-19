@@ -28,13 +28,6 @@ namespace gip {
     using std::string;
     using std::vector;
 
-    // Options given initial values here
-    string Options::_DefaultFormat("GTiff");
-    float Options::_ChunkSize(128.0);
-    int Options::_Verbose(1);
-    int Options::_NumCores(2);
-    string Options::_WorkDir("/tmp/");  
-
     // Constructors
     GeoResource::GeoResource(string filename, bool update, bool temp)
         : _Filename(filename), _temp(temp) {
@@ -55,7 +48,7 @@ namespace gip {
         }
         _GDALDataset.reset(ds);
 
-        if (Options::Verbose() > 4)
+        if (Options::verbose() > 4)
             std::cout << basename() << ": GeoResource Open (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
     }
 
@@ -64,7 +57,7 @@ namespace gip {
         : _Filename(filename), _temp(temp) {
 
         // format, driver, and file extension
-        string format = Options::DefaultFormat();
+        string format = Options::defaultformat();
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
@@ -84,7 +77,7 @@ namespace gip {
 
         // create file
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
-        if (Options::Verbose() > 4)
+        if (Options::verbose() > 4)
             std::cout << basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
         _GDALDataset.reset( driver->Create(_Filename.c_str(), xsz,ysz,bsz, dt.gdal(), papszOptions) );
         if (_GDALDataset.get() == NULL) {
@@ -108,7 +101,7 @@ namespace gip {
         if (_GDALDataset.unique()) {
             _GDALDataset->FlushCache();
             //BOOST_LOG_TRIVIAL(trace) << Basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
-            if (Options::Verbose() > 4) std::cout << basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
+            if (Options::verbose() > 4) std::cout << basename() << ": ~GeoResource (use_count = " << _GDALDataset.use_count() << ")" << std::endl;
             if (_temp) {
                 std::remove(_Filename.c_str());
             }

@@ -20,8 +20,8 @@ class GeoRasterTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.SetVerbose(1)
-        gippy.Options.SetChunkSize(128.0)
+        gippy.Options.set_verbose(1)
+        gippy.Options.set_chunksize(128.0)
 
     def test_sqrt(self):
         """ Calculate sqrt of image """

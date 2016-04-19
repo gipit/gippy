@@ -61,7 +61,7 @@ namespace gip {
 
     // Open layer
     void GeoVectorResource::OpenLayer(string layer) {
-        //if (Options::Verbose() > 4)
+        //if (Options::verbose() > 4)
         //    cout << Basename() << ": opening layer " << layer << endl;
         if (layer == "") {
             _Layer = _OGRDataSource->GetLayer(0);

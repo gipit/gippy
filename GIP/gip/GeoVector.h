@@ -57,7 +57,7 @@ namespace gip {
         }
         //! Destructor
         ~GeoVector() {
-            //if (Options::Verbose() > 4) use_counts("destructor");
+            //if (Options::verbose() > 4) use_counts("destructor");
         }
 
         void set_primary_key(std::string key="") {

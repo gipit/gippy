@@ -4,7 +4,7 @@
 //! k-means unsupervised classifier
 GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterations, float threshold ) {
     //if (Image.NumBands() < 2) throw GIP::Gexceptions::errInvalidParams("At least two bands must be supplied");
-    if (Options::Verbose()) {
+    if (Options::verbose()) {
         cout << image.Basename() << " - k-means unsupervised classifier:" << endl
             << "  Classes = " << classes << endl
             << "  Iterations = " << iterations << endl
@@ -29,7 +29,7 @@ GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterat
     do {
         NumPixelChange = 0;
         for (i=0; i<classes; i++) NumSamples(i) = 0;
-        if (Options::Verbose()) cout << "  Iteration " << iteration+1 << std::flush;
+        if (Options::verbose()) cout << "  Iteration " << iteration+1 << std::flush;
 
         for (unsigned int iChunk=1; iChunk<=image[0].NumChunks(); iChunk++) {
             C_img = img.Read(iChunk);
@@ -56,7 +56,7 @@ GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterat
                 } else C_imgout(x,y) = 0;
             }
             imgout[0].Write(C_imgout,iChunk);
-            if (Options::Verbose()) cout << "." << std::flush;
+            if (Options::verbose()) cout << "." << std::flush;
         }
 
         // Calculate new Mean class vectors
@@ -69,8 +69,8 @@ GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterat
                 NumSamples(i) = 0;
             }
         }
-        if (Options::Verbose()) cout << 100.0*((double)NumPixelChange/image.Size()) << "% pixels changed class" << endl;
-        if (Options::Verbose()>1) cimg_printclasses(ClassMeans);
+        if (Options::verbose()) cout << 100.0*((double)NumPixelChange/image.Size()) << "% pixels changed class" << endl;
+        if (Options::verbose()>1) cimg_printclasses(ClassMeans);
     } while ( (++iteration < iterations) && (NumPixelChange > threshold) );
 
     imgout.SetBandName("k-means", 1);
@@ -104,13 +104,13 @@ GeoImage SpectralStatistics(const GeoImage& img, string filename) {
     CImgList<double> stats;
     ChunkSet chunks(img.XSize(),img.YSize());
     for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-        if (Options::Verbose() > 2) 
+        if (Options::verbose() > 2) 
             std::cout << "Processing chunk " << chunks[iChunk] << " of " << img.Size() << std::endl;
         stats = img.SpectralStatistics(chunks[iChunk]);
         imgout[0].Write(stats[0], chunks[iChunk]);
         imgout[1].Write(stats[1], chunks[iChunk]);
     }
-    if (Options::Verbose())
+    if (Options::verbose())
         std::cout << "Spectral statistics written to " << imgout.Filename() << std::endl;
     return imgout;
 }
@@ -131,7 +131,7 @@ CImg<double> SpectralCorrelation(const GeoImage& image, CImg<double> covariance)
     for (b=0; b<NumBands; b++) stddev(b) = image[b].StdDev();
     CImg<double> Correlation = covariance.div(stddev.get_transpose() * stddev);
 
-    if (Options::Verbose() > 0) {
+    if (Options::verbose() > 0) {
         cout << image.Basename() << " Spectral Correlation Matrix:" << endl;
         cimg_forY(Correlation,y) {
             cout << "\t";

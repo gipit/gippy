@@ -41,7 +41,7 @@ namespace gip {
      */
     GeoImage acca(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
-        if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.basename() << endl;
+        if (Options::verbose() > 1) cout << "GIPPY: ACCA - " << image.basename() << endl;
 
         float th_red(0.08);
         float th_ndsi(0.7);
@@ -66,7 +66,7 @@ namespace gip {
         ChunkSet chunks(image.xsize(),image.ysize());
         Rect<int> chunk;
 
-        //if (Options::Verbose()) cout << image.basename() << " - ACCA (dev-version)" << endl;
+        //if (Options::verbose()) cout << image.basename() << " - ACCA (dev-version)" << endl;
         for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chunk = chunks[iChunk];
             red = image["RED"].read<float>(chunk);
@@ -116,12 +116,12 @@ namespace gip {
             imgout["pass1"].write<unsigned char>(clouds,chunk);
             imgout["ambclouds"].write<unsigned char>(ambclouds,chunk);
             //imgout[0].write(nonclouds,iChunk);
-            if (Options::Verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.size() << endl;
+            if (Options::verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.size() << endl;
         }
         // Cloud statistics
         float cloudcover = cloudsum / scenesize;
         CImg<float> tstats = image["LWIR"].add_mask(imgout["pass1"]).stats();
-        if (Options::Verbose() > 1) {
+        if (Options::verbose() > 1) {
             cout.precision(4);
             cout << "   Cloud Cover = " << cloudcover*100 << "%" << endl;
             //cimg_print(tstats, "Cloud stats(min,max,mean,sd,skew,count)");
@@ -143,25 +143,25 @@ namespace gip {
             }
             image["LWIR"].clear_masks();
             CImg<float> warm_stats = image["LWIR"].add_mask(imgout["ambclouds"]).add_mask(image["LWIR"] < th1).add_mask(image["LWIR"] > th0).stats();
-            if (Options::Verbose() > 1) 
+            if (Options::verbose() > 1) 
                 warm_stats.print("Warm Cloud stats(min,max,mean,sd,skew,count)");
             image["LWIR"].clear_masks();
             if (((warm_stats(5)/scenesize) < 0.4) && (warm_stats(2) < 22)) {
-                if (Options::Verbose() > 2) cout << "Accepting warm clouds" << endl;
+                if (Options::verbose() > 2) cout << "Accepting warm clouds" << endl;
                 imgout["ambclouds"].add_mask(image["LWIR"] < th1).add_mask(image["LWIR"] > th0);
                 addclouds = true;
             } else {
                 // Cold clouds
                 CImg<float> cold_stats = image["LWIR"].add_mask(imgout["ambclouds"]).add_mask(image["LWIR"] < th0).stats();
-                if (Options::Verbose() > 1) 
+                if (Options::verbose() > 1) 
                     cold_stats.print("Cold Cloud stats(min,max,mean,sd,skew,count)");
                 image["LWIR"].clear_masks();
                 if (((cold_stats(5)/scenesize) < 0.4) && (cold_stats(2) < 22)) {
-                    if (Options::Verbose() > 2) cout << "Accepting cold clouds" << endl;
+                    if (Options::verbose() > 2) cout << "Accepting cold clouds" << endl;
                     imgout["ambclouds"].add_mask(image["LWIR"] < th0);
                     addclouds = true;
                 } else
-                    if (Options::Verbose() > 2) cout << "Rejecting all ambiguous clouds" << endl;
+                    if (Options::verbose() > 2) cout << "Rejecting all ambiguous clouds" << endl;
             }
         } else image["LWIR"].clear_masks();
 
@@ -175,7 +175,7 @@ namespace gip {
         int dy = cos(solarazimuth) * distance / yres;
         int padding(double(dilate)/2+std::max(abs(dx),abs(dy))+1);
         int smearlen = sqrt(dx*dx+dy*dy);
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             cerr << "distance = " << distance << endl
                  << "dx       = " << dx << endl
                  << "dy       = " << dy << endl
@@ -186,7 +186,7 @@ namespace gip {
         int signY(dy/abs(dy));
         int xstep = std::max(signX*dx/dilate/4, 1);
         int ystep = std::max(signY*dy/dilate/4, 1);
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             cerr << "dilate = " << dilate << endl
                  << "xstep  = " << signX*xstep << endl
                  << "ystep  = " << signY*ystep << endl ;
@@ -195,7 +195,7 @@ namespace gip {
 
         for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chunk = chunks[iChunk];
-            if (Options::Verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.size() << endl;
+            if (Options::verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.size() << endl;
             clouds = imgout["pass1"].read<unsigned char>(chunk);
             // should this be a |= ?
             if (addclouds) clouds += imgout["ambclouds"].read<unsigned char>(chunk);
@@ -224,7 +224,7 @@ namespace gip {
     //! Merge images into one file and crop to vector
     GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
-        if (Options::Verbose() > 1)
+        if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << images.nimages() << " files) - " << filename << endl;
         Rect<double> extent = feature.extent();
 
@@ -286,7 +286,7 @@ namespace gip {
             psWarpOptions->padfSrcNoDataImag[b] = 0.0;
             psWarpOptions->padfDstNoDataImag[b] = 0.0;
         }
-        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
+        psWarpOptions->dfWarpMemoryLimit = Options::chunksize() * 1024.0 * 1024.0;
         switch (interpolation) {
             case 1: psWarpOptions->eResampleAlg = GRA_Bilinear;
                 break;
@@ -294,7 +294,7 @@ namespace gip {
                 break;
             default: psWarpOptions->eResampleAlg = GRA_NearestNeighbour;
         }
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             psWarpOptions->pfnProgress = GDALTermProgress;
         else psWarpOptions->pfnProgress = GDALDummyProgress;
 
@@ -302,7 +302,7 @@ namespace gip {
         //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
         papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
-        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::NumCores()).c_str());
+        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::cores()).c_str());
         psWarpOptions->papszWarpOptions = papszOptions;
 
         OGRGeometry* geom = feature.geometry();
@@ -319,7 +319,7 @@ namespace gip {
 
     //! Fmask cloud mask
     GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
-        if (Options::Verbose() > 1)
+        if (Options::verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
         GeoImage imgout = GeoImage::create_from(filename, image, 5, "uint8");
@@ -408,7 +408,7 @@ namespace gip {
         double Tlo(landBT.percentile(17.5));
         double Thi(landBT.percentile(82.5));
 
-        if (Options::Verbose() > 2) {
+        if (Options::verbose() > 2) {
             cout << "PCP = " << 100*cloudpixels/(double)datapixels << "%" << endl;
             cout << "Water (82.5%) = " << Twater << endl;
             cout << "Land (17.5%) = " << Tlo << ", (82.5%) = " << Thi << endl;
@@ -437,7 +437,7 @@ namespace gip {
         float wthresh = 0.5 + tol;
         float lthresh(probout["lcloud"].add_mask(imgout["land"]).percentile(82.5)+0.2+tol);
         probout["lcloud"].clear_masks();
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             cout << "Thresholds: water = " << wthresh << ", land = " << lthresh << endl;
 
         // 3x3 filter of 1's for majority filter
@@ -476,7 +476,7 @@ namespace gip {
     }
 
     GeoImage indices(const GeoImage& image, dictionary products, dictionary metadata) {
-        if (Options::Verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
+        if (Options::verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
 
@@ -486,7 +486,7 @@ namespace gip {
         string prodname;
         for (iprod=products.begin(); iprod!=products.end(); iprod++) {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
-            if (Options::Verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
+            if (Options::verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
             prodname = iprod->first;
             imagesout[prodname] = GeoImage::create_from(iprod->second, image, 1, "int16");
             imagesout[prodname].set_nodata(nodataout);
@@ -524,7 +524,7 @@ namespace gip {
                 used_colors.insert(*ivstr);
             }
         }
-        if (Options::Verbose() > 2) {
+        if (Options::verbose() > 2) {
             cout << "Colors used: ";
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) cout << " " << *isstr;
             cout << endl;
@@ -536,7 +536,7 @@ namespace gip {
 
         // need to add overlap
         for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].size() << endl;
+            if (Options::verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
                 if (*isstr == "red") red = image["red"].read<float>(chunks[iChunk]);
                 else if (*isstr == "green") green = image["green"].read<float>(chunks[iChunk]);
@@ -608,7 +608,7 @@ namespace gip {
         ChunkSet chunks(img.xsize(),img.ysize());
 
         for (unsigned int bout=0; bout<numbands; bout++) {
-            //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
+            //if (Options::verbose() > 4) cout << "Band " << bout << endl;
             for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
                 cimg = img[0].read<float>(chunks[iChunk]) * coef(0, bout);;
                 for (unsigned int bin=1; bin<numbands; bin++) {

@@ -25,9 +25,10 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
-#include <gip/Utils.h>
 //#include <ogr_srs_api.h>
 #include <ogr_spatialref.h>
+#include <gip/gip.h>
+#include <gip/Utils.h>
 
 namespace gip {
 
@@ -309,7 +310,7 @@ namespace gip {
             unsigned int rows;
 
             if (numchunks == 0) {
-                rows = floor( ( Options::ChunkSize() *1024*1024) / sizeof(double) / xsize() );
+                rows = floor( ( Options::chunksize() *1024*1024) / sizeof(double) / xsize() );
                 rows = rows > ysize() ? ysize() : rows;
                 numchunks = ceil( ysize()/(float)rows );
             } else {
@@ -318,15 +319,15 @@ namespace gip {
 
             _Chunks.clear();
             Rect<int> chunk;
-            /*if (Options::Verbose() > 3) {
+            /*if (Options::verbose() > 3) {
                 std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
-                    << Options::ChunkSize() << " MB max each)" << std::endl;
+                    << Options::chunksize() << " MB max each)" << std::endl;
             }*/
             for (unsigned int i=0; i<numchunks; i++) {
                 chunk = Rect<int>(0, rows*i, xsize(), std::min(rows*(i+1),ysize())-(rows*i) );
                 chunk.padding(_padding);
                 _Chunks.push_back(chunk);
-                //if (Options::Verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
+                //if (Options::verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
             }
             return _Chunks;            
         }

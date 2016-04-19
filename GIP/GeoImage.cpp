@@ -210,7 +210,7 @@ namespace gip {
         for (unsigned int b=0; b<NumBands; b++) means(b) = (*this)[b].stats()[2]; //cout << "Mean b" << b << " = " << means(b) << endl; }
         covariance -= (means.get_transpose() * means);
 
-        if (Options::Verbose() > 2) {
+        if (Options::verbose() > 2) {
             std::cout << basename() << " Spectral Covariance Matrix:" << endl;
             cimg_forY(covariance,y) {
                 std::cout << "\t";

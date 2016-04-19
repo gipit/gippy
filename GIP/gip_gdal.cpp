@@ -22,11 +22,10 @@
 #include <gip/gip_gdal.h>
 
 namespace gip {
-	using std::cout;
 
     //! Warp a single image into output image with cutline
     GeoImage& WarpToImage(const GeoImage& imgin, GeoImage& imgout, GDALWarpOptions *psWarpOptions, OGRGeometry* site) {
-        if (Options::Verbose() > 2) cout << imgin.basename() << " warping into " << imgout.basename() << " " << std::flush;
+        if (Options::verbose() > 2) std::cout << imgin.basename() << " warping into " << imgout.basename() << " " << std::flush;
 
         // Create cutline transform to pixel coordinates
         char **papszOptionsCutline = NULL;
@@ -54,7 +53,7 @@ namespace gip {
         // Perform transformation
         GDALWarpOperation oOperation;
         oOperation.Initialize( psWarpOptions );
-        //if (Options::Verbose() > 3) cout << "Error: " << CPLGetLastErrorMsg() << endl;
+        //if (Options::verbose() > 3) std::cout << "Error: " << CPLGetLastErrorMsg() << endl;
         oOperation.ChunkAndWarpMulti( 0, 0, imgout.xsize(), imgout.ysize() );
 
         // destroy things

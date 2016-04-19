@@ -483,7 +483,7 @@ namespace gip {
             CImg<double> imgd;
             imgd.assign(img);
             for (std::vector<func>::const_iterator iFunc=_Functions.begin();iFunc!=_Functions.end();iFunc++) {
-                //if (Options::Verbose() > 2 && (chunk.p0()==iPoint(0,0)))
+                //if (Options::verbose() > 2 && (chunk.p0()==iPoint(0,0)))
                 //    std::cout << basename() << ": Applying function " << (*iFunc) << std::endl;
                 (*iFunc)(imgd);
             }
@@ -499,7 +499,7 @@ namespace gip {
             }
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);
-        if (Options::Verbose() > 3)
+        if (Options::verbose() > 3)
             std::cout << basename() << ": read " << chunk << " in " << elapsed.count() << " seconds" << std::endl;
 
         return img;
@@ -516,7 +516,7 @@ namespace gip {
             img.crop(p0.x(),p0.y(),p1.x(),p1.y());
         }
 
-        if (Options::Verbose() > 4) {
+        if (Options::verbose() > 4) {
             std::cout << basename() << ": writing " << img.width() << " x "
                 << img.height() << " image to rect " << chunk << std::endl;
         }
@@ -537,7 +537,7 @@ namespace gip {
         if (gain() != 1.0 || offset() != 0.0) {
             cimg_for(img,ptr,T) if (*ptr != nodata()) *ptr = (*ptr-offset())/gain();
         }
-        if (Options::Verbose() > 3 && (chunk.p0()==iPoint(0,0)))
+        if (Options::verbose() > 3 && (chunk.p0()==iPoint(0,0)))
             std::cout << basename() << ": Writing (" << gain() << "x + " << offset() << ")" << std::endl;
         return write_raw(img,chunk);
     }
@@ -550,7 +550,7 @@ namespace gip {
         raster.set_srs(this->srs());
         raster.set_affine(this->affine());
         ChunkSet chunks(xsize(), ysize());
-        if (Options::Verbose() > 3)
+        if (Options::verbose() > 3)
             std::cout << basename() << ": Processing in " << chunks.size() << " chunks" << std::endl;
         for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
                 CImg<T> cimg = read<T>(chunks[iChunk]);

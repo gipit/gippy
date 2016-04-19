@@ -43,7 +43,7 @@ namespace gip {
         /*explicit GeoFeature(const GeoVectorResource& vector, std::shared_ptr<OGRFeature> feature) 
             : GeoVectorResource(vector) {
             _Feature = feature;
-            if (Options::Verbose() > 4) use_counts("constructor");
+            if (Options::verbose() > 4) use_counts("constructor");
         }*/
         //! Constructor to open specific feature in a vector
         explicit GeoFeature(std::string filename, std::string layer, long int fid)
@@ -64,18 +64,18 @@ namespace gip {
         //! Copy constructor
         GeoFeature(const GeoFeature& feature) 
             : GeoVectorResource(feature), _Feature(feature._Feature) {
-            //if (Options::Verbose() > 4) use_count("copy constructor");
+            //if (Options::verbose() > 4) use_count("copy constructor");
         }
         //! Assignment operator
         GeoFeature& operator=(const GeoFeature& feature) {
             if (this == &feature) return *this;
             GeoVectorResource::operator=(feature);
             _Feature = feature._Feature;
-            //if (Options::Verbose() > 4) use_count("assignment");
+            //if (Options::verbose() > 4) use_count("assignment");
             return *this;
         }
         ~GeoFeature() {
-            //if (Options::Verbose() > 4) use_count("destructor");
+            //if (Options::verbose() > 4) use_count("destructor");
         }
 
         //! Get value for the PrimaryKey

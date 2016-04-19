@@ -78,26 +78,8 @@ namespace std {
 
 // GIP headers and classes to be wrapped - order is important!
 //  ignore directives suppress warnings, then operators are redefined through %extend
-%include "gip/gip.h"
 
-namespace gip {
-    // Just wrapping basic options.
-    class Options {
-    public:
-        //static std::string ConfigDir();
-        //static void SetConfigDir(std::string dir);
-        static std::string DefaultFormat();
-        static void SetDefaultFormat(std::string format);
-        static float ChunkSize();
-        static void SetChunkSize(float sz);
-        static int Verbose();
-        static void SetVerbose(int v);
-        static int NumCores();
-        static void SetNumCores(int n);
-        static std::string WorkDir();
-        static void SetWorkDir(std::string workdir);
-    };
-}
+%include "gip/gip.h"
 
 // Geometry
 %ignore gip::Point::operator=;
