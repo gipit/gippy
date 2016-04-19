@@ -629,7 +629,7 @@ namespace gip {
         GeoImage imgout = GeoImage::create_from(filename, img, 1, "uint8");
         imgout.set_bandname("RXD", 1);
 
-        CImg<double> covariance = spectral_covariance(img);
+        CImg<double> covariance = img.spectral_covariance();
         CImg<double> K = covariance.invert();
         CImg<double> chip, chipout, pixel;
 
@@ -653,49 +653,7 @@ namespace gip {
     }
 
 
-    //! Calculates spectral covariance of image
-    CImg<double> spectral_covariance(const GeoImage& img) {
-        unsigned int NumBands(img.nbands());
 
-        CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;        
-        CImg<unsigned char> mask;
-        int validsize;
-
-        ChunkSet chunks = img.chunks();
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            // Bands x NumPixels
-            matrixchunk = CImg<double>(NumBands, chunks[iChunk].area(),1,1,0);
-            mask = img.nodata_mask(chunks[iChunk]);
-            validsize = mask.size() - mask.sum();
-
-            int p(0);
-            for (unsigned int b=0;b<NumBands;b++) {
-                bandchunk = img[b].read<double>(chunks[iChunk]);
-                p = 0;
-                cimg_forXY(bandchunk,x,y) {
-                    if (mask(x,y)==0) matrixchunk(b,p++) = bandchunk(x,y);
-                }
-            }
-            if (p != (int)img.size()) matrixchunk.crop(0,0,NumBands-1,p-1);
-            covariance += (matrixchunk.get_transpose() * matrixchunk)/(validsize-1);
-        }
-        // Subtract Mean
-        CImg<double> means(NumBands);
-        for (unsigned int b=0; b<NumBands; b++) means(b) = img[b].stats()[2]; //cout << "Mean b" << b << " = " << means(b) << endl; }
-        covariance -= (means.get_transpose() * means);
-
-        if (Options::Verbose() > 2) {
-            cout << img.basename() << " Spectral Covariance Matrix:" << endl;
-            cimg_forY(covariance,y) {
-                cout << "\t";
-                cimg_forX(covariance,x) {
-                    cout << std::setw(18) << covariance(x,y);
-                }
-                cout << endl;
-            }
-        }
-        return covariance;
-    }
 
     }
 } // namespace gip

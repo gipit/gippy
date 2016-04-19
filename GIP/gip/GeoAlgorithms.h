@@ -80,8 +80,6 @@ namespace gip {
     //! Calculate spectral correlation
     //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
-    //! Calculate spectral covariance
-    CImg<double> spectral_covariance(const GeoImage&);
     }
 } // namespace gip
 
