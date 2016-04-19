@@ -220,36 +220,6 @@ namespace gip {
         return imgout;
     }
 
-    //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
-    std::string browse_image(const GeoImage& image, std::string filename, int quality) {
-        // TODO - take in output filename rather then autogenerating
-        //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.basename() << endl;
-
-        GeoImage img(image);
-        if (img.bands_exist({"red","green","blue"})) {
-            img.select({"red","green","blue"});
-        } else {
-            img.select({img[0].description()});
-        }
-
-        CImg<double> stats;
-        float lo, hi;
-        for (unsigned int b=0; b<img.nbands(); b++) {
-            stats = img[b].stats();
-            lo = std::max(stats(2) - 3*stats(3), stats(0));
-            hi = std::min(stats(2) + 3*stats(3), stats(1));
-            if ((lo == hi) && (lo == 1)) lo = 0;
-            img[b] = ((img[b] - lo) * (255.0/(hi-lo))).max(0.0).min(255.0);
-        }
-        CImg<double> cimg(img.read<double>());
-        // TODO - alpha channel?
-        cimg_for(cimg, ptr, double) { if (*ptr == img[0].nodata()) *ptr = 0; }
-
-        cimg.round().save_jpeg(filename.c_str(), quality);
-
-        if (Options::Verbose() > 1) cout << image.basename() << ": BrowseImage written to " << filename << endl;
-        return filename;
-    }
 
     //! Merge images into one file and crop to vector
     GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 

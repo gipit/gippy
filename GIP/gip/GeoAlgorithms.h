@@ -31,6 +31,7 @@
 namespace gip {
     namespace algorithms {
 
+    /* these are not currently used
     std::map< std::string, std::vector<std::string> > RequiredBands = {
         {"acca", {"RED","GREEN","NIR","SWIR1","LWIR"}},
         {"truecolor", {"RED","GREEN","BLUE"}},
@@ -46,13 +47,10 @@ namespace gip {
         {"msavi2", {"NIR","RED"}},
         {"vari", {"RED","GREEN","BLUE"}},
         {"brgt", {"RED","GREEN","BLUE","NIR"}},
-    };
+    }; */
 
     //! Create cloudmask using ACCA
     GeoImage acca(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000, dictionary=dictionary());
-
-    //! Stretch image into byte
-    std::string browse_image(const GeoImage&, std::string, int quality=75);
 
     //! Create single image from multiple input images using vector file footprint
     GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
