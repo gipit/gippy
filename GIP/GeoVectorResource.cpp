@@ -61,7 +61,7 @@ namespace gip {
 
     // Open layer
     void GeoVectorResource::OpenLayer(string layer) {
-        //if (Options::Verbose() > 4)
+        //if (Options::verbose() > 4)
         //    cout << Basename() << ": opening layer " << layer << endl;
         if (layer == "") {
             _Layer = _OGRDataSource->GetLayer(0);
@@ -71,15 +71,15 @@ namespace gip {
     }
 
     // Info
-    string GeoVectorResource::Filename() const {
+    string GeoVectorResource::filename() const {
         return _Filename;
     }
 
-    string GeoVectorResource::Basename() const {
-        return LayerName();
+    string GeoVectorResource::basename() const {
+        return layer_name();
     }
 
-    string GeoVectorResource::LayerName() const {
+    string GeoVectorResource::layer_name() const {
         return _Layer->GetName();
     }
 
@@ -88,13 +88,13 @@ namespace gip {
        return *_Layer->GetSpatialRef();
     }*/
 
-    std::string GeoVectorResource::SRS() const {
+    std::string GeoVectorResource::srs() const {
         char* wkt(NULL);
         _Layer->GetSpatialRef()->exportToWkt(&wkt);
         return std::string(wkt); 
     }
 
-    Rect<double> GeoVectorResource::Extent() const {
+    Rect<double> GeoVectorResource::extent() const {
         OGREnvelope ext;
         _Layer->GetExtent(&ext, true);
         return Rect<double>(

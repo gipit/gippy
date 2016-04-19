@@ -57,15 +57,15 @@ namespace gip {
         }
         //! Destructor
         ~GeoVector() {
-            //if (Options::Verbose() > 4) use_counts("destructor");
+            //if (Options::verbose() > 4) use_counts("destructor");
         }
 
-        void SetPrimaryKey(std::string key="") {
+        void set_primary_key(std::string key="") {
             if (key == "") {
                 _PrimaryKey = "";
                 return;
             }
-            std::vector<std::string> atts = Attributes();
+            std::vector<std::string> atts = attributes();
             if (std::find(atts.begin(), atts.end(), key) != atts.end()) {
                 _PrimaryKey = key;
                 // for now, don't check
@@ -91,7 +91,7 @@ namespace gip {
         }
         //! Get feature (0-based index), const version
         const GeoFeature operator[](unsigned int index) const {
-            if (index >= NumFeatures())
+            if (index >= nfeatures())
                 throw std::out_of_range("No feature " + to_string(index));
             _Layer->ResetReading();
             _Layer->SetNextByIndex(index);
@@ -106,19 +106,19 @@ namespace gip {
             if (_PrimaryKey == "") 
                 return GeoFeature(*this, std::stol(val));
             else {
-                std::vector<GeoFeature> query = where(PrimaryKey(), val);
+                std::vector<GeoFeature> query = where(primary_key(), val);
                 if (query.size() == 0)
-                    throw std::out_of_range("No feature with " + PrimaryKey() + " = " + val);
+                    throw std::out_of_range("No feature with " + primary_key() + " = " + val);
                 return query[0];
             }
         }
 
         //! Get value of this attribute for all features
-        std::vector<std::string> Values(std::string attr) {
+        std::vector<std::string> values(std::string attr) {
             std::vector<std::string> vals;
             _Layer->ResetReading();
             GeoFeature f;
-            for (unsigned int i=0; i<NumFeatures(); i++) {
+            for (unsigned int i=0; i<nfeatures(); i++) {
                 f = GeoFeature(*this, _Layer->GetNextFeature());
                 vals.push_back(f[attr]);
             }
@@ -130,7 +130,7 @@ namespace gip {
             std::vector<GeoFeature> matches;
             _Layer->ResetReading();
             GeoFeature f;
-            for (unsigned int i=0; i<NumFeatures(); i++) {
+            for (unsigned int i=0; i<nfeatures(); i++) {
                 f = GeoFeature(*this, _Layer->GetNextFeature());
                 if (f[attr] == val)
                     matches.push_back(f);
@@ -150,10 +150,10 @@ namespace gip {
         }
 
         //! Calculate intersection between passed in feature and features in this layer
-        std::map<std::string, std::string> Intersections(GeoFeature feat) {
+        std::map<std::string, std::string> intersections(GeoFeature feat) {
             // transform passed in feature to native
             OGRSpatialReference* srs = _Layer->GetSpatialRef();
-            OGRGeometry* geom = feat.Geometry(srs);
+            OGRGeometry* geom = feat.geometry(srs);
             _Layer->SetSpatialFilter(geom);
             _Layer->ResetReading();
             OGRFeature* f;

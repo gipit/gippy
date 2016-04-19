@@ -25,9 +25,10 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
-#include <gip/Utils.h>
 //#include <ogr_srs_api.h>
 #include <ogr_spatialref.h>
+#include <gip/gip.h>
+#include <gip/Utils.h>
 
 namespace gip {
 
@@ -136,9 +137,9 @@ namespace gip {
         }
 
         //! Get padding
-        unsigned int Padding() const { return _padding; }
+        unsigned int padding() const { return _padding; }
         //! Set padding
-        Rect& Padding(unsigned int padding) {
+        Rect& padding(unsigned int padding) {
             _padding = padding;
             return *this;
         }
@@ -158,7 +159,7 @@ namespace gip {
         }*/
 
         //! Transform between coordinate systems
-        Rect& Transform(std::string src, std::string dst) {
+        Rect& transform(std::string src, std::string dst) {
             if (src == dst) return *this;
             OGRSpatialReference _src = OGRSpatialReference(src.c_str());
             OGRSpatialReference _dst = OGRSpatialReference(src.c_str());
@@ -176,43 +177,45 @@ namespace gip {
             return *this;
         }
 
-        Rect& Pad() {
-            return Pad(_padding);
+        Rect& pad() {
+            return pad(_padding);
         }
 
-        Rect& Pad(int pad) {
+        Rect& pad(int pad) {
             _p0 = _p0 - Point<T>(pad,pad);
             _p1 = _p1 + Point<T>(pad,pad);
             return *this;
         }
 
-        Rect get_Pad() const {
-            return get_Pad(_padding);
+        Rect get_pad() const {
+            return get_pad(_padding);
         }
 
-        Rect get_Pad(int pad) const {
-            return Rect<T>(*this).Pad(pad);
+        Rect get_pad(int pad) const {
+            return Rect<T>(*this).pad(pad);
         }
+
         //! Intersects Rect with argument Rect
-        Rect& Intersect(const Rect& rect) {
+        Rect& intersect(const Rect& rect) {
             _p0 = Point<T>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) );
             _p1 = Point<T>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) );
             return *this;
         }
         //! Returns intersection of two Rects
-        Rect get_Intersect(const Rect& rect) const {
-            return Rect<T>(*this).Intersect(rect);
+        Rect get_intersect(const Rect& rect) const {
+            return Rect<T>(*this).intersect(rect);
         }
+
         // Calculates union of Rect with argument Rect
-        Rect& Union(const Rect& rect) {
+        Rect& union_with(const Rect& rect) {
             _p0 = Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) );
             _p1 = Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) );
             return *this;            
         }
         //! Returns outer bounding box of two rects
-        Rect get_Union(const Rect& rect) const {
-            return Rect<T>(*this).Union(rect);
-        }
+        /*Rect get_union(const Rect& rect) const {
+            return Rect<T>(*this).union(rect);
+        }*/
         friend std::ostream& operator<<(std::ostream& stream,const Rect& r) {
             return stream << r._p0 << "-" << r._p1;
         }
@@ -226,10 +229,10 @@ namespace gip {
     };
 
     //! calculate union of all rects 
-    template<typename T> Rect<T> Union(std::vector< Rect<T> > rects) {
+    template<typename T> Rect<T> union_all(std::vector< Rect<T> > rects) {
         Rect<T> unioned(rects[0]);
         for (unsigned int i=1; i<rects.size(); i++) {
-            unioned.Union(rects[i]);
+            unioned.union_with(rects[i]);
         }
         return unioned;
     }
@@ -245,13 +248,13 @@ namespace gip {
         //! Constructor taking in image size
         ChunkSet(unsigned int xsize, unsigned int ysize, unsigned int padding=0, unsigned int numchunks=0)
             : _xsize(xsize), _ysize(ysize), _padding(padding) {
-            ChunkUp(numchunks);
+            create_chunks(numchunks);
         }
 
         //! Copy constructor
         ChunkSet(const ChunkSet& chunks)
             : _xsize(chunks._xsize), _ysize(chunks._ysize), _padding(chunks._padding) {
-            ChunkUp(chunks.Size());
+            create_chunks(chunks.size());
         }
 
         //! Assignment copy
@@ -260,33 +263,32 @@ namespace gip {
             _xsize = chunks._xsize;
             _ysize = chunks._ysize;
             _padding = chunks._padding;
-            ChunkUp(chunks.Size());
+            create_chunks(chunks.size());
             return *this;
         }
         ~ChunkSet() {}
 
         //! Get width of region
-        unsigned int XSize() const { return _xsize; }
+        unsigned int xsize() const { return _xsize; }
 
         //! Get height of region
-        unsigned int YSize() const { return _ysize; }
+        unsigned int ysize() const { return _ysize; }
 
         //! Determine if region is valid
-        bool Valid() const {
-            return (((_xsize * _ysize) == 0) || (Size() == 0)) ? false : true;
+        bool valid() const {
+            return (((_xsize * _ysize) == 0) || (size() == 0)) ? false : true;
         }
 
         //! Get number of chunks
-        unsigned int Size() const { return _Chunks.size(); }
         unsigned int size() const { return _Chunks.size(); }
 
         //! Get amount of padding in pixels
-        unsigned int Padding() const { return _padding; }
+        unsigned int padding() const { return _padding; }
 
         //! Set padding
-        ChunkSet& Padding(unsigned int _pad) {
+        ChunkSet& padding(unsigned int _pad) {
             _padding = _pad;
-            ChunkUp(_Chunks.size());
+            create_chunks(_Chunks.size());
             return *this;
         }
 
@@ -304,28 +306,28 @@ namespace gip {
 
     private:
         //! Function to chunk up region
-        std::vector< Rect<int> > ChunkUp(unsigned int numchunks=0) {
+        std::vector< Rect<int> > create_chunks(unsigned int numchunks=0) {
             unsigned int rows;
 
             if (numchunks == 0) {
-                rows = floor( ( Options::ChunkSize() *1024*1024) / sizeof(double) / XSize() );
-                rows = rows > YSize() ? YSize() : rows;
-                numchunks = ceil( YSize()/(float)rows );
+                rows = floor( ( Options::chunksize() *1024*1024) / sizeof(double) / xsize() );
+                rows = rows > ysize() ? ysize() : rows;
+                numchunks = ceil( ysize()/(float)rows );
             } else {
-                rows = int(YSize() / numchunks);
+                rows = int(ysize() / numchunks);
             }
 
             _Chunks.clear();
             Rect<int> chunk;
-            /*if (Options::Verbose() > 3) {
+            /*if (Options::verbose() > 3) {
                 std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
-                    << Options::ChunkSize() << " MB max each)" << std::endl;
+                    << Options::chunksize() << " MB max each)" << std::endl;
             }*/
             for (unsigned int i=0; i<numchunks; i++) {
-                chunk = Rect<int>(0, rows*i, XSize(), std::min(rows*(i+1),YSize())-(rows*i) );
-                chunk.Padding(_padding);
+                chunk = Rect<int>(0, rows*i, xsize(), std::min(rows*(i+1),ysize())-(rows*i) );
+                chunk.padding(_padding);
                 _Chunks.push_back(chunk);
-                //if (Options::Verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
+                //if (Options::verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
             }
             return _Chunks;            
         }

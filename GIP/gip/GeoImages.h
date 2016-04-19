@@ -58,25 +58,25 @@ namespace gip {
         ~GeoImages() { _GeoImages.clear(); }
 
         //! \name File Information
-        std::vector<std::string> Basenames() const {
+        std::vector<std::string> basenames() const {
             std::vector<std::string> names;
             for (unsigned int i=0; i<_GeoImages.size(); i++)
-                names.push_back(_GeoImages[i].Basename());
+                names.push_back(_GeoImages[i].basename());
             return names;
         }
         //! Number of bands
-        unsigned int NumImages() const { return _GeoImages.size(); }
+        unsigned int nimages() const { return _GeoImages.size(); }
 
         //! Best datatype of all bands
-        DataType Type() const {
+        DataType type() const {
             // TODO - validate all, return highest precision data type in collection
-            return _GeoImages[0].Type();
+            return _GeoImages[0].type();
         }
 
         //! Return number of bands in images, or -1 if they are not all the same
-        unsigned int NumBands() const {
+        unsigned int nbands() const {
             // TODO - validate against all...reutrn -1 if different
-            return _GeoImages[0].NumBands();
+            return _GeoImages[0].nbands();
         }
 
         //! Get image (0-based index)
@@ -92,7 +92,7 @@ namespace gip {
         //GeoImage& AsGeoImage(int bandnum) const {}
 
         //! Return union of all extents transformed to passed in SRS
-        Rect<double> Extent(std::string srs) const;
+        Rect<double> extent(std::string srs) const;
 
     protected:
         //! Vector of raster bands

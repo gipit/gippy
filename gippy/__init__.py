@@ -30,5 +30,5 @@ del remove_f
 del f
 
 # register GDAL and OGR formats
-gdalinit()
-del locals()['gdalinit'] 
+init()
+del locals()['init'] 

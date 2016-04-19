@@ -39,9 +39,9 @@ namespace gip {
      * temperature, sun elevation, solar azimuth, and number of pixels to
      * dilate.
      */
-    GeoImage ACCA(const GeoImage& image, std::string filename, float se_degrees,
+    GeoImage acca(const GeoImage& image, std::string filename, float se_degrees,
                   float sa_degrees, int erode, int dilate, int cloudheight, dictionary metadata ) {
-        if (Options::Verbose() > 1) cout << "GIPPY: ACCA - " << image.Basename() << endl;
+        if (Options::verbose() > 1) cout << "GIPPY: ACCA - " << image.basename() << endl;
 
         float th_red(0.08);
         float th_ndsi(0.7);
@@ -53,9 +53,9 @@ namespace gip {
         //float th_warm(210);
 
         GeoImage imgout = GeoImage::create_from(filename, image, 4, "uint8");
-        imgout.SetNoData(0);
-        imgout.SetBandNames({"finalmask", "cloudmask", "ambclouds", "pass1"});
-        imgout.SetMeta(metadata);
+        imgout.set_nodata(0);
+        imgout.set_bandnames({"finalmask", "cloudmask", "ambclouds", "pass1"});
+        imgout.set_meta(metadata);
 
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
 
@@ -63,19 +63,19 @@ namespace gip {
         CImg<unsigned char> nonclouds, ambclouds, clouds, mask, temp2;
         float cloudsum(0), scenesize(0);
 
-        ChunkSet chunks(image.XSize(),image.YSize());
+        ChunkSet chunks(image.xsize(),image.ysize());
         Rect<int> chunk;
 
-        //if (Options::Verbose()) cout << image.Basename() << " - ACCA (dev-version)" << endl;
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        //if (Options::verbose()) cout << image.basename() << " - ACCA (dev-version)" << endl;
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chunk = chunks[iChunk];
-            red = image["RED"].Read<float>(chunk);
-            green = image["GREEN"].Read<float>(chunk);
-            nir = image["NIR"].Read<float>(chunk);
-            swir1 = image["SWIR1"].Read<float>(chunk);
-            temp = image["LWIR"].Read<float>(chunk);
+            red = image["RED"].read<float>(chunk);
+            green = image["GREEN"].read<float>(chunk);
+            nir = image["NIR"].read<float>(chunk);
+            swir1 = image["SWIR1"].read<float>(chunk);
+            temp = image["LWIR"].read<float>(chunk);
 
-            mask = image.NoDataMask(bands_used, chunk)^=1;
+            mask = image.nodata_mask(bands_used, chunk)^=1;
 
             ndsi = (green - swir1).div(green + swir1);
             b56comp = (1.0 - swir1).mul(temp + 273.15);
@@ -113,15 +113,15 @@ namespace gip {
             cloudsum += clouds.sum();
             scenesize += mask.sum();
 
-            imgout["pass1"].Write<unsigned char>(clouds,chunk);
-            imgout["ambclouds"].Write<unsigned char>(ambclouds,chunk);
-            //imgout[0].Write(nonclouds,iChunk);
-            if (Options::Verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.Size() << endl;
+            imgout["pass1"].write<unsigned char>(clouds,chunk);
+            imgout["ambclouds"].write<unsigned char>(ambclouds,chunk);
+            //imgout[0].write(nonclouds,iChunk);
+            if (Options::verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.size() << endl;
         }
         // Cloud statistics
         float cloudcover = cloudsum / scenesize;
-        CImg<float> tstats = image["LWIR"].AddMask(imgout["pass1"]).Stats();
-        if (Options::Verbose() > 1) {
+        CImg<float> tstats = image["LWIR"].add_mask(imgout["pass1"]).stats();
+        if (Options::verbose() > 1) {
             cout.precision(4);
             cout << "   Cloud Cover = " << cloudcover*100 << "%" << endl;
             //cimg_print(tstats, "Cloud stats(min,max,mean,sd,skew,count)");
@@ -130,10 +130,10 @@ namespace gip {
         // Pass 2 (thermal processing)
         bool addclouds(false);
         if ((cloudcover > 0.004) && (tstats(2) < 22.0)) {
-            float th0 = image["LWIR"].Percentile(83.5);
-            float th1 = image["LWIR"].Percentile(97.5);
+            float th0 = image["LWIR"].percentile(83.5);
+            float th1 = image["LWIR"].percentile(97.5);
             if (tstats[4] > 0) {
-                float th2 = image["LWIR"].Percentile(98.75);
+                float th2 = image["LWIR"].percentile(98.75);
                 float shift(0);
                 shift = tstats[3] * ((tstats[4] > 1.0) ? 1.0 : tstats[4]);
                 //cout << "Percentiles = " << th0 << ", " << th1 << ", " << th2 << ", " << shift << endl;
@@ -141,29 +141,29 @@ namespace gip {
                 th0 += shift;
                 th1 += shift;
             }
-            image["LWIR"].ClearMasks();
-            CImg<float> warm_stats = image["LWIR"].AddMask(imgout["ambclouds"]).AddMask(image["LWIR"] < th1).AddMask(image["LWIR"] > th0).Stats();
-            if (Options::Verbose() > 1) 
+            image["LWIR"].clear_masks();
+            CImg<float> warm_stats = image["LWIR"].add_mask(imgout["ambclouds"]).add_mask(image["LWIR"] < th1).add_mask(image["LWIR"] > th0).stats();
+            if (Options::verbose() > 1) 
                 warm_stats.print("Warm Cloud stats(min,max,mean,sd,skew,count)");
-            image["LWIR"].ClearMasks();
+            image["LWIR"].clear_masks();
             if (((warm_stats(5)/scenesize) < 0.4) && (warm_stats(2) < 22)) {
-                if (Options::Verbose() > 2) cout << "Accepting warm clouds" << endl;
-                imgout["ambclouds"].AddMask(image["LWIR"] < th1).AddMask(image["LWIR"] > th0);
+                if (Options::verbose() > 2) cout << "Accepting warm clouds" << endl;
+                imgout["ambclouds"].add_mask(image["LWIR"] < th1).add_mask(image["LWIR"] > th0);
                 addclouds = true;
             } else {
                 // Cold clouds
-                CImg<float> cold_stats = image["LWIR"].AddMask(imgout["ambclouds"]).AddMask(image["LWIR"] < th0).Stats();
-                if (Options::Verbose() > 1) 
+                CImg<float> cold_stats = image["LWIR"].add_mask(imgout["ambclouds"]).add_mask(image["LWIR"] < th0).stats();
+                if (Options::verbose() > 1) 
                     cold_stats.print("Cold Cloud stats(min,max,mean,sd,skew,count)");
-                image["LWIR"].ClearMasks();
+                image["LWIR"].clear_masks();
                 if (((cold_stats(5)/scenesize) < 0.4) && (cold_stats(2) < 22)) {
-                    if (Options::Verbose() > 2) cout << "Accepting cold clouds" << endl;
-                    imgout["ambclouds"].AddMask(image["LWIR"] < th0);
+                    if (Options::verbose() > 2) cout << "Accepting cold clouds" << endl;
+                    imgout["ambclouds"].add_mask(image["LWIR"] < th0);
                     addclouds = true;
                 } else
-                    if (Options::Verbose() > 2) cout << "Rejecting all ambiguous clouds" << endl;
+                    if (Options::verbose() > 2) cout << "Rejecting all ambiguous clouds" << endl;
             }
-        } else image["LWIR"].ClearMasks();
+        } else image["LWIR"].clear_masks();
 
         //! Coarse shadow covering smear of image
         float xres(30.0);
@@ -175,7 +175,7 @@ namespace gip {
         int dy = cos(solarazimuth) * distance / yres;
         int padding(double(dilate)/2+std::max(abs(dx),abs(dy))+1);
         int smearlen = sqrt(dx*dx+dy*dy);
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             cerr << "distance = " << distance << endl
                  << "dx       = " << dx << endl
                  << "dy       = " << dy << endl
@@ -186,20 +186,20 @@ namespace gip {
         int signY(dy/abs(dy));
         int xstep = std::max(signX*dx/dilate/4, 1);
         int ystep = std::max(signY*dy/dilate/4, 1);
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             cerr << "dilate = " << dilate << endl
                  << "xstep  = " << signX*xstep << endl
                  << "ystep  = " << signY*ystep << endl ;
 
-        chunks.Padding(padding);
+        chunks.padding(padding);
 
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
             chunk = chunks[iChunk];
-            if (Options::Verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.Size() << endl;
-            clouds = imgout["pass1"].Read<unsigned char>(chunk);
+            if (Options::verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.size() << endl;
+            clouds = imgout["pass1"].read<unsigned char>(chunk);
             // should this be a |= ?
-            if (addclouds) clouds += imgout["ambclouds"].Read<unsigned char>(chunk);
-            clouds|=(image.SaturationMask(bands_used, chunk));
+            if (addclouds) clouds += imgout["ambclouds"].read<unsigned char>(chunk);
+            clouds|=(image.saturation_mask(bands_used, chunk));
             // Majority filter
             //clouds|=clouds.get_convolve(filter).threshold(majority));
             if (erode > 0)
@@ -212,56 +212,26 @@ namespace gip {
                 for(int xN=abs(dx),yN=abs(dy); xN>0 && yN>0; xN-=xstep,yN-=ystep)
                     clouds|=temp2.get_shift(signX*xN,signY*yN);
             }
-            imgout["cloudmask"].Write<unsigned char>(clouds,chunk);
+            imgout["cloudmask"].write<unsigned char>(clouds,chunk);
             // Inverse and multiply by nodata mask to get good data mask
-            imgout["finalmask"].Write<unsigned char>((clouds^=1).mul(image.NoDataMask(bands_used, chunk)^=1), chunk);
+            imgout["finalmask"].write<unsigned char>((clouds^=1).mul(image.nodata_mask(bands_used, chunk)^=1), chunk);
             // TODO - add in snow mask
         }
         return imgout;
     }
 
-    //! Generate byte-scaled image (grayscale or 3-band RGB if available) for easy viewing
-    std::string BrowseImage(const GeoImage& image, std::string filename, int quality) {
-        // TODO - take in output filename rather then autogenerating
-        //if (Options::Verbose() > 1) cout << "GIPPY: BrowseImage - " << image.Basename() << endl;
-
-        GeoImage img(image);
-        if (img.BandsExist({"red","green","blue"})) {
-            img.select({"red","green","blue"});
-        } else {
-            img.select({img[0].Description()});
-        }
-
-        CImg<double> stats;
-        float lo, hi;
-        for (unsigned int b=0; b<img.NumBands(); b++) {
-            stats = img[b].Stats();
-            lo = std::max(stats(2) - 3*stats(3), stats(0));
-            hi = std::min(stats(2) + 3*stats(3), stats(1));
-            if ((lo == hi) && (lo == 1)) lo = 0;
-            img[b] = ((img[b] - lo) * (255.0/(hi-lo))).max(0.0).min(255.0);
-        }
-        CImg<double> cimg(img.Read<double>());
-        // TODO - alpha channel?
-        cimg_for(cimg, ptr, double) { if (*ptr == img[0].NoData()) *ptr = 0; }
-
-        cimg.round().save_jpeg(filename.c_str(), quality);
-
-        if (Options::Verbose() > 1) cout << image.Basename() << ": BrowseImage written to " << filename << endl;
-        return filename;
-    }
 
     //! Merge images into one file and crop to vector
-    GeoImage CookieCutter(GeoImages images, GeoFeature feature, std::string filename, 
+    GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop, unsigned char interpolation, dictionary metadata) {
-        if (Options::Verbose() > 1)
-            cout << "GIPPY: CookieCutter (" << images.NumImages() << " files) - " << filename << endl;
-        Rect<double> extent = feature.Extent();
+        if (Options::verbose() > 1)
+            cout << "GIPPY: cookie_cutter (" << images.nimages() << " files) - " << filename << endl;
+        Rect<double> extent = feature.extent();
 
         if (crop) {
-            Rect<double> _extent = images.Extent(feature.SRS());
+            Rect<double> _extent = images.extent(feature.srs());
             // limit to feature extent
-            _extent.Intersect(extent);
+            _extent.intersect(extent);
             // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
             extent = Rect<double>(
                 Point<double>(extent.x0() + std::floor((_extent.x0()-extent.x0()) / xres) * xres, _extent.y0()),
@@ -273,17 +243,21 @@ namespace gip {
         // convert extent to resolution units
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
-        GeoImage imgout(filename, xsize, ysize, images.NumBands(), images.Type());
-        imgout.CopyMeta(images[0]);
-        for (unsigned int b=0;b<imgout.NumBands();b++) imgout[b].CopyMeta(images[0][b]);
+        GeoImage imgout(filename, xsize, ysize, images.nbands(), images.type());
+        imgout.set_meta(images[0].meta());
+        for (unsigned int b=0;b<imgout.nbands();b++) {
+            imgout[b].set_gain(images[0][b].gain());
+            imgout[b].set_offset(images[0][b].offset());
+            imgout[b].set_nodata(images[0][b].nodata());
+        }
 
         // add additional metadata to output
-        metadata["SourceFiles"] = to_string(images.Basenames());
+        metadata["SourceFiles"] = to_string(images.basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
-        imgout.SetMeta(metadata);
+        imgout.set_meta(metadata);
 
         // set projection and affine transformation
-        imgout.SetSRS(feature.SRS());
+        imgout.set_srs(feature.srs());
         // TODO - set affine based on extent and resolution (?)
         CImg<double> affine(6);
         affine[0] = extent.x0();
@@ -292,27 +266,27 @@ namespace gip {
         affine[3] = extent.y1();
         affine[4] = 0;
         affine[5] = -std::abs(yres);
-        imgout.SetAffine(affine);
+        imgout.set_affine(affine);
 
         // warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
         psWarpOptions->hDstDS = imgout.GetGDALDataset();
-        psWarpOptions->nBandCount = imgout.NumBands();
+        psWarpOptions->nBandCount = imgout.nbands();
         psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
         psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
         psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        for (unsigned int b=0;b<imgout.NumBands();b++) {
+        for (unsigned int b=0;b<imgout.nbands();b++) {
             psWarpOptions->panSrcBands[b] = b+1;
             psWarpOptions->panDstBands[b] = b+1;
-            psWarpOptions->padfSrcNoDataReal[b] = images[0][b].NoData();
-            psWarpOptions->padfDstNoDataReal[b] = imgout[b].NoData();
+            psWarpOptions->padfSrcNoDataReal[b] = images[0][b].nodata();
+            psWarpOptions->padfDstNoDataReal[b] = imgout[b].nodata();
             psWarpOptions->padfSrcNoDataImag[b] = 0.0;
             psWarpOptions->padfDstNoDataImag[b] = 0.0;
         }
-        psWarpOptions->dfWarpMemoryLimit = Options::ChunkSize() * 1024.0 * 1024.0;
+        psWarpOptions->dfWarpMemoryLimit = Options::chunksize() * 1024.0 * 1024.0;
         switch (interpolation) {
             case 1: psWarpOptions->eResampleAlg = GRA_Bilinear;
                 break;
@@ -320,7 +294,7 @@ namespace gip {
                 break;
             default: psWarpOptions->eResampleAlg = GRA_NearestNeighbour;
         }
-        if (Options::Verbose() > 2)
+        if (Options::verbose() > 2)
             psWarpOptions->pfnProgress = GDALTermProgress;
         else psWarpOptions->pfnProgress = GDALDummyProgress;
 
@@ -328,12 +302,12 @@ namespace gip {
         //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
         papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
-        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::NumCores()).c_str());
+        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::cores()).c_str());
         psWarpOptions->papszWarpOptions = papszOptions;
 
-        OGRGeometry* geom = feature.Geometry();
+        OGRGeometry* geom = feature.geometry();
 
-        for (unsigned int i=0; i<images.NumImages(); i++) {
+        for (unsigned int i=0; i<images.nimages(); i++) {
             WarpToImage(images[i], imgout, psWarpOptions, geom);
             psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"INIT_DEST",NULL);
         }
@@ -344,19 +318,19 @@ namespace gip {
 
 
     //! Fmask cloud mask
-    GeoImage Fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
-        if (Options::Verbose() > 1)
+    GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate, dictionary metadata) {
+        if (Options::verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
         GeoImage imgout = GeoImage::create_from(filename, image, 5, "uint8");
-        imgout.SetBandNames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
-        imgout.SetNoData(0);
-        imgout.SetMeta(metadata);
+        imgout.set_bandnames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
+        imgout.set_nodata(0);
+        imgout.set_meta(metadata);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
         GeoImage probout = GeoImage::create_from(filename + "-prob", image, 2, "float32");
-        probout.SetBandNames({"wcloud", "lcloud"});
-        probout.SetNoData(nodataval);
+        probout.set_bandnames({"wcloud", "lcloud"});
+        probout.set_nodata(nodataval);
 
         CImg<unsigned char> clouds, pcp, wmask, lmask, mask, redsatmask, greensatmask;
         CImg<float> red, nir, green, blue, swir1, swir2, BT, ndvi, ndsi, white, vprob;
@@ -367,20 +341,20 @@ namespace gip {
         //CImg<double> wstats(image.Size()), lstats(image.Size());
         //int wloc(0), lloc(0);
 
-        ChunkSet chunks(image.XSize(),image.YSize());
+        ChunkSet chunks(image.xsize(),image.ysize());
 
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            blue = image["blue"].Read<double>(chunks[iChunk]);
-            red = image["red"].Read<double>(chunks[iChunk]);
-            green = image["green"].Read<double>(chunks[iChunk]);
-            nir = image["nir"].Read<double>(chunks[iChunk]);
-            swir1 = image["swir1"].Read<double>(chunks[iChunk]);
-            swir2 = image["swir2"].Read<double>(chunks[iChunk]);
-            BT = image["lwir"].Read<double>(chunks[iChunk]);
-            mask = image.NoDataMask(chunks[iChunk])^=1;
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
+            blue = image["blue"].read<double>(chunks[iChunk]);
+            red = image["red"].read<double>(chunks[iChunk]);
+            green = image["green"].read<double>(chunks[iChunk]);
+            nir = image["nir"].read<double>(chunks[iChunk]);
+            swir1 = image["swir1"].read<double>(chunks[iChunk]);
+            swir2 = image["swir2"].read<double>(chunks[iChunk]);
+            BT = image["lwir"].read<double>(chunks[iChunk]);
+            mask = image.nodata_mask(chunks[iChunk])^=1;
             ndvi = (nir-red).div(nir+red);
             ndsi = (green-swir1).div(green+swir1);
-            white = image.Whiteness(chunks[iChunk]);
+            white = image.whiteness(chunks[iChunk]);
 
             // Potential cloud pixels
             pcp =
@@ -395,8 +369,8 @@ namespace gip {
                 & white.get_threshold(0.7,false,true)^=1
                 & nir.get_div(swir1).threshold(0.75);
 
-            redsatmask = image["red"].SaturationMask(chunks[iChunk]);
-            greensatmask = image["green"].SaturationMask(chunks[iChunk]);
+            redsatmask = image["red"].saturation_mask(chunks[iChunk]);
+            greensatmask = image["green"].saturation_mask(chunks[iChunk]);
             vprob = red;
             // Calculate "variability probability"
             cimg_forXY(vprob,x,y) {
@@ -404,37 +378,37 @@ namespace gip {
                 _ndsi = (greensatmask(x,y) && swir1(x,y) > green(x,y)) ? 0 : abs(ndsi(x,y));
                 vprob(x,y) = 1 - std::max(white(x,y), std::max(_ndsi, _ndvi));
             }
-            probout["lcloud"].Write(vprob, chunks[iChunk]);
+            probout["lcloud"].write(vprob, chunks[iChunk]);
 
             datapixels += mask.sum();
             cloudpixels += pcp.sum();
             wmask = ((ndvi.get_threshold(0.01,false,true)^=1) &= (nir.get_threshold(0.01,false,true)^=1))|=
                     ((ndvi.get_threshold(0.1,false,true)^=1) &= (nir.get_threshold(0.05,false,true)^=1));
 
-            imgout["pcp"].Write(pcp.mul(mask), chunks[iChunk]);        // Potential cloud pixels
-            imgout["water"].Write(wmask.get_mul(mask), chunks[iChunk]);   // Clear-sky water
+            imgout["pcp"].write(pcp.mul(mask), chunks[iChunk]);        // Potential cloud pixels
+            imgout["water"].write(wmask.get_mul(mask), chunks[iChunk]);   // Clear-sky water
             CImg<unsigned char> landimg((wmask^1).mul(pcp^1).mul(mask));
             landpixels += landimg.sum();
-            imgout["land"].Write(landimg, chunks[iChunk]);    // Clear-sky land
+            imgout["land"].write(landimg, chunks[iChunk]);    // Clear-sky land
         }
         // floodfill....seems bad way
         //shadowmask = nir.draw_fill(nir.width()/2,nir.height()/2,)
 
         // If not enough non-cloud pixels then return existing mask
-        if (cloudpixels >= (0.999*imgout[0].Size())) return imgout;
+        if (cloudpixels >= (0.999*imgout[0].size())) return imgout;
         // If not enough clear-sky land pixels then use all
         //GeoRaster msk;
         //if (landpixels < (0.001*imgout[0].Size())) msk = imgout[1];
 
         // Clear-sky water
-        double Twater(image["lwir"].AddMask(image["swir2"] < 0.03).AddMask(imgout["water"]).AddMask(imgout["pcp"]).Percentile(82.5));
-        image["lwir"].ClearMasks();
-        GeoRaster landBT(image["lwir"].AddMask(imgout["land"]));
-        image["lwir"].ClearMasks();
-        double Tlo(landBT.Percentile(17.5));
-        double Thi(landBT.Percentile(82.5));
+        double Twater(image["lwir"].add_mask(image["swir2"] < 0.03).add_mask(imgout["water"]).add_mask(imgout["pcp"]).percentile(82.5));
+        image["lwir"].clear_masks();
+        GeoRaster landBT(image["lwir"].add_mask(imgout["land"]));
+        image["lwir"].clear_masks();
+        double Tlo(landBT.percentile(17.5));
+        double Thi(landBT.percentile(82.5));
 
-        if (Options::Verbose() > 2) {
+        if (Options::verbose() > 2) {
             cout << "PCP = " << 100*cloudpixels/(double)datapixels << "%" << endl;
             cout << "Water (82.5%) = " << Twater << endl;
             cout << "Land (17.5%) = " << Tlo << ", (82.5%) = " << Thi << endl;
@@ -442,42 +416,42 @@ namespace gip {
 
         // Calculate cloud probabilities for over water and land
         CImg<float> wprob, lprob;
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            mask = image.NoDataMask(chunks[iChunk])^=1;
-            BT = image["lwir"].Read<double>(chunks[iChunk]);
-            swir1 = image["swir1"].Read<double>(chunks[iChunk]);
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
+            mask = image.nodata_mask(chunks[iChunk])^=1;
+            BT = image["lwir"].read<double>(chunks[iChunk]);
+            swir1 = image["swir1"].read<double>(chunks[iChunk]);
 
             // Water Clouds = temp probability x brightness probability
             wprob = ((Twater - BT)/=4.0).mul( swir1.min(0.11)/=0.11 ).mul(mask);
-            probout["wcloud"].Write(wprob, chunks[iChunk]);
+            probout["wcloud"].write(wprob, chunks[iChunk]);
 
             // Land Clouds = temp probability x variability probability
-            vprob = probout["wcloud"].Read<double>(chunks[iChunk]);
+            vprob = probout["wcloud"].read<double>(chunks[iChunk]);
             lprob = ((Thi + 4-BT)/=(Thi+4-(Tlo-4))).mul( vprob ).mul(mask);
             //1 - image.NDVI(*chunks[iChunk]).abs().max(image.NDSI(*chunks[iChunk]).abs()).max(image.Whiteness(*chunks[iChunk]).abs()) );
-            probout["lcloud"].Write( lprob, chunks[iChunk]);
+            probout["lcloud"].write( lprob, chunks[iChunk]);
         }
 
         // Thresholds
         float tol((tolerance-3)*0.1);
         float wthresh = 0.5 + tol;
-        float lthresh(probout["lcloud"].AddMask(imgout["land"]).Percentile(82.5)+0.2+tol);
-        probout["lcloud"].ClearMasks();
-        if (Options::Verbose() > 2)
+        float lthresh(probout["lcloud"].add_mask(imgout["land"]).percentile(82.5)+0.2+tol);
+        probout["lcloud"].clear_masks();
+        if (Options::verbose() > 2)
             cout << "Thresholds: water = " << wthresh << ", land = " << lthresh << endl;
 
         // 3x3 filter of 1's for majority filter
         //CImg<int> filter(3,3,1,1, 1);
         int erode = 5;
         int padding(double(std::max(dilate,erode)+1)/2);
-        chunks.Padding(padding);
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            mask = image.NoDataMask(chunks[iChunk])^=1;
-            pcp = imgout["pcp"].Read<double>(chunks[iChunk]);
-            wmask = imgout["water"].Read<double>(chunks[iChunk]);
-            BT = image["lwir"].Read<double>(chunks[iChunk]);
+        chunks.padding(padding);
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
+            mask = image.nodata_mask(chunks[iChunk])^=1;
+            pcp = imgout["pcp"].read<double>(chunks[iChunk]);
+            wmask = imgout["water"].read<double>(chunks[iChunk]);
+            BT = image["lwir"].read<double>(chunks[iChunk]);
 
-            lprob = probout["lcloud"].Read<double>(chunks[iChunk]);
+            lprob = probout["lcloud"].read<double>(chunks[iChunk]);
             
             clouds = 
                 (pcp & wmask & wprob.threshold(0.5))|=
@@ -494,17 +468,15 @@ namespace gip {
 
             //cimg_forXY(nodatamask,x,y) if (!nodatamask(x,y)) mask(x,y) = 0;
             clouds.mul(mask);
-            imgout["clouds"].Write(clouds, chunks[iChunk]);
-            imgout["final"].Write((clouds^=1).mul(mask), chunks[iChunk]);
+            imgout["clouds"].write(clouds, chunks[iChunk]);
+            imgout["final"].write((clouds^=1).mul(mask), chunks[iChunk]);
         }
 
         return imgout;
     }
 
-
-    //void Indices(const GeoImage& ImageIn, string basename, std::vector<std::string> products) {
-    GeoImage Indices(const GeoImage& image, dictionary products, dictionary metadata) {
-        if (Options::Verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
+    GeoImage indices(const GeoImage& image, dictionary products, dictionary metadata) {
+        if (Options::verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
 
@@ -514,14 +486,14 @@ namespace gip {
         string prodname;
         for (iprod=products.begin(); iprod!=products.end(); iprod++) {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
-            if (Options::Verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
+            if (Options::verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
             prodname = iprod->first;
             imagesout[prodname] = GeoImage::create_from(iprod->second, image, 1, "int16");
-            imagesout[prodname].SetNoData(nodataout);
-            imagesout[prodname].SetGain(0.0001);
-            imagesout[prodname].SetMeta(metadata);
-            imagesout[prodname].SetBandName(prodname, 1);
-            filenames.push_back(imagesout[prodname].Filename());
+            imagesout[prodname].set_nodata(nodataout);
+            imagesout[prodname].set_gain(0.0001);
+            imagesout[prodname].set_meta(metadata);
+            imagesout[prodname].set_bandname(prodname, 1);
+            filenames.push_back(imagesout[prodname].filename());
         }
         if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
 
@@ -552,7 +524,7 @@ namespace gip {
                 used_colors.insert(*ivstr);
             }
         }
-        if (Options::Verbose() > 2) {
+        if (Options::verbose() > 2) {
             cout << "Colors used: ";
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) cout << " " << *isstr;
             cout << endl;
@@ -560,18 +532,18 @@ namespace gip {
 
         CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg;
 
-        ChunkSet chunks(image.XSize(),image.YSize());
+        ChunkSet chunks(image.xsize(),image.ysize());
 
         // need to add overlap
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            if (Options::Verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].Size() << endl;
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
+            if (Options::verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
-                if (*isstr == "red") red = image["red"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "green") green = image["green"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "blue") blue = image["blue"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "nir") nir = image["nir"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "swir1") swir1 = image["swir1"].Read<float>(chunks[iChunk]);
-                else if (*isstr == "swir2") swir2 = image["swir2"].Read<float>(chunks[iChunk]);
+                if (*isstr == "red") red = image["red"].read<float>(chunks[iChunk]);
+                else if (*isstr == "green") green = image["green"].read<float>(chunks[iChunk]);
+                else if (*isstr == "blue") blue = image["blue"].read<float>(chunks[iChunk]);
+                else if (*isstr == "nir") nir = image["nir"].read<float>(chunks[iChunk]);
+                else if (*isstr == "swir1") swir1 = image["swir1"].read<float>(chunks[iChunk]);
+                else if (*isstr == "swir2") swir2 = image["swir2"].read<float>(chunks[iChunk]);
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
@@ -612,119 +584,76 @@ namespace gip {
                     cimgout = swir1.div(swir2);
                 }
                 // TODO don't read mask again...create here
-                cimgmask = image.NoDataMask(colors[prodname], chunks[iChunk]);
+                cimgmask = image.nodata_mask(colors[prodname], chunks[iChunk]);
                 cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;
-                imagesout[prodname].Write(cimgout,chunks[iChunk]);
+                imagesout[prodname].write(cimgout,chunks[iChunk]);
             }
         }
         return GeoImage(filenames);
     }
 
     //! Perform linear transform with given coefficients (e.g., PC transform)
-    GeoImage LinearTransform(const GeoImage& img, string filename, CImg<float> coef) {
+    GeoImage linear_transform(const GeoImage& img, string filename, CImg<float> coef) {
         // Verify size of array
-        unsigned int numbands = img.NumBands();
+        unsigned int numbands = img.nbands();
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))
             throw std::runtime_error("Coefficient array needs to be of size NumBands x NumBands!");
         float nodataout = -32768;
-        GeoImage imgout = GeoImage::create_from(filename, img, img.NumBands(), "float32");
-        imgout.SetNoData(nodataout);
-        //imgout.SetGain(0.0001);
-        imgout.CopyMeta(img);
+        GeoImage imgout = GeoImage::create_from(filename, img, img.nbands(), "float32");
+        imgout.set_nodata(nodataout);
+        imgout.set_meta(img.meta());
         CImg<float> cimg;
         CImg<unsigned char> mask;
 
-        ChunkSet chunks(img.XSize(),img.YSize());
+        ChunkSet chunks(img.xsize(),img.ysize());
 
         for (unsigned int bout=0; bout<numbands; bout++) {
-            //if (Options::Verbose() > 4) cout << "Band " << bout << endl;
-            for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                cimg = img[0].Read<float>(chunks[iChunk]) * coef(0, bout);;
+            //if (Options::verbose() > 4) cout << "Band " << bout << endl;
+            for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
+                cimg = img[0].read<float>(chunks[iChunk]) * coef(0, bout);;
                 for (unsigned int bin=1; bin<numbands; bin++) {
-                    cimg = cimg + (img[bin].Read<float>(chunks[iChunk]) * coef(bin, bout));
+                    cimg = cimg + (img[bin].read<float>(chunks[iChunk]) * coef(bin, bout));
                 }
-                mask = img.NoDataMask(chunks[iChunk]);
+                mask = img.nodata_mask(chunks[iChunk]);
                 cimg_forXY(cimg,x,y) if (mask(x,y)) cimg(x,y) = nodataout;
-                imgout[bout].Write(cimg, chunks[iChunk]);
+                imgout[bout].write(cimg, chunks[iChunk]);
             }
         }
         return imgout;
     }
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
-    GeoImage RXD(const GeoImage& img, string filename) {
-        if (img.NumBands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
+    GeoImage rxd(const GeoImage& img, string filename) {
+        if (img.nbands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
 
         GeoImage imgout = GeoImage::create_from(filename, img, 1, "uint8");
-        imgout.SetBandName("RXD", 1);
+        imgout.set_bandname("RXD", 1);
 
-        CImg<double> covariance = SpectralCovariance(img);
+        CImg<double> covariance = img.spectral_covariance();
         CImg<double> K = covariance.invert();
         CImg<double> chip, chipout, pixel;
 
         // Calculate band means
-        CImg<double> bandmeans(img.NumBands());
+        CImg<double> bandmeans(img.nbands());
         cimg_forX(bandmeans, x) {
-            bandmeans(x) = img[x].Stats()[2];
+            bandmeans(x) = img[x].stats()[2];
         }
 
-        ChunkSet chunks(img.XSize(),img.YSize());
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            chip = img.Read<double>(chunks[iChunk]);
+        ChunkSet chunks(img.xsize(),img.ysize());
+        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
+            chip = img.read<double>(chunks[iChunk]);
             chipout = CImg<double>(chip, "xyzc");
             cimg_forXY(chip,x,y) {
                 pixel = chip.get_crop(x,y,0,0,x,y,0,chip.spectrum()-1).unroll('x') - bandmeans;
                 chipout(x,y) = (pixel * K.get_transpose() * pixel.get_transpose())[0];
             }
-            imgout[0].Write(chipout, chunks[iChunk]);
+            imgout[0].write(chipout, chunks[iChunk]);
         }
         return imgout;
     }
 
 
-    //! Calculates spectral covariance of image
-    CImg<double> SpectralCovariance(const GeoImage& img) {
-        unsigned int NumBands(img.NumBands());
 
-        CImg<double> covariance(NumBands, NumBands, 1, 1, 0), bandchunk, matrixchunk;        
-        CImg<unsigned char> mask;
-        int validsize;
-
-        ChunkSet chunks = img.Chunks();
-        for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-            // Bands x NumPixels
-            matrixchunk = CImg<double>(NumBands, chunks[iChunk].area(),1,1,0);
-            mask = img.NoDataMask(chunks[iChunk]);
-            validsize = mask.size() - mask.sum();
-
-            int p(0);
-            for (unsigned int b=0;b<NumBands;b++) {
-                bandchunk = img[b].Read<double>(chunks[iChunk]);
-                p = 0;
-                cimg_forXY(bandchunk,x,y) {
-                    if (mask(x,y)==0) matrixchunk(b,p++) = bandchunk(x,y);
-                }
-            }
-            if (p != (int)img.Size()) matrixchunk.crop(0,0,NumBands-1,p-1);
-            covariance += (matrixchunk.get_transpose() * matrixchunk)/(validsize-1);
-        }
-        // Subtract Mean
-        CImg<double> means(NumBands);
-        for (unsigned int b=0; b<NumBands; b++) means(b) = img[b].Stats()[2]; //cout << "Mean b" << b << " = " << means(b) << endl; }
-        covariance -= (means.get_transpose() * means);
-
-        if (Options::Verbose() > 2) {
-            cout << img.Basename() << " Spectral Covariance Matrix:" << endl;
-            cimg_forY(covariance,y) {
-                cout << "\t";
-                cimg_forX(covariance,x) {
-                    cout << std::setw(18) << covariance(x,y);
-                }
-                cout << endl;
-            }
-        }
-        return covariance;
-    }
 
     }
 } // namespace gip

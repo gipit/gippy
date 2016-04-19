@@ -19,21 +19,22 @@
 #    limitations under the License.
 ##############################################################################*/
 
-#ifndef GIPCIMG_H
-#define GIPCIMG_H
+#include <gip/gip.h>
+#include <ogrsf_frmts.h>
 
-/*
-This header file 
-*/
+namespace gip {
 
-//#define cimg_debug 0
-#define cimg_verbosity 1
-#define cimg_display 0
-#define cimg_plugin "CImg_plugins.h"
+    // Global options given initial values here
+    std::string Options::_DefaultFormat("GTiff");
+    float Options::_ChunkSize(128.0);
+    int Options::_Verbose(1);
+    int Options::_Cores(2);
 
-#include <CImg.h>
+    // Register file formats with GDAL and OGR
+    void init() {
+        GDALAllRegister();
+        OGRRegisterAll();
+        CPLPushErrorHandler(CPLQuietErrorHandler);
+    }
 
-using cimg_library::CImg;
-using cimg_library::CImgList;
-
-#endif
+} // namespace gip

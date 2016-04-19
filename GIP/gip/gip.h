@@ -23,20 +23,68 @@
 #define GIP_H
 
 #include <gdal_priv.h>
-#include <ogrsf_frmts.h>
+
+
+//#define cimg_debug 0
+#define cimg_verbosity 1
+#define cimg_display 0
+#define cimg_plugin "CImg_plugins.h"
+
+#include <CImg.h>
 
 /*
     Utility functions that are called only from Python (not used internally)
 */
 
 namespace gip {
+    using cimg_library::CImg;
+    using cimg_library::CImgList;
 
-    // Register file formats with GDAL and OGR
-    void gdalinit() {
-        GDALAllRegister();
-        OGRRegisterAll();
-        CPLPushErrorHandler(CPLQuietErrorHandler);
-    }
+    void init();
+
+    class Options {
+    public:
+        // \name Global Options (static properties)
+        //! Get Config directory
+        //static std::string ConfigDir() { return _ConfigDir.string(); }
+        //! Set Config directory
+        //static void SetConfigDir(std::string dir) { _ConfigDir = dir; }
+        //! Default format when creating new files
+        static std::string defaultformat() { return _DefaultFormat; }
+        //! Set default format when creating new files
+        static void set_defaultformat(std::string str) { _DefaultFormat = str; }
+        //! Default chunk size when chunking an image
+        static float chunksize() { return _ChunkSize; }
+        //! Set chunk size, used when chunking an image
+        static void set_chunksize(float sz) { _ChunkSize = sz; }
+        //! Get verbose level
+        static int verbose() { return _Verbose; }
+        //! Set verbose level
+        static void set_verbose(int v) { 
+            _Verbose = v;
+            if (v > 4) {
+                // turn on GDAL output
+                CPLPushErrorHandler(CPLDefaultErrorHandler);
+            } else {
+                CPLPushErrorHandler(CPLQuietErrorHandler);
+            }
+        }
+        //! Get desired number of cores
+        static int cores() { return _Cores; }
+        //! Set desired number of cores
+        static void set_cores(int n) { _Cores = n; }
+
+    private:
+        // global options
+        //! Default format
+        static std::string _DefaultFormat;
+        //! Chunk size used when chunking up an image
+        static float _ChunkSize;
+        //! Verbosity level
+        static int _Verbose;
+        //! Number of cores to use when multi threading
+        static int _Cores;
+    };
 
 }
 

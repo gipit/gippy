@@ -105,7 +105,7 @@ template<class T, class t> CImg<T> TimeSeries(CImg<t> times, iRect chunk=iRect()
 //! Extract spectra from select pixels (where mask > 0)
 // TODO - review this function to be more general, combined with TimeSeries
 template<class T> CImg<T> Extract(const GeoRaster& mask) {
-    if (Options::Verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
+    if (Options::verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
     CImg<unsigned char> cmask;
     CImg<T> cimg;
     long count = 0;
@@ -118,7 +118,7 @@ template<class T> CImg<T> Extract(const GeoRaster& mask) {
     count = 0;
     unsigned int c;
     for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-        if (Options::Verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
+        if (Options::verbose() > 3) std::cout << "Extracting from chunk " << iChunk << std::endl;
         cimg = Read<T>(chunks[iChunk]);
         cmask = mask.Read<unsigned char>(chunks[iChunk]);
         cimg_forXY(cimg,x,y) {

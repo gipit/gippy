@@ -22,21 +22,14 @@
 #include <gip/gip_gdal.h>
 
 namespace gip {
-	using std::cout;
-
-    std::string FileExtension() {
-        std::string format = Options::DefaultFormat();
-        GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
-        return driver->GetMetadataItem(GDAL_DMD_EXTENSION);
-    }
 
     //! Warp a single image into output image with cutline
     GeoImage& WarpToImage(const GeoImage& imgin, GeoImage& imgout, GDALWarpOptions *psWarpOptions, OGRGeometry* site) {
-        if (Options::Verbose() > 2) cout << imgin.Basename() << " warping into " << imgout.Basename() << " " << std::flush;
+        if (Options::verbose() > 2) std::cout << imgin.basename() << " warping into " << imgout.basename() << " " << std::flush;
 
         // Create cutline transform to pixel coordinates
         char **papszOptionsCutline = NULL;
-        papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.SRS().c_str() );
+        papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.srs().c_str() );
         papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
         CutlineTransformer oTransformer;
 
@@ -60,8 +53,8 @@ namespace gip {
         // Perform transformation
         GDALWarpOperation oOperation;
         oOperation.Initialize( psWarpOptions );
-        //if (Options::Verbose() > 3) cout << "Error: " << CPLGetLastErrorMsg() << endl;
-        oOperation.ChunkAndWarpMulti( 0, 0, imgout.XSize(), imgout.YSize() );
+        //if (Options::verbose() > 3) std::cout << "Error: " << CPLGetLastErrorMsg() << endl;
+        oOperation.ChunkAndWarpMulti( 0, 0, imgout.xsize(), imgout.ysize() );
 
         // destroy things
         GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );
