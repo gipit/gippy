@@ -224,6 +224,7 @@ if sys.platform == 'darwin':
     extra_compile_args.append('-Wno-absolute-value')
     extra_compile_args.append('-Wno-shift-negative-value')
     extra_compile_args.append('-Wno-parentheses-equality')
+    extra_compile_args.append('-Wno-deprecated-declarations')
 else:
     # Remove the "-Wstrict-prototypes" compiler option that swig adds, which isn't valid for C++.
     cfg_vars = sysconfig.get_config_vars()
