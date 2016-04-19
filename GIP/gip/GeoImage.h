@@ -73,7 +73,7 @@ namespace gip {
                 temp = true;
             }
             GeoImage geoimg(filename, xsize, ysize, bsize, DataType(dtype), temp);
-            geoimg.setsrs(srs);
+            geoimg.set_srs(srs);
             // TODO: what about setting GeoTransorm
             return geoimg;
         }

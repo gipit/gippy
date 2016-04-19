@@ -174,8 +174,8 @@ namespace gip {
     }
 
     GeoResource& GeoResource::SetCoordinateSystem(const GeoResource& res) {
-        setsrs(res.srs());
-        setaffine(res.affine());
+        set_srs(res.srs());
+        set_affine(res.affine());
         return *this;
     }
 

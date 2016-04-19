@@ -287,7 +287,7 @@ namespace gip {
         imgout.set_meta(metadata);
 
         // set projection and affine transformation
-        imgout.setsrs(feature.srs());
+        imgout.set_srs(feature.srs());
         // TODO - set affine based on extent and resolution (?)
         CImg<double> affine(6);
         affine[0] = extent.x0();
@@ -296,7 +296,7 @@ namespace gip {
         affine[3] = extent.y1();
         affine[4] = 0;
         affine[5] = -std::abs(yres);
-        imgout.setaffine(affine);
+        imgout.set_affine(affine);
 
         // warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();

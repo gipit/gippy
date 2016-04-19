@@ -91,7 +91,7 @@ namespace gip {
             return _GDALDataset->GetProjectionRef();
         }
         //! Set projection definition in Well Known Text format
-        GeoResource& setsrs(std::string proj) {
+        GeoResource& set_srs(std::string proj) {
             _GDALDataset->SetProjection(proj.c_str());
             return *this;
         }
@@ -104,7 +104,7 @@ namespace gip {
             return CImg<double>(&affine[0], 6);
         }
         //! Set Affine transformation
-        GeoResource& setaffine(CImg<double> affine) {
+        GeoResource& set_affine(CImg<double> affine) {
             _GDALDataset->SetGeoTransform(affine.data());
             return *this;
         }
