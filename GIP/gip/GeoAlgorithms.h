@@ -23,7 +23,6 @@
 #define GIP_GEOALGORITHMS_H
 
 #include <gip/GeoImage.h>
-#include <gip/GeoImages.h>
 #include <gip/GeoRaster.h>
 #include <gip/GeoVector.h>
 #include <initializer_list>
@@ -56,8 +55,8 @@ namespace gip {
     GeoImage fmask(const GeoImage&, std::string, int=3, int=5);
 
     //! Create single image from multiple input images using vector file footprint
-    GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
-        float xres, float yres, bool crop=false, unsigned char interpolation=0);
+    //GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
+    //    float xres, float yres, bool crop=false, unsigned char interpolation=0);
 
     //! Kmeans
     //GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);

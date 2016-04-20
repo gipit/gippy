@@ -64,10 +64,9 @@ namespace std {
 %{
     #include <python2.7/Python.h>
     #include <gip/gip.h>
-    #include <gip/Utils.h>
+    #include <gip/utils.h>
     #include <gip/geometry.h>
     #include <gip/GeoImage.h>
-    #include <gip/GeoImages.h>
     #include <gip/GeoVector.h>
     using namespace gip;
 
@@ -255,22 +254,6 @@ namespace gip {
                     throw(std::exception());
             }
             return *self;
-        }
-    }
-}
-
-
-// GeoImages
-%ignore gip::GeoImages::operator=;
-%ignore gip::GeoImages::operator[];
-%include "gip/GeoImages.h"
-namespace gip {
-    %extend GeoImages {
-        GeoImage __getitem__(int index) {
-            return self->GeoImages::operator[](index);
-        }
-        unsigned long int __len__() {
-            return self->GeoImages::nimages();
         }
     }
 }
