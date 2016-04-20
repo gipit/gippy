@@ -44,7 +44,7 @@ namespace gip {
         //! Open existing file constructor
         GeoResource(std::string filename, bool update=false, bool temp=false);
         //! Create new file - TODO how specify OGRLayer
-        GeoResource(int, int, int, DataType, std::string, bool=false); //, dictionary = dictionary());
+        GeoResource(std::string, int, int, int, std::string, Rect<double>, DataType, std::string, bool);
 
         //! Copy constructor
         GeoResource(const GeoResource& resource);

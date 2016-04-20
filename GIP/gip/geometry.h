@@ -197,7 +197,7 @@ namespace gip {
         }
 
         // Calculates union (outer bounding box) of Rect with argument Rect
-        Rect& union_with(const Rect& rect) {
+        Rect union_with(const Rect& rect) {
             return Rect<T>(
                 Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) ),
                 Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) )

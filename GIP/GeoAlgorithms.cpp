@@ -219,6 +219,7 @@ namespace gip {
 
 
     //! Merge images into one file and crop to vector
+    /*
     GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
         float xres, float yres, bool crop, unsigned char interpolation) {
         if (Options::verbose() > 1)
@@ -240,7 +241,8 @@ namespace gip {
         // convert extent to resolution units
         int xsize = std::ceil(extent.width() / xres);
         int ysize = std::ceil(extent.height() / yres);
-        GeoImage imgout(filename, xsize, ysize, images.nbands(), images.type());
+        std::string srs;
+        GeoImage imgout(filename, extent, srs, xsize, ysize, images.nbands(), images.type());
         imgout.set_meta(images[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {
             imgout[b].set_gain(images[0][b].gain());
@@ -276,7 +278,7 @@ namespace gip {
     
         return imgout;
     }
-
+    */
 
     //! Fmask cloud mask
     GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate) {

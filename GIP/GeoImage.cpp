@@ -225,45 +225,33 @@ namespace gip {
     }
 
     GeoImage GeoImage::warp(std::string filename, GeoFeature feature,
-                bool crop, std::string srs,
+                bool crop, std::string proj,
                 float xres, float yres, int interpolation) {
 
         // get the desired Spatial Reference System from feature or override with srs argument
         // TODO - check for valid srs
-        srs = feature.valid() ? feature.srs() : srs;
+        proj = feature.valid() ? feature.srs() : proj;
 
         // Calculate extent of final output
         Rect<double> ext = extent();
-        // warp to desired SRS
-        if (srs != srs()) {
-            ext = ext.transform(srs(), srs);
+        // warp extent to desired SRS
+        if (proj != srs()) {
+            ext = ext.transform(srs(), proj);
         }
-        // if desired, and feature is provided, then get intersection
+        // if cropping, and feature is provided, then get intersection
         if (crop && feature.valid()) {
-            Rect<double> _ext = feature.extent();
-            std::string fsrs = feature.srs();
-            if (feature.srs != srs)
-                _ext = _ext.transform(feature.srs(), srs);
-            // limit to feature extent
-            _ext.intersect(ext);
+            Rect<double> fext = feature.extent();
+            ext = ext.intersect(fext);
             // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
             ext = Rect<double>(
-                Point<double>(ext.x0() + std::floor((_ext.x0()-ext.x0()) / xres) * xres, _ext.y0()),
-                Point<double>(_ext.x1(), ext.y1() - std::floor((ext.y1()-_ext.y1()) / yres) * yres)
+                Point<double>(fext.x0() + std::floor((ext.x0()-fext.x0()) / xres) * xres, ext.y0()),
+                Point<double>(ext.x1(), fext.y1() - std::floor((fext.y1()-ext.y1()) / yres) * yres)
             );
         }
 
-        // create output file
-        // convert extent to resolution units
-        // create an image here
-        GeoImage imgout(filename, xsize, ysize, nbands(), type());
-        imgout.set_meta(meta());
-        for (unsigned int b=0;b<imgout.nbands();b++) {
-            imgout[b].set_gain((*this)[b].gain());
-            imgout[b].set_offset((*this)[b].offset());
-            imgout[b].set_nodata((*this)[b].nodata());
-        }
-        // set SRS
+        int xsz = std::ceil(ext.width() / xres);
+        int ysz = std::ceil(ext.height() / yres);
+        GeoImage imgout(filename, xsz, ysz, nbands(), proj, ext, type());
 
         // warp into this output image
         return warp_into(imgout, feature, interpolation);
@@ -352,11 +340,9 @@ namespace gip {
 
         // destroy things
         GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );
-        //if (feature.valid())
         GDALDestroyGenImgProjTransformer( oTransformer.hSrcImageTransformer );
         CSLDestroy( papszOptionsCutline );
         OGRGeometryFactory::destroyGeometry(site_t);
-
         GDALDestroyWarpOptions( psWarpOptions );
         return imgout;        
     }

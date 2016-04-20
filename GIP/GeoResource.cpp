@@ -53,11 +53,14 @@ namespace gip {
     }
 
     //! Create new file
-    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, bool temp)
+    GeoResource::GeoResource(string filename, int xsz, int ysz, int bsz, 
+                             string proj, Rect<double> bbox, 
+                             DataType dt, std::string format, bool temp)
         : _Filename(filename), _temp(temp) {
 
         // format, driver, and file extension
-        string format = Options::defaultformat();
+        if (format == "")
+            format = Options::defaultformat();
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
@@ -83,6 +86,14 @@ namespace gip {
         if (_GDALDataset.get() == NULL) {
             std::cout << "Error creating " << _Filename << CPLGetLastErrorMsg() << std::endl;
         }
+        set_srs(proj);
+        CImg<double> affine(6, 1, 1, 1,
+            // xmin, xres, xshear
+            bbox.x0(), bbox.width() / (float)xsz, 0.0,
+            // ymin, yshear, yres
+            bbox.y1(), 0.0, -std::abs(bbox.height() / (float)ysz)  
+        );
+        set_affine(affine);
     }
 
     GeoResource::GeoResource(const GeoResource& resource)

@@ -53,8 +53,11 @@ namespace gip {
         //! Open file from vector of individual files
         explicit GeoImage(std::vector<std::string> filenames);
         //! Constructor for creating new file
-        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, DataType dt=DataType("uint8"), bool temp=false) :
-            GeoResource(xsz, ysz, bsz, dt, filename, temp) {
+        explicit GeoImage(std::string filename, 
+                          int xsz, int ysz, int nb, 
+                          std::string proj, Rect<double> bbox, 
+                          DataType dt, std::string format="", bool temp=false) :
+                GeoResource(filename, xsz, ysz, nb, proj, bbox, dt, format, temp) {
             load_bands();
         }
         //! Copy constructor - copies GeoResource and all bands
@@ -67,31 +70,43 @@ namespace gip {
         //! \name Factory Functions
         //! Create new image
         static GeoImage create(std::string filename, 
-                unsigned int xsize=0, unsigned int ysize=0, unsigned int bsize=0, 
-                std::string dtype="unknown", std::string srs="", bool temp=false) {
+                unsigned int xsz=1, unsigned int ysz=1, unsigned int nb=1, 
+                std::string proj="EPSG:4326",
+                CImg<double> bbox=CImg<double>(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0),
+                std::string dtype="uint8", std::string format="", bool temp=false) {
             if (filename == "") {
                 filename = std::tmpnam(nullptr);
                 temp = true;
             }
-            GeoImage geoimg(filename, xsize, ysize, bsize, DataType(dtype), temp);
-            geoimg.set_srs(srs);
-            // TODO: what about setting GeoTransorm
-            return geoimg;
+            Rect<double> ext(bbox[0], bbox[1], bbox[2], bbox[3]);
+            return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp);
         }
 
         //! Create new image using foorprint of another
-        static GeoImage create_from(std::string filename, GeoImage geoimg, 
-                                    unsigned int bsize=0, std::string dtype="unknown", bool temp=false) {
+        static GeoImage create_from(std::string filename, GeoImage geoimg, unsigned int nb=0, 
+                std::string dtype="unknown", std::string format="", bool temp=false) {
             unsigned int _xs(geoimg.xsize());
             unsigned int _ys(geoimg.ysize());
             unsigned int _bs(geoimg.nbands());
             std::string _srs(geoimg.srs());
             std::string _dtype(geoimg.type().string());
-            _bs = bsize > 0 ? bsize : _bs;
+            _bs = nb > 0 ? nb : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
-            GeoImage img = create(filename, _xs, _ys, _bs, _dtype, _srs, temp);
+            if (filename == "") {
+                filename = std::tmpnam(nullptr);
+                temp = true;
+            }
+            GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp);
+            // copy metadata
             img.set_meta(geoimg.meta());
-            // TODO - set per band meta, or nodata, gain, offset by band?
+            // if same number of bands, set band metadata
+            if (geoimg.nbands() == _bs) {
+                for (unsigned int b=0;b<_bs;b++) {
+                    img[b].set_gain(geoimg[b].gain());
+                    img[b].set_offset(geoimg[b].offset());
+                    img[b].set_nodata(geoimg[b].nodata());
+                }
+            }
             return img;
         }
 
@@ -347,6 +362,10 @@ namespace gip {
             // Saturation?  If pixel saturated make Whiteness 0 ?
             return white;
         }
+
+        GeoImage warp(std::string, GeoFeature=GeoFeature(), 
+            bool=false, std::string="EPSG:4326",
+            float=1.0, float=1.0, int=0);
 
         GeoImage& warp_into(GeoImage&, GeoFeature=GeoFeature(), int=0, bool=false);
 
