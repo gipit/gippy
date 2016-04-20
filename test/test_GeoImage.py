@@ -20,7 +20,9 @@ class GeoImageTests(unittest.TestCase):
         gp.Options.set_chunksize(4.0)
 
     def create_image(self, filename='', size=(1, 1000, 1000), dtype='uint8', temp=False):
-        return gp.GeoImage.create(filename, xsize=size[1], ysize=size[2], bsize=size[0],
+        return gp.GeoImage.create(filename,
+                                  xsz=size[1], ysz=size[2], nb=size[0],
+                                  bbox=np.array([0.0, 0.0, 1.0, 1.0]),
                                   dtype=dtype, temp=temp)
 
     def test_open(self):
@@ -36,6 +38,10 @@ class GeoImageTests(unittest.TestCase):
         self.assertTrue(geoimg.xsize() == 1000)
         self.assertTrue(geoimg.ysize() == 1000)
         self.assertTrue(os.path.exists(fout))
+        # test resolution
+        res = geoimg.resolution()
+        self.assertEqual(res.x(), 1.0/geoimg.xsize())
+        self.assertEqual(res.y(), -1.0/geoimg.ysize())
         os.remove(fout)
 
     def test_create_multiband(self):
