@@ -21,7 +21,7 @@
 
 #include <cstdio>
 #include <gip/GeoResource.h>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 
 
 namespace gip {
@@ -53,11 +53,14 @@ namespace gip {
     }
 
     //! Create new file
-    GeoResource::GeoResource(int xsz, int ysz, int bsz, DataType dt, string filename, bool temp)
+    GeoResource::GeoResource(string filename, int xsz, int ysz, int bsz, 
+                             string proj, BoundingBox bbox, 
+                             DataType dt, std::string format, bool temp)
         : _Filename(filename), _temp(temp) {
 
         // format, driver, and file extension
-        string format = Options::defaultformat();
+        if (format == "")
+            format = Options::defaultformat();
         //if (format == "GTiff") options["COMPRESS"] = "LZW";
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
@@ -83,6 +86,14 @@ namespace gip {
         if (_GDALDataset.get() == NULL) {
             std::cout << "Error creating " << _Filename << CPLGetLastErrorMsg() << std::endl;
         }
+        set_srs(proj);
+        CImg<double> affine(6, 1, 1, 1,
+            // xmin, xres, xshear
+            bbox.x0(), bbox.width() / (float)xsz, 0.0,
+            // ymin, yshear, yres
+            bbox.y1(), 0.0, -std::abs(bbox.height() / (float)ysz)  
+        );
+        set_affine(affine);
     }
 
     GeoResource::GeoResource(const GeoResource& resource)
@@ -166,8 +177,28 @@ namespace gip {
         return Point<double>(aff[1], aff[5]);
     }
 
-    ChunkSet GeoResource::chunks(unsigned int padding, unsigned int numchunks) const {
-        return ChunkSet(xsize(), ysize(), padding, numchunks);
+    std::vector< Chunk > GeoResource::chunks(unsigned int padding, unsigned int numchunks) const {
+        std::vector< Chunk > _Chunks;
+        unsigned int rows;
+
+        if (numchunks == 0) {
+            // calculate based on global variable chunksize
+            rows = floor( ( Options::chunksize() *1024*1024) / sizeof(double) / xsize() );
+            rows = rows > ysize() ? ysize() : rows;
+            numchunks = ceil( ysize()/(float)rows );
+        } else {
+            rows = int(ysize() / numchunks);
+        }
+
+        _Chunks.clear();
+        Chunk chunk;
+        for (unsigned int i=0; i<numchunks; i++) {
+            chunk = Chunk(0, rows*i, xsize(), std::min(rows*(i+1),ysize())-(rows*i) );
+            chunk.padding(padding);
+            _Chunks.push_back(chunk);
+            //if (Options::verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
+        }
+        return _Chunks;        
     }
 
     // Metadata

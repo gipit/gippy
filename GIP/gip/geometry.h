@@ -28,7 +28,7 @@
 //#include <ogr_srs_api.h>
 #include <ogr_spatialref.h>
 #include <gip/gip.h>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 
 namespace gip {
 
@@ -69,13 +69,13 @@ namespace gip {
     };
 
     //! (2D) Rect class
-    template<typename T=int> class Rect {
+    template<typename T> class Rect {
     public:
         //! Default Constructor
-        Rect() : _p0(0,0), _p1(-1,-1), _padding(0) {}
+        Rect() : _p0(0,0), _p1(0,0) {}
         //! Constructor takes in top left coordinate and width/height
         Rect(T x, T y, T width, T height) 
-            : _p0(x,y), _p1(x+width-1,y+height-1), _padding(0) {
+            : _p0(x,y), _p1(x+width,y+height) {
             // Validate, x0 and y0 should always be the  min values
             /*if (_width < 0) {
                 _width = abs(m_width);
@@ -87,17 +87,16 @@ namespace gip {
             }*/
         }
         Rect(Point<T> p0, Point<T> p1)
-            : _p0(p0), _p1(p1), _padding(0) {
+            : _p0(p0), _p1(p1) {
         }
         //! Copy constructor
         Rect(const Rect<T>& rect)
-            : _p0(rect._p0), _p1(rect._p1), _padding(rect._padding) {}
+            : _p0(rect._p0), _p1(rect._p1) {}
         //! Assignment operator
         Rect& operator=(const Rect& rect) {
             if (this == &rect) return *this;
             _p0 = rect._p0;
             _p1 = rect._p1;
-            _padding = rect._padding;
             return *this;
         }
 
@@ -115,9 +114,9 @@ namespace gip {
         //! Area of the Rect
         T area() const { return abs(width()*height()); }
         //! Width of Rect
-        T width() const { return _p1.x()-_p0.x()+1; }
+        T width() const { return _p1.x()-_p0.x(); }
         //! Height of Rect
-        T height() const { return _p1.y()-_p0.y()+1; }
+        T height() const { return _p1.y()-_p0.y(); }
         //! Left x coordinate
         T x0() const { return _p0.x(); }
         //! Top y coordinate
@@ -136,10 +135,101 @@ namespace gip {
             return !operator==(rect);
         }
 
+        //! Transform between coordinate systems
+        Rect transform(std::string src, std::string dst) {
+            if (src == dst) return *this;
+            OGRSpatialReference _src;
+            _src.SetFromUserInput(src.c_str());
+            OGRSpatialReference _dst;
+            _dst.SetFromUserInput(dst.c_str());
+            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
+            double x, y;
+            x = _p0.x();
+            y = _p0.y();
+            trans->Transform(1, &x, &y);
+            Point<T> pt0 (x, y);
+            x = _p1.x();
+            y = _p1.y();
+            trans->Transform(1, &x, &y);
+            Point<T> pt1(x, y);
+            delete trans;
+            return Rect<T>(pt0, pt1);
+        }
+
+        //! Intersects Rect with argument Rect
+        Rect intersect(const Rect& rect) {
+            // transform rect
+            return Rect<T>(
+                Point<T>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) ),
+                Point<T>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) )
+            );
+        }
+
+        // Calculates union (outer bounding box) of Rect with argument Rect
+        Rect union_with(const Rect& rect) {
+            return Rect<T>(
+                Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) ),
+                Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) )
+            );
+        }
+
+        friend std::ostream& operator<<(std::ostream& stream,const Rect& r) {
+            return stream << r._p0 << "-" << r._p1;
+        }
+
+    protected:
+        // top-left
+        Point<T> _p0;
+        // bottom-right
+        Point<T> _p1;
+    };
+
+    //! calculate union of all rects 
+    template<typename T> Rect<T> union_all(std::vector< Rect<T> > rects) {
+        Rect<T> unioned(rects[0]);
+        for (unsigned int i=1; i<rects.size(); i++) {
+            unioned.union_with(rects[i]);
+        }
+        return unioned;
+    }
+
+    //! Rect representing region of interest on a raster (ie pixel coordinates)
+    class Chunk : public Rect<int> {
+    public:
+        //! Default Constructor
+        Chunk() : Rect<int>(), _padding(0) {}
+        //! Constructor takes in top left coordinate and width/height
+        Chunk(int x, int y, int width, int height) 
+            : Rect<int>(x, y, width, height), _padding(0) {}
+        Chunk(Point<int> p0, Point<int> p1)
+            : Rect<int>(p0, p1), _padding(0) {
+        }
+        //! Copy constructor
+        Chunk(const Chunk& ch)
+            : Rect<int>(ch), _padding(ch._padding) {}
+        //! Assignment operator
+        Chunk& operator=(const Chunk& ch) {
+            if (this == &ch) return *this;
+            Rect<int>::operator=(ch);
+            _padding = ch._padding;
+            return *this;
+        }
+
+        //! Intersects Rect with argument Rect
+        Chunk intersect(const Chunk& rect) {
+            // transform rect
+            Chunk ch = Chunk(
+                Point<int>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) ),
+                Point<int>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) )
+            );
+            ch.padding(_padding);
+            return ch;
+        }
+
         //! Get padding
         unsigned int padding() const { return _padding; }
         //! Set padding
-        Rect& padding(unsigned int padding) {
+        Chunk& padding(unsigned int padding) {
             _padding = padding;
             return *this;
         }
@@ -158,190 +248,26 @@ namespace gip {
             return Rect(*this).Shift(x,y);
         }*/
 
-        //! Transform between coordinate systems
-        Rect& transform(std::string src, std::string dst) {
-            if (src == dst) return *this;
-            OGRSpatialReference _src = OGRSpatialReference(src.c_str());
-            OGRSpatialReference _dst = OGRSpatialReference(src.c_str());
-            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
-            double x, y;
-            x = _p0.x();
-            y = _p0.y();
-            trans->Transform(1, &x, &y);
-            _p0 = Point<T>(x, y);
-            x = _p1.x();
-            y = _p1.y();
-            trans->Transform(1, &x, &y);
-            _p1 = Point<T>(x, y);
-            delete trans;
-            return *this;
-        }
-
-        Rect& pad() {
+        Chunk& pad() {
             return pad(_padding);
         }
 
-        Rect& pad(int pad) {
-            _p0 = _p0 - Point<T>(pad,pad);
-            _p1 = _p1 + Point<T>(pad,pad);
+        Chunk& pad(int pad) {
+            _p0 = _p0 - Point<int>(pad,pad);
+            _p1 = _p1 + Point<int>(pad,pad);
             return *this;
         }
 
-        Rect get_pad() const {
-            return get_pad(_padding);
-        }
-
-        Rect get_pad(int pad) const {
-            return Rect<T>(*this).pad(pad);
-        }
-
-        //! Intersects Rect with argument Rect
-        Rect& intersect(const Rect& rect) {
-            _p0 = Point<T>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) );
-            _p1 = Point<T>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) );
-            return *this;
-        }
-        //! Returns intersection of two Rects
-        Rect get_intersect(const Rect& rect) const {
-            return Rect<T>(*this).intersect(rect);
-        }
-
-        // Calculates union of Rect with argument Rect
-        Rect& union_with(const Rect& rect) {
-            _p0 = Point<T>( std::min(_p0.x(), rect.x0()), std::min(_p0.y(), rect.y0()) );
-            _p1 = Point<T>( std::max(_p1.x(), rect.x1()), std::max(_p1.y(), rect.y1()) );
-            return *this;            
-        }
-        //! Returns outer bounding box of two rects
-        /*Rect get_union(const Rect& rect) const {
-            return Rect<T>(*this).union(rect);
-        }*/
-        friend std::ostream& operator<<(std::ostream& stream,const Rect& r) {
-            return stream << r._p0 << "-" << r._p1;
-        }
     private:
-        // top-left
-        Point<T> _p0;
-        // bottom-right
-        Point<T> _p1;
         // Amount of padding around the rect (Rect is always stored WITHOUT padding)
         unsigned int _padding;
     };
 
-    //! calculate union of all rects 
-    template<typename T> Rect<T> union_all(std::vector< Rect<T> > rects) {
-        Rect<T> unioned(rects[0]);
-        for (unsigned int i=1; i<rects.size(); i++) {
-            unioned.union_with(rects[i]);
-        }
-        return unioned;
-    }
 
+    //! Rect representing bounding box in some coordinates
+    typedef Rect<double> BoundingBox;
+    //class BoundingBox : public Rect<double> {};
 
-    //! Collection of Rects representing a chunked up region (i.e. image)
-    class ChunkSet {
-    public:
-        //! Default constructor
-        ChunkSet()
-            : _xsize(0), _ysize(0), _padding(0) {}
-
-        //! Constructor taking in image size
-        ChunkSet(unsigned int xsize, unsigned int ysize, unsigned int padding=0, unsigned int numchunks=0)
-            : _xsize(xsize), _ysize(ysize), _padding(padding) {
-            create_chunks(numchunks);
-        }
-
-        //! Copy constructor
-        ChunkSet(const ChunkSet& chunks)
-            : _xsize(chunks._xsize), _ysize(chunks._ysize), _padding(chunks._padding) {
-            create_chunks(chunks.size());
-        }
-
-        //! Assignment copy
-        ChunkSet& operator=(const ChunkSet& chunks) {
-            if (this == & chunks) return *this;
-            _xsize = chunks._xsize;
-            _ysize = chunks._ysize;
-            _padding = chunks._padding;
-            create_chunks(chunks.size());
-            return *this;
-        }
-        ~ChunkSet() {}
-
-        //! Get width of region
-        unsigned int xsize() const { return _xsize; }
-
-        //! Get height of region
-        unsigned int ysize() const { return _ysize; }
-
-        //! Determine if region is valid
-        bool valid() const {
-            return (((_xsize * _ysize) == 0) || (size() == 0)) ? false : true;
-        }
-
-        //! Get number of chunks
-        unsigned int size() const { return _Chunks.size(); }
-
-        //! Get amount of padding in pixels
-        unsigned int padding() const { return _padding; }
-
-        //! Set padding
-        ChunkSet& padding(unsigned int _pad) {
-            _padding = _pad;
-            create_chunks(_Chunks.size());
-            return *this;
-        }
-
-        //! Get a chunk
-        Rect<int>& operator[](unsigned int index) { 
-            // Call const version
-            return const_cast< Rect<int>& >(static_cast<const ChunkSet&>(*this)[index]);
-        }
-        //! Get a chunk, const version
-        const Rect<int>& operator[](unsigned int index) const { 
-            if (index < _Chunks.size())
-                return _Chunks[index];
-            throw std::out_of_range("No chunk " + to_string(index));
-        }
-
-    private:
-        //! Function to chunk up region
-        std::vector< Rect<int> > create_chunks(unsigned int numchunks=0) {
-            unsigned int rows;
-
-            if (numchunks == 0) {
-                rows = floor( ( Options::chunksize() *1024*1024) / sizeof(double) / xsize() );
-                rows = rows > ysize() ? ysize() : rows;
-                numchunks = ceil( ysize()/(float)rows );
-            } else {
-                rows = int(ysize() / numchunks);
-            }
-
-            _Chunks.clear();
-            Rect<int> chunk;
-            /*if (Options::verbose() > 3) {
-                std::cout << Basename() << ": chunking into " << numchunks << " chunks (" 
-                    << Options::chunksize() << " MB max each)" << std::endl;
-            }*/
-            for (unsigned int i=0; i<numchunks; i++) {
-                chunk = Rect<int>(0, rows*i, xsize(), std::min(rows*(i+1),ysize())-(rows*i) );
-                chunk.padding(_padding);
-                _Chunks.push_back(chunk);
-                //if (Options::verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
-            }
-            return _Chunks;            
-        }
-
-        //! Width (columns) of region
-        unsigned int _xsize;
-        //! Height (rows) of region
-        unsigned int _ysize;
-        //! Padding to apply to rects (dimensions are always the rect without padding)
-        unsigned int _padding;
-
-        //! Coordinates of the chunks
-        std::vector< Rect<int> > _Chunks;
-    };
 
 } // namespace GIP
 

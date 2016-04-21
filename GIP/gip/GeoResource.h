@@ -29,8 +29,10 @@
 
 #include <gip/gip.h>
 #include <gip/DataType.h>
-#include <gdal_priv.h>
+//#include <gdal_priv.h>
+#include <ogr_spatialref.h>
 #include <gip/geometry.h>
+
 
 namespace gip {
     typedef std::map<std::string,std::string> dictionary;
@@ -44,7 +46,7 @@ namespace gip {
         //! Open existing file constructor
         GeoResource(std::string filename, bool update=false, bool temp=false);
         //! Create new file - TODO how specify OGRLayer
-        GeoResource(int, int, int, DataType, std::string, bool=false); //, dictionary = dictionary());
+        GeoResource(std::string, int, int, int, std::string, BoundingBox, DataType, std::string, bool);
 
         //! Copy constructor
         GeoResource(const GeoResource& resource);
@@ -85,18 +87,23 @@ namespace gip {
         //! Maximum Coordinates of X and Y
         Point<double> maxxy() const;
         //! Extent
-        Rect<double> extent() const { return Rect<double>(geoloc(0, ysize()-1), geoloc(xsize()-1, 0)); }
+        BoundingBox extent() const { return BoundingBox(geoloc(0, ysize()), geoloc(xsize(), 0)); }
         //! Return Spatial Reference system  in Well Known Text format
         std::string srs() const {
             return _GDALDataset->GetProjectionRef();
         }
         //! Set projection definition in Well Known Text format
         GeoResource& set_srs(std::string proj) {
-            _GDALDataset->SetProjection(proj.c_str());
+            // convert to proj4
+            OGRSpatialReference oSRS;
+            oSRS.SetFromUserInput(proj.c_str());
+            char* prj;
+            oSRS.exportToWkt(&prj);
+            _GDALDataset->SetProjection(prj);
+            //OGRSpatialReference::DestroySpatialReference(oSRS);
             return *this;
         }
-        //! Return projection as OGRSpatialReference
-        //OGRSpatialReference ogr_srs() const;
+
         //! Get Affine transformation
         CImg<double> affine() const {
             double affine[6];
@@ -128,7 +135,7 @@ namespace gip {
         Point<double> resolution() const;
 
         //! Get chunkset chunking up image
-        ChunkSet chunks(unsigned int padding=0, unsigned int numchunks=0) const;
+        std::vector<Chunk> chunks(unsigned int padding=0, unsigned int numchunks=0) const;
 
         //! \name Metadata functions
         //! Get metadata item

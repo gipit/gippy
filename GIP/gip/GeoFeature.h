@@ -78,6 +78,10 @@ namespace gip {
             //if (Options::verbose() > 4) use_count("destructor");
         }
 
+        bool valid() const {
+            return _Feature ? true : false;
+        }
+
         //! Get value for the PrimaryKey
         std::string value() const {
             if (_PrimaryKey == "")
@@ -92,10 +96,10 @@ namespace gip {
         }
 
         //! \name Geospatial information
-        Rect<double> extent() const {
+        BoundingBox extent() const {
             OGREnvelope ext;
             geometry()->getEnvelope(&ext);
-            return Rect<double>(
+            return BoundingBox(
                 Point<double>(ext.MinX, ext.MinY),
                 Point<double>(ext.MaxX, ext.MaxY)
             );

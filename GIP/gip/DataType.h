@@ -24,7 +24,7 @@
 
 #include <string>
 #include <vector>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 #include <gdal_priv.h>
 
 namespace gip {

@@ -89,10 +89,11 @@ namespace gip {
         CImg<double> cimg;
         double count(0), total(0), val;
         double min(type().maxval()), max(type().minval());
-        ChunkSet chunks(xsize(),ysize());
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> _chunks = chunks();
 
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            cimg = read<double>(chunks[iChunk]);
+        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+            cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nodata()) {
                     total += *ptr;
@@ -105,8 +106,8 @@ namespace gip {
         float mean = total/count;
         total = 0;
         double total3(0);
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            cimg = read<double>(chunks[iChunk]);
+        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+            cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nodata()) {
                     val = *ptr-mean;
@@ -146,9 +147,10 @@ namespace gip {
         CImg<float> hist(bins,1,1,1,0);
         long numpixels(0);
         float nd = nodata();
-        ChunkSet chunks(xsize(),ysize());
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            cimg = read<double>(chunks[iChunk]);
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> _chunks = chunks();
+        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+            cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nd) {
                     hist[(unsigned int)( (*ptr-st(0))*bins / (st(1)-st(0)) )]++;
@@ -161,5 +163,45 @@ namespace gip {
         //if (Options::verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
         return hist;
     }
+
+    // Smooth/convolution (3x3) taking into account NoData
+    /*GeoRaster smooth(GeoRaster raster) {
+        CImg<double> kernel(3,3,1,1,1);
+        int m0((kernel.width())/2);
+        int n0((kernel.height())/2);
+        int border(std::max(m0,n0));
+        double total, norm;
+        CImg<double> cimg0, cimg, subcimg;
+
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> _chunks = chunks();
+        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+            cimg0 = read<double>(*iCh);
+            cimg = cimg0;
+            cimg_for_insideXY(cimg,x,y,border) {
+                subcimg = cimg0.get_crop(x-m0,y-n0,x+m0,y+m0);
+                total = 0;
+                norm = 0;
+                cimg_forXY(kernel,m,n) {
+                    if (subcimg(m,n) != nodata()) {
+                        total = total + (subcimg(m,n) * kernel(m,n));
+                        norm = norm + kernel(m,n);
+                    }
+                }
+                if (norm == 0)
+                    cimg(x,y) = raster.nodata();
+                else
+                    cimg(x,y) = total/norm;
+                if (cimg(x,y) == nodata()) cimg(x,y) = raster.nodata();
+            }
+            // Update nodata values in border region
+            cimg_for_borderXY(cimg,x,y,border) {
+                if (cimg(x,y) == nodata()) cimg(x,y) = raster.nodata();
+            }
+            raster.write(cimg, *iCh);
+        }
+        return raster;
+    }*/
+
 
 } // namespace gip

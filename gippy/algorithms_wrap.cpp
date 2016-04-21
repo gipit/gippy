@@ -2938,18 +2938,16 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_char swig_types[1]
 #define SWIGTYPE_p_difference_type swig_types[2]
 #define SWIGTYPE_p_func swig_types[3]
-#define SWIGTYPE_p_gip__GeoFeature swig_types[4]
-#define SWIGTYPE_p_gip__GeoImage swig_types[5]
-#define SWIGTYPE_p_gip__GeoImages swig_types[6]
-#define SWIGTYPE_p_gip__PointT_int_t swig_types[7]
-#define SWIGTYPE_p_gip__RectT_int_t swig_types[8]
-#define SWIGTYPE_p_key_type swig_types[9]
-#define SWIGTYPE_p_mapped_type swig_types[10]
-#define SWIGTYPE_p_size_type swig_types[11]
-#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[12]
-#define SWIGTYPE_p_value_type swig_types[13]
-static swig_type_info *swig_types[15];
-static swig_module_info swig_module = {swig_types, 14, 0, 0, 0, 0};
+#define SWIGTYPE_p_gip__GeoImage swig_types[4]
+#define SWIGTYPE_p_gip__PointT_int_t swig_types[5]
+#define SWIGTYPE_p_gip__RectT_double_t swig_types[6]
+#define SWIGTYPE_p_key_type swig_types[7]
+#define SWIGTYPE_p_mapped_type swig_types[8]
+#define SWIGTYPE_p_size_type swig_types[9]
+#define SWIGTYPE_p_std__mapT_std__string_std__string_std__lessT_std__string_t_std__allocatorT_std__pairT_std__string_const_std__string_t_t_t swig_types[10]
+#define SWIGTYPE_p_value_type swig_types[11]
+static swig_type_info *swig_types[13];
+static swig_module_info swig_module = {swig_types, 12, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4600,95 +4598,6 @@ SWIG_AsVal_int (PyObject * obj, int *val)
 
 
 SWIGINTERN int
-SWIG_AsVal_bool (PyObject *obj, bool *val)
-{
-  int r;
-  if (!PyBool_Check(obj))
-    return SWIG_ERROR;
-  r = PyObject_IsTrue(obj);
-  if (r == -1)
-    return SWIG_ERROR;
-  if (val) *val = r ? true : false;
-  return SWIG_OK;
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_long (PyObject *obj, unsigned long *val) 
-{
-#if PY_VERSION_HEX < 0x03000000
-  if (PyInt_Check(obj)) {
-    long v = PyInt_AsLong(obj);
-    if (v >= 0) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      return SWIG_OverflowError;
-    }
-  } else
-#endif
-  if (PyLong_Check(obj)) {
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_OK;
-    } else {
-      PyErr_Clear();
-#if PY_VERSION_HEX >= 0x03000000
-      {
-        long v = PyLong_AsLong(obj);
-        if (!PyErr_Occurred()) {
-          if (v < 0) {
-            return SWIG_OverflowError;
-          }
-        } else {
-          PyErr_Clear();
-        }
-      }
-#endif
-    }
-  }
-#ifdef SWIG_PYTHON_CAST_MODE
-  {
-    int dispatch = 0;
-    unsigned long v = PyLong_AsUnsignedLong(obj);
-    if (!PyErr_Occurred()) {
-      if (val) *val = v;
-      return SWIG_AddCast(SWIG_OK);
-    } else {
-      PyErr_Clear();
-    }
-    if (!dispatch) {
-      double d;
-      int res = SWIG_AddCast(SWIG_AsVal_double (obj,&d));
-      if (SWIG_IsOK(res) && SWIG_CanCastAsInteger(&d, 0, ULONG_MAX)) {
-	if (val) *val = (unsigned long)(d);
-	return res;
-      }
-    }
-  }
-#endif
-  return SWIG_TypeError;
-}
-
-
-SWIGINTERN int
-SWIG_AsVal_unsigned_SS_char (PyObject * obj, unsigned char *val)
-{
-  unsigned long v;
-  int res = SWIG_AsVal_unsigned_SS_long (obj, &v);
-  if (SWIG_IsOK(res)) {
-    if ((v > UCHAR_MAX)) {
-      return SWIG_OverflowError;
-    } else {
-      if (val) *val = static_cast< unsigned char >(v);
-    }
-  }  
-  return res;
-}
-
-
-SWIGINTERN int
 SWIG_AsVal_std_string (PyObject * obj, std::string *val)
 {
   std::string* v = (std::string *) 0;
@@ -5182,44 +5091,6 @@ SWIGINTERN PyObject *_wrap_acca(PyObject *SWIGUNUSEDPARM(self), PyObject *args, 
      catch (const std::exception& e) { PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
   resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
   return resultobj; fail: return NULL; }
-SWIGINTERN PyObject *_wrap_cookie_cutter(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) {
-  PyObject *resultobj = 0; gip::GeoImages arg1 ; gip::GeoFeature arg2 ; std::string arg3 ; float arg4 ; float arg5 ;
-  bool arg6 = (bool) false ; unsigned char arg7 = (unsigned char) 0 ; void *argp1 ; int res1 = 0 ; void *argp2 ; int res2 = 0 ;
-  float val4 ; int ecode4 = 0 ; float val5 ; int ecode5 = 0 ; bool val6 ; int ecode6 = 0 ; unsigned char val7 ; int ecode7 = 0 ;
-  PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ; PyObject * obj3 = 0 ; PyObject * obj4 = 0 ;
-  PyObject * obj5 = 0 ; PyObject * obj6 = 0 ; char *  kwnames[] = {
-    (char *) "images",(char *) "feature",(char *) "filename",(char *) "xres",(char *) "yres",(char *) "crop",(char *) "interpolation", NULL }
-  ; gip::GeoImage result;
-  if (!PyArg_ParseTupleAndKeywords(args,kwargs,(char *)"OOOOO|OO:cookie_cutter",kwnames,&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6)) SWIG_fail;
-  { res1 = SWIG_ConvertPtr(obj0, &argp1, SWIGTYPE_p_gip__GeoImages,  0  | 0); if (!SWIG_IsOK(res1)) {
-      SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "cookie_cutter" "', argument " "1"" of type '" "gip::GeoImages""'");  }
-       if (!argp1) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "cookie_cutter" "', argument " "1"" of type '" "gip::GeoImages""'"); }
-     else { gip::GeoImages * temp = reinterpret_cast< gip::GeoImages * >(argp1); arg1 = *temp;
-      if (SWIG_IsNewObj(res1)) delete temp; }  }  { res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_gip__GeoFeature,  0  | 0);
-    if (!SWIG_IsOK(res2)) {
-      SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "cookie_cutter" "', argument " "2"" of type '" "gip::GeoFeature""'");  }
-       if (!argp2) {
-      SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "cookie_cutter" "', argument " "2"" of type '" "gip::GeoFeature""'"); }
-     else { gip::GeoFeature * temp = reinterpret_cast< gip::GeoFeature * >(argp2); arg2 = *temp;
-      if (SWIG_IsNewObj(res2)) delete temp; }  }  { std::string *ptr = (std::string *)0;
-    int res = SWIG_AsPtr_std_string(obj2, &ptr); if (!SWIG_IsOK(res) || !ptr) {
-      SWIG_exception_fail(SWIG_ArgError((ptr ? res : SWIG_TypeError)), "in method '" "cookie_cutter" "', argument " "3"" of type '" "std::string""'");  }
-     arg3 = *ptr; if (SWIG_IsNewObj(res)) delete ptr; }  ecode4 = SWIG_AsVal_float(obj3, &val4); if (!SWIG_IsOK(ecode4)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "cookie_cutter" "', argument " "4"" of type '" "float""'"); }  
-  arg4 = static_cast< float >(val4); ecode5 = SWIG_AsVal_float(obj4, &val5); if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "cookie_cutter" "', argument " "5"" of type '" "float""'"); }  
-  arg5 = static_cast< float >(val5); if (obj5) { ecode6 = SWIG_AsVal_bool(obj5, &val6); if (!SWIG_IsOK(ecode6)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "cookie_cutter" "', argument " "6"" of type '" "bool""'"); }  
-    arg6 = static_cast< bool >(val6); }  if (obj6) { ecode7 = SWIG_AsVal_unsigned_SS_char(obj6, &val7);
-    if (!SWIG_IsOK(ecode7)) {
-      SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "cookie_cutter" "', argument " "7"" of type '" "unsigned char""'"); }
-      arg7 = static_cast< unsigned char >(val7); }  { try {
-      result = gip::algorithms::cookie_cutter(arg1,arg2,arg3,arg4,arg5,arg6,arg7); }  catch (const std::out_of_range& e) { 
-      PyErr_SetString(PyExc_IndexError, e.what()); return NULL; }  catch (const std::exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, e.what()); return NULL; }  } 
-  resultobj = SWIG_NewPointerObj((new gip::GeoImage(static_cast< const gip::GeoImage& >(result))), SWIGTYPE_p_gip__GeoImage, SWIG_POINTER_OWN |  0 );
-  return resultobj; fail: return NULL; }
 SWIGINTERN PyObject *_wrap_fmask(PyObject *SWIGUNUSEDPARM(self), PyObject *args, PyObject *kwargs) { PyObject *resultobj = 0;
   gip::GeoImage *arg1 = 0 ; std::string arg2 ; int arg3 = (int) 3 ; int arg4 = (int) 5 ; void *argp1 = 0 ; int res1 = 0 ;
   int val3 ; int ecode3 = 0 ; int val4 ; int ecode4 = 0 ; PyObject * obj0 = 0 ; PyObject * obj1 = 0 ; PyObject * obj2 = 0 ;
@@ -5312,20 +5183,6 @@ static PyMethodDef SwigMethods[] = {
 		"    arg7: int\n"
 		"\n"
 		""},
-	 { (char *)"cookie_cutter", (PyCFunction) _wrap_cookie_cutter, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
-		"cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, float xres, float yres, \n"
-		"    bool crop=False, unsigned char interpolation=0) -> GeoImage\n"
-		"\n"
-		"Parameters:\n"
-		"    images: gip::GeoImages\n"
-		"    feature: gip::GeoFeature\n"
-		"    filename: std::string\n"
-		"    xres: float\n"
-		"    yres: float\n"
-		"    crop: bool\n"
-		"    interpolation: unsigned char\n"
-		"\n"
-		""},
 	 { (char *)"fmask", (PyCFunction) _wrap_fmask, METH_VARARGS | METH_KEYWORDS, (char *)"\n"
 		"fmask(GeoImage arg1, std::string arg2, int arg3=3, int arg4=5) -> GeoImage\n"
 		"\n"
@@ -5371,11 +5228,9 @@ static swig_type_info _swigt__p_allocator_type = {"_p_allocator_type", "allocato
 static swig_type_info _swigt__p_char = {"_p_char", "char *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_difference_type = {"_p_difference_type", "difference_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_func = {"_p_func", "func *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_gip__GeoFeature = {"_p_gip__GeoFeature", "gip::GeoFeature *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gip__GeoImage = {"_p_gip__GeoImage", "gip::GeoImage *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_gip__GeoImages = {"_p_gip__GeoImages", "gip::GeoImages *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_gip__PointT_int_t = {"_p_gip__PointT_int_t", "gip::iPoint *|gip::Point< int > *", 0, 0, (void*)0, 0};
-static swig_type_info _swigt__p_gip__RectT_int_t = {"_p_gip__RectT_int_t", "gip::iRect *|gip::Rect< int > *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_gip__RectT_double_t = {"_p_gip__RectT_double_t", "gip::BoundingBox *|gip::Rect< double > *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_key_type = {"_p_key_type", "key_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_mapped_type = {"_p_mapped_type", "mapped_type *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_size_type = {"_p_size_type", "size_type *", 0, 0, (void*)0, 0};
@@ -5387,11 +5242,9 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_char,
   &_swigt__p_difference_type,
   &_swigt__p_func,
-  &_swigt__p_gip__GeoFeature,
   &_swigt__p_gip__GeoImage,
-  &_swigt__p_gip__GeoImages,
   &_swigt__p_gip__PointT_int_t,
-  &_swigt__p_gip__RectT_int_t,
+  &_swigt__p_gip__RectT_double_t,
   &_swigt__p_key_type,
   &_swigt__p_mapped_type,
   &_swigt__p_size_type,
@@ -5403,11 +5256,9 @@ static swig_cast_info _swigc__p_allocator_type[] = {  {&_swigt__p_allocator_type
 static swig_cast_info _swigc__p_char[] = {  {&_swigt__p_char, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_difference_type[] = {  {&_swigt__p_difference_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_func[] = {  {&_swigt__p_func, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_gip__GeoFeature[] = {  {&_swigt__p_gip__GeoFeature, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gip__GeoImage[] = {  {&_swigt__p_gip__GeoImage, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_gip__GeoImages[] = {  {&_swigt__p_gip__GeoImages, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_gip__PointT_int_t[] = {  {&_swigt__p_gip__PointT_int_t, 0, 0, 0},{0, 0, 0, 0}};
-static swig_cast_info _swigc__p_gip__RectT_int_t[] = {  {&_swigt__p_gip__RectT_int_t, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_gip__RectT_double_t[] = {  {&_swigt__p_gip__RectT_double_t, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_key_type[] = {  {&_swigt__p_key_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_mapped_type[] = {  {&_swigt__p_mapped_type, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_size_type[] = {  {&_swigt__p_size_type, 0, 0, 0},{0, 0, 0, 0}};
@@ -5419,11 +5270,9 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_char,
   _swigc__p_difference_type,
   _swigc__p_func,
-  _swigc__p_gip__GeoFeature,
   _swigc__p_gip__GeoImage,
-  _swigc__p_gip__GeoImages,
   _swigc__p_gip__PointT_int_t,
-  _swigc__p_gip__RectT_int_t,
+  _swigc__p_gip__RectT_double_t,
   _swigc__p_key_type,
   _swigc__p_mapped_type,
   _swigc__p_size_type,

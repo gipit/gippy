@@ -26,9 +26,11 @@
 #include <sstream>
 #include <string>
 #include <typeinfo>
-#include <gdal_priv.h>
 #include <vector>
 #include <algorithm>
+#include <gdal_priv.h>
+#include <ogrsf_frmts.h>
+#include <gdalwarper.h>
 
 namespace gip {
 
@@ -140,6 +142,29 @@ namespace gip {
         }
         return intarray;
     }
+
+    //! Transformer class 
+    class CutlineTransformer : public OGRCoordinateTransformation {
+    public:
+        void *hSrcImageTransformer;
+
+        virtual OGRSpatialReference *GetSourceCS() { return NULL; }
+        virtual OGRSpatialReference *GetTargetCS() { return NULL; }
+
+        virtual int Transform( int nCount, double *x, double *y, double *z = NULL ) {
+            int nResult;
+
+            int *pabSuccess = (int *) CPLCalloc(sizeof(int),nCount);
+            nResult = TransformEx( nCount, x, y, z, pabSuccess );
+            CPLFree( pabSuccess );
+
+            return nResult;
+        }
+
+        virtual int TransformEx( int nCount, double *x, double *y, double *z = NULL, int *pabSuccess = NULL ) {
+            return GDALGenImgProjTransform( hSrcImageTransformer, TRUE, nCount, x, y, z, pabSuccess );
+        }
+    };
 
 }
 

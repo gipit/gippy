@@ -26,9 +26,9 @@ namespace gip {
     using std::vector;
 
     // find transformed union of all raster bounding boxes
-    Rect<double> GeoImages::extent(std::string srs) const {
-        Rect<double> ext;
-        vector< Rect<double> > extents;
+    BoundingBox GeoImages::extent(std::string srs) const {
+        BoundingBox ext;
+        vector< BoundingBox > extents;
         for (vector<GeoImage>::const_iterator i=_GeoImages.begin(); i!=_GeoImages.end(); i++) {
             ext = i->extent();
             ext.transform(i->srs(), srs);

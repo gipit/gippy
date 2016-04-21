@@ -92,7 +92,7 @@ namespace gip {
         //GeoImage& AsGeoImage(int bandnum) const {}
 
         //! Return union of all extents transformed to passed in SRS
-        Rect<double> extent(std::string srs) const;
+        BoundingBox extent(std::string srs) const;
 
     protected:
         //! Vector of raster bands

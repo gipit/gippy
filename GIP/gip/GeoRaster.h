@@ -33,7 +33,6 @@
 
 
 namespace gip {
-    typedef Rect<int> iRect;
     typedef Point<int> iPoint;
 
     //! Extended GDALRasterBand class
@@ -290,14 +289,14 @@ namespace gip {
         float percentile(float p) const;
 
         //! \name File I/O
-        template<class T> CImg<T> read_raw(iRect chunk=iRect()) const;
-        template<class T> CImg<T> read(iRect chunk=iRect()) const;
-        template<class T> GeoRaster& write_raw(CImg<T> img, iRect chunk=iRect());
-        template<class T> GeoRaster& write(CImg<T> img, iRect chunk=iRect());
+        template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const;
+        template<class T> CImg<T> read(Chunk chunk=Chunk()) const;
+        template<class T> GeoRaster& write_raw(CImg<T> img, Chunk chunk=Chunk());
+        template<class T> GeoRaster& write(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& save(GeoRaster& raster);
 
          //! Get Saturation mask: 1's where it's saturated
-        CImg<unsigned char> saturation_mask(iRect chunk=iRect()) const {
+        CImg<unsigned char> saturation_mask(Chunk chunk=Chunk()) const {
             switch (type().type()) {
                 case 1: return _Mask<unsigned char>(_maxDC, chunk);
                 case 2: return _Mask<unsigned short>(_maxDC, chunk);
@@ -311,8 +310,8 @@ namespace gip {
         }
 
         //! NoData mask: 1's where it's bad data
-        CImg<unsigned char> nodata_mask(iRect chunk=iRect()) const {
-            if (!chunk.valid()) chunk = iRect(0,0,xsize(),ysize());
+        CImg<unsigned char> nodata_mask(Chunk chunk=Chunk()) const {
+            if (!chunk.valid()) chunk = Chunk(0,0,xsize(),ysize());
             switch (type().type()) {
                 case 1: return _Mask<unsigned char>(nodata(), chunk);
                 case 2: return _Mask<unsigned short>(nodata(), chunk);
@@ -325,48 +324,12 @@ namespace gip {
             }
         }
 
-        CImg<unsigned char> data_mask(iRect chunk=iRect()) const {
+        CImg<unsigned char> data_mask(Chunk chunk=Chunk()) const {
             return nodata_mask(chunk)^=1;
         }
 
         //! Smooth/convolution (3x3) taking into account NoData
-        GeoRaster smooth(GeoRaster raster) {
-            CImg<double> kernel(3,3,1,1,1);
-            int m0((kernel.width())/2);
-            int n0((kernel.height())/2);
-            int border(std::max(m0,n0));
-            double total, norm;
-            CImg<double> cimg0, cimg, subcimg;
-
-            ChunkSet chunks(xsize(),ysize());
-            chunks.padding(border);
-            for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-                cimg0 = read<double>(chunks[iChunk]);
-                cimg = cimg0;
-                cimg_for_insideXY(cimg,x,y,border) {
-                    subcimg = cimg0.get_crop(x-m0,y-n0,x+m0,y+m0);
-                    total = 0;
-                    norm = 0;
-                    cimg_forXY(kernel,m,n) {
-                        if (subcimg(m,n) != nodata()) {
-                            total = total + (subcimg(m,n) * kernel(m,n));
-                            norm = norm + kernel(m,n);
-                        }
-                    }
-                    if (norm == 0)
-                        cimg(x,y) = raster.nodata();
-                    else
-                        cimg(x,y) = total/norm;
-                    if (cimg(x,y) == nodata()) cimg(x,y) = raster.nodata();
-                }
-                // Update nodata values in border region
-                cimg_for_borderXY(cimg,x,y,border) {
-                    if (cimg(x,y) == nodata()) cimg(x,y) = raster.nodata();
-                }
-                raster.write(cimg, chunks[iChunk]);
-            }
-            return raster;
-        }
+        //GeoRaster smooth(GeoRaster raster);
 
     protected:
         // TODO - examine why not shared pointer? (I think because it's managed by GDALDataset class)
@@ -418,7 +381,7 @@ namespace gip {
         }
 
         //! inline function for creating a mask showing this value
-        template<class T> inline CImg<unsigned char> _Mask(T val, iRect chunk=iRect()) const {
+        template<class T> inline CImg<unsigned char> _Mask(T val, Chunk chunk=Chunk()) const {
             CImg<T> img = read_raw<T>(chunk);
             CImg<unsigned char> mask(img.width(),img.height(),1,1,0);
             cimg_forXY(img,x,y) if (img(x,y) == val) mask(x,y) = 1;
@@ -429,20 +392,21 @@ namespace gip {
 
     //! \name File I/O
     //! Read raw chunk given bounding box
-    template<class T> CImg<T> GeoRaster::read_raw(iRect chunk) const {
+    template<class T> CImg<T> GeoRaster::read_raw(Chunk chunk) const {
         if (!chunk.valid())
-            chunk = Rect<int>(0,0,xsize(),ysize());
+            // default to entire image
+            chunk = Chunk(0,0,xsize(),ysize());
         else if (chunk.padding() > 0)
-            chunk = chunk.pad().intersect(Rect<int>(0,0,xsize(),ysize()));
+            // pad out but limit to image
+            chunk = chunk.pad().intersect(Chunk(0,0,xsize(),ysize()));
 
         // This doesn't check for in bounds, should it?
-        int width = chunk.x1()-chunk.x0()+1;
-        int height = chunk.y1()-chunk.y0()+1;
+        int w(chunk.width()), h(chunk.height());
 
-        CImg<T> img(width, height);
+        CImg<T> img(w, h);
         DataType dt(typeid(T));
-        CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), width, height,
-            img.data(), width, height, dt.gdal(), 0, 0);
+        CPLErr err = _GDALRasterBand->RasterIO(GF_Read, chunk.x0(), chunk.y0(), w, h, 
+            img.data(), w, h, dt.gdal(), 0, 0);
         if (err != CE_None) {
             std::stringstream err;
             err << "error reading " << CPLGetLastErrorMsg();
@@ -464,7 +428,7 @@ namespace gip {
     }
 
     //! Retrieve a piece of the image as a CImg
-    template<class T> CImg<T> GeoRaster::read(iRect chunk) const {
+    template<class T> CImg<T> GeoRaster::read(Chunk chunk) const {
         auto start = std::chrono::system_clock::now();
 
         CImg<T> img(read_raw<T>(chunk));
@@ -506,13 +470,15 @@ namespace gip {
     }
 
     //! Write raw CImg to file
-    template<class T> GeoRaster& GeoRaster::write_raw(CImg<T> img, iRect chunk) {
-        if (!chunk.valid()) chunk = Rect<int>(0,0,xsize(),ysize());
+    template<class T> GeoRaster& GeoRaster::write_raw(CImg<T> img, Chunk chunk) {
+        if (!chunk.valid())
+            // default to entire image
+            chunk = Chunk(0,0,xsize(),ysize());
         // Depad this if needed
-        if (chunk.padding() > 0) {
-            Rect<int> pchunk = chunk.get_pad().intersect(Rect<int>(0,0,xsize(),ysize()));
+        else if (chunk.padding() > 0) {
+            Chunk pchunk = chunk.pad().intersect(Chunk(0,0,xsize(),ysize()));
             Point<int> p0(chunk.p0()-pchunk.p0());
-            Point<int> p1 = p0 + Point<int>(chunk.width()-1,chunk.height()-1);
+            Point<int> p1 = p0 + Point<int>(chunk.width(),chunk.height());
             img.crop(p0.x(),p0.y(),p1.x(),p1.y());
         }
 
@@ -533,7 +499,7 @@ namespace gip {
     }
 
     //! Write a Cimg to the file
-    template<class T> GeoRaster& GeoRaster::write(CImg<T> img, iRect chunk) {
+    template<class T> GeoRaster& GeoRaster::write(CImg<T> img, Chunk chunk) {
         if (gain() != 1.0 || offset() != 0.0) {
             cimg_for(img,ptr,T) if (*ptr != nodata()) *ptr = (*ptr-offset())/gain();
         }
@@ -549,15 +515,16 @@ namespace gip {
         band->SetMetadata(_GDALRasterBand->GetMetadata());
         raster.set_srs(this->srs());
         raster.set_affine(this->affine());
-        ChunkSet chunks(xsize(), ysize());
+        std::vector<Chunk>::const_iterator iCh;
+        std::vector<Chunk> _chunks = chunks();
         if (Options::verbose() > 3)
-            std::cout << basename() << ": Processing in " << chunks.size() << " chunks" << std::endl;
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-                CImg<T> cimg = read<T>(chunks[iChunk]);
+            std::cout << basename() << ": Processing in " << _chunks.size() << " chunks" << std::endl;
+        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+                CImg<T> cimg = read<T>(*iCh);
                 if (nodata() != raster.nodata()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == nodata()) *ptr = raster.nodata(); }
                 }
-                raster.write(cimg,chunks[iChunk]);
+                raster.write(cimg,*iCh);
         }
         return *this;
     }

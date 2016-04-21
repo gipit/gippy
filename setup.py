@@ -200,7 +200,7 @@ def update_lib_path_mac(oldpath, newpath, modpath=None):
 # GDAL config parameters
 gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
-extra_compile_args = ['-fPIC', '-O3', '-std=c++11']
+extra_compile_args = ['-fPIC', '-O3', '-std=c++11', '-Wno-maybe-uninitialized']
 
 extra_link_args = gdal_config.extra_link_args
 
@@ -248,9 +248,9 @@ gip_module = Extension(
 # the swig .so modules containing the C++ code that wraps libgip.so
 swig_modules = []
 for n in ['gippy', 'algorithms']:
-    src = os.path.join('gippy', n + '_wrap.cpp')
-    if not os.path.exists(src):
-        src = os.path.join('gippy', n + '.i')
+    src = os.path.join('gippy', n + '.i')
+    cppsrc = os.path.join('gippy', n + '_wrap.cpp')
+    src = cppsrc if  os.path.exists(cppsrc) else src
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),

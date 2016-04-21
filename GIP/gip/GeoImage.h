@@ -25,8 +25,9 @@
 #include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/GeoRaster.h>
+#include <gip/GeoFeature.h>
 #include <stdint.h>
-#include <gip/Utils.h>
+#include <gip/utils.h>
 
 namespace gip {
     //using std::string;
@@ -52,8 +53,11 @@ namespace gip {
         //! Open file from vector of individual files
         explicit GeoImage(std::vector<std::string> filenames);
         //! Constructor for creating new file
-        explicit GeoImage(std::string filename, int xsz, int ysz, int bsz, DataType dt=DataType("uint8"), bool temp=false) :
-            GeoResource(xsz, ysz, bsz, dt, filename, temp) {
+        explicit GeoImage(std::string filename, 
+                          int xsz, int ysz, int nb, 
+                          std::string proj, BoundingBox bbox, 
+                          DataType dt, std::string format="", bool temp=false) :
+                GeoResource(filename, xsz, ysz, nb, proj, bbox, dt, format, temp) {
             load_bands();
         }
         //! Copy constructor - copies GeoResource and all bands
@@ -65,32 +69,45 @@ namespace gip {
 
         //! \name Factory Functions
         //! Create new image
-        static GeoImage create(std::string filename, 
-                unsigned int xsize=0, unsigned int ysize=0, unsigned int bsize=0, 
-                std::string dtype="unknown", std::string srs="", bool temp=false) {
+        static GeoImage create(std::string filename="", 
+                unsigned int xsz=1, unsigned int ysz=1, unsigned int nb=1, 
+                std::string proj="EPSG:4326",
+                CImg<double> bbox=CImg<double>(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0),
+                std::string dtype="uint8", std::string format="", bool temp=false) {
             if (filename == "") {
                 filename = std::tmpnam(nullptr);
                 temp = true;
             }
-            GeoImage geoimg(filename, xsize, ysize, bsize, DataType(dtype), temp);
-            geoimg.set_srs(srs);
-            // TODO: what about setting GeoTransorm
-            return geoimg;
+            BoundingBox ext(bbox[0], bbox[1], bbox[2], bbox[3]);
+            return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp);
         }
 
         //! Create new image using foorprint of another
-        static GeoImage create_from(std::string filename, GeoImage geoimg, 
-                                    unsigned int bsize=0, std::string dtype="unknown", bool temp=false) {
+        static GeoImage create_from(GeoImage geoimg, std::string filename="", unsigned int nb=0, 
+                std::string dtype="unknown", std::string format="", bool temp=false) {
             unsigned int _xs(geoimg.xsize());
             unsigned int _ys(geoimg.ysize());
             unsigned int _bs(geoimg.nbands());
             std::string _srs(geoimg.srs());
             std::string _dtype(geoimg.type().string());
-            _bs = bsize > 0 ? bsize : _bs;
+            _bs = nb > 0 ? nb : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
-            GeoImage img = create(filename, _xs, _ys, _bs, _dtype, _srs, temp);
+            if (filename == "") {
+                filename = std::tmpnam(nullptr);
+                temp = true;
+            }
+            GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp);
+            // copy metadata
             img.set_meta(geoimg.meta());
-            // TODO - set per band meta, or nodata, gain, offset by band?
+            // if same number of bands, set band metadata
+            if (geoimg.nbands() == _bs) {
+                for (unsigned int b=0;b<_bs;b++) {
+                    img[b].set_gain(geoimg[b].gain());
+                    img[b].set_offset(geoimg[b].offset());
+                    img[b].set_nodata(geoimg[b].nodata());
+                }
+                img.set_bandnames(geoimg.bandnames());
+            }
             return img;
         }
 
@@ -236,9 +253,12 @@ namespace gip {
         //! Calculate spectral covariance
         CImg<double> spectral_covariance() const;
 
+        //! Calculate spectral correlation
+        //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
+
         //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string, std::string="unknown", bool=false);
+        template<class T> GeoImage save(std::string="", std::string="", bool=false);
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& add_mask(const GeoRaster& band) {
@@ -253,7 +273,7 @@ namespace gip {
 
         //! \name File I/O
         //! Read raw chunk, across all bands
-        template<class T> CImg<T> read_raw(iRect chunk=iRect()) const {
+        template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -263,7 +283,7 @@ namespace gip {
         }
 
         //! Read chunk, across all bands
-        template<class T> CImg<T> read(iRect chunk=iRect()) const {
+        template<class T> CImg<T> read(Chunk chunk=Chunk()) const {
             CImgList<T> images;
             typename std::vector< GeoRaster >::const_iterator iBand;
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -273,7 +293,7 @@ namespace gip {
         }
 
         //! Write cube across all bands
-        template<class T> GeoImage& write(const CImg<T> img, iRect chunk=iRect()) {
+        template<class T> GeoImage& write(const CImg<T> img, Chunk chunk=Chunk()) {
             typename std::vector< GeoRaster >::iterator iBand;
             int i(0);
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
@@ -284,7 +304,7 @@ namespace gip {
 
         // Generate Masks: NoData, Data, Saturation
         //! NoData mask.  1's where it is nodata
-        CImg<uint8_t> nodata_mask(std::vector<std::string> bands, iRect chunk=iRect()) const {
+        CImg<uint8_t> nodata_mask(std::vector<std::string> bands, Chunk chunk=Chunk()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
             for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
@@ -297,21 +317,21 @@ namespace gip {
         }
 
         // NoData mask (all bands)
-        CImg<uint8_t> nodata_mask(iRect chunk=iRect()) const {
+        CImg<uint8_t> nodata_mask(Chunk chunk=Chunk()) const {
             return nodata_mask({}, chunk);
         }
 
         //! Data mask. 1's where valid data
-        CImg<unsigned char> data_mask(std::vector<std::string> bands, iRect chunk=iRect()) const {
+        CImg<unsigned char> data_mask(std::vector<std::string> bands, Chunk chunk=Chunk()) const {
             return nodata_mask(bands, chunk)^=1;
         }
 
-        CImg<unsigned char> data_mask(iRect chunk=iRect()) const {
+        CImg<unsigned char> data_mask(Chunk chunk=Chunk()) const {
             return data_mask({}, chunk);
         }
 
         //! Saturation mask (all bands).  1's where it is saturated
-        CImg<unsigned char> saturation_mask(std::vector<std::string> bands, iRect chunk=iRect()) const {
+        CImg<unsigned char> saturation_mask(std::vector<std::string> bands, Chunk chunk=Chunk()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
             for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
@@ -323,12 +343,12 @@ namespace gip {
             return mask;
         }
 
-        CImg<unsigned char> saturation_mask(iRect chunk=iRect()) const {
+        CImg<unsigned char> saturation_mask(Chunk chunk=Chunk()) const {
             return saturation_mask({}, chunk);
         }
 
         //! Whiteness (created from red, green, blue)
-        CImg<float> whiteness(iRect chunk=iRect()) const {
+        CImg<float> whiteness(Chunk chunk=Chunk()) const {
             if (!bands_exist({"red", "green", "blue"}))
                 throw std::out_of_range("Need RGB bands to calculate whiteness");
             CImg<float> red = operator[]("red").read_raw<float>(chunk);
@@ -344,7 +364,11 @@ namespace gip {
             return white;
         }
 
-        //GeoImage& warp_into(GeoImage&, GDALWarpOptions*, OGRGeometry*)
+        GeoImage warp(std::string filename="", GeoFeature feature=GeoFeature(), 
+            bool crop=false, std::string proj="EPSG:4326",
+            float xres=1.0, float yres=1.0, int interpolation=0);
+
+        GeoImage& warp_into(GeoImage&, GeoFeature=GeoFeature(), int=0, bool=false);
 
     protected:
         //! Vector of raster bands
@@ -367,7 +391,7 @@ namespace gip {
                 if (name == to_lower(bname)) return i;
             }
             throw std::out_of_range("No band " + name);
-        }     
+        }
 
     }; // class GeoImage
 
@@ -377,10 +401,11 @@ namespace gip {
     /*
     template<class T> GeoImage& GeoImage::save() {
         // Create chunks
-        ChunkSet chunks(XSize(), YSize());
-        for (unsigned int i=0; i<nbands(); i++) {
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = image.chunks();
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
             for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
-                (*this)[i].write((*this)[i].read<T>(chunks[iChunk]),chunks[iChunk]);
+                (*this)[i].write((*this)[i].read<T>(*iCh),*iCh);
             }
             // clear functions after processing
             (*this)[i].ClearFunctions();
@@ -392,15 +417,11 @@ namespace gip {
     // Save input file with processing applied into new output file
     template<class T> GeoImage GeoImage::save(std::string filename, std::string dt, bool overviews) {
         // TODO: if not supplied base output datatype on units?
-        if (dt == "unknown") dt = this->type().string();
-        GeoImage imgout = GeoImage::create_from(filename, *this, nbands(), dt);
+        if (dt == "") dt = this->type().string();
+        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dt);
         for (unsigned int i=0; i<imgout.nbands(); i++) {
-            imgout[i].set_gain((*this)[i].gain());
-            imgout[i].set_offset((*this)[i].offset());
-            imgout[i].set_nodata((*this)[i].nodata());
             (*this)[i].save<T>(imgout[i]);
         }
-	    imgout.set_bandnames(_BandNames);
         if (overviews) {
             int panOverviewList[3] = { 2, 4, 8 };
             imgout._GDALDataset->BuildOverviews( "NEAREST", 3, panOverviewList, 0, NULL, GDALDummyProgress, NULL );

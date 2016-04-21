@@ -102,13 +102,14 @@ GeoImage SpectralStatistics(const GeoImage& img, string filename) {
     imgout.SetBandName("StdDev", 2);
 
     CImgList<double> stats;
-    ChunkSet chunks(img.XSize(),img.YSize());
-    for (unsigned int iChunk=0; iChunk<chunks.Size(); iChunk++) {
+    vector<Chunk>::const_iterator iCh;
+    vector<Chunk> chunks = img.chunks();
+    for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
         if (Options::verbose() > 2) 
-            std::cout << "Processing chunk " << chunks[iChunk] << " of " << img.Size() << std::endl;
-        stats = img.SpectralStatistics(chunks[iChunk]);
-        imgout[0].Write(stats[0], chunks[iChunk]);
-        imgout[1].Write(stats[1], chunks[iChunk]);
+            std::cout << "Processing chunk " << i++ << " of " << chunks.Size() << std::endl;
+        stats = img.SpectralStatistics(*iCh);
+        imgout[0].Write(stats[0], *iCh);
+        imgout[1].Write(stats[1], *iCh);
     }
     if (Options::verbose())
         std::cout << "Spectral statistics written to " << imgout.Filename() << std::endl;

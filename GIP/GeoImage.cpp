@@ -20,7 +20,8 @@
 ##############################################################################*/
 
 #include <gip/GeoImage.h>
-#include <gip/GeoRaster.h>
+
+//#include <gip/GeoRaster.h>
 
 //#include <sstream>
 
@@ -187,16 +188,17 @@ namespace gip {
         CImg<unsigned char> mask;
         int validsize;
 
-        ChunkSet chset = chunks();
-        for (unsigned int iChunk=0; iChunk<chset.size(); iChunk++) {
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> _chunks = chunks();
+        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
             // Bands x NumPixels
-            matrixchunk = CImg<double>(NumBands, chset[iChunk].area(),1,1,0);
-            mask = nodata_mask(chset[iChunk]);
+            matrixchunk = CImg<double>(NumBands, iCh->area(),1,1,0);
+            mask = nodata_mask(*iCh);
             validsize = mask.size() - mask.sum();
 
             int p(0);
             for (unsigned int b=0;b<NumBands;b++) {
-                bandchunk = (*this)[b].read<double>(chset[iChunk]);
+                bandchunk = (*this)[b].read<double>(*iCh);
                 p = 0;
                 cimg_forXY(bandchunk,x,y) {
                     if (mask(x,y)==0) matrixchunk(b,p++) = bandchunk(x,y);
@@ -223,6 +225,143 @@ namespace gip {
         return covariance;
     }
 
+    GeoImage GeoImage::warp(std::string filename, GeoFeature feature,
+                bool crop, std::string proj,
+                float xres, float yres, int interpolation) {
+
+        // get the desired Spatial Reference System from feature or override with srs argument
+        // TODO - check for valid srs
+        proj = feature.valid() ? feature.srs() : proj;
+
+        // Calculate extent of final output
+        BoundingBox ext = extent();
+        std::cout << "proj = " << proj << std::endl;
+        std::cout << "srs = " << srs() << std::endl;
+        std::cout << "EXTENT BEFORE" << ext << std::endl;
+        // warp extent to desired SRS
+        if (proj != srs()) {
+            ext = ext.transform(srs(), proj);
+        }
+        std::cout << "EXTENT AFTER" << ext << std::endl;
+        std::cout << "WIDTH = " << ext.width() << std::endl;
+        std::cout << "HEIGHT = " << ext.height() << std::endl;
+        // if cropping, and feature is provided, then get intersection
+        if (crop && feature.valid()) {
+            BoundingBox fext = feature.extent();
+            ext = ext.intersect(fext);
+            // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
+            ext = BoundingBox(
+                Point<double>(fext.x0() + std::floor((ext.x0()-fext.x0()) / xres) * xres, ext.y0()),
+                Point<double>(ext.x1(), fext.y1() - std::floor((fext.y1()-ext.y1()) / yres) * yres)
+            );
+        }
+
+        int xsz = std::ceil((ext.p1().x()-ext.p0().x()) / std::abs(xres));
+        int ysz = std::ceil((ext.p1().y()-ext.p0().y()) / std::abs(yres));
+        std::cout << "xsz = " << xsz << ", ysz = " << ysz << std::endl;
+        GeoImage imgout(filename, xsz, ysz, nbands(), proj, ext, type());
+
+        // warp into this output image
+        warp_into(imgout, feature, interpolation);
+        return imgout;
+    }
+
+
+    GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit) {
+        //if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << " " << std::flush;
+
+        // warp options
+        GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
+        GDALDataset* srcDS = _GDALDataset.get();
+        GDALDataset* dstDS = imgout._GDALDataset.get();
+        psWarpOptions->hSrcDS = srcDS;
+        psWarpOptions->hDstDS = dstDS;
+        psWarpOptions->nBandCount = nbands();
+        psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
+        psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
+        psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
+        for (unsigned int b=0;b<nbands();b++) {
+            psWarpOptions->panSrcBands[b] = b+1;
+            psWarpOptions->panDstBands[b] = b+1;
+            psWarpOptions->padfSrcNoDataReal[b] = (*this)[b].nodata();
+            // TODO - note this assumes output nodata is same as input
+            psWarpOptions->padfDstNoDataReal[b] = imgout[b].nodata();
+            psWarpOptions->padfSrcNoDataImag[b] = 0.0;
+            psWarpOptions->padfDstNoDataImag[b] = 0.0;
+        }
+        psWarpOptions->dfWarpMemoryLimit = Options::chunksize() * 1024.0 * 1024.0;
+        switch (interpolation) {
+            case 1: psWarpOptions->eResampleAlg = GRA_Bilinear;
+                break;
+            case 2: psWarpOptions->eResampleAlg = GRA_Cubic;
+                break;
+            default: psWarpOptions->eResampleAlg = GRA_NearestNeighbour;
+        }
+        if (Options::verbose() > 2)
+            psWarpOptions->pfnProgress = GDALTermProgress;
+        else psWarpOptions->pfnProgress = GDALDummyProgress;
+
+        char **papszOptions = NULL;
+        //papszOptions = CSLSetNameValue(papszOptions,"SKIP_NOSOURCE","YES");
+        if (noinit)
+            papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
+        else
+            papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
+        papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
+        papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::cores()).c_str());
+        psWarpOptions->papszWarpOptions = papszOptions;
+
+        // if valid geometry apply it as a cutline
+        OGRGeometry* site_t;
+        char **papszOptionsCutline = NULL;
+        CutlineTransformer oTransformer;
+        if (feature.valid()) {
+            OGRGeometry* site = feature.geometry();
+
+            // Create cutline transform to pixel coordinates        
+            papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.srs().c_str() );
+            papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
+            oTransformer.hSrcImageTransformer = GDALCreateGenImgProjTransformer2( srcDS, NULL, papszOptionsCutline );
+            site_t = site->clone();
+            site_t->transform(&oTransformer);
+
+            //psWarpOptions->hCutline = site_t;
+            char* wkt;
+            site_t->exportToWkt(&wkt);
+            psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"CUTLINE", wkt);
+        }
+
+        // set options
+        //psWarpOptions->papszWarpOptions = CSLDuplicate(papszOptions);
+        psWarpOptions->pTransformerArg =
+            GDALCreateGenImgProjTransformer( srcDS, srcDS->GetProjectionRef(),
+                                             dstDS, dstDS->GetProjectionRef(), TRUE, 0.0, 0 );
+        psWarpOptions->pfnTransformer = GDALGenImgProjTransform;
+
+        // Perform transformation
+        GDALWarpOperation oOperation;
+        oOperation.Initialize( psWarpOptions );
+        //if (Options::verbose() > 3) std::cout << "Error: " << CPLGetLastErrorMsg() << endl;
+        oOperation.ChunkAndWarpMulti( 0, 0, imgout.xsize(), imgout.ysize() );
+
+        // destroy things
+        GDALDestroyGenImgProjTransformer( psWarpOptions->pTransformerArg );
+        if (feature.valid()) {
+            GDALDestroyGenImgProjTransformer( oTransformer.hSrcImageTransformer );
+            CSLDestroy( papszOptionsCutline );
+            OGRGeometryFactory::destroyGeometry(site_t);
+        }
+        GDALDestroyWarpOptions( psWarpOptions );
+        return imgout;        
+    }
+
+
+    // private functions
+
+    //! Get list of band numbers from list of band names
     std::vector<int> GeoImage::Descriptions2Indices(std::vector<std::string> bands) const {
         std::vector<int> ibands;
         std::vector<int>::const_iterator b;
