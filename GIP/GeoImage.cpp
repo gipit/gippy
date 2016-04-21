@@ -252,7 +252,8 @@ namespace gip {
 
         int xsz = std::ceil((ext.p1().x()-ext.p0().x()) / std::abs(xres));
         int ysz = std::ceil((ext.p1().y()-ext.p0().y()) / std::abs(yres));
-        GeoImage imgout(filename, xsz, ysz, nbands(), proj, ext, type());
+        CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
+        GeoImage imgout = GeoImage::create(filename, xsz, ysz, nbands(), proj, bbox, type().string());
 
         // save existing as temp file
         GeoImage geoimg = save<double>();
