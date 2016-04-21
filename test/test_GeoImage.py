@@ -111,6 +111,5 @@ class GeoImageTests(unittest.TestCase):
     def test_real_warp(self):
         """ Test warping a real image to another projection """
         geoimg = get_test_image()
-        geoimg2 = geoimg.select([1])
-        imgout = geoimg2.warp('test-realwarp.tif', proj='EPSG:4326', xres=0.0003, yres=0.0003)
-
+        #geoimg2 = geoimg.select([1])
+        imgout = geoimg.warp('test-realwarp.tif', proj='EPSG:4326', xres=0.0003, yres=0.0003)

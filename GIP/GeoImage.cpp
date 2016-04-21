@@ -254,8 +254,10 @@ namespace gip {
         int ysz = std::ceil((ext.p1().y()-ext.p0().y()) / std::abs(yres));
         GeoImage imgout(filename, xsz, ysz, nbands(), proj, ext, type());
 
-        // warp into this output image
-        warp_into(imgout, feature, interpolation);
+        // save existing as temp file
+        GeoImage geoimg = save<double>();
+        // warp temp into output image
+        geoimg.warp_into(imgout, feature, interpolation);
         return imgout;
     }
 
