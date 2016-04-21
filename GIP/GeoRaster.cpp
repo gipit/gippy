@@ -125,7 +125,7 @@ namespace gip {
         return _Stats;
     }
 
-    float GeoRaster::percentile(float p) const {
+    double GeoRaster::percentile(const double& p) const {
         CImg<float> st = stats();
         unsigned int bins(100);
         CImg<float> hist = histogram(bins,true) * 100;

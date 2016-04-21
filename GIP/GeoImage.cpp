@@ -235,16 +235,10 @@ namespace gip {
 
         // Calculate extent of final output
         BoundingBox ext = extent();
-        std::cout << "proj = " << proj << std::endl;
-        std::cout << "srs = " << srs() << std::endl;
-        std::cout << "EXTENT BEFORE" << ext << std::endl;
         // warp extent to desired SRS
         if (proj != srs()) {
             ext = ext.transform(srs(), proj);
         }
-        std::cout << "EXTENT AFTER" << ext << std::endl;
-        std::cout << "WIDTH = " << ext.width() << std::endl;
-        std::cout << "HEIGHT = " << ext.height() << std::endl;
         // if cropping, and feature is provided, then get intersection
         if (crop && feature.valid()) {
             BoundingBox fext = feature.extent();
@@ -258,7 +252,6 @@ namespace gip {
 
         int xsz = std::ceil((ext.p1().x()-ext.p0().x()) / std::abs(xres));
         int ysz = std::ceil((ext.p1().y()-ext.p0().y()) / std::abs(yres));
-        std::cout << "xsz = " << xsz << ", ysz = " << ysz << std::endl;
         GeoImage imgout(filename, xsz, ysz, nbands(), proj, ext, type());
 
         // warp into this output image

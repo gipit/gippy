@@ -25,17 +25,15 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include <map>
 
 #include <gip/gip.h>
 #include <gip/DataType.h>
-//#include <gdal_priv.h>
-#include <ogr_spatialref.h>
 #include <gip/geometry.h>
+#include <ogr_spatialref.h>
 
 
 namespace gip {
-    typedef std::map<std::string,std::string> dictionary;
+    typedef Rect<double> BoundingBox;
 
     //! Base class representing a geospatial resource
     class GeoResource {

@@ -25,9 +25,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
-//#include <ogr_srs_api.h>
 #include <ogr_spatialref.h>
-#include <gip/gip.h>
 #include <gip/utils.h>
 
 namespace gip {
@@ -185,6 +183,7 @@ namespace gip {
     };
 
     //! calculate union of all rects 
+    /*
     template<typename T> Rect<T> union_all(std::vector< Rect<T> > rects) {
         Rect<T> unioned(rects[0]);
         for (unsigned int i=1; i<rects.size(); i++) {
@@ -192,6 +191,7 @@ namespace gip {
         }
         return unioned;
     }
+    */
 
     //! Rect representing region of interest on a raster (ie pixel coordinates)
     class Chunk : public Rect<int> {
@@ -263,11 +263,7 @@ namespace gip {
         unsigned int _padding;
     };
 
-
-    //! Rect representing bounding box in some coordinates
     typedef Rect<double> BoundingBox;
-    //class BoundingBox : public Rect<double> {};
-
 
 } // namespace GIP
 

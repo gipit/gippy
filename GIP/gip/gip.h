@@ -23,7 +23,8 @@
 #define GIP_H
 
 #include <gdal_priv.h>
-
+#include <string>
+#include <map>
 
 //#define cimg_debug 0
 #define cimg_verbosity 1
@@ -39,6 +40,8 @@
 namespace gip {
     using cimg_library::CImg;
     using cimg_library::CImgList;
+
+    typedef std::map<std::string, std::string> dictionary;
 
     void init();
 
