@@ -54,7 +54,7 @@ namespace gip {
 
     //! Create new file
     GeoResource::GeoResource(string filename, int xsz, int ysz, int bsz, 
-                             string proj, Rect<double> bbox, 
+                             string proj, BoundingBox bbox, 
                              DataType dt, std::string format, bool temp)
         : _Filename(filename), _temp(temp) {
 
@@ -177,8 +177,28 @@ namespace gip {
         return Point<double>(aff[1], aff[5]);
     }
 
-    ChunkSet GeoResource::chunks(unsigned int padding, unsigned int numchunks) const {
-        return ChunkSet(xsize(), ysize(), padding, numchunks);
+    std::vector< Chunk > GeoResource::chunks(unsigned int padding, unsigned int numchunks) const {
+        std::vector< Chunk > _Chunks;
+        unsigned int rows;
+
+        if (numchunks == 0) {
+            // calculate based on global variable chunksize
+            rows = floor( ( Options::chunksize() *1024*1024) / sizeof(double) / xsize() );
+            rows = rows > ysize() ? ysize() : rows;
+            numchunks = ceil( ysize()/(float)rows );
+        } else {
+            rows = int(ysize() / numchunks);
+        }
+
+        _Chunks.clear();
+        Chunk chunk;
+        for (unsigned int i=0; i<numchunks; i++) {
+            chunk = Chunk(0, rows*i, xsize(), std::min(rows*(i+1),ysize())-(rows*i) );
+            chunk.padding(padding);
+            _Chunks.push_back(chunk);
+            //if (Options::verbose() > 3) std::cout << "  Chunk " << i << ": " << chunk << std::endl;
+        }
+        return _Chunks;        
     }
 
     // Metadata

@@ -51,7 +51,7 @@ namespace gip {
         float th_nirswir1(1.0);
         //float th_warm(210);
 
-        GeoImage imgout = GeoImage::create_from(filename, image, 4, "uint8");
+        GeoImage imgout = GeoImage::create_from(image, filename, 4, "uint8");
         imgout.set_nodata(0);
         imgout.set_bandnames({"finalmask", "cloudmask", "ambclouds", "pass1"});
         vector<string> bands_used({"RED","GREEN","NIR","SWIR1","LWIR"});
@@ -60,19 +60,18 @@ namespace gip {
         CImg<unsigned char> nonclouds, ambclouds, clouds, mask, temp2;
         float cloudsum(0), scenesize(0);
 
-        ChunkSet chunks(image.xsize(),image.ysize());
-        Rect<int> chunk;
-
         //if (Options::verbose()) cout << image.basename() << " - ACCA (dev-version)" << endl;
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            chunk = chunks[iChunk];
-            red = image["RED"].read<float>(chunk);
-            green = image["GREEN"].read<float>(chunk);
-            nir = image["NIR"].read<float>(chunk);
-            swir1 = image["SWIR1"].read<float>(chunk);
-            temp = image["LWIR"].read<float>(chunk);
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = image.chunks();
+        int i(0);
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            red = image["RED"].read<float>(*iCh);
+            green = image["GREEN"].read<float>(*iCh);
+            nir = image["NIR"].read<float>(*iCh);
+            swir1 = image["SWIR1"].read<float>(*iCh);
+            temp = image["LWIR"].read<float>(*iCh);
 
-            mask = image.nodata_mask(bands_used, chunk)^=1;
+            mask = image.nodata_mask(bands_used, *iCh)^=1;
 
             ndsi = (green - swir1).div(green + swir1);
             b56comp = (1.0 - swir1).mul(temp + 273.15);
@@ -110,10 +109,10 @@ namespace gip {
             cloudsum += clouds.sum();
             scenesize += mask.sum();
 
-            imgout["pass1"].write<unsigned char>(clouds,chunk);
-            imgout["ambclouds"].write<unsigned char>(ambclouds,chunk);
-            //imgout[0].write(nonclouds,iChunk);
-            if (Options::verbose() > 3) cout << "Processed chunk " << chunk << " of " << chunks.size() << endl;
+            imgout["pass1"].write<unsigned char>(clouds,*iCh);
+            imgout["ambclouds"].write<unsigned char>(ambclouds,*iCh);
+            //imgout[0].write(nonclouds,iCh);
+            if (Options::verbose() > 3) cout << "Processed chunk " << i++ << " of " << chunks.size() << endl;
         }
         // Cloud statistics
         float cloudcover = cloudsum / scenesize;
@@ -188,15 +187,14 @@ namespace gip {
                  << "xstep  = " << signX*xstep << endl
                  << "ystep  = " << signY*ystep << endl ;
 
-        chunks.padding(padding);
-
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            chunk = chunks[iChunk];
-            if (Options::verbose() > 3) cout << "Chunk " << chunk << " of " << chunks.size() << endl;
-            clouds = imgout["pass1"].read<unsigned char>(chunk);
+        chunks = image.chunks(padding);
+        i = 0;
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            if (Options::verbose() > 3) cout << "Chunk " << i++ << " of " << chunks.size() << endl;
+            clouds = imgout["pass1"].read<unsigned char>(*iCh);
             // should this be a |= ?
-            if (addclouds) clouds += imgout["ambclouds"].read<unsigned char>(chunk);
-            clouds|=(image.saturation_mask(bands_used, chunk));
+            if (addclouds) clouds += imgout["ambclouds"].read<unsigned char>(*iCh);
+            clouds|=(image.saturation_mask(bands_used, *iCh));
             // Majority filter
             //clouds|=clouds.get_convolve(filter).threshold(majority));
             if (erode > 0)
@@ -209,9 +207,9 @@ namespace gip {
                 for(int xN=abs(dx),yN=abs(dy); xN>0 && yN>0; xN-=xstep,yN-=ystep)
                     clouds|=temp2.get_shift(signX*xN,signY*yN);
             }
-            imgout["cloudmask"].write<unsigned char>(clouds,chunk);
+            imgout["cloudmask"].write<unsigned char>(clouds,*iCh);
             // Inverse and multiply by nodata mask to get good data mask
-            imgout["finalmask"].write<unsigned char>((clouds^=1).mul(image.nodata_mask(bands_used, chunk)^=1), chunk);
+            imgout["finalmask"].write<unsigned char>((clouds^=1).mul(image.nodata_mask(bands_used, *iCh)^=1), *iCh);
             // TODO - add in snow mask
         }
         return imgout;
@@ -224,14 +222,14 @@ namespace gip {
         float xres, float yres, bool crop, unsigned char interpolation) {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << images.nimages() << " files) - " << filename << endl;
-        Rect<double> extent = feature.extent();
+        BoundingBox extent = feature.extent();
 
         if (crop) {
-            Rect<double> _extent = images.extent(feature.srs());
+            BoundingBox _extent = images.extent(feature.srs());
             // limit to feature extent
             _extent.intersect(extent);
             // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
-            extent = Rect<double>(
+            extent = BoundingBox(
                 Point<double>(extent.x0() + std::floor((_extent.x0()-extent.x0()) / xres) * xres, _extent.y0()),
                 Point<double>(_extent.x1(), extent.y1() - std::floor((extent.y1()-_extent.y1()) / yres) * yres)
             );
@@ -285,12 +283,12 @@ namespace gip {
         if (Options::verbose() > 1)
             cout << "GIPPY: Fmask (tol=" << tolerance << ", d=" << dilate << ") - " << filename << endl;
 
-        GeoImage imgout = GeoImage::create_from(filename, image, 5, "uint8");
+        GeoImage imgout = GeoImage::create_from(image, filename, 5, "uint8");
         imgout.set_bandnames({"finalmask", "cloudmask", "PCP", "clearskywater", "clearskyland"});
         imgout.set_nodata(0);
         float nodataval(-32768);
         // Output probabilties (for debugging/analysis)
-        GeoImage probout = GeoImage::create_from(filename + "-prob", image, 2, "float32");
+        GeoImage probout = GeoImage::create_from(image, filename + "-prob", 2, "float32");
         probout.set_bandnames({"wcloud", "lcloud"});
         probout.set_nodata(nodataval);
 
@@ -303,20 +301,21 @@ namespace gip {
         //CImg<double> wstats(image.Size()), lstats(image.Size());
         //int wloc(0), lloc(0);
 
-        ChunkSet chunks(image.xsize(),image.ysize());
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = image.chunks();
 
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            blue = image["blue"].read<double>(chunks[iChunk]);
-            red = image["red"].read<double>(chunks[iChunk]);
-            green = image["green"].read<double>(chunks[iChunk]);
-            nir = image["nir"].read<double>(chunks[iChunk]);
-            swir1 = image["swir1"].read<double>(chunks[iChunk]);
-            swir2 = image["swir2"].read<double>(chunks[iChunk]);
-            BT = image["lwir"].read<double>(chunks[iChunk]);
-            mask = image.nodata_mask(chunks[iChunk])^=1;
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            blue = image["blue"].read<double>(*iCh);
+            red = image["red"].read<double>(*iCh);
+            green = image["green"].read<double>(*iCh);
+            nir = image["nir"].read<double>(*iCh);
+            swir1 = image["swir1"].read<double>(*iCh);
+            swir2 = image["swir2"].read<double>(*iCh);
+            BT = image["lwir"].read<double>(*iCh);
+            mask = image.nodata_mask(*iCh)^=1;
             ndvi = (nir-red).div(nir+red);
             ndsi = (green-swir1).div(green+swir1);
-            white = image.whiteness(chunks[iChunk]);
+            white = image.whiteness(*iCh);
 
             // Potential cloud pixels
             pcp =
@@ -331,8 +330,8 @@ namespace gip {
                 & white.get_threshold(0.7,false,true)^=1
                 & nir.get_div(swir1).threshold(0.75);
 
-            redsatmask = image["red"].saturation_mask(chunks[iChunk]);
-            greensatmask = image["green"].saturation_mask(chunks[iChunk]);
+            redsatmask = image["red"].saturation_mask(*iCh);
+            greensatmask = image["green"].saturation_mask(*iCh);
             vprob = red;
             // Calculate "variability probability"
             cimg_forXY(vprob,x,y) {
@@ -340,18 +339,18 @@ namespace gip {
                 _ndsi = (greensatmask(x,y) && swir1(x,y) > green(x,y)) ? 0 : abs(ndsi(x,y));
                 vprob(x,y) = 1 - std::max(white(x,y), std::max(_ndsi, _ndvi));
             }
-            probout["lcloud"].write(vprob, chunks[iChunk]);
+            probout["lcloud"].write(vprob, *iCh);
 
             datapixels += mask.sum();
             cloudpixels += pcp.sum();
             wmask = ((ndvi.get_threshold(0.01,false,true)^=1) &= (nir.get_threshold(0.01,false,true)^=1))|=
                     ((ndvi.get_threshold(0.1,false,true)^=1) &= (nir.get_threshold(0.05,false,true)^=1));
 
-            imgout["pcp"].write(pcp.mul(mask), chunks[iChunk]);        // Potential cloud pixels
-            imgout["water"].write(wmask.get_mul(mask), chunks[iChunk]);   // Clear-sky water
+            imgout["pcp"].write(pcp.mul(mask), *iCh);        // Potential cloud pixels
+            imgout["water"].write(wmask.get_mul(mask), *iCh);   // Clear-sky water
             CImg<unsigned char> landimg((wmask^1).mul(pcp^1).mul(mask));
             landpixels += landimg.sum();
-            imgout["land"].write(landimg, chunks[iChunk]);    // Clear-sky land
+            imgout["land"].write(landimg, *iCh);    // Clear-sky land
         }
         // floodfill....seems bad way
         //shadowmask = nir.draw_fill(nir.width()/2,nir.height()/2,)
@@ -378,20 +377,20 @@ namespace gip {
 
         // Calculate cloud probabilities for over water and land
         CImg<float> wprob, lprob;
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            mask = image.nodata_mask(chunks[iChunk])^=1;
-            BT = image["lwir"].read<double>(chunks[iChunk]);
-            swir1 = image["swir1"].read<double>(chunks[iChunk]);
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            mask = image.nodata_mask(*iCh)^=1;
+            BT = image["lwir"].read<double>(*iCh);
+            swir1 = image["swir1"].read<double>(*iCh);
 
             // Water Clouds = temp probability x brightness probability
             wprob = ((Twater - BT)/=4.0).mul( swir1.min(0.11)/=0.11 ).mul(mask);
-            probout["wcloud"].write(wprob, chunks[iChunk]);
+            probout["wcloud"].write(wprob, *iCh);
 
             // Land Clouds = temp probability x variability probability
-            vprob = probout["wcloud"].read<double>(chunks[iChunk]);
+            vprob = probout["wcloud"].read<double>(*iCh);
             lprob = ((Thi + 4-BT)/=(Thi+4-(Tlo-4))).mul( vprob ).mul(mask);
-            //1 - image.NDVI(*chunks[iChunk]).abs().max(image.NDSI(*chunks[iChunk]).abs()).max(image.Whiteness(*chunks[iChunk]).abs()) );
-            probout["lcloud"].write( lprob, chunks[iChunk]);
+            //1 - image.NDVI(**iCh).abs().max(image.NDSI(**iCh).abs()).max(image.Whiteness(**iCh).abs()) );
+            probout["lcloud"].write( lprob, *iCh);
         }
 
         // Thresholds
@@ -406,14 +405,14 @@ namespace gip {
         //CImg<int> filter(3,3,1,1, 1);
         int erode = 5;
         int padding(double(std::max(dilate,erode)+1)/2);
-        chunks.padding(padding);
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            mask = image.nodata_mask(chunks[iChunk])^=1;
-            pcp = imgout["pcp"].read<double>(chunks[iChunk]);
-            wmask = imgout["water"].read<double>(chunks[iChunk]);
-            BT = image["lwir"].read<double>(chunks[iChunk]);
+        chunks = image.chunks(padding);
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            mask = image.nodata_mask(*iCh)^=1;
+            pcp = imgout["pcp"].read<double>(*iCh);
+            wmask = imgout["water"].read<double>(*iCh);
+            BT = image["lwir"].read<double>(*iCh);
 
-            lprob = probout["lcloud"].read<double>(chunks[iChunk]);
+            lprob = probout["lcloud"].read<double>(*iCh);
             
             clouds = 
                 (pcp & wmask & wprob.threshold(0.5))|=
@@ -430,8 +429,8 @@ namespace gip {
 
             //cimg_forXY(nodatamask,x,y) if (!nodatamask(x,y)) mask(x,y) = 0;
             clouds.mul(mask);
-            imgout["clouds"].write(clouds, chunks[iChunk]);
-            imgout["final"].write((clouds^=1).mul(mask), chunks[iChunk]);
+            imgout["clouds"].write(clouds, *iCh);
+            imgout["final"].write((clouds^=1).mul(mask), *iCh);
         }
 
         return imgout;
@@ -450,7 +449,7 @@ namespace gip {
             //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
             if (Options::verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
             prodname = iprod->first;
-            imagesout[prodname] = GeoImage::create_from(iprod->second, image, 1, "int16");
+            imagesout[prodname] = GeoImage::create_from(image, iprod->second, 1, "int16");
             imagesout[prodname].set_nodata(nodataout);
             imagesout[prodname].set_gain(0.0001);
             imagesout[prodname].set_bandname(prodname, 1);
@@ -493,18 +492,19 @@ namespace gip {
 
         CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg;
 
-        ChunkSet chunks(image.xsize(),image.ysize());
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = image.chunks();
 
         // need to add overlap
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            if (Options::verbose() > 3) cout << "Chunk " << chunks[iChunk] << " of " << image[0].size() << endl;
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            if (Options::verbose() > 3) cout << "Chunk " << *iCh << " of " << image[0].size() << endl;
             for (isstr=used_colors.begin();isstr!=used_colors.end();isstr++) {
-                if (*isstr == "red") red = image["red"].read<float>(chunks[iChunk]);
-                else if (*isstr == "green") green = image["green"].read<float>(chunks[iChunk]);
-                else if (*isstr == "blue") blue = image["blue"].read<float>(chunks[iChunk]);
-                else if (*isstr == "nir") nir = image["nir"].read<float>(chunks[iChunk]);
-                else if (*isstr == "swir1") swir1 = image["swir1"].read<float>(chunks[iChunk]);
-                else if (*isstr == "swir2") swir2 = image["swir2"].read<float>(chunks[iChunk]);
+                if (*isstr == "red") red = image["red"].read<float>(*iCh);
+                else if (*isstr == "green") green = image["green"].read<float>(*iCh);
+                else if (*isstr == "blue") blue = image["blue"].read<float>(*iCh);
+                else if (*isstr == "nir") nir = image["nir"].read<float>(*iCh);
+                else if (*isstr == "swir1") swir1 = image["swir1"].read<float>(*iCh);
+                else if (*isstr == "swir2") swir2 = image["swir2"].read<float>(*iCh);
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
@@ -545,9 +545,9 @@ namespace gip {
                     cimgout = swir1.div(swir2);
                 }
                 // TODO don't read mask again...create here
-                cimgmask = image.nodata_mask(colors[prodname], chunks[iChunk]);
+                cimgmask = image.nodata_mask(colors[prodname], *iCh);
                 cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;
-                imagesout[prodname].write(cimgout,chunks[iChunk]);
+                imagesout[prodname].write(cimgout,*iCh);
             }
         }
         return GeoImage(filenames);
@@ -560,24 +560,25 @@ namespace gip {
         if ((coef.height() != (int)numbands) || (coef.width() != (int)numbands))
             throw std::runtime_error("Coefficient array needs to be of size NumBands x NumBands!");
         float nodataout = -32768;
-        GeoImage imgout = GeoImage::create_from(filename, img, img.nbands(), "float32");
+        GeoImage imgout = GeoImage::create_from(img, filename, img.nbands(), "float32");
         imgout.set_nodata(nodataout);
         imgout.set_meta(img.meta());
         CImg<float> cimg;
         CImg<unsigned char> mask;
 
-        ChunkSet chunks(img.xsize(),img.ysize());
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = img.chunks();
 
         for (unsigned int bout=0; bout<numbands; bout++) {
             //if (Options::verbose() > 4) cout << "Band " << bout << endl;
-            for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-                cimg = img[0].read<float>(chunks[iChunk]) * coef(0, bout);;
+            for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+                cimg = img[0].read<float>(*iCh) * coef(0, bout);;
                 for (unsigned int bin=1; bin<numbands; bin++) {
-                    cimg = cimg + (img[bin].read<float>(chunks[iChunk]) * coef(bin, bout));
+                    cimg = cimg + (img[bin].read<float>(*iCh) * coef(bin, bout));
                 }
-                mask = img.nodata_mask(chunks[iChunk]);
+                mask = img.nodata_mask(*iCh);
                 cimg_forXY(cimg,x,y) if (mask(x,y)) cimg(x,y) = nodataout;
-                imgout[bout].write(cimg, chunks[iChunk]);
+                imgout[bout].write(cimg, *iCh);
             }
         }
         return imgout;
@@ -587,7 +588,7 @@ namespace gip {
     GeoImage rxd(const GeoImage& img, string filename) {
         if (img.nbands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");
 
-        GeoImage imgout = GeoImage::create_from(filename, img, 1, "uint8");
+        GeoImage imgout = GeoImage::create_from(img, filename, 1, "uint8");
         imgout.set_bandname("RXD", 1);
 
         CImg<double> covariance = img.spectral_covariance();
@@ -600,15 +601,16 @@ namespace gip {
             bandmeans(x) = img[x].stats()[2];
         }
 
-        ChunkSet chunks(img.xsize(),img.ysize());
-        for (unsigned int iChunk=0; iChunk<chunks.size(); iChunk++) {
-            chip = img.read<double>(chunks[iChunk]);
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = img.chunks();
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            chip = img.read<double>(*iCh);
             chipout = CImg<double>(chip, "xyzc");
             cimg_forXY(chip,x,y) {
                 pixel = chip.get_crop(x,y,0,0,x,y,0,chip.spectrum()-1).unroll('x') - bandmeans;
                 chipout(x,y) = (pixel * K.get_transpose() * pixel.get_transpose())[0];
             }
-            imgout[0].write(chipout, chunks[iChunk]);
+            imgout[0].write(chipout, *iCh);
         }
         return imgout;
     }

@@ -94,10 +94,10 @@ namespace gip {
         return std::string(wkt); 
     }
 
-    Rect<double> GeoVectorResource::extent() const {
+    BoundingBox GeoVectorResource::extent() const {
         OGREnvelope ext;
         _Layer->GetExtent(&ext, true);
-        return Rect<double>(
+        return BoundingBox(
             Point<double>(ext.MinX, ext.MinY),
             Point<double>(ext.MaxX, ext.MaxY)
         );

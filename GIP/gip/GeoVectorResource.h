@@ -65,7 +65,7 @@ namespace gip {
         //std::string Projection() const;
 
         //! Get bounding box in projected units
-        Rect<double> extent() const;
+        BoundingBox extent() const;
 
         //! Get number of features
         unsigned long int nfeatures() const {

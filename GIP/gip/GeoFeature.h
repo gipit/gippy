@@ -96,10 +96,10 @@ namespace gip {
         }
 
         //! \name Geospatial information
-        Rect<double> extent() const {
+        BoundingBox extent() const {
             OGREnvelope ext;
             geometry()->getEnvelope(&ext);
-            return Rect<double>(
+            return BoundingBox(
                 Point<double>(ext.MinX, ext.MinY),
                 Point<double>(ext.MaxX, ext.MaxY)
             );
