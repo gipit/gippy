@@ -7,7 +7,6 @@ import unittest
 from datetime import datetime
 import gippy.algorithms as alg
 from utils import get_test_image
-from nose.tools import set_trace
 
 
 class GeoImageTests(unittest.TestCase):
@@ -16,25 +15,19 @@ class GeoImageTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gp.Options.set_verbose(3)
+        gp.Options.set_verbose(2)
         gp.Options.set_chunksize(4.0)
 
-    def create_image(self, filename='', size=(1, 1000, 1000), dtype='uint8', temp=False):
-        return gp.GeoImage.create(filename,
-                                  xsz=size[1], ysz=size[2], nb=size[0],
-                                  bbox=np.array([0.0, 0.0, 1.0, 1.0]),
-                                  dtype=dtype, temp=temp)
-
-    def test_open(self):
+    def test0_open(self):
         """ Open existing image """
         geoimg = get_test_image()
         self.assertTrue(geoimg.xsize() > 0)
         self.assertTrue(geoimg.ysize() > 0)
 
-    def test_create(self):
+    def test1_create(self):
         """ Create single band image """
         fout = 'test.tif'
-        geoimg = self.create_image(fout)
+        geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000)
         self.assertTrue(geoimg.xsize() == 1000)
         self.assertTrue(geoimg.ysize() == 1000)
         self.assertTrue(os.path.exists(fout))
@@ -47,7 +40,7 @@ class GeoImageTests(unittest.TestCase):
     def test_create_multiband(self):
         """ Create an RGB image """
         fout = 'test_3band.tif'
-        geoimg = self.create_image(fout, (3, 1000, 1000))
+        geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000, nb=3)
         geoimg.set_bandnames(['green', 'red', 'blue'])
         # test selection of bands
         geoimg2 = geoimg.select(["red"])
@@ -60,7 +53,7 @@ class GeoImageTests(unittest.TestCase):
     def test_create_temp_file(self):
         """ Create a temp file that is deleted when last reference gone """
         fout = self.prefix + '_temp.tif'
-        geoimg = self.create_image(fout, size=(5, 1000, 1000), temp=True)
+        geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000, nb=5, temp=True)
         self.assertTrue(os.path.exists(fout))
         # keep a band
         band = geoimg[1]
@@ -73,7 +66,7 @@ class GeoImageTests(unittest.TestCase):
 
     def test_create_autoname_temp(self):
         """ Create temp file with auto-generated filename """
-        geoimg = self.create_image(size=(5, 1000, 1000))
+        geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, nb=3)
         fname = geoimg.filename()
         self.assertTrue(os.path.exists(fname))
         geoimg = None
@@ -99,3 +92,24 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(geoimg.type().string(), 'uint8')
         self.assertEqual(geoimg[0].min(), 1.0)
         self.assertEqual(geoimg[0].max(), 255.0)
+
+    def test_warp(self):
+        """ Test warping image into another """
+        fout1 = 'test-warpin.tif'
+        fout2 = 'test-warpout.tif'
+        bbox = np.array([0.0, 0.0, 1.0, 1.0])
+        # default image in EPSG:4326 that spans 1 degree
+        geoimg = gp.GeoImage.create(fout1, xsz=1000, ysz=1000, nb=3, proj='EPSG:4326', bbox=bbox)
+        # 3857, set resolution to 100 meters
+        imgout = geoimg.warp(fout2, proj='EPSG:3857', xres=100.0, yres=100.0)
+        self.assertTrue(os.path.exists(imgout.filename()))
+        self.assertEqual(imgout.xsize(), 1114)
+        self.assertEqual(imgout.ysize(), 1114)
+        self.assertAlmostEqual(np.ceil(imgout.resolution().x()), 100.0)
+
+    def test_real_warp(self):
+        """ Test warping a real image to another projection """
+        geoimg = get_test_image()
+        geoimg2 = geoimg.select([1])
+        imgout = geoimg2.warp('test-realwarp.tif', proj='EPSG:4326', xres=0.0003, yres=0.0003)
+

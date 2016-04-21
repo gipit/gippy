@@ -20,7 +20,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.set_verbose(1)
+        gippy.Options.set_verbose(2)
         gippy.Options.set_chunksize(128.0)
 
     def test_sqrt(self):
@@ -63,7 +63,7 @@ class GeoRasterTests(unittest.TestCase):
         inds = np.logical_and(red != nodata, nir != nodata)
         ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
         fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
-        geoimgout = gippy.GeoImage.create_from(fout, geoimg, 1, "float64")
+        geoimgout = gippy.GeoImage.create_from(geoimg, fout, dtype="float64")
         geoimgout[0].write(ndvi)
         geoimgout = None
         geoimg = None
