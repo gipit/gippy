@@ -92,17 +92,15 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(geoimg.type().string(), 'uint8')
         self.assertEqual(geoimg[0].min(), 1.0)
         self.assertEqual(geoimg[0].max(), 255.0)
-	os.remove(fout)
+        os.remove(fout)
 
     def test_warp(self):
         """ Test warping image into another """
-        fout1 = 'test-warpin.tif'
-        fout2 = 'test-warpout.tif'
         bbox = np.array([0.0, 0.0, 1.0, 1.0])
         # default image in EPSG:4326 that spans 1 degree
-        geoimg = gp.GeoImage.create(fout1, xsz=1000, ysz=1000, nb=3, proj='EPSG:4326', bbox=bbox)
+        geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, nb=3, proj='EPSG:4326', bbox=bbox)
         # 3857, set resolution to 100 meters
-        imgout = geoimg.warp(fout2, proj='EPSG:3857', xres=100.0, yres=100.0)
+        imgout = geoimg.warp(proj='EPSG:3857', xres=100.0, yres=100.0)
         self.assertTrue(os.path.exists(imgout.filename()))
         self.assertEqual(imgout.xsize(), 1114)
         self.assertEqual(imgout.ysize(), 1114)
@@ -111,5 +109,11 @@ class GeoImageTests(unittest.TestCase):
     def test_real_warp(self):
         """ Test warping a real image to another projection """
         geoimg = get_test_image()
-        #geoimg2 = geoimg.select([1])
-        imgout = geoimg.warp('test-realwarp.tif', proj='EPSG:4326', xres=0.0003, yres=0.0003)
+        fout = 'test-realwarp.tif'
+        imgout = geoimg.warp(fout, proj='EPSG:4326', xres=0.0003, yres=0.0003)
+        self.assertEqual(imgout.xsize(), 653)
+        self.assertEqual(imgout.ysize(), 547)
+        os.remove(fout)
+
+    #def test_warp_crop(self):
+        """ Test crop with feature when warping """
