@@ -111,39 +111,18 @@ namespace gip {
             return img;
         }
 
-        //static GeoImage New(string filename, const GeoImage& template=GeoImage(), int xsz=0, int ysz=0, int bands=1, DataType dt=GDT_Byte)
-        //! Constructor to create new file based on input vector extents
-        /*explicit GeoImage(string filename, string vector, float xres, float yres, DataType datatype=GDT_Byte, int bsz=1) {
-            OGRDataSource *poDS = OGRSFDriverRegistrar::Open(vector.c_str());
-            OGRLayer *poLayer = poDS->GetLayer(0);
-            OGREnvelope extent;
-            poLayer->GetExtent(&extent, true);
-            int xsize = (int)(0.5 + (extent.MaxX - extent.MinX) / xres);
-            int ysize = (int)(0.5 + (extent.MaxY - extent.MinY) / yres);
-            GeoResource::CreateNew(xsize, ysize, bsz, datatype, filename);
-            double affine[6];
-            affine[0] = extent.MinX;
-            affine[1] = xres;
-            affine[2] = 0;
-            affine[3] = extent.MaxY;
-            affine[4] = 0;
-            affine[5] = -yres;
-            _GDALDataset->SetGeoTransform(affine);
-            char* wkt = NULL;
-            poLayer->GetSpatialRef()->exportToWkt(&wkt);
-            _GDALDataset->SetProjection(wkt);
-            OGRDataSource::DestroyDataSource( poDS );
-        }*/
-
         //! Open new image
         static GeoImage open(std::string filename, bool update=false, float nodata=0,
             std::vector<std::string> bandnames=std::vector<std::string>({}),
             double gain=1.0, double offset=0.0) {
             // open image, then set all these things
             GeoImage geoimg = GeoImage(filename, update);
-            geoimg.set_bandnames(bandnames);
             geoimg.set_gain(gain);
-            geoimg.set_offset(offset);
+            geoimg.set_offset(offset);            
+            if (bandnames.size() != geoimg.nbands())
+                throw std::runtime_error("bandnames must be provided for all bands in file");
+            geoimg.set_bandnames(bandnames);
+
             return geoimg;
         }
 
@@ -169,19 +148,21 @@ namespace gip {
         //! Get vector of band names
         std::vector<std::string> bandnames() const { return _BandNames; }
         //! Set a band name
-        void set_bandname(std::string desc, int bandnum) {
+        GeoImage& set_bandname(std::string bandname, int bandnum) {
             try {
                 // Test if color already exists
-                (*this)[desc];
-                throw std::out_of_range ("Band " + desc + " already exists in GeoImage!");
+                (*this)[bandname];
+                throw std::out_of_range ("Band " + bandname + " already exists in GeoImage!");
             } catch(...) {
-                _BandNames[bandnum-1] = desc;
-                _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(desc.c_str());
-                _RasterBands[bandnum-1].set_color(desc);
-            }            
+                _BandNames[bandnum-1] = bandname;
+                //_RasterBands[bandnum-1]._GDALRasterBand->SetDescription(bandname.c_str());
+                _RasterBands[bandnum-1].set_color(bandname);
+                _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(bandname.c_str());
+            }
+            return *this;
         }
         //! Set all band names with vector size equal to # bands
-        void set_bandnames(std::vector<std::string> names) {
+        GeoImage& set_bandnames(std::vector<std::string> names) {
 	       if (names.size() != nbands())
             	throw std::out_of_range("Band list size must be equal to # of bands");
             for (unsigned int i=0; i<names.size(); i++) {
@@ -192,19 +173,20 @@ namespace gip {
                     std::cout << "Band " + names[i] + " already exists" << std::endl;
                 }
             }
+            return *this;
         }
         //! Check if this band exists
-        bool band_exists(std::string desc) const {
+        bool band_exists(std::string bandname) const {
             try {
-                (*this)[desc];
+                (*this)[bandname];
                 return true;
             } catch(...) {
                 return false;
             } 
         }   
         //! Check if ALL these bands exist
-        bool bands_exist(std::vector<std::string> desc) const {
-            for (std::vector<std::string>::const_iterator i=desc.begin(); i!=desc.end(); i++) {
+        bool bands_exist(std::vector<std::string> bnames) const {
+            for (std::vector<std::string>::const_iterator i=bnames.begin(); i!=bnames.end(); i++) {
                 if (!band_exists(*i)) return false;
             }
             return true;            
@@ -228,17 +210,26 @@ namespace gip {
         //! Adds a band (as last band)
         GeoImage& add(GeoRaster band);
         //! Keep only these band names
-        GeoImage& select(std::vector<std::string>);
+        GeoImage& select(std::vector<std::string> names);
         //! Keep only these band numbers
-        GeoImage& select(std::vector<int>);
+        GeoImage& select(std::vector<int> nums);
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands
-        void set_gain(float gain) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_gain(gain); }
+        GeoImage& set_gain(float gain) { 
+            for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_gain(gain);
+            return *this;
+        }
         //! Set gain for all bands
-        void set_offset(float offset) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_offset(offset); }
+        GeoImage& set_offset(float offset) { 
+            for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_offset(offset);
+            return *this;
+        }
         //! Set NoData for all bands
-        void set_nodata(double val) { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_nodata(val); }
+        GeoImage& set_nodata(double val) { 
+            for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_nodata(val);
+            return *this;
+        }
 
         //! \name Processing functions
         //! Auto rescale all bands
@@ -265,7 +256,10 @@ namespace gip {
             return *this;
         }
         //! Clear all masks
-        void clear_masks() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].clear_masks(); }
+        GeoImage& clear_masks() { 
+            for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].clear_masks();
+            return *this;
+        }
 
         //! \name File I/O
         //! Read raw chunk, across all bands
