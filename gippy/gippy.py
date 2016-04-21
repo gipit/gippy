@@ -252,79 +252,79 @@ class SwigPyIterator(_object):
 SwigPyIterator_swigregister = _gippy.SwigPyIterator_swigregister
 SwigPyIterator_swigregister(SwigPyIterator)
 
-class vectors(_object):
+class svector(_object):
     """Proxy of C++ std::vector<(std::string)> class"""
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, vectors, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, svector, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, vectors, name)
+    __getattr__ = lambda self, name: _swig_getattr(self, svector, name)
     __repr__ = _swig_repr
     def iterator(self):
         """
-        iterator(vectors self) -> SwigPyIterator
+        iterator(svector self) -> SwigPyIterator
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_iterator(self)
+        return _gippy.svector_iterator(self)
 
     def __iter__(self): return self.iterator()
     def __nonzero__(self):
         """
-        __nonzero__(vectors self) -> bool
+        __nonzero__(svector self) -> bool
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors___nonzero__(self)
+        return _gippy.svector___nonzero__(self)
 
     def __bool__(self):
         """
-        __bool__(vectors self) -> bool
+        __bool__(svector self) -> bool
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors___bool__(self)
+        return _gippy.svector___bool__(self)
 
     def __len__(self):
         """
-        __len__(vectors self) -> std::vector< std::string >::size_type
+        __len__(svector self) -> std::vector< std::string >::size_type
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors___len__(self)
+        return _gippy.svector___len__(self)
 
     def pop(self):
         """
-        pop(vectors self) -> std::vector< std::string >::value_type
+        pop(svector self) -> std::vector< std::string >::value_type
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_pop(self)
+        return _gippy.svector_pop(self)
 
     def __getslice__(self, *args, **kwargs):
         """
-        __getslice__(vectors self, std::vector< std::string >::difference_type i, std::vector< std::string >::difference_type j) -> vectors
+        __getslice__(svector self, std::vector< std::string >::difference_type i, std::vector< std::string >::difference_type j) -> svector
 
         Parameters:
             i: std::vector< std::string >::difference_type
             j: std::vector< std::string >::difference_type
 
         """
-        return _gippy.vectors___getslice__(self, *args, **kwargs)
+        return _gippy.svector___getslice__(self, *args, **kwargs)
 
     def __setslice__(self, *args, **kwargs):
         """
-        __setslice__(vectors self, std::vector< std::string >::difference_type i, std::vector< std::string >::difference_type j, 
-            vectors v=std::vector< std::string,std::allocator< std::string > >())
+        __setslice__(svector self, std::vector< std::string >::difference_type i, std::vector< std::string >::difference_type j, 
+            svector v=std::vector< std::string,std::allocator< std::string > >())
 
         Parameters:
             i: std::vector< std::string >::difference_type
@@ -332,286 +332,286 @@ class vectors(_object):
             v: std::vector< std::string,std::allocator< std::string > > const &
 
         """
-        return _gippy.vectors___setslice__(self, *args, **kwargs)
+        return _gippy.svector___setslice__(self, *args, **kwargs)
 
     def __delslice__(self, *args, **kwargs):
         """
-        __delslice__(vectors self, std::vector< std::string >::difference_type i, std::vector< std::string >::difference_type j)
+        __delslice__(svector self, std::vector< std::string >::difference_type i, std::vector< std::string >::difference_type j)
 
         Parameters:
             i: std::vector< std::string >::difference_type
             j: std::vector< std::string >::difference_type
 
         """
-        return _gippy.vectors___delslice__(self, *args, **kwargs)
+        return _gippy.svector___delslice__(self, *args, **kwargs)
 
     def __delitem__(self, *args):
         """
-        __delitem__(vectors self, std::vector< std::string >::difference_type i)
+        __delitem__(svector self, std::vector< std::string >::difference_type i)
 
         Parameters:
             i: std::vector< std::string >::difference_type
 
-        __delitem__(vectors self, PySliceObject * slice)
+        __delitem__(svector self, PySliceObject * slice)
 
         Parameters:
             slice: PySliceObject *
 
         """
-        return _gippy.vectors___delitem__(self, *args)
+        return _gippy.svector___delitem__(self, *args)
 
     def __getitem__(self, *args):
         """
-        __getitem__(vectors self, PySliceObject * slice) -> vectors
+        __getitem__(svector self, PySliceObject * slice) -> svector
 
         Parameters:
             slice: PySliceObject *
 
-        __getitem__(vectors self, std::vector< std::string >::difference_type i) -> std::vector< std::string >::value_type const &
+        __getitem__(svector self, std::vector< std::string >::difference_type i) -> std::vector< std::string >::value_type const &
 
         Parameters:
             i: std::vector< std::string >::difference_type
 
         """
-        return _gippy.vectors___getitem__(self, *args)
+        return _gippy.svector___getitem__(self, *args)
 
     def __setitem__(self, *args):
         """
-        __setitem__(vectors self, PySliceObject * slice, vectors v)
+        __setitem__(svector self, PySliceObject * slice, svector v)
 
         Parameters:
             slice: PySliceObject *
             v: std::vector< std::string,std::allocator< std::string > > const &
 
-        __setitem__(vectors self, PySliceObject * slice)
+        __setitem__(svector self, PySliceObject * slice)
 
         Parameters:
             slice: PySliceObject *
 
-        __setitem__(vectors self, std::vector< std::string >::difference_type i, std::vector< std::string >::value_type const & x)
+        __setitem__(svector self, std::vector< std::string >::difference_type i, std::vector< std::string >::value_type const & x)
 
         Parameters:
             i: std::vector< std::string >::difference_type
             x: std::vector< std::string >::value_type const &
 
         """
-        return _gippy.vectors___setitem__(self, *args)
+        return _gippy.svector___setitem__(self, *args)
 
     def append(self, *args, **kwargs):
         """
-        append(vectors self, std::vector< std::string >::value_type const & x)
+        append(svector self, std::vector< std::string >::value_type const & x)
 
         Parameters:
             x: std::vector< std::string >::value_type const &
 
         """
-        return _gippy.vectors_append(self, *args, **kwargs)
+        return _gippy.svector_append(self, *args, **kwargs)
 
     def empty(self):
         """
-        empty(vectors self) -> bool
+        empty(svector self) -> bool
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors_empty(self)
+        return _gippy.svector_empty(self)
 
     def size(self):
         """
-        size(vectors self) -> std::vector< std::string >::size_type
+        size(svector self) -> std::vector< std::string >::size_type
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors_size(self)
+        return _gippy.svector_size(self)
 
     def clear(self):
         """
-        clear(vectors self)
+        clear(svector self)
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_clear(self)
+        return _gippy.svector_clear(self)
 
     def swap(self, *args, **kwargs):
         """
-        swap(vectors self, vectors v)
+        swap(svector self, svector v)
 
         Parameters:
             v: std::vector< std::string > &
 
         """
-        return _gippy.vectors_swap(self, *args, **kwargs)
+        return _gippy.svector_swap(self, *args, **kwargs)
 
     def get_allocator(self):
         """
-        get_allocator(vectors self) -> std::vector< std::string >::allocator_type
+        get_allocator(svector self) -> std::vector< std::string >::allocator_type
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors_get_allocator(self)
+        return _gippy.svector_get_allocator(self)
 
     def begin(self):
         """
-        begin(vectors self) -> std::vector< std::string >::iterator
+        begin(svector self) -> std::vector< std::string >::iterator
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_begin(self)
+        return _gippy.svector_begin(self)
 
     def end(self):
         """
-        end(vectors self) -> std::vector< std::string >::iterator
+        end(svector self) -> std::vector< std::string >::iterator
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_end(self)
+        return _gippy.svector_end(self)
 
     def rbegin(self):
         """
-        rbegin(vectors self) -> std::vector< std::string >::reverse_iterator
+        rbegin(svector self) -> std::vector< std::string >::reverse_iterator
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_rbegin(self)
+        return _gippy.svector_rbegin(self)
 
     def rend(self):
         """
-        rend(vectors self) -> std::vector< std::string >::reverse_iterator
+        rend(svector self) -> std::vector< std::string >::reverse_iterator
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_rend(self)
+        return _gippy.svector_rend(self)
 
     def pop_back(self):
         """
-        pop_back(vectors self)
+        pop_back(svector self)
 
         Parameters:
             self: std::vector< std::string > *
 
         """
-        return _gippy.vectors_pop_back(self)
+        return _gippy.svector_pop_back(self)
 
     def erase(self, *args):
         """
-        erase(vectors self, std::vector< std::string >::iterator pos) -> std::vector< std::string >::iterator
+        erase(svector self, std::vector< std::string >::iterator pos) -> std::vector< std::string >::iterator
 
         Parameters:
             pos: std::vector< std::string >::iterator
 
-        erase(vectors self, std::vector< std::string >::iterator first, std::vector< std::string >::iterator last) -> std::vector< std::string >::iterator
+        erase(svector self, std::vector< std::string >::iterator first, std::vector< std::string >::iterator last) -> std::vector< std::string >::iterator
 
         Parameters:
             first: std::vector< std::string >::iterator
             last: std::vector< std::string >::iterator
 
         """
-        return _gippy.vectors_erase(self, *args)
+        return _gippy.svector_erase(self, *args)
 
     def __init__(self, *args): 
         """
-        __init__(std::vector<(std::string)> self) -> vectors
-        __init__(std::vector<(std::string)> self, vectors arg2) -> vectors
+        __init__(std::vector<(std::string)> self) -> svector
+        __init__(std::vector<(std::string)> self, svector arg2) -> svector
 
         Parameters:
             arg2: std::vector< std::string > const &
 
-        __init__(std::vector<(std::string)> self, std::vector< std::string >::size_type size) -> vectors
+        __init__(std::vector<(std::string)> self, std::vector< std::string >::size_type size) -> svector
 
         Parameters:
             size: std::vector< std::string >::size_type
 
-        __init__(std::vector<(std::string)> self, std::vector< std::string >::size_type size, std::vector< std::string >::value_type const & value) -> vectors
+        __init__(std::vector<(std::string)> self, std::vector< std::string >::size_type size, std::vector< std::string >::value_type const & value) -> svector
 
         Parameters:
             size: std::vector< std::string >::size_type
             value: std::vector< std::string >::value_type const &
 
         """
-        this = _gippy.new_vectors(*args)
+        this = _gippy.new_svector(*args)
         try: self.this.append(this)
         except: self.this = this
     def push_back(self, *args, **kwargs):
         """
-        push_back(vectors self, std::vector< std::string >::value_type const & x)
+        push_back(svector self, std::vector< std::string >::value_type const & x)
 
         Parameters:
             x: std::vector< std::string >::value_type const &
 
         """
-        return _gippy.vectors_push_back(self, *args, **kwargs)
+        return _gippy.svector_push_back(self, *args, **kwargs)
 
     def front(self):
         """
-        front(vectors self) -> std::vector< std::string >::value_type const &
+        front(svector self) -> std::vector< std::string >::value_type const &
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors_front(self)
+        return _gippy.svector_front(self)
 
     def back(self):
         """
-        back(vectors self) -> std::vector< std::string >::value_type const &
+        back(svector self) -> std::vector< std::string >::value_type const &
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors_back(self)
+        return _gippy.svector_back(self)
 
     def assign(self, *args, **kwargs):
         """
-        assign(vectors self, std::vector< std::string >::size_type n, std::vector< std::string >::value_type const & x)
+        assign(svector self, std::vector< std::string >::size_type n, std::vector< std::string >::value_type const & x)
 
         Parameters:
             n: std::vector< std::string >::size_type
             x: std::vector< std::string >::value_type const &
 
         """
-        return _gippy.vectors_assign(self, *args, **kwargs)
+        return _gippy.svector_assign(self, *args, **kwargs)
 
     def resize(self, *args):
         """
-        resize(vectors self, std::vector< std::string >::size_type new_size)
+        resize(svector self, std::vector< std::string >::size_type new_size)
 
         Parameters:
             new_size: std::vector< std::string >::size_type
 
-        resize(vectors self, std::vector< std::string >::size_type new_size, std::vector< std::string >::value_type const & x)
+        resize(svector self, std::vector< std::string >::size_type new_size, std::vector< std::string >::value_type const & x)
 
         Parameters:
             new_size: std::vector< std::string >::size_type
             x: std::vector< std::string >::value_type const &
 
         """
-        return _gippy.vectors_resize(self, *args)
+        return _gippy.svector_resize(self, *args)
 
     def insert(self, *args):
         """
-        insert(vectors self, std::vector< std::string >::iterator pos, std::vector< std::string >::value_type const & x) -> std::vector< std::string >::iterator
+        insert(svector self, std::vector< std::string >::iterator pos, std::vector< std::string >::value_type const & x) -> std::vector< std::string >::iterator
 
         Parameters:
             pos: std::vector< std::string >::iterator
             x: std::vector< std::string >::value_type const &
 
-        insert(vectors self, std::vector< std::string >::iterator pos, std::vector< std::string >::size_type n, 
+        insert(svector self, std::vector< std::string >::iterator pos, std::vector< std::string >::size_type n, 
             std::vector< std::string >::value_type const & x)
 
         Parameters:
@@ -620,105 +620,105 @@ class vectors(_object):
             x: std::vector< std::string >::value_type const &
 
         """
-        return _gippy.vectors_insert(self, *args)
+        return _gippy.svector_insert(self, *args)
 
     def reserve(self, *args, **kwargs):
         """
-        reserve(vectors self, std::vector< std::string >::size_type n)
+        reserve(svector self, std::vector< std::string >::size_type n)
 
         Parameters:
             n: std::vector< std::string >::size_type
 
         """
-        return _gippy.vectors_reserve(self, *args, **kwargs)
+        return _gippy.svector_reserve(self, *args, **kwargs)
 
     def capacity(self):
         """
-        capacity(vectors self) -> std::vector< std::string >::size_type
+        capacity(svector self) -> std::vector< std::string >::size_type
 
         Parameters:
             self: std::vector< std::string > const *
 
         """
-        return _gippy.vectors_capacity(self)
+        return _gippy.svector_capacity(self)
 
-    __swig_destroy__ = _gippy.delete_vectors
+    __swig_destroy__ = _gippy.delete_svector
     __del__ = lambda self : None;
-vectors_swigregister = _gippy.vectors_swigregister
-vectors_swigregister(vectors)
+svector_swigregister = _gippy.svector_swigregister
+svector_swigregister(svector)
 
-class vectori(_object):
+class ivector(_object):
     """Proxy of C++ std::vector<(int)> class"""
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, vectori, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, ivector, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, vectori, name)
+    __getattr__ = lambda self, name: _swig_getattr(self, ivector, name)
     __repr__ = _swig_repr
     def iterator(self):
         """
-        iterator(vectori self) -> SwigPyIterator
+        iterator(ivector self) -> SwigPyIterator
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_iterator(self)
+        return _gippy.ivector_iterator(self)
 
     def __iter__(self): return self.iterator()
     def __nonzero__(self):
         """
-        __nonzero__(vectori self) -> bool
+        __nonzero__(ivector self) -> bool
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori___nonzero__(self)
+        return _gippy.ivector___nonzero__(self)
 
     def __bool__(self):
         """
-        __bool__(vectori self) -> bool
+        __bool__(ivector self) -> bool
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori___bool__(self)
+        return _gippy.ivector___bool__(self)
 
     def __len__(self):
         """
-        __len__(vectori self) -> std::vector< int >::size_type
+        __len__(ivector self) -> std::vector< int >::size_type
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori___len__(self)
+        return _gippy.ivector___len__(self)
 
     def pop(self):
         """
-        pop(vectori self) -> std::vector< int >::value_type
+        pop(ivector self) -> std::vector< int >::value_type
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_pop(self)
+        return _gippy.ivector_pop(self)
 
     def __getslice__(self, *args, **kwargs):
         """
-        __getslice__(vectori self, std::vector< int >::difference_type i, std::vector< int >::difference_type j) -> vectori
+        __getslice__(ivector self, std::vector< int >::difference_type i, std::vector< int >::difference_type j) -> ivector
 
         Parameters:
             i: std::vector< int >::difference_type
             j: std::vector< int >::difference_type
 
         """
-        return _gippy.vectori___getslice__(self, *args, **kwargs)
+        return _gippy.ivector___getslice__(self, *args, **kwargs)
 
     def __setslice__(self, *args, **kwargs):
         """
-        __setslice__(vectori self, std::vector< int >::difference_type i, std::vector< int >::difference_type j, vectori v=std::vector< int,std::allocator< int > >())
+        __setslice__(ivector self, std::vector< int >::difference_type i, std::vector< int >::difference_type j, ivector v=std::vector< int,std::allocator< int > >())
 
         Parameters:
             i: std::vector< int >::difference_type
@@ -726,286 +726,286 @@ class vectori(_object):
             v: std::vector< int,std::allocator< int > > const &
 
         """
-        return _gippy.vectori___setslice__(self, *args, **kwargs)
+        return _gippy.ivector___setslice__(self, *args, **kwargs)
 
     def __delslice__(self, *args, **kwargs):
         """
-        __delslice__(vectori self, std::vector< int >::difference_type i, std::vector< int >::difference_type j)
+        __delslice__(ivector self, std::vector< int >::difference_type i, std::vector< int >::difference_type j)
 
         Parameters:
             i: std::vector< int >::difference_type
             j: std::vector< int >::difference_type
 
         """
-        return _gippy.vectori___delslice__(self, *args, **kwargs)
+        return _gippy.ivector___delslice__(self, *args, **kwargs)
 
     def __delitem__(self, *args):
         """
-        __delitem__(vectori self, std::vector< int >::difference_type i)
+        __delitem__(ivector self, std::vector< int >::difference_type i)
 
         Parameters:
             i: std::vector< int >::difference_type
 
-        __delitem__(vectori self, PySliceObject * slice)
+        __delitem__(ivector self, PySliceObject * slice)
 
         Parameters:
             slice: PySliceObject *
 
         """
-        return _gippy.vectori___delitem__(self, *args)
+        return _gippy.ivector___delitem__(self, *args)
 
     def __getitem__(self, *args):
         """
-        __getitem__(vectori self, PySliceObject * slice) -> vectori
+        __getitem__(ivector self, PySliceObject * slice) -> ivector
 
         Parameters:
             slice: PySliceObject *
 
-        __getitem__(vectori self, std::vector< int >::difference_type i) -> std::vector< int >::value_type const &
+        __getitem__(ivector self, std::vector< int >::difference_type i) -> std::vector< int >::value_type const &
 
         Parameters:
             i: std::vector< int >::difference_type
 
         """
-        return _gippy.vectori___getitem__(self, *args)
+        return _gippy.ivector___getitem__(self, *args)
 
     def __setitem__(self, *args):
         """
-        __setitem__(vectori self, PySliceObject * slice, vectori v)
+        __setitem__(ivector self, PySliceObject * slice, ivector v)
 
         Parameters:
             slice: PySliceObject *
             v: std::vector< int,std::allocator< int > > const &
 
-        __setitem__(vectori self, PySliceObject * slice)
+        __setitem__(ivector self, PySliceObject * slice)
 
         Parameters:
             slice: PySliceObject *
 
-        __setitem__(vectori self, std::vector< int >::difference_type i, std::vector< int >::value_type const & x)
+        __setitem__(ivector self, std::vector< int >::difference_type i, std::vector< int >::value_type const & x)
 
         Parameters:
             i: std::vector< int >::difference_type
             x: std::vector< int >::value_type const &
 
         """
-        return _gippy.vectori___setitem__(self, *args)
+        return _gippy.ivector___setitem__(self, *args)
 
     def append(self, *args, **kwargs):
         """
-        append(vectori self, std::vector< int >::value_type const & x)
+        append(ivector self, std::vector< int >::value_type const & x)
 
         Parameters:
             x: std::vector< int >::value_type const &
 
         """
-        return _gippy.vectori_append(self, *args, **kwargs)
+        return _gippy.ivector_append(self, *args, **kwargs)
 
     def empty(self):
         """
-        empty(vectori self) -> bool
+        empty(ivector self) -> bool
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori_empty(self)
+        return _gippy.ivector_empty(self)
 
     def size(self):
         """
-        size(vectori self) -> std::vector< int >::size_type
+        size(ivector self) -> std::vector< int >::size_type
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori_size(self)
+        return _gippy.ivector_size(self)
 
     def clear(self):
         """
-        clear(vectori self)
+        clear(ivector self)
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_clear(self)
+        return _gippy.ivector_clear(self)
 
     def swap(self, *args, **kwargs):
         """
-        swap(vectori self, vectori v)
+        swap(ivector self, ivector v)
 
         Parameters:
             v: std::vector< int > &
 
         """
-        return _gippy.vectori_swap(self, *args, **kwargs)
+        return _gippy.ivector_swap(self, *args, **kwargs)
 
     def get_allocator(self):
         """
-        get_allocator(vectori self) -> std::vector< int >::allocator_type
+        get_allocator(ivector self) -> std::vector< int >::allocator_type
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori_get_allocator(self)
+        return _gippy.ivector_get_allocator(self)
 
     def begin(self):
         """
-        begin(vectori self) -> std::vector< int >::iterator
+        begin(ivector self) -> std::vector< int >::iterator
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_begin(self)
+        return _gippy.ivector_begin(self)
 
     def end(self):
         """
-        end(vectori self) -> std::vector< int >::iterator
+        end(ivector self) -> std::vector< int >::iterator
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_end(self)
+        return _gippy.ivector_end(self)
 
     def rbegin(self):
         """
-        rbegin(vectori self) -> std::vector< int >::reverse_iterator
+        rbegin(ivector self) -> std::vector< int >::reverse_iterator
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_rbegin(self)
+        return _gippy.ivector_rbegin(self)
 
     def rend(self):
         """
-        rend(vectori self) -> std::vector< int >::reverse_iterator
+        rend(ivector self) -> std::vector< int >::reverse_iterator
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_rend(self)
+        return _gippy.ivector_rend(self)
 
     def pop_back(self):
         """
-        pop_back(vectori self)
+        pop_back(ivector self)
 
         Parameters:
             self: std::vector< int > *
 
         """
-        return _gippy.vectori_pop_back(self)
+        return _gippy.ivector_pop_back(self)
 
     def erase(self, *args):
         """
-        erase(vectori self, std::vector< int >::iterator pos) -> std::vector< int >::iterator
+        erase(ivector self, std::vector< int >::iterator pos) -> std::vector< int >::iterator
 
         Parameters:
             pos: std::vector< int >::iterator
 
-        erase(vectori self, std::vector< int >::iterator first, std::vector< int >::iterator last) -> std::vector< int >::iterator
+        erase(ivector self, std::vector< int >::iterator first, std::vector< int >::iterator last) -> std::vector< int >::iterator
 
         Parameters:
             first: std::vector< int >::iterator
             last: std::vector< int >::iterator
 
         """
-        return _gippy.vectori_erase(self, *args)
+        return _gippy.ivector_erase(self, *args)
 
     def __init__(self, *args): 
         """
-        __init__(std::vector<(int)> self) -> vectori
-        __init__(std::vector<(int)> self, vectori arg2) -> vectori
+        __init__(std::vector<(int)> self) -> ivector
+        __init__(std::vector<(int)> self, ivector arg2) -> ivector
 
         Parameters:
             arg2: std::vector< int > const &
 
-        __init__(std::vector<(int)> self, std::vector< int >::size_type size) -> vectori
+        __init__(std::vector<(int)> self, std::vector< int >::size_type size) -> ivector
 
         Parameters:
             size: std::vector< int >::size_type
 
-        __init__(std::vector<(int)> self, std::vector< int >::size_type size, std::vector< int >::value_type const & value) -> vectori
+        __init__(std::vector<(int)> self, std::vector< int >::size_type size, std::vector< int >::value_type const & value) -> ivector
 
         Parameters:
             size: std::vector< int >::size_type
             value: std::vector< int >::value_type const &
 
         """
-        this = _gippy.new_vectori(*args)
+        this = _gippy.new_ivector(*args)
         try: self.this.append(this)
         except: self.this = this
     def push_back(self, *args, **kwargs):
         """
-        push_back(vectori self, std::vector< int >::value_type const & x)
+        push_back(ivector self, std::vector< int >::value_type const & x)
 
         Parameters:
             x: std::vector< int >::value_type const &
 
         """
-        return _gippy.vectori_push_back(self, *args, **kwargs)
+        return _gippy.ivector_push_back(self, *args, **kwargs)
 
     def front(self):
         """
-        front(vectori self) -> std::vector< int >::value_type const &
+        front(ivector self) -> std::vector< int >::value_type const &
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori_front(self)
+        return _gippy.ivector_front(self)
 
     def back(self):
         """
-        back(vectori self) -> std::vector< int >::value_type const &
+        back(ivector self) -> std::vector< int >::value_type const &
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori_back(self)
+        return _gippy.ivector_back(self)
 
     def assign(self, *args, **kwargs):
         """
-        assign(vectori self, std::vector< int >::size_type n, std::vector< int >::value_type const & x)
+        assign(ivector self, std::vector< int >::size_type n, std::vector< int >::value_type const & x)
 
         Parameters:
             n: std::vector< int >::size_type
             x: std::vector< int >::value_type const &
 
         """
-        return _gippy.vectori_assign(self, *args, **kwargs)
+        return _gippy.ivector_assign(self, *args, **kwargs)
 
     def resize(self, *args):
         """
-        resize(vectori self, std::vector< int >::size_type new_size)
+        resize(ivector self, std::vector< int >::size_type new_size)
 
         Parameters:
             new_size: std::vector< int >::size_type
 
-        resize(vectori self, std::vector< int >::size_type new_size, std::vector< int >::value_type const & x)
+        resize(ivector self, std::vector< int >::size_type new_size, std::vector< int >::value_type const & x)
 
         Parameters:
             new_size: std::vector< int >::size_type
             x: std::vector< int >::value_type const &
 
         """
-        return _gippy.vectori_resize(self, *args)
+        return _gippy.ivector_resize(self, *args)
 
     def insert(self, *args):
         """
-        insert(vectori self, std::vector< int >::iterator pos, std::vector< int >::value_type const & x) -> std::vector< int >::iterator
+        insert(ivector self, std::vector< int >::iterator pos, std::vector< int >::value_type const & x) -> std::vector< int >::iterator
 
         Parameters:
             pos: std::vector< int >::iterator
             x: std::vector< int >::value_type const &
 
-        insert(vectori self, std::vector< int >::iterator pos, std::vector< int >::size_type n, std::vector< int >::value_type const & x)
+        insert(ivector self, std::vector< int >::iterator pos, std::vector< int >::size_type n, std::vector< int >::value_type const & x)
 
         Parameters:
             pos: std::vector< int >::iterator
@@ -1013,32 +1013,32 @@ class vectori(_object):
             x: std::vector< int >::value_type const &
 
         """
-        return _gippy.vectori_insert(self, *args)
+        return _gippy.ivector_insert(self, *args)
 
     def reserve(self, *args, **kwargs):
         """
-        reserve(vectori self, std::vector< int >::size_type n)
+        reserve(ivector self, std::vector< int >::size_type n)
 
         Parameters:
             n: std::vector< int >::size_type
 
         """
-        return _gippy.vectori_reserve(self, *args, **kwargs)
+        return _gippy.ivector_reserve(self, *args, **kwargs)
 
     def capacity(self):
         """
-        capacity(vectori self) -> std::vector< int >::size_type
+        capacity(ivector self) -> std::vector< int >::size_type
 
         Parameters:
             self: std::vector< int > const *
 
         """
-        return _gippy.vectori_capacity(self)
+        return _gippy.ivector_capacity(self)
 
-    __swig_destroy__ = _gippy.delete_vectori
+    __swig_destroy__ = _gippy.delete_ivector
     __del__ = lambda self : None;
-vectori_swigregister = _gippy.vectori_swigregister
-vectori_swigregister(vectori)
+ivector_swigregister = _gippy.ivector_swigregister
+ivector_swigregister(ivector)
 
 cimg_verbosity = _gippy.cimg_verbosity
 cimg_display = _gippy.cimg_display
@@ -1192,311 +1192,17 @@ def Options_set_cores(*args, **kwargs):
     """
   return _gippy.Options_set_cores(*args, **kwargs)
 
-class ChunkSet(_object):
-    """Proxy of C++ gip::ChunkSet class"""
+class Chunk(_object):
+    """Proxy of C++ gip::Chunk class"""
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, ChunkSet, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, Chunk, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, ChunkSet, name)
+    __getattr__ = lambda self, name: _swig_getattr(self, Chunk, name)
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
-        __init__(gip::ChunkSet self) -> ChunkSet
-        __init__(gip::ChunkSet self, unsigned int xsize, unsigned int ysize, unsigned int padding=0, unsigned int numchunks=0) -> ChunkSet
-
-        Parameters:
-            xsize: unsigned int
-            ysize: unsigned int
-            padding: unsigned int
-            numchunks: unsigned int
-
-        __init__(gip::ChunkSet self, ChunkSet chunks) -> ChunkSet
-
-        Parameters:
-            chunks: gip::ChunkSet const &
-
-        """
-        this = _gippy.new_ChunkSet(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _gippy.delete_ChunkSet
-    __del__ = lambda self : None;
-    def xsize(self):
-        """
-        xsize(ChunkSet self) -> unsigned int
-
-        Parameters:
-            self: gip::ChunkSet const *
-
-        """
-        return _gippy.ChunkSet_xsize(self)
-
-    def ysize(self):
-        """
-        ysize(ChunkSet self) -> unsigned int
-
-        Parameters:
-            self: gip::ChunkSet const *
-
-        """
-        return _gippy.ChunkSet_ysize(self)
-
-    def valid(self):
-        """
-        valid(ChunkSet self) -> bool
-
-        Parameters:
-            self: gip::ChunkSet const *
-
-        """
-        return _gippy.ChunkSet_valid(self)
-
-    def size(self):
-        """
-        size(ChunkSet self) -> unsigned int
-
-        Parameters:
-            self: gip::ChunkSet const *
-
-        """
-        return _gippy.ChunkSet_size(self)
-
-    def padding(self, *args):
-        """
-        padding(ChunkSet self) -> unsigned int
-        padding(ChunkSet self, unsigned int _pad) -> ChunkSet
-
-        Parameters:
-            _pad: unsigned int
-
-        """
-        return _gippy.ChunkSet_padding(self, *args)
-
-    def __getitem__(self, *args, **kwargs):
-        """
-        __getitem__(ChunkSet self, int index) -> Rect_int
-
-        Parameters:
-            index: int
-
-        """
-        return _gippy.ChunkSet___getitem__(self, *args, **kwargs)
-
-    def __setitem__(self, *args, **kwargs):
-        """
-        __setitem__(ChunkSet self, int index, Rect_int rect) -> Rect_int
-
-        Parameters:
-            index: int
-            rect: gip::Rect< int > const &
-
-        """
-        return _gippy.ChunkSet___setitem__(self, *args, **kwargs)
-
-    def __len__(self):
-        """
-        __len__(ChunkSet self) -> unsigned long
-
-        Parameters:
-            self: gip::ChunkSet *
-
-        """
-        return _gippy.ChunkSet___len__(self)
-
-    def __deepcopy__(self, *args, **kwargs):
-        """
-        __deepcopy__(ChunkSet self, ChunkSet chunks) -> ChunkSet
-
-        Parameters:
-            chunks: gip::ChunkSet
-
-        """
-        return _gippy.ChunkSet___deepcopy__(self, *args, **kwargs)
-
-ChunkSet_swigregister = _gippy.ChunkSet_swigregister
-ChunkSet_swigregister(ChunkSet)
-
-class Point_int(_object):
-    """Proxy of C++ gip::Point<(int)> class"""
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Point_int, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Point_int, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        """
-        __init__(gip::Point<(int)> self) -> Point_int
-        __init__(gip::Point<(int)> self, int x, int y) -> Point_int
-
-        Parameters:
-            x: int
-            y: int
-
-        """
-        this = _gippy.new_Point_int(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _gippy.delete_Point_int
-    __del__ = lambda self : None;
-    def __sub__(self, *args, **kwargs):
-        """
-        __sub__(Point_int self, Point_int p) -> Point_int
-
-        Parameters:
-            p: gip::Point< int > const &
-
-        """
-        return _gippy.Point_int___sub__(self, *args, **kwargs)
-
-    def __add__(self, *args, **kwargs):
-        """
-        __add__(Point_int self, Point_int p) -> Point_int
-
-        Parameters:
-            p: gip::Point< int > const &
-
-        """
-        return _gippy.Point_int___add__(self, *args, **kwargs)
-
-    def __eq__(self, *args, **kwargs):
-        """
-        __eq__(Point_int self, Point_int p) -> bool
-
-        Parameters:
-            p: gip::Point< int > const &
-
-        """
-        return _gippy.Point_int___eq__(self, *args, **kwargs)
-
-    def __ne__(self, *args, **kwargs):
-        """
-        __ne__(Point_int self, Point_int p) -> bool
-
-        Parameters:
-            p: gip::Point< int > const &
-
-        """
-        return _gippy.Point_int___ne__(self, *args, **kwargs)
-
-    def x(self):
-        """
-        x(Point_int self) -> int
-
-        Parameters:
-            self: gip::Point< int > const *
-
-        """
-        return _gippy.Point_int_x(self)
-
-    def y(self):
-        """
-        y(Point_int self) -> int
-
-        Parameters:
-            self: gip::Point< int > const *
-
-        """
-        return _gippy.Point_int_y(self)
-
-Point_int_swigregister = _gippy.Point_int_swigregister
-Point_int_swigregister(Point_int)
-
-class Point_double(_object):
-    """Proxy of C++ gip::Point<(double)> class"""
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Point_double, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Point_double, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        """
-        __init__(gip::Point<(double)> self) -> Point_double
-        __init__(gip::Point<(double)> self, double x, double y) -> Point_double
-
-        Parameters:
-            x: double
-            y: double
-
-        """
-        this = _gippy.new_Point_double(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _gippy.delete_Point_double
-    __del__ = lambda self : None;
-    def __sub__(self, *args, **kwargs):
-        """
-        __sub__(Point_double self, Point_double p) -> Point_double
-
-        Parameters:
-            p: gip::Point< double > const &
-
-        """
-        return _gippy.Point_double___sub__(self, *args, **kwargs)
-
-    def __add__(self, *args, **kwargs):
-        """
-        __add__(Point_double self, Point_double p) -> Point_double
-
-        Parameters:
-            p: gip::Point< double > const &
-
-        """
-        return _gippy.Point_double___add__(self, *args, **kwargs)
-
-    def __eq__(self, *args, **kwargs):
-        """
-        __eq__(Point_double self, Point_double p) -> bool
-
-        Parameters:
-            p: gip::Point< double > const &
-
-        """
-        return _gippy.Point_double___eq__(self, *args, **kwargs)
-
-    def __ne__(self, *args, **kwargs):
-        """
-        __ne__(Point_double self, Point_double p) -> bool
-
-        Parameters:
-            p: gip::Point< double > const &
-
-        """
-        return _gippy.Point_double___ne__(self, *args, **kwargs)
-
-    def x(self):
-        """
-        x(Point_double self) -> double
-
-        Parameters:
-            self: gip::Point< double > const *
-
-        """
-        return _gippy.Point_double_x(self)
-
-    def y(self):
-        """
-        y(Point_double self) -> double
-
-        Parameters:
-            self: gip::Point< double > const *
-
-        """
-        return _gippy.Point_double_y(self)
-
-Point_double_swigregister = _gippy.Point_double_swigregister
-Point_double_swigregister(Point_double)
-
-class Rect_int(_object):
-    """Proxy of C++ gip::Rect<(int)> class"""
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Rect_int, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Rect_int, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        """
-        __init__(gip::Rect<(int)> self) -> Rect_int
-        __init__(gip::Rect<(int)> self, int x, int y, int width, int height) -> Rect_int
+        __init__(gip::Chunk self) -> Chunk
+        __init__(gip::Chunk self, int x, int y, int width, int height) -> Chunk
 
         Parameters:
             x: int
@@ -1504,846 +1210,1016 @@ class Rect_int(_object):
             width: int
             height: int
 
-        __init__(gip::Rect<(int)> self, Point_int p0, Point_int p1) -> Rect_int
+        __init__(gip::Chunk self, iPoint p0, iPoint p1) -> Chunk
 
         Parameters:
             p0: gip::Point< int >
             p1: gip::Point< int >
 
-        __init__(gip::Rect<(int)> self, Rect_int rect) -> Rect_int
+        __init__(gip::Chunk self, Chunk ch) -> Chunk
 
         Parameters:
-            rect: gip::Rect< int > const &
+            ch: gip::Chunk const &
 
         """
-        this = _gippy.new_Rect_int(*args)
+        this = _gippy.new_Chunk(*args)
         try: self.this.append(this)
         except: self.this = this
-    __swig_destroy__ = _gippy.delete_Rect_int
-    __del__ = lambda self : None;
-    def p0(self):
+    def intersect(self, *args, **kwargs):
         """
-        p0(Rect_int self) -> Point_int
+        intersect(Chunk self, Chunk rect) -> Chunk
 
         Parameters:
-            self: gip::Rect< int > const *
+            rect: gip::Chunk const &
 
         """
-        return _gippy.Rect_int_p0(self)
-
-    def p1(self):
-        """
-        p1(Rect_int self) -> Point_int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_p1(self)
-
-    def valid(self):
-        """
-        valid(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_valid(self)
-
-    def area(self):
-        """
-        area(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_area(self)
-
-    def width(self):
-        """
-        width(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_width(self)
-
-    def height(self):
-        """
-        height(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_height(self)
-
-    def x0(self):
-        """
-        x0(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_x0(self)
-
-    def y0(self):
-        """
-        y0(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_y0(self)
-
-    def x1(self):
-        """
-        x1(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_x1(self)
-
-    def y1(self):
-        """
-        y1(Rect_int self) -> int
-
-        Parameters:
-            self: gip::Rect< int > const *
-
-        """
-        return _gippy.Rect_int_y1(self)
-
-    def __eq__(self, *args, **kwargs):
-        """
-        __eq__(Rect_int self, Rect_int rect) -> bool
-
-        Parameters:
-            rect: gip::Rect< int > const &
-
-        """
-        return _gippy.Rect_int___eq__(self, *args, **kwargs)
-
-    def __ne__(self, *args, **kwargs):
-        """
-        __ne__(Rect_int self, Rect_int rect) -> bool
-
-        Parameters:
-            rect: gip::Rect< int > const &
-
-        """
-        return _gippy.Rect_int___ne__(self, *args, **kwargs)
+        return _gippy.Chunk_intersect(self, *args, **kwargs)
 
     def padding(self, *args):
         """
-        padding(Rect_int self) -> unsigned int
-        padding(Rect_int self, unsigned int padding) -> Rect_int
+        padding(Chunk self) -> unsigned int
+        padding(Chunk self, unsigned int padding) -> Chunk
 
         Parameters:
             padding: unsigned int
 
         """
-        return _gippy.Rect_int_padding(self, *args)
-
-    def transform(self, *args, **kwargs):
-        """
-        transform(Rect_int self, std::string src, std::string dst) -> Rect_int
-
-        Parameters:
-            src: std::string
-            dst: std::string
-
-        """
-        return _gippy.Rect_int_transform(self, *args, **kwargs)
+        return _gippy.Chunk_padding(self, *args)
 
     def pad(self, *args):
         """
-        pad(Rect_int self) -> Rect_int
-        pad(Rect_int self, int pad) -> Rect_int
+        pad(Chunk self) -> Chunk
+        pad(Chunk self, int pad) -> Chunk
 
         Parameters:
             pad: int
 
         """
-        return _gippy.Rect_int_pad(self, *args)
+        return _gippy.Chunk_pad(self, *args)
 
-    def get_pad(self, *args):
-        """
-        get_pad(Rect_int self) -> Rect_int
-        get_pad(Rect_int self, int pad) -> Rect_int
+    __swig_destroy__ = _gippy.delete_Chunk
+    __del__ = lambda self : None;
+Chunk_swigregister = _gippy.Chunk_swigregister
+Chunk_swigregister(Chunk)
 
-        Parameters:
-            pad: int
-
-        """
-        return _gippy.Rect_int_get_pad(self, *args)
-
-    def intersect(self, *args, **kwargs):
-        """
-        intersect(Rect_int self, Rect_int rect) -> Rect_int
-
-        Parameters:
-            rect: gip::Rect< int > const &
-
-        """
-        return _gippy.Rect_int_intersect(self, *args, **kwargs)
-
-    def get_intersect(self, *args, **kwargs):
-        """
-        get_intersect(Rect_int self, Rect_int rect) -> Rect_int
-
-        Parameters:
-            rect: gip::Rect< int > const &
-
-        """
-        return _gippy.Rect_int_get_intersect(self, *args, **kwargs)
-
-    def union_with(self, *args, **kwargs):
-        """
-        union_with(Rect_int self, Rect_int rect) -> Rect_int
-
-        Parameters:
-            rect: gip::Rect< int > const &
-
-        """
-        return _gippy.Rect_int_union_with(self, *args, **kwargs)
-
-Rect_int_swigregister = _gippy.Rect_int_swigregister
-Rect_int_swigregister(Rect_int)
-
-class Rect_double(_object):
-    """Proxy of C++ gip::Rect<(double)> class"""
+class iPoint(_object):
+    """Proxy of C++ gip::Point<(int)> class"""
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, Rect_double, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, iPoint, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, Rect_double, name)
+    __getattr__ = lambda self, name: _swig_getattr(self, iPoint, name)
     __repr__ = _swig_repr
     def __init__(self, *args): 
         """
-        __init__(gip::Rect<(double)> self) -> Rect_double
-        __init__(gip::Rect<(double)> self, double x, double y, double width, double height) -> Rect_double
+        __init__(gip::Point<(int)> self) -> iPoint
+        __init__(gip::Point<(int)> self, int x, int y) -> iPoint
+
+        Parameters:
+            x: int
+            y: int
+
+        """
+        this = _gippy.new_iPoint(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _gippy.delete_iPoint
+    __del__ = lambda self : None;
+    def __sub__(self, *args, **kwargs):
+        """
+        __sub__(iPoint self, iPoint p) -> iPoint
+
+        Parameters:
+            p: gip::Point< int > const &
+
+        """
+        return _gippy.iPoint___sub__(self, *args, **kwargs)
+
+    def __add__(self, *args, **kwargs):
+        """
+        __add__(iPoint self, iPoint p) -> iPoint
+
+        Parameters:
+            p: gip::Point< int > const &
+
+        """
+        return _gippy.iPoint___add__(self, *args, **kwargs)
+
+    def __eq__(self, *args, **kwargs):
+        """
+        __eq__(iPoint self, iPoint p) -> bool
+
+        Parameters:
+            p: gip::Point< int > const &
+
+        """
+        return _gippy.iPoint___eq__(self, *args, **kwargs)
+
+    def __ne__(self, *args, **kwargs):
+        """
+        __ne__(iPoint self, iPoint p) -> bool
+
+        Parameters:
+            p: gip::Point< int > const &
+
+        """
+        return _gippy.iPoint___ne__(self, *args, **kwargs)
+
+    def x(self):
+        """
+        x(iPoint self) -> int
+
+        Parameters:
+            self: gip::Point< int > const *
+
+        """
+        return _gippy.iPoint_x(self)
+
+    def y(self):
+        """
+        y(iPoint self) -> int
+
+        Parameters:
+            self: gip::Point< int > const *
+
+        """
+        return _gippy.iPoint_y(self)
+
+iPoint_swigregister = _gippy.iPoint_swigregister
+iPoint_swigregister(iPoint)
+
+class dPoint(_object):
+    """Proxy of C++ gip::Point<(double)> class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, dPoint, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, dPoint, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(gip::Point<(double)> self) -> dPoint
+        __init__(gip::Point<(double)> self, double x, double y) -> dPoint
 
         Parameters:
             x: double
             y: double
-            width: double
-            height: double
-
-        __init__(gip::Rect<(double)> self, Point_double p0, Point_double p1) -> Rect_double
-
-        Parameters:
-            p0: gip::Point< double >
-            p1: gip::Point< double >
-
-        __init__(gip::Rect<(double)> self, Rect_double rect) -> Rect_double
-
-        Parameters:
-            rect: gip::Rect< double > const &
 
         """
-        this = _gippy.new_Rect_double(*args)
+        this = _gippy.new_dPoint(*args)
         try: self.this.append(this)
         except: self.this = this
-    __swig_destroy__ = _gippy.delete_Rect_double
+    __swig_destroy__ = _gippy.delete_dPoint
     __del__ = lambda self : None;
-    def p0(self):
+    def __sub__(self, *args, **kwargs):
         """
-        p0(Rect_double self) -> Point_double
+        __sub__(dPoint self, dPoint p) -> dPoint
 
         Parameters:
-            self: gip::Rect< double > const *
+            p: gip::Point< double > const &
 
         """
-        return _gippy.Rect_double_p0(self)
+        return _gippy.dPoint___sub__(self, *args, **kwargs)
 
-    def p1(self):
+    def __add__(self, *args, **kwargs):
         """
-        p1(Rect_double self) -> Point_double
+        __add__(dPoint self, dPoint p) -> dPoint
 
         Parameters:
-            self: gip::Rect< double > const *
+            p: gip::Point< double > const &
 
         """
-        return _gippy.Rect_double_p1(self)
-
-    def valid(self):
-        """
-        valid(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_valid(self)
-
-    def area(self):
-        """
-        area(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_area(self)
-
-    def width(self):
-        """
-        width(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_width(self)
-
-    def height(self):
-        """
-        height(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_height(self)
-
-    def x0(self):
-        """
-        x0(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_x0(self)
-
-    def y0(self):
-        """
-        y0(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_y0(self)
-
-    def x1(self):
-        """
-        x1(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_x1(self)
-
-    def y1(self):
-        """
-        y1(Rect_double self) -> double
-
-        Parameters:
-            self: gip::Rect< double > const *
-
-        """
-        return _gippy.Rect_double_y1(self)
+        return _gippy.dPoint___add__(self, *args, **kwargs)
 
     def __eq__(self, *args, **kwargs):
         """
-        __eq__(Rect_double self, Rect_double rect) -> bool
+        __eq__(dPoint self, dPoint p) -> bool
 
         Parameters:
-            rect: gip::Rect< double > const &
+            p: gip::Point< double > const &
 
         """
-        return _gippy.Rect_double___eq__(self, *args, **kwargs)
+        return _gippy.dPoint___eq__(self, *args, **kwargs)
 
     def __ne__(self, *args, **kwargs):
         """
-        __ne__(Rect_double self, Rect_double rect) -> bool
+        __ne__(dPoint self, dPoint p) -> bool
 
         Parameters:
-            rect: gip::Rect< double > const &
+            p: gip::Point< double > const &
 
         """
-        return _gippy.Rect_double___ne__(self, *args, **kwargs)
+        return _gippy.dPoint___ne__(self, *args, **kwargs)
 
-    def padding(self, *args):
+    def x(self):
         """
-        padding(Rect_double self) -> unsigned int
-        padding(Rect_double self, unsigned int padding) -> Rect_double
+        x(dPoint self) -> double
 
         Parameters:
-            padding: unsigned int
+            self: gip::Point< double > const *
 
         """
-        return _gippy.Rect_double_padding(self, *args)
+        return _gippy.dPoint_x(self)
 
-    def transform(self, *args, **kwargs):
+    def y(self):
         """
-        transform(Rect_double self, std::string src, std::string dst) -> Rect_double
+        y(dPoint self) -> double
 
         Parameters:
-            src: std::string
-            dst: std::string
+            self: gip::Point< double > const *
 
         """
-        return _gippy.Rect_double_transform(self, *args, **kwargs)
+        return _gippy.dPoint_y(self)
 
-    def pad(self, *args):
-        """
-        pad(Rect_double self) -> Rect_double
-        pad(Rect_double self, int pad) -> Rect_double
+dPoint_swigregister = _gippy.dPoint_swigregister
+dPoint_swigregister(dPoint)
 
-        Parameters:
-            pad: int
-
-        """
-        return _gippy.Rect_double_pad(self, *args)
-
-    def get_pad(self, *args):
-        """
-        get_pad(Rect_double self) -> Rect_double
-        get_pad(Rect_double self, int pad) -> Rect_double
-
-        Parameters:
-            pad: int
-
-        """
-        return _gippy.Rect_double_get_pad(self, *args)
-
-    def intersect(self, *args, **kwargs):
-        """
-        intersect(Rect_double self, Rect_double rect) -> Rect_double
-
-        Parameters:
-            rect: gip::Rect< double > const &
-
-        """
-        return _gippy.Rect_double_intersect(self, *args, **kwargs)
-
-    def get_intersect(self, *args, **kwargs):
-        """
-        get_intersect(Rect_double self, Rect_double rect) -> Rect_double
-
-        Parameters:
-            rect: gip::Rect< double > const &
-
-        """
-        return _gippy.Rect_double_get_intersect(self, *args, **kwargs)
-
-    def union_with(self, *args, **kwargs):
-        """
-        union_with(Rect_double self, Rect_double rect) -> Rect_double
-
-        Parameters:
-            rect: gip::Rect< double > const &
-
-        """
-        return _gippy.Rect_double_union_with(self, *args, **kwargs)
-
-Rect_double_swigregister = _gippy.Rect_double_swigregister
-Rect_double_swigregister(Rect_double)
-
-class vector_Rect_int(_object):
-    """Proxy of C++ std::vector<(gip::Rect<(int)>)> class"""
+class chvector(_object):
+    """Proxy of C++ std::vector<(Chunk)> class"""
     __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, vector_Rect_int, name, value)
+    __setattr__ = lambda self, name, value: _swig_setattr(self, chvector, name, value)
     __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, vector_Rect_int, name)
+    __getattr__ = lambda self, name: _swig_getattr(self, chvector, name)
     __repr__ = _swig_repr
     def iterator(self):
         """
-        iterator(vector_Rect_int self) -> SwigPyIterator
+        iterator(chvector self) -> SwigPyIterator
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_iterator(self)
+        return _gippy.chvector_iterator(self)
 
     def __iter__(self): return self.iterator()
     def __nonzero__(self):
         """
-        __nonzero__(vector_Rect_int self) -> bool
+        __nonzero__(chvector self) -> bool
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int___nonzero__(self)
+        return _gippy.chvector___nonzero__(self)
 
     def __bool__(self):
         """
-        __bool__(vector_Rect_int self) -> bool
+        __bool__(chvector self) -> bool
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int___bool__(self)
+        return _gippy.chvector___bool__(self)
 
     def __len__(self):
         """
-        __len__(vector_Rect_int self) -> std::vector< gip::Rect< int > >::size_type
+        __len__(chvector self) -> std::vector< Chunk >::size_type
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int___len__(self)
+        return _gippy.chvector___len__(self)
 
     def pop(self):
         """
-        pop(vector_Rect_int self) -> Rect_int
+        pop(chvector self) -> std::vector< Chunk >::value_type
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_pop(self)
+        return _gippy.chvector_pop(self)
 
     def __getslice__(self, *args, **kwargs):
         """
-        __getslice__(vector_Rect_int self, std::vector< gip::Rect< int > >::difference_type i, std::vector< gip::Rect< int > >::difference_type j) -> vector_Rect_int
+        __getslice__(chvector self, std::vector< Chunk >::difference_type i, std::vector< Chunk >::difference_type j) -> chvector
 
         Parameters:
-            i: std::vector< gip::Rect< int > >::difference_type
-            j: std::vector< gip::Rect< int > >::difference_type
+            i: std::vector< Chunk >::difference_type
+            j: std::vector< Chunk >::difference_type
 
         """
-        return _gippy.vector_Rect_int___getslice__(self, *args, **kwargs)
+        return _gippy.chvector___getslice__(self, *args, **kwargs)
 
     def __setslice__(self, *args, **kwargs):
         """
-        __setslice__(vector_Rect_int self, std::vector< gip::Rect< int > >::difference_type i, std::vector< gip::Rect< int > >::difference_type j, 
-            vector_Rect_int v=std::vector< gip::Rect< int >,std::allocator< gip::Rect< int > > >())
+        __setslice__(chvector self, std::vector< Chunk >::difference_type i, std::vector< Chunk >::difference_type j, 
+            chvector v=std::vector< Chunk,std::allocator< Chunk > >())
 
         Parameters:
-            i: std::vector< gip::Rect< int > >::difference_type
-            j: std::vector< gip::Rect< int > >::difference_type
-            v: std::vector< gip::Rect< int >,std::allocator< gip::Rect< int > > > const &
+            i: std::vector< Chunk >::difference_type
+            j: std::vector< Chunk >::difference_type
+            v: std::vector< Chunk,std::allocator< Chunk > > const &
 
         """
-        return _gippy.vector_Rect_int___setslice__(self, *args, **kwargs)
+        return _gippy.chvector___setslice__(self, *args, **kwargs)
 
     def __delslice__(self, *args, **kwargs):
         """
-        __delslice__(vector_Rect_int self, std::vector< gip::Rect< int > >::difference_type i, std::vector< gip::Rect< int > >::difference_type j)
+        __delslice__(chvector self, std::vector< Chunk >::difference_type i, std::vector< Chunk >::difference_type j)
 
         Parameters:
-            i: std::vector< gip::Rect< int > >::difference_type
-            j: std::vector< gip::Rect< int > >::difference_type
+            i: std::vector< Chunk >::difference_type
+            j: std::vector< Chunk >::difference_type
 
         """
-        return _gippy.vector_Rect_int___delslice__(self, *args, **kwargs)
+        return _gippy.chvector___delslice__(self, *args, **kwargs)
 
     def __delitem__(self, *args):
         """
-        __delitem__(vector_Rect_int self, std::vector< gip::Rect< int > >::difference_type i)
+        __delitem__(chvector self, std::vector< Chunk >::difference_type i)
 
         Parameters:
-            i: std::vector< gip::Rect< int > >::difference_type
+            i: std::vector< Chunk >::difference_type
 
-        __delitem__(vector_Rect_int self, PySliceObject * slice)
+        __delitem__(chvector self, PySliceObject * slice)
 
         Parameters:
             slice: PySliceObject *
 
         """
-        return _gippy.vector_Rect_int___delitem__(self, *args)
+        return _gippy.chvector___delitem__(self, *args)
 
     def __getitem__(self, *args):
         """
-        __getitem__(vector_Rect_int self, PySliceObject * slice) -> vector_Rect_int
+        __getitem__(chvector self, PySliceObject * slice) -> chvector
 
         Parameters:
             slice: PySliceObject *
 
-        __getitem__(vector_Rect_int self, std::vector< gip::Rect< int > >::difference_type i) -> Rect_int
+        __getitem__(chvector self, std::vector< Chunk >::difference_type i) -> std::vector< Chunk >::value_type const &
 
         Parameters:
-            i: std::vector< gip::Rect< int > >::difference_type
+            i: std::vector< Chunk >::difference_type
 
         """
-        return _gippy.vector_Rect_int___getitem__(self, *args)
+        return _gippy.chvector___getitem__(self, *args)
 
     def __setitem__(self, *args):
         """
-        __setitem__(vector_Rect_int self, PySliceObject * slice, vector_Rect_int v)
+        __setitem__(chvector self, PySliceObject * slice, chvector v)
 
         Parameters:
             slice: PySliceObject *
-            v: std::vector< gip::Rect< int >,std::allocator< gip::Rect< int > > > const &
+            v: std::vector< Chunk,std::allocator< Chunk > > const &
 
-        __setitem__(vector_Rect_int self, PySliceObject * slice)
+        __setitem__(chvector self, PySliceObject * slice)
 
         Parameters:
             slice: PySliceObject *
 
-        __setitem__(vector_Rect_int self, std::vector< gip::Rect< int > >::difference_type i, Rect_int x)
+        __setitem__(chvector self, std::vector< Chunk >::difference_type i, std::vector< Chunk >::value_type const & x)
 
         Parameters:
-            i: std::vector< gip::Rect< int > >::difference_type
-            x: std::vector< gip::Rect< int > >::value_type const &
+            i: std::vector< Chunk >::difference_type
+            x: std::vector< Chunk >::value_type const &
 
         """
-        return _gippy.vector_Rect_int___setitem__(self, *args)
+        return _gippy.chvector___setitem__(self, *args)
 
     def append(self, *args, **kwargs):
         """
-        append(vector_Rect_int self, Rect_int x)
+        append(chvector self, std::vector< Chunk >::value_type const & x)
 
         Parameters:
-            x: std::vector< gip::Rect< int > >::value_type const &
+            x: std::vector< Chunk >::value_type const &
 
         """
-        return _gippy.vector_Rect_int_append(self, *args, **kwargs)
+        return _gippy.chvector_append(self, *args, **kwargs)
 
     def empty(self):
         """
-        empty(vector_Rect_int self) -> bool
+        empty(chvector self) -> bool
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int_empty(self)
+        return _gippy.chvector_empty(self)
 
     def size(self):
         """
-        size(vector_Rect_int self) -> std::vector< gip::Rect< int > >::size_type
+        size(chvector self) -> std::vector< Chunk >::size_type
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int_size(self)
+        return _gippy.chvector_size(self)
 
     def clear(self):
         """
-        clear(vector_Rect_int self)
+        clear(chvector self)
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_clear(self)
+        return _gippy.chvector_clear(self)
 
     def swap(self, *args, **kwargs):
         """
-        swap(vector_Rect_int self, vector_Rect_int v)
+        swap(chvector self, chvector v)
 
         Parameters:
-            v: std::vector< gip::Rect< int > > &
+            v: std::vector< Chunk > &
 
         """
-        return _gippy.vector_Rect_int_swap(self, *args, **kwargs)
+        return _gippy.chvector_swap(self, *args, **kwargs)
 
     def get_allocator(self):
         """
-        get_allocator(vector_Rect_int self) -> std::vector< gip::Rect< int > >::allocator_type
+        get_allocator(chvector self) -> std::vector< Chunk >::allocator_type
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int_get_allocator(self)
+        return _gippy.chvector_get_allocator(self)
 
     def begin(self):
         """
-        begin(vector_Rect_int self) -> std::vector< gip::Rect< int > >::iterator
+        begin(chvector self) -> std::vector< Chunk >::iterator
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_begin(self)
+        return _gippy.chvector_begin(self)
 
     def end(self):
         """
-        end(vector_Rect_int self) -> std::vector< gip::Rect< int > >::iterator
+        end(chvector self) -> std::vector< Chunk >::iterator
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_end(self)
+        return _gippy.chvector_end(self)
 
     def rbegin(self):
         """
-        rbegin(vector_Rect_int self) -> std::vector< gip::Rect< int > >::reverse_iterator
+        rbegin(chvector self) -> std::vector< Chunk >::reverse_iterator
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_rbegin(self)
+        return _gippy.chvector_rbegin(self)
 
     def rend(self):
         """
-        rend(vector_Rect_int self) -> std::vector< gip::Rect< int > >::reverse_iterator
+        rend(chvector self) -> std::vector< Chunk >::reverse_iterator
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_rend(self)
+        return _gippy.chvector_rend(self)
 
     def pop_back(self):
         """
-        pop_back(vector_Rect_int self)
+        pop_back(chvector self)
 
         Parameters:
-            self: std::vector< gip::Rect< int > > *
+            self: std::vector< Chunk > *
 
         """
-        return _gippy.vector_Rect_int_pop_back(self)
+        return _gippy.chvector_pop_back(self)
 
     def erase(self, *args):
         """
-        erase(vector_Rect_int self, std::vector< gip::Rect< int > >::iterator pos) -> std::vector< gip::Rect< int > >::iterator
+        erase(chvector self, std::vector< Chunk >::iterator pos) -> std::vector< Chunk >::iterator
 
         Parameters:
-            pos: std::vector< gip::Rect< int > >::iterator
+            pos: std::vector< Chunk >::iterator
 
-        erase(vector_Rect_int self, std::vector< gip::Rect< int > >::iterator first, std::vector< gip::Rect< int > >::iterator last) -> std::vector< gip::Rect< int > >::iterator
+        erase(chvector self, std::vector< Chunk >::iterator first, std::vector< Chunk >::iterator last) -> std::vector< Chunk >::iterator
 
         Parameters:
-            first: std::vector< gip::Rect< int > >::iterator
-            last: std::vector< gip::Rect< int > >::iterator
+            first: std::vector< Chunk >::iterator
+            last: std::vector< Chunk >::iterator
 
         """
-        return _gippy.vector_Rect_int_erase(self, *args)
+        return _gippy.chvector_erase(self, *args)
 
     def __init__(self, *args): 
         """
-        __init__(std::vector<(gip::Rect<(int)>)> self) -> vector_Rect_int
-        __init__(std::vector<(gip::Rect<(int)>)> self, vector_Rect_int arg2) -> vector_Rect_int
+        __init__(std::vector<(Chunk)> self) -> chvector
+        __init__(std::vector<(Chunk)> self, chvector arg2) -> chvector
 
         Parameters:
-            arg2: std::vector< gip::Rect< int > > const &
+            arg2: std::vector< Chunk > const &
 
-        __init__(std::vector<(gip::Rect<(int)>)> self, std::vector< gip::Rect< int > >::size_type size) -> vector_Rect_int
-
-        Parameters:
-            size: std::vector< gip::Rect< int > >::size_type
-
-        __init__(std::vector<(gip::Rect<(int)>)> self, std::vector< gip::Rect< int > >::size_type size, Rect_int value) -> vector_Rect_int
+        __init__(std::vector<(Chunk)> self, std::vector< Chunk >::size_type size) -> chvector
 
         Parameters:
-            size: std::vector< gip::Rect< int > >::size_type
-            value: std::vector< gip::Rect< int > >::value_type const &
+            size: std::vector< Chunk >::size_type
+
+        __init__(std::vector<(Chunk)> self, std::vector< Chunk >::size_type size, std::vector< Chunk >::value_type const & value) -> chvector
+
+        Parameters:
+            size: std::vector< Chunk >::size_type
+            value: std::vector< Chunk >::value_type const &
 
         """
-        this = _gippy.new_vector_Rect_int(*args)
+        this = _gippy.new_chvector(*args)
         try: self.this.append(this)
         except: self.this = this
     def push_back(self, *args, **kwargs):
         """
-        push_back(vector_Rect_int self, Rect_int x)
+        push_back(chvector self, std::vector< Chunk >::value_type const & x)
 
         Parameters:
-            x: std::vector< gip::Rect< int > >::value_type const &
+            x: std::vector< Chunk >::value_type const &
 
         """
-        return _gippy.vector_Rect_int_push_back(self, *args, **kwargs)
+        return _gippy.chvector_push_back(self, *args, **kwargs)
 
     def front(self):
         """
-        front(vector_Rect_int self) -> Rect_int
+        front(chvector self) -> std::vector< Chunk >::value_type const &
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int_front(self)
+        return _gippy.chvector_front(self)
 
     def back(self):
         """
-        back(vector_Rect_int self) -> Rect_int
+        back(chvector self) -> std::vector< Chunk >::value_type const &
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int_back(self)
+        return _gippy.chvector_back(self)
 
     def assign(self, *args, **kwargs):
         """
-        assign(vector_Rect_int self, std::vector< gip::Rect< int > >::size_type n, Rect_int x)
+        assign(chvector self, std::vector< Chunk >::size_type n, std::vector< Chunk >::value_type const & x)
 
         Parameters:
-            n: std::vector< gip::Rect< int > >::size_type
-            x: std::vector< gip::Rect< int > >::value_type const &
+            n: std::vector< Chunk >::size_type
+            x: std::vector< Chunk >::value_type const &
 
         """
-        return _gippy.vector_Rect_int_assign(self, *args, **kwargs)
+        return _gippy.chvector_assign(self, *args, **kwargs)
 
     def resize(self, *args):
         """
-        resize(vector_Rect_int self, std::vector< gip::Rect< int > >::size_type new_size)
+        resize(chvector self, std::vector< Chunk >::size_type new_size)
 
         Parameters:
-            new_size: std::vector< gip::Rect< int > >::size_type
+            new_size: std::vector< Chunk >::size_type
 
-        resize(vector_Rect_int self, std::vector< gip::Rect< int > >::size_type new_size, Rect_int x)
+        resize(chvector self, std::vector< Chunk >::size_type new_size, std::vector< Chunk >::value_type const & x)
 
         Parameters:
-            new_size: std::vector< gip::Rect< int > >::size_type
-            x: std::vector< gip::Rect< int > >::value_type const &
+            new_size: std::vector< Chunk >::size_type
+            x: std::vector< Chunk >::value_type const &
 
         """
-        return _gippy.vector_Rect_int_resize(self, *args)
+        return _gippy.chvector_resize(self, *args)
 
     def insert(self, *args):
         """
-        insert(vector_Rect_int self, std::vector< gip::Rect< int > >::iterator pos, Rect_int x) -> std::vector< gip::Rect< int > >::iterator
+        insert(chvector self, std::vector< Chunk >::iterator pos, std::vector< Chunk >::value_type const & x) -> std::vector< Chunk >::iterator
 
         Parameters:
-            pos: std::vector< gip::Rect< int > >::iterator
-            x: std::vector< gip::Rect< int > >::value_type const &
+            pos: std::vector< Chunk >::iterator
+            x: std::vector< Chunk >::value_type const &
 
-        insert(vector_Rect_int self, std::vector< gip::Rect< int > >::iterator pos, std::vector< gip::Rect< int > >::size_type n, 
-            Rect_int x)
+        insert(chvector self, std::vector< Chunk >::iterator pos, std::vector< Chunk >::size_type n, std::vector< Chunk >::value_type const & x)
 
         Parameters:
-            pos: std::vector< gip::Rect< int > >::iterator
-            n: std::vector< gip::Rect< int > >::size_type
-            x: std::vector< gip::Rect< int > >::value_type const &
+            pos: std::vector< Chunk >::iterator
+            n: std::vector< Chunk >::size_type
+            x: std::vector< Chunk >::value_type const &
 
         """
-        return _gippy.vector_Rect_int_insert(self, *args)
+        return _gippy.chvector_insert(self, *args)
 
     def reserve(self, *args, **kwargs):
         """
-        reserve(vector_Rect_int self, std::vector< gip::Rect< int > >::size_type n)
+        reserve(chvector self, std::vector< Chunk >::size_type n)
 
         Parameters:
-            n: std::vector< gip::Rect< int > >::size_type
+            n: std::vector< Chunk >::size_type
 
         """
-        return _gippy.vector_Rect_int_reserve(self, *args, **kwargs)
+        return _gippy.chvector_reserve(self, *args, **kwargs)
 
     def capacity(self):
         """
-        capacity(vector_Rect_int self) -> std::vector< gip::Rect< int > >::size_type
+        capacity(chvector self) -> std::vector< Chunk >::size_type
 
         Parameters:
-            self: std::vector< gip::Rect< int > > const *
+            self: std::vector< Chunk > const *
 
         """
-        return _gippy.vector_Rect_int_capacity(self)
+        return _gippy.chvector_capacity(self)
 
-    __swig_destroy__ = _gippy.delete_vector_Rect_int
+    __swig_destroy__ = _gippy.delete_chvector
     __del__ = lambda self : None;
-vector_Rect_int_swigregister = _gippy.vector_Rect_int_swigregister
-vector_Rect_int_swigregister(vector_Rect_int)
+chvector_swigregister = _gippy.chvector_swigregister
+chvector_swigregister(chvector)
+
+class bbvector(_object):
+    """Proxy of C++ std::vector<(BoundingBox)> class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, bbvector, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, bbvector, name)
+    __repr__ = _swig_repr
+    def iterator(self):
+        """
+        iterator(bbvector self) -> SwigPyIterator
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_iterator(self)
+
+    def __iter__(self): return self.iterator()
+    def __nonzero__(self):
+        """
+        __nonzero__(bbvector self) -> bool
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector___nonzero__(self)
+
+    def __bool__(self):
+        """
+        __bool__(bbvector self) -> bool
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector___bool__(self)
+
+    def __len__(self):
+        """
+        __len__(bbvector self) -> std::vector< BoundingBox >::size_type
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector___len__(self)
+
+    def pop(self):
+        """
+        pop(bbvector self) -> std::vector< BoundingBox >::value_type
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_pop(self)
+
+    def __getslice__(self, *args, **kwargs):
+        """
+        __getslice__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::difference_type j) -> bbvector
+
+        Parameters:
+            i: std::vector< BoundingBox >::difference_type
+            j: std::vector< BoundingBox >::difference_type
+
+        """
+        return _gippy.bbvector___getslice__(self, *args, **kwargs)
+
+    def __setslice__(self, *args, **kwargs):
+        """
+        __setslice__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::difference_type j, 
+            bbvector v=std::vector< BoundingBox,std::allocator< BoundingBox > >())
+
+        Parameters:
+            i: std::vector< BoundingBox >::difference_type
+            j: std::vector< BoundingBox >::difference_type
+            v: std::vector< BoundingBox,std::allocator< BoundingBox > > const &
+
+        """
+        return _gippy.bbvector___setslice__(self, *args, **kwargs)
+
+    def __delslice__(self, *args, **kwargs):
+        """
+        __delslice__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::difference_type j)
+
+        Parameters:
+            i: std::vector< BoundingBox >::difference_type
+            j: std::vector< BoundingBox >::difference_type
+
+        """
+        return _gippy.bbvector___delslice__(self, *args, **kwargs)
+
+    def __delitem__(self, *args):
+        """
+        __delitem__(bbvector self, std::vector< BoundingBox >::difference_type i)
+
+        Parameters:
+            i: std::vector< BoundingBox >::difference_type
+
+        __delitem__(bbvector self, PySliceObject * slice)
+
+        Parameters:
+            slice: PySliceObject *
+
+        """
+        return _gippy.bbvector___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        """
+        __getitem__(bbvector self, PySliceObject * slice) -> bbvector
+
+        Parameters:
+            slice: PySliceObject *
+
+        __getitem__(bbvector self, std::vector< BoundingBox >::difference_type i) -> std::vector< BoundingBox >::value_type const &
+
+        Parameters:
+            i: std::vector< BoundingBox >::difference_type
+
+        """
+        return _gippy.bbvector___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        """
+        __setitem__(bbvector self, PySliceObject * slice, bbvector v)
+
+        Parameters:
+            slice: PySliceObject *
+            v: std::vector< BoundingBox,std::allocator< BoundingBox > > const &
+
+        __setitem__(bbvector self, PySliceObject * slice)
+
+        Parameters:
+            slice: PySliceObject *
+
+        __setitem__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::value_type const & x)
+
+        Parameters:
+            i: std::vector< BoundingBox >::difference_type
+            x: std::vector< BoundingBox >::value_type const &
+
+        """
+        return _gippy.bbvector___setitem__(self, *args)
+
+    def append(self, *args, **kwargs):
+        """
+        append(bbvector self, std::vector< BoundingBox >::value_type const & x)
+
+        Parameters:
+            x: std::vector< BoundingBox >::value_type const &
+
+        """
+        return _gippy.bbvector_append(self, *args, **kwargs)
+
+    def empty(self):
+        """
+        empty(bbvector self) -> bool
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector_empty(self)
+
+    def size(self):
+        """
+        size(bbvector self) -> std::vector< BoundingBox >::size_type
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector_size(self)
+
+    def clear(self):
+        """
+        clear(bbvector self)
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_clear(self)
+
+    def swap(self, *args, **kwargs):
+        """
+        swap(bbvector self, bbvector v)
+
+        Parameters:
+            v: std::vector< BoundingBox > &
+
+        """
+        return _gippy.bbvector_swap(self, *args, **kwargs)
+
+    def get_allocator(self):
+        """
+        get_allocator(bbvector self) -> std::vector< BoundingBox >::allocator_type
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector_get_allocator(self)
+
+    def begin(self):
+        """
+        begin(bbvector self) -> std::vector< BoundingBox >::iterator
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_begin(self)
+
+    def end(self):
+        """
+        end(bbvector self) -> std::vector< BoundingBox >::iterator
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_end(self)
+
+    def rbegin(self):
+        """
+        rbegin(bbvector self) -> std::vector< BoundingBox >::reverse_iterator
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_rbegin(self)
+
+    def rend(self):
+        """
+        rend(bbvector self) -> std::vector< BoundingBox >::reverse_iterator
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_rend(self)
+
+    def pop_back(self):
+        """
+        pop_back(bbvector self)
+
+        Parameters:
+            self: std::vector< BoundingBox > *
+
+        """
+        return _gippy.bbvector_pop_back(self)
+
+    def erase(self, *args):
+        """
+        erase(bbvector self, std::vector< BoundingBox >::iterator pos) -> std::vector< BoundingBox >::iterator
+
+        Parameters:
+            pos: std::vector< BoundingBox >::iterator
+
+        erase(bbvector self, std::vector< BoundingBox >::iterator first, std::vector< BoundingBox >::iterator last) -> std::vector< BoundingBox >::iterator
+
+        Parameters:
+            first: std::vector< BoundingBox >::iterator
+            last: std::vector< BoundingBox >::iterator
+
+        """
+        return _gippy.bbvector_erase(self, *args)
+
+    def __init__(self, *args): 
+        """
+        __init__(std::vector<(BoundingBox)> self) -> bbvector
+        __init__(std::vector<(BoundingBox)> self, bbvector arg2) -> bbvector
+
+        Parameters:
+            arg2: std::vector< BoundingBox > const &
+
+        __init__(std::vector<(BoundingBox)> self, std::vector< BoundingBox >::size_type size) -> bbvector
+
+        Parameters:
+            size: std::vector< BoundingBox >::size_type
+
+        __init__(std::vector<(BoundingBox)> self, std::vector< BoundingBox >::size_type size, std::vector< BoundingBox >::value_type const & value) -> bbvector
+
+        Parameters:
+            size: std::vector< BoundingBox >::size_type
+            value: std::vector< BoundingBox >::value_type const &
+
+        """
+        this = _gippy.new_bbvector(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    def push_back(self, *args, **kwargs):
+        """
+        push_back(bbvector self, std::vector< BoundingBox >::value_type const & x)
+
+        Parameters:
+            x: std::vector< BoundingBox >::value_type const &
+
+        """
+        return _gippy.bbvector_push_back(self, *args, **kwargs)
+
+    def front(self):
+        """
+        front(bbvector self) -> std::vector< BoundingBox >::value_type const &
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector_front(self)
+
+    def back(self):
+        """
+        back(bbvector self) -> std::vector< BoundingBox >::value_type const &
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector_back(self)
+
+    def assign(self, *args, **kwargs):
+        """
+        assign(bbvector self, std::vector< BoundingBox >::size_type n, std::vector< BoundingBox >::value_type const & x)
+
+        Parameters:
+            n: std::vector< BoundingBox >::size_type
+            x: std::vector< BoundingBox >::value_type const &
+
+        """
+        return _gippy.bbvector_assign(self, *args, **kwargs)
+
+    def resize(self, *args):
+        """
+        resize(bbvector self, std::vector< BoundingBox >::size_type new_size)
+
+        Parameters:
+            new_size: std::vector< BoundingBox >::size_type
+
+        resize(bbvector self, std::vector< BoundingBox >::size_type new_size, std::vector< BoundingBox >::value_type const & x)
+
+        Parameters:
+            new_size: std::vector< BoundingBox >::size_type
+            x: std::vector< BoundingBox >::value_type const &
+
+        """
+        return _gippy.bbvector_resize(self, *args)
+
+    def insert(self, *args):
+        """
+        insert(bbvector self, std::vector< BoundingBox >::iterator pos, std::vector< BoundingBox >::value_type const & x) -> std::vector< BoundingBox >::iterator
+
+        Parameters:
+            pos: std::vector< BoundingBox >::iterator
+            x: std::vector< BoundingBox >::value_type const &
+
+        insert(bbvector self, std::vector< BoundingBox >::iterator pos, std::vector< BoundingBox >::size_type n, 
+            std::vector< BoundingBox >::value_type const & x)
+
+        Parameters:
+            pos: std::vector< BoundingBox >::iterator
+            n: std::vector< BoundingBox >::size_type
+            x: std::vector< BoundingBox >::value_type const &
+
+        """
+        return _gippy.bbvector_insert(self, *args)
+
+    def reserve(self, *args, **kwargs):
+        """
+        reserve(bbvector self, std::vector< BoundingBox >::size_type n)
+
+        Parameters:
+            n: std::vector< BoundingBox >::size_type
+
+        """
+        return _gippy.bbvector_reserve(self, *args, **kwargs)
+
+    def capacity(self):
+        """
+        capacity(bbvector self) -> std::vector< BoundingBox >::size_type
+
+        Parameters:
+            self: std::vector< BoundingBox > const *
+
+        """
+        return _gippy.bbvector_capacity(self)
+
+    __swig_destroy__ = _gippy.delete_bbvector
+    __del__ = lambda self : None;
+bbvector_swigregister = _gippy.bbvector_swigregister
+bbvector_swigregister(bbvector)
 
 class DataType(_object):
     """Proxy of C++ gip::DataType class"""
@@ -2451,15 +2327,19 @@ class GeoResource(_object):
             update: bool
             temp: bool
 
-        __init__(gip::GeoResource self, int arg2, int arg3, int arg4, DataType arg5, std::string arg6, bool arg7=False) -> GeoResource
+        __init__(gip::GeoResource self, std::string arg2, int arg3, int arg4, int arg5, std::string arg6, gip::BoundingBox arg7, 
+            DataType arg8, std::string arg9, bool arg10) -> GeoResource
 
         Parameters:
-            arg2: int
+            arg2: std::string
             arg3: int
             arg4: int
-            arg5: gip::DataType
+            arg5: int
             arg6: std::string
-            arg7: bool
+            arg7: gip::BoundingBox
+            arg8: gip::DataType
+            arg9: std::string
+            arg10: bool
 
         __init__(gip::GeoResource self, GeoResource resource) -> GeoResource
 
@@ -2544,7 +2424,7 @@ class GeoResource(_object):
 
     def geoloc(self, *args, **kwargs):
         """
-        geoloc(GeoResource self, float xloc, float yloc) -> Point_double
+        geoloc(GeoResource self, float xloc, float yloc) -> dPoint
 
         Parameters:
             xloc: float
@@ -2555,7 +2435,7 @@ class GeoResource(_object):
 
     def minxy(self):
         """
-        minxy(GeoResource self) -> Point_double
+        minxy(GeoResource self) -> dPoint
 
         Parameters:
             self: gip::GeoResource const *
@@ -2565,7 +2445,7 @@ class GeoResource(_object):
 
     def maxxy(self):
         """
-        maxxy(GeoResource self) -> Point_double
+        maxxy(GeoResource self) -> dPoint
 
         Parameters:
             self: gip::GeoResource const *
@@ -2575,7 +2455,7 @@ class GeoResource(_object):
 
     def extent(self):
         """
-        extent(GeoResource self) -> Rect_double
+        extent(GeoResource self) -> gip::BoundingBox
 
         Parameters:
             self: gip::GeoResource const *
@@ -2625,7 +2505,7 @@ class GeoResource(_object):
 
     def resolution(self):
         """
-        resolution(GeoResource self) -> Point_double
+        resolution(GeoResource self) -> dPoint
 
         Parameters:
             self: gip::GeoResource const *
@@ -2635,7 +2515,7 @@ class GeoResource(_object):
 
     def chunks(self, padding=0, numchunks=0):
         """
-        chunks(GeoResource self, unsigned int padding=0, unsigned int numchunks=0) -> ChunkSet
+        chunks(GeoResource self, unsigned int padding=0, unsigned int numchunks=0) -> std::vector< gip::Chunk,std::allocator< gip::Chunk > >
 
         Parameters:
             padding: unsigned int
@@ -3269,50 +3149,40 @@ class GeoRaster(GeoResource):
 
     def saturation_mask(self, *args, **kwargs):
         """
-        saturation_mask(GeoRaster self, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        saturation_mask(GeoRaster self, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoRaster_saturation_mask(self, *args, **kwargs)
 
     def nodata_mask(self, *args, **kwargs):
         """
-        nodata_mask(GeoRaster self, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        nodata_mask(GeoRaster self, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoRaster_nodata_mask(self, *args, **kwargs)
 
     def data_mask(self, *args, **kwargs):
         """
-        data_mask(GeoRaster self, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        data_mask(GeoRaster self, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoRaster_data_mask(self, *args, **kwargs)
 
-    def smooth(self, *args, **kwargs):
-        """
-        smooth(GeoRaster self, GeoRaster raster) -> GeoRaster
-
-        Parameters:
-            raster: gip::GeoRaster
-
-        """
-        return _gippy.GeoRaster_smooth(self, *args, **kwargs)
-
     def read(self, *args, **kwargs):
         """
-        read(GeoRaster self, Rect_int chunk=gip::Rect< int >()) -> PyObject *
+        read(GeoRaster self, Chunk chunk=gip::Chunk()) -> PyObject *
 
         Parameters:
-            chunk: gip::Rect< int >
+            chunk: gip::Chunk
 
 
         PyObject returned is a numpy.array.
@@ -3323,11 +3193,11 @@ class GeoRaster(GeoResource):
 
     def write(self, *args, **kwargs):
         """
-        write(GeoRaster self, PyObject * obj, Rect_int chunk=gip::Rect< int >()) -> GeoRaster
+        write(GeoRaster self, PyObject * obj, Chunk chunk=gip::Chunk()) -> GeoRaster
 
         Parameters:
             obj: PyObject *
-            chunk: gip::Rect< int >
+            chunk: gip::Chunk
 
 
         PyObject passed in is a numpy.array.
@@ -3371,20 +3241,23 @@ class GeoImage(GeoResource):
             filename: std::string
             update: bool
 
-        __init__(gip::GeoImage self, vectors filenames) -> GeoImage
+        __init__(gip::GeoImage self, svector filenames) -> GeoImage
 
         Parameters:
             filenames: std::vector< std::string,std::allocator< std::string > >
 
-        __init__(gip::GeoImage self, std::string filename, int xsz, int ysz, int bsz, DataType dt=gip::DataType("uint8"), 
-            bool temp=False) -> GeoImage
+        __init__(gip::GeoImage self, std::string filename, int xsz, int ysz, int nb, std::string proj, gip::BoundingBox bbox, 
+            DataType dt, std::string format="", bool temp=False) -> GeoImage
 
         Parameters:
             filename: std::string
             xsz: int
             ysz: int
-            bsz: int
+            nb: int
+            proj: std::string
+            bbox: gip::BoundingBox
             dt: gip::DataType
+            format: std::string
             temp: bool
 
         __init__(gip::GeoImage self, GeoImage image) -> GeoImage
@@ -3400,16 +3273,20 @@ class GeoImage(GeoResource):
     __del__ = lambda self : None;
     def create(*args, **kwargs):
         """
-        create(std::string filename, unsigned int xsize=0, unsigned int ysize=0, unsigned int bsize=0, 
-            std::string dtype="unknown", std::string srs="", bool temp=False) -> GeoImage
+        create(std::string filename="", unsigned int xsz=1, unsigned int ysz=1, unsigned int nb=1, 
+            std::string proj="EPSG:4326", CImg< double > bbox=CImg< double >(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0), 
+            std::string dtype="uint8", std::string format="", 
+            bool temp=False) -> GeoImage
 
         Parameters:
             filename: std::string
-            xsize: unsigned int
-            ysize: unsigned int
-            bsize: unsigned int
+            xsz: unsigned int
+            ysz: unsigned int
+            nb: unsigned int
+            proj: std::string
+            bbox: CImg< double >
             dtype: std::string
-            srs: std::string
+            format: std::string
             temp: bool
 
         """
@@ -3419,14 +3296,15 @@ class GeoImage(GeoResource):
     __swig_getmethods__["create"] = lambda x: create
     def create_from(*args, **kwargs):
         """
-        create_from(std::string filename, GeoImage geoimg, unsigned int bsize=0, std::string dtype="unknown", 
-            bool temp=False) -> GeoImage
+        create_from(GeoImage geoimg, std::string filename="", unsigned int nb=0, std::string dtype="unknown", 
+            std::string format="", bool temp=False) -> GeoImage
 
         Parameters:
-            filename: std::string
             geoimg: gip::GeoImage
-            bsize: unsigned int
+            filename: std::string
+            nb: unsigned int
             dtype: std::string
+            format: std::string
             temp: bool
 
         """
@@ -3436,7 +3314,7 @@ class GeoImage(GeoResource):
     __swig_getmethods__["create_from"] = lambda x: create_from
     def open(*args, **kwargs):
         """
-        open(std::string filename, bool update=False, float nodata=0, vectors bandnames=std::vector< std::string >({}), 
+        open(std::string filename, bool update=False, float nodata=0, svector bandnames=std::vector< std::string >({}), 
             double gain=1.0, double offset=0.0) -> GeoImage
 
         Parameters:
@@ -3454,7 +3332,7 @@ class GeoImage(GeoResource):
     __swig_getmethods__["open"] = lambda x: open
     def filenames(self):
         """
-        filenames(GeoImage self) -> vectors
+        filenames(GeoImage self) -> svector
 
         Parameters:
             self: gip::GeoImage const *
@@ -3495,7 +3373,7 @@ class GeoImage(GeoResource):
 
     def bandnames(self):
         """
-        bandnames(GeoImage self) -> vectors
+        bandnames(GeoImage self) -> svector
 
         Parameters:
             self: gip::GeoImage const *
@@ -3516,7 +3394,7 @@ class GeoImage(GeoResource):
 
     def set_bandnames(self, *args, **kwargs):
         """
-        set_bandnames(GeoImage self, vectors names)
+        set_bandnames(GeoImage self, svector names)
 
         Parameters:
             names: std::vector< std::string,std::allocator< std::string > >
@@ -3536,7 +3414,7 @@ class GeoImage(GeoResource):
 
     def bands_exist(self, *args, **kwargs):
         """
-        bands_exist(GeoImage self, vectors desc) -> bool
+        bands_exist(GeoImage self, svector desc) -> bool
 
         Parameters:
             desc: std::vector< std::string,std::allocator< std::string > >
@@ -3556,12 +3434,12 @@ class GeoImage(GeoResource):
 
     def select(self, *args):
         """
-        select(GeoImage self, vectors arg2) -> GeoImage
+        select(GeoImage self, svector arg2) -> GeoImage
 
         Parameters:
             arg2: std::vector< std::string,std::allocator< std::string > >
 
-        select(GeoImage self, vectori arg2) -> GeoImage
+        select(GeoImage self, ivector arg2) -> GeoImage
 
         Parameters:
             arg2: std::vector< int,std::allocator< int > >
@@ -3643,61 +3521,91 @@ class GeoImage(GeoResource):
 
     def nodata_mask(self, *args):
         """
-        nodata_mask(GeoImage self, vectors bands, Rect_int chunk=gip::iRect()) -> CImg< uint8_t >
+        nodata_mask(GeoImage self, svector bands, Chunk chunk=gip::Chunk()) -> CImg< uint8_t >
 
         Parameters:
             bands: std::vector< std::string,std::allocator< std::string > >
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
-        nodata_mask(GeoImage self, Rect_int chunk=gip::iRect()) -> CImg< uint8_t >
+        nodata_mask(GeoImage self, Chunk chunk=gip::Chunk()) -> CImg< uint8_t >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoImage_nodata_mask(self, *args)
 
     def data_mask(self, *args):
         """
-        data_mask(GeoImage self, vectors bands, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        data_mask(GeoImage self, svector bands, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
             bands: std::vector< std::string,std::allocator< std::string > >
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
-        data_mask(GeoImage self, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        data_mask(GeoImage self, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoImage_data_mask(self, *args)
 
     def saturation_mask(self, *args):
         """
-        saturation_mask(GeoImage self, vectors bands, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        saturation_mask(GeoImage self, svector bands, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
             bands: std::vector< std::string,std::allocator< std::string > >
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
-        saturation_mask(GeoImage self, Rect_int chunk=gip::iRect()) -> CImg< unsigned char >
+        saturation_mask(GeoImage self, Chunk chunk=gip::Chunk()) -> CImg< unsigned char >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoImage_saturation_mask(self, *args)
 
     def whiteness(self, *args, **kwargs):
         """
-        whiteness(GeoImage self, Rect_int chunk=gip::iRect()) -> CImg< float >
+        whiteness(GeoImage self, Chunk chunk=gip::Chunk()) -> CImg< float >
 
         Parameters:
-            chunk: gip::iRect
+            chunk: gip::Chunk
 
         """
         return _gippy.GeoImage_whiteness(self, *args, **kwargs)
+
+    def warp(self, *args, **kwargs):
+        """
+        warp(GeoImage self, std::string filename="", GeoFeature feature=GeoFeature(), bool crop=False, std::string proj="EPSG:4326", 
+            float xres=1.0, float yres=1.0, int interpolation=0) -> GeoImage
+
+        Parameters:
+            filename: std::string
+            feature: GeoFeature
+            crop: bool
+            proj: std::string
+            xres: float
+            yres: float
+            interpolation: int
+
+        """
+        return _gippy.GeoImage_warp(self, *args, **kwargs)
+
+    def warp_into(self, *args, **kwargs):
+        """
+        warp_into(GeoImage self, GeoImage arg2, GeoFeature arg3=GeoFeature(), int arg4=0, bool arg5=False) -> GeoImage
+
+        Parameters:
+            arg2: gip::GeoImage &
+            arg3: GeoFeature
+            arg4: int
+            arg5: bool
+
+        """
+        return _gippy.GeoImage_warp_into(self, *args, **kwargs)
 
     def __getitem__(self, *args):
         """
@@ -3764,10 +3672,10 @@ class GeoImage(GeoResource):
 
     def read(self, *args, **kwargs):
         """
-        read(GeoImage self, Rect_int chunk=gip::Rect< int >()) -> PyObject *
+        read(GeoImage self, Chunk chunk=gip::Chunk()) -> PyObject *
 
         Parameters:
-            chunk: gip::Rect< int >
+            chunk: gip::Chunk
 
 
         PyObject returned is a numpy.array.
@@ -3778,11 +3686,11 @@ class GeoImage(GeoResource):
 
     def write(self, *args, **kwargs):
         """
-        write(GeoImage self, PyObject * obj, Rect_int chunk=gip::Rect< int >()) -> GeoImage
+        write(GeoImage self, PyObject * obj, Chunk chunk=gip::Chunk()) -> GeoImage
 
         Parameters:
             obj: PyObject *
-            chunk: gip::Rect< int >
+            chunk: gip::Chunk
 
 
         PyObject returned is a numpy.array.
@@ -3796,16 +3704,20 @@ GeoImage_swigregister(GeoImage)
 
 def GeoImage_create(*args, **kwargs):
   """
-    GeoImage_create(std::string filename, unsigned int xsize=0, unsigned int ysize=0, unsigned int bsize=0, 
-        std::string dtype="unknown", std::string srs="", bool temp=False) -> GeoImage
+    GeoImage_create(std::string filename="", unsigned int xsz=1, unsigned int ysz=1, unsigned int nb=1, 
+        std::string proj="EPSG:4326", CImg< double > bbox=CImg< double >(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0), 
+        std::string dtype="uint8", std::string format="", 
+        bool temp=False) -> GeoImage
 
     Parameters:
         filename: std::string
-        xsize: unsigned int
-        ysize: unsigned int
-        bsize: unsigned int
+        xsz: unsigned int
+        ysz: unsigned int
+        nb: unsigned int
+        proj: std::string
+        bbox: CImg< double >
         dtype: std::string
-        srs: std::string
+        format: std::string
         temp: bool
 
     """
@@ -3813,14 +3725,15 @@ def GeoImage_create(*args, **kwargs):
 
 def GeoImage_create_from(*args, **kwargs):
   """
-    GeoImage_create_from(std::string filename, GeoImage geoimg, unsigned int bsize=0, std::string dtype="unknown", 
-        bool temp=False) -> GeoImage
+    GeoImage_create_from(GeoImage geoimg, std::string filename="", unsigned int nb=0, std::string dtype="unknown", 
+        std::string format="", bool temp=False) -> GeoImage
 
     Parameters:
-        filename: std::string
         geoimg: gip::GeoImage
-        bsize: unsigned int
+        filename: std::string
+        nb: unsigned int
         dtype: std::string
+        format: std::string
         temp: bool
 
     """
@@ -3828,7 +3741,7 @@ def GeoImage_create_from(*args, **kwargs):
 
 def GeoImage_open(*args, **kwargs):
   """
-    GeoImage_open(std::string filename, bool update=False, float nodata=0, vectors bandnames=std::vector< std::string >({}), 
+    GeoImage_open(std::string filename, bool update=False, float nodata=0, svector bandnames=std::vector< std::string >({}), 
         double gain=1.0, double offset=0.0) -> GeoImage
 
     Parameters:
@@ -3841,105 +3754,6 @@ def GeoImage_open(*args, **kwargs):
 
     """
   return _gippy.GeoImage_open(*args, **kwargs)
-
-class GeoImages(_object):
-    """Proxy of C++ gip::GeoImages class"""
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, GeoImages, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, GeoImages, name)
-    __repr__ = _swig_repr
-    def __init__(self, *args): 
-        """
-        __init__(gip::GeoImages self) -> GeoImages
-        __init__(gip::GeoImages self, vectors filenames) -> GeoImages
-
-        Parameters:
-            filenames: std::vector< std::string,std::allocator< std::string > >
-
-        __init__(gip::GeoImages self, GeoImages images) -> GeoImages
-
-        Parameters:
-            images: gip::GeoImages const &
-
-        """
-        this = _gippy.new_GeoImages(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    __swig_destroy__ = _gippy.delete_GeoImages
-    __del__ = lambda self : None;
-    def basenames(self):
-        """
-        basenames(GeoImages self) -> vectors
-
-        Parameters:
-            self: gip::GeoImages const *
-
-        """
-        return _gippy.GeoImages_basenames(self)
-
-    def nimages(self):
-        """
-        nimages(GeoImages self) -> unsigned int
-
-        Parameters:
-            self: gip::GeoImages const *
-
-        """
-        return _gippy.GeoImages_nimages(self)
-
-    def type(self):
-        """
-        type(GeoImages self) -> DataType
-
-        Parameters:
-            self: gip::GeoImages const *
-
-        """
-        return _gippy.GeoImages_type(self)
-
-    def nbands(self):
-        """
-        nbands(GeoImages self) -> unsigned int
-
-        Parameters:
-            self: gip::GeoImages const *
-
-        """
-        return _gippy.GeoImages_nbands(self)
-
-    def extent(self, *args, **kwargs):
-        """
-        extent(GeoImages self, std::string srs) -> Rect_double
-
-        Parameters:
-            srs: std::string
-
-        """
-        return _gippy.GeoImages_extent(self, *args, **kwargs)
-
-    def __getitem__(self, *args, **kwargs):
-        """
-        __getitem__(GeoImages self, int index) -> GeoImage
-
-        Parameters:
-            index: int
-
-        """
-        return _gippy.GeoImages___getitem__(self, *args, **kwargs)
-
-    def __len__(self):
-        """
-        __len__(GeoImages self) -> unsigned long
-
-        Parameters:
-            self: gip::GeoImages *
-
-        """
-        return _gippy.GeoImages___len__(self)
-
-GeoImages_swigregister = _gippy.GeoImages_swigregister
-GeoImages_swigregister(GeoImages)
 
 class GeoVectorResource(_object):
     """Proxy of C++ gip::GeoVectorResource class"""
@@ -4010,7 +3824,7 @@ class GeoVectorResource(_object):
 
     def extent(self):
         """
-        extent(GeoVectorResource self) -> Rect_double
+        extent(GeoVectorResource self) -> gip::BoundingBox
 
         Parameters:
             self: gip::GeoVectorResource const *
@@ -4040,7 +3854,7 @@ class GeoVectorResource(_object):
 
     def attributes(self):
         """
-        attributes(GeoVectorResource self) -> vectors
+        attributes(GeoVectorResource self) -> svector
 
         Parameters:
             self: gip::GeoVectorResource const *
@@ -4103,6 +3917,16 @@ class GeoFeature(GeoVectorResource):
         except: self.this = this
     __swig_destroy__ = _gippy.delete_GeoFeature
     __del__ = lambda self : None;
+    def valid(self):
+        """
+        valid(GeoFeature self) -> bool
+
+        Parameters:
+            self: gip::GeoFeature const *
+
+        """
+        return _gippy.GeoFeature_valid(self)
+
     def value(self):
         """
         value(GeoFeature self) -> std::string
@@ -4125,7 +3949,7 @@ class GeoFeature(GeoVectorResource):
 
     def extent(self):
         """
-        extent(GeoFeature self) -> Rect_double
+        extent(GeoFeature self) -> gip::BoundingBox
 
         Parameters:
             self: gip::GeoFeature const *
@@ -4632,7 +4456,7 @@ class GeoVector(GeoVectorResource):
 
     def values(self, *args, **kwargs):
         """
-        values(GeoVector self, std::string attr) -> vectors
+        values(GeoVector self, std::string attr) -> svector
 
         Parameters:
             attr: std::string

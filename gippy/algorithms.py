@@ -88,23 +88,6 @@ def acca(*args, **kwargs):
     """
   return _algorithms.acca(*args, **kwargs)
 
-def cookie_cutter(*args, **kwargs):
-  """
-    cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, float xres, float yres, 
-        bool crop=False, unsigned char interpolation=0) -> GeoImage
-
-    Parameters:
-        images: gip::GeoImages
-        feature: gip::GeoFeature
-        filename: std::string
-        xres: float
-        yres: float
-        crop: bool
-        interpolation: unsigned char
-
-    """
-  return _algorithms.cookie_cutter(*args, **kwargs)
-
 def fmask(*args, **kwargs):
   """
     fmask(GeoImage arg1, std::string arg2, int arg3=3, int arg4=5) -> GeoImage
