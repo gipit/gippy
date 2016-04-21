@@ -29,8 +29,8 @@
 %include "std_vector.i"
 %include "std_map.i"
 namespace std {
-    %template(vectors) std::vector<std::string>;
-    %template(vectori) std::vector<int>;
+    %template(svector) std::vector<std::string>;
+    %template(ivector) std::vector<int>;
     %template() std::map<std::string, std::string>;
 }
 
@@ -87,34 +87,12 @@ namespace std {
 // Geometry
 %ignore gip::Point::operator=;
 %ignore gip::Rect::operator=;
-%ignore gip::ChunkSet::operator=;
-%ignore gip::ChunkSet::operator[];
 %include "gip/geometry.h"
 
-%template(Point_int) gip::Point<int>;
-%template(Point_double) gip::Point<double>;
-%template(Rect_int) gip::Rect<int>;
-%template(Rect_double) gip::Rect<double>;
-%template(vector_Rect_int) std::vector< gip::Rect<int> >;
-
-namespace gip {
-    %extend ChunkSet {
-        Rect<int> __getitem__(int index) {
-            return self->ChunkSet::operator[](index);
-        }
-        Rect<int>& __setitem__(int index, const Rect<int>& rect) {
-            self->operator[](index) = rect;
-            return self->ChunkSet::operator[](index);
-        }
-        unsigned long int __len__() {
-            return self->size();
-        }        
-        ChunkSet __deepcopy__(ChunkSet chunks) {
-            return ChunkSet(chunks);
-        }
-    }
-}
-
+%template(iPoint) gip::Point<int>;
+%template(dPoint) gip::Point<double>;
+%template(chvector) std::vector<Chunk>;
+%template(bbvector) std::vector<BoundingBox>;
 
 // DataType
 %ignore gip::DataTypes;
@@ -148,7 +126,7 @@ namespace gip {
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
-        PyObject* read(Rect<int> chunk=Rect<int>()) {
+        PyObject* read(Chunk chunk=Chunk()) {
             if (self->gain() == 1.0 && self->offset() == 0.0) {
                 switch(self->type().type()) {
                     case 1: return CImgToArr(self->read<unsigned char>(chunk));
@@ -166,7 +144,7 @@ namespace gip {
         %feature("docstring",
                  "PyObject passed in is a numpy.array.\n"
                  "Comply!\n ");
-        GeoRaster& write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
+        GeoRaster& write(PyObject* obj, Chunk chunk=Chunk()) {
             switch( PyArray_TYPE((PyArrayObject*)obj)) {
                 case NPY_UINT8: self->write(ArrToCImg<unsigned char>(obj), chunk); break;
                 case NPY_UINT16: self->write(ArrToCImg<unsigned short>(obj), chunk); break;
@@ -223,7 +201,7 @@ namespace gip {
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
-        PyObject* read(Rect<int> chunk=Rect<int>()) {
+        PyObject* read(Chunk chunk=Chunk()) {
             // Only looks at first band for gain and offset
             if ((*self)[0].gain() == 1.0 && (*self)[0].offset() == 0.0) {
                 switch(self->type().type()) {
@@ -239,7 +217,7 @@ namespace gip {
             }
             return CImgToArr(self->read<float>(chunk));
         }
-        GeoImage& write(PyObject* obj, Rect<int> chunk=Rect<int>()) {
+        GeoImage& write(PyObject* obj, Chunk chunk=Chunk()) {
             switch( PyArray_TYPE((PyArrayObject*)obj)) {
                 case NPY_UINT8: self->write(ArrToCImg<unsigned char>(obj), chunk); break;
                 case NPY_UINT16: self->write(ArrToCImg<unsigned short>(obj), chunk); break;
