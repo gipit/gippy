@@ -134,7 +134,7 @@ namespace gip {
         }
 
         //! Scale image to given range (minout, maxout)
-        GeoRaster autoscale(const double& minout, const double& maxout, const double percent=0.0) {
+        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
             double minin = this->min();
             double maxin = this->max();
             if (percent > 0.0) {
@@ -286,7 +286,7 @@ namespace gip {
         CImg<float> histogram(int bins=100, bool cumulative=false) const;
 
         //! Get value for this percentile in the cumulative distribution histogram
-        float percentile(float p) const;
+        double percentile(const double& p) const;
 
         //! \name File I/O
         template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const;

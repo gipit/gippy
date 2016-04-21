@@ -87,12 +87,15 @@ namespace std {
 // Geometry
 %ignore gip::Point::operator=;
 %ignore gip::Rect::operator=;
+%ignore gip::Chunk::operator=;
 %include "gip/geometry.h"
 
 %template(iPoint) gip::Point<int>;
 %template(dPoint) gip::Point<double>;
+%template(iRect) gip::Rect<int>;
+%template(dRect) gip::Rect<double>;
 %template(chvector) std::vector<Chunk>;
-%template(bbvector) std::vector<BoundingBox>;
+//%template(bbvector) std::vector<BoundingBox>;
 
 // DataType
 %ignore gip::DataTypes;

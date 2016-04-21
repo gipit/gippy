@@ -67,10 +67,10 @@ class GeoImageTests(unittest.TestCase):
     def test_create_autoname_temp(self):
         """ Create temp file with auto-generated filename """
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, nb=3)
-        fname = geoimg.filename()
-        self.assertTrue(os.path.exists(fname))
+        fout = geoimg.filename()
+        self.assertTrue(os.path.exists(fout))
         geoimg = None
-        self.assertFalse(os.path.exists(fname))
+        self.assertFalse(os.path.exists(fout))
 
     def test_autoscale(self):
         """ Auto scale each band in image """
@@ -85,13 +85,14 @@ class GeoImageTests(unittest.TestCase):
 
     def test_save(self):
         """ Save image as new image with different datatype """
-        fname = 'test-byte.tif'
-        geoimg = get_test_image().autoscale(1.0, 255.0).save(fname, 'uint8')
+        fout = 'test-byte.tif'
+        geoimg = get_test_image().autoscale(1.0, 255.0).save(fout, 'uint8')
         geoimg = None
-        geoimg = gp.GeoImage(fname)
+        geoimg = gp.GeoImage(fout)
         self.assertEqual(geoimg.type().string(), 'uint8')
         self.assertEqual(geoimg[0].min(), 1.0)
         self.assertEqual(geoimg[0].max(), 255.0)
+	os.remove(fout)
 
     def test_warp(self):
         """ Test warping image into another """
@@ -110,6 +111,5 @@ class GeoImageTests(unittest.TestCase):
     def test_real_warp(self):
         """ Test warping a real image to another projection """
         geoimg = get_test_image()
-        geoimg2 = geoimg.select([1])
-        imgout = geoimg2.warp('test-realwarp.tif', proj='EPSG:4326', xres=0.0003, yres=0.0003)
-
+        #geoimg2 = geoimg.select([1])
+        imgout = geoimg.warp('test-realwarp.tif', proj='EPSG:4326', xres=0.0003, yres=0.0003)

@@ -1432,6 +1432,384 @@ class dPoint(_object):
 dPoint_swigregister = _gippy.dPoint_swigregister
 dPoint_swigregister(dPoint)
 
+class iRect(_object):
+    """Proxy of C++ gip::Rect<(int)> class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, iRect, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, iRect, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(gip::Rect<(int)> self) -> iRect
+        __init__(gip::Rect<(int)> self, int x, int y, int width, int height) -> iRect
+
+        Parameters:
+            x: int
+            y: int
+            width: int
+            height: int
+
+        __init__(gip::Rect<(int)> self, iPoint p0, iPoint p1) -> iRect
+
+        Parameters:
+            p0: gip::Point< int >
+            p1: gip::Point< int >
+
+        __init__(gip::Rect<(int)> self, iRect rect) -> iRect
+
+        Parameters:
+            rect: gip::Rect< int > const &
+
+        """
+        this = _gippy.new_iRect(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _gippy.delete_iRect
+    __del__ = lambda self : None;
+    def p0(self):
+        """
+        p0(iRect self) -> iPoint
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_p0(self)
+
+    def p1(self):
+        """
+        p1(iRect self) -> iPoint
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_p1(self)
+
+    def valid(self):
+        """
+        valid(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_valid(self)
+
+    def area(self):
+        """
+        area(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_area(self)
+
+    def width(self):
+        """
+        width(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_width(self)
+
+    def height(self):
+        """
+        height(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_height(self)
+
+    def x0(self):
+        """
+        x0(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_x0(self)
+
+    def y0(self):
+        """
+        y0(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_y0(self)
+
+    def x1(self):
+        """
+        x1(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_x1(self)
+
+    def y1(self):
+        """
+        y1(iRect self) -> int
+
+        Parameters:
+            self: gip::Rect< int > const *
+
+        """
+        return _gippy.iRect_y1(self)
+
+    def __eq__(self, *args, **kwargs):
+        """
+        __eq__(iRect self, iRect rect) -> bool
+
+        Parameters:
+            rect: gip::Rect< int > const &
+
+        """
+        return _gippy.iRect___eq__(self, *args, **kwargs)
+
+    def __ne__(self, *args, **kwargs):
+        """
+        __ne__(iRect self, iRect rect) -> bool
+
+        Parameters:
+            rect: gip::Rect< int > const &
+
+        """
+        return _gippy.iRect___ne__(self, *args, **kwargs)
+
+    def transform(self, *args, **kwargs):
+        """
+        transform(iRect self, std::string src, std::string dst) -> iRect
+
+        Parameters:
+            src: std::string
+            dst: std::string
+
+        """
+        return _gippy.iRect_transform(self, *args, **kwargs)
+
+    def intersect(self, *args, **kwargs):
+        """
+        intersect(iRect self, iRect rect) -> iRect
+
+        Parameters:
+            rect: gip::Rect< int > const &
+
+        """
+        return _gippy.iRect_intersect(self, *args, **kwargs)
+
+    def union_with(self, *args, **kwargs):
+        """
+        union_with(iRect self, iRect rect) -> iRect
+
+        Parameters:
+            rect: gip::Rect< int > const &
+
+        """
+        return _gippy.iRect_union_with(self, *args, **kwargs)
+
+iRect_swigregister = _gippy.iRect_swigregister
+iRect_swigregister(iRect)
+
+class dRect(_object):
+    """Proxy of C++ gip::Rect<(double)> class"""
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, dRect, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, dRect, name)
+    __repr__ = _swig_repr
+    def __init__(self, *args): 
+        """
+        __init__(gip::Rect<(double)> self) -> dRect
+        __init__(gip::Rect<(double)> self, double x, double y, double width, double height) -> dRect
+
+        Parameters:
+            x: double
+            y: double
+            width: double
+            height: double
+
+        __init__(gip::Rect<(double)> self, dPoint p0, dPoint p1) -> dRect
+
+        Parameters:
+            p0: gip::Point< double >
+            p1: gip::Point< double >
+
+        __init__(gip::Rect<(double)> self, dRect rect) -> dRect
+
+        Parameters:
+            rect: gip::Rect< double > const &
+
+        """
+        this = _gippy.new_dRect(*args)
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _gippy.delete_dRect
+    __del__ = lambda self : None;
+    def p0(self):
+        """
+        p0(dRect self) -> dPoint
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_p0(self)
+
+    def p1(self):
+        """
+        p1(dRect self) -> dPoint
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_p1(self)
+
+    def valid(self):
+        """
+        valid(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_valid(self)
+
+    def area(self):
+        """
+        area(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_area(self)
+
+    def width(self):
+        """
+        width(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_width(self)
+
+    def height(self):
+        """
+        height(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_height(self)
+
+    def x0(self):
+        """
+        x0(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_x0(self)
+
+    def y0(self):
+        """
+        y0(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_y0(self)
+
+    def x1(self):
+        """
+        x1(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_x1(self)
+
+    def y1(self):
+        """
+        y1(dRect self) -> double
+
+        Parameters:
+            self: gip::Rect< double > const *
+
+        """
+        return _gippy.dRect_y1(self)
+
+    def __eq__(self, *args, **kwargs):
+        """
+        __eq__(dRect self, dRect rect) -> bool
+
+        Parameters:
+            rect: gip::Rect< double > const &
+
+        """
+        return _gippy.dRect___eq__(self, *args, **kwargs)
+
+    def __ne__(self, *args, **kwargs):
+        """
+        __ne__(dRect self, dRect rect) -> bool
+
+        Parameters:
+            rect: gip::Rect< double > const &
+
+        """
+        return _gippy.dRect___ne__(self, *args, **kwargs)
+
+    def transform(self, *args, **kwargs):
+        """
+        transform(dRect self, std::string src, std::string dst) -> dRect
+
+        Parameters:
+            src: std::string
+            dst: std::string
+
+        """
+        return _gippy.dRect_transform(self, *args, **kwargs)
+
+    def intersect(self, *args, **kwargs):
+        """
+        intersect(dRect self, dRect rect) -> dRect
+
+        Parameters:
+            rect: gip::Rect< double > const &
+
+        """
+        return _gippy.dRect_intersect(self, *args, **kwargs)
+
+    def union_with(self, *args, **kwargs):
+        """
+        union_with(dRect self, dRect rect) -> dRect
+
+        Parameters:
+            rect: gip::Rect< double > const &
+
+        """
+        return _gippy.dRect_union_with(self, *args, **kwargs)
+
+dRect_swigregister = _gippy.dRect_swigregister
+dRect_swigregister(dRect)
+
 class chvector(_object):
     """Proxy of C++ std::vector<(Chunk)> class"""
     __swig_setmethods__ = {}
@@ -1826,401 +2204,6 @@ class chvector(_object):
 chvector_swigregister = _gippy.chvector_swigregister
 chvector_swigregister(chvector)
 
-class bbvector(_object):
-    """Proxy of C++ std::vector<(BoundingBox)> class"""
-    __swig_setmethods__ = {}
-    __setattr__ = lambda self, name, value: _swig_setattr(self, bbvector, name, value)
-    __swig_getmethods__ = {}
-    __getattr__ = lambda self, name: _swig_getattr(self, bbvector, name)
-    __repr__ = _swig_repr
-    def iterator(self):
-        """
-        iterator(bbvector self) -> SwigPyIterator
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_iterator(self)
-
-    def __iter__(self): return self.iterator()
-    def __nonzero__(self):
-        """
-        __nonzero__(bbvector self) -> bool
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector___nonzero__(self)
-
-    def __bool__(self):
-        """
-        __bool__(bbvector self) -> bool
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector___bool__(self)
-
-    def __len__(self):
-        """
-        __len__(bbvector self) -> std::vector< BoundingBox >::size_type
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector___len__(self)
-
-    def pop(self):
-        """
-        pop(bbvector self) -> std::vector< BoundingBox >::value_type
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_pop(self)
-
-    def __getslice__(self, *args, **kwargs):
-        """
-        __getslice__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::difference_type j) -> bbvector
-
-        Parameters:
-            i: std::vector< BoundingBox >::difference_type
-            j: std::vector< BoundingBox >::difference_type
-
-        """
-        return _gippy.bbvector___getslice__(self, *args, **kwargs)
-
-    def __setslice__(self, *args, **kwargs):
-        """
-        __setslice__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::difference_type j, 
-            bbvector v=std::vector< BoundingBox,std::allocator< BoundingBox > >())
-
-        Parameters:
-            i: std::vector< BoundingBox >::difference_type
-            j: std::vector< BoundingBox >::difference_type
-            v: std::vector< BoundingBox,std::allocator< BoundingBox > > const &
-
-        """
-        return _gippy.bbvector___setslice__(self, *args, **kwargs)
-
-    def __delslice__(self, *args, **kwargs):
-        """
-        __delslice__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::difference_type j)
-
-        Parameters:
-            i: std::vector< BoundingBox >::difference_type
-            j: std::vector< BoundingBox >::difference_type
-
-        """
-        return _gippy.bbvector___delslice__(self, *args, **kwargs)
-
-    def __delitem__(self, *args):
-        """
-        __delitem__(bbvector self, std::vector< BoundingBox >::difference_type i)
-
-        Parameters:
-            i: std::vector< BoundingBox >::difference_type
-
-        __delitem__(bbvector self, PySliceObject * slice)
-
-        Parameters:
-            slice: PySliceObject *
-
-        """
-        return _gippy.bbvector___delitem__(self, *args)
-
-    def __getitem__(self, *args):
-        """
-        __getitem__(bbvector self, PySliceObject * slice) -> bbvector
-
-        Parameters:
-            slice: PySliceObject *
-
-        __getitem__(bbvector self, std::vector< BoundingBox >::difference_type i) -> std::vector< BoundingBox >::value_type const &
-
-        Parameters:
-            i: std::vector< BoundingBox >::difference_type
-
-        """
-        return _gippy.bbvector___getitem__(self, *args)
-
-    def __setitem__(self, *args):
-        """
-        __setitem__(bbvector self, PySliceObject * slice, bbvector v)
-
-        Parameters:
-            slice: PySliceObject *
-            v: std::vector< BoundingBox,std::allocator< BoundingBox > > const &
-
-        __setitem__(bbvector self, PySliceObject * slice)
-
-        Parameters:
-            slice: PySliceObject *
-
-        __setitem__(bbvector self, std::vector< BoundingBox >::difference_type i, std::vector< BoundingBox >::value_type const & x)
-
-        Parameters:
-            i: std::vector< BoundingBox >::difference_type
-            x: std::vector< BoundingBox >::value_type const &
-
-        """
-        return _gippy.bbvector___setitem__(self, *args)
-
-    def append(self, *args, **kwargs):
-        """
-        append(bbvector self, std::vector< BoundingBox >::value_type const & x)
-
-        Parameters:
-            x: std::vector< BoundingBox >::value_type const &
-
-        """
-        return _gippy.bbvector_append(self, *args, **kwargs)
-
-    def empty(self):
-        """
-        empty(bbvector self) -> bool
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector_empty(self)
-
-    def size(self):
-        """
-        size(bbvector self) -> std::vector< BoundingBox >::size_type
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector_size(self)
-
-    def clear(self):
-        """
-        clear(bbvector self)
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_clear(self)
-
-    def swap(self, *args, **kwargs):
-        """
-        swap(bbvector self, bbvector v)
-
-        Parameters:
-            v: std::vector< BoundingBox > &
-
-        """
-        return _gippy.bbvector_swap(self, *args, **kwargs)
-
-    def get_allocator(self):
-        """
-        get_allocator(bbvector self) -> std::vector< BoundingBox >::allocator_type
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector_get_allocator(self)
-
-    def begin(self):
-        """
-        begin(bbvector self) -> std::vector< BoundingBox >::iterator
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_begin(self)
-
-    def end(self):
-        """
-        end(bbvector self) -> std::vector< BoundingBox >::iterator
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_end(self)
-
-    def rbegin(self):
-        """
-        rbegin(bbvector self) -> std::vector< BoundingBox >::reverse_iterator
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_rbegin(self)
-
-    def rend(self):
-        """
-        rend(bbvector self) -> std::vector< BoundingBox >::reverse_iterator
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_rend(self)
-
-    def pop_back(self):
-        """
-        pop_back(bbvector self)
-
-        Parameters:
-            self: std::vector< BoundingBox > *
-
-        """
-        return _gippy.bbvector_pop_back(self)
-
-    def erase(self, *args):
-        """
-        erase(bbvector self, std::vector< BoundingBox >::iterator pos) -> std::vector< BoundingBox >::iterator
-
-        Parameters:
-            pos: std::vector< BoundingBox >::iterator
-
-        erase(bbvector self, std::vector< BoundingBox >::iterator first, std::vector< BoundingBox >::iterator last) -> std::vector< BoundingBox >::iterator
-
-        Parameters:
-            first: std::vector< BoundingBox >::iterator
-            last: std::vector< BoundingBox >::iterator
-
-        """
-        return _gippy.bbvector_erase(self, *args)
-
-    def __init__(self, *args): 
-        """
-        __init__(std::vector<(BoundingBox)> self) -> bbvector
-        __init__(std::vector<(BoundingBox)> self, bbvector arg2) -> bbvector
-
-        Parameters:
-            arg2: std::vector< BoundingBox > const &
-
-        __init__(std::vector<(BoundingBox)> self, std::vector< BoundingBox >::size_type size) -> bbvector
-
-        Parameters:
-            size: std::vector< BoundingBox >::size_type
-
-        __init__(std::vector<(BoundingBox)> self, std::vector< BoundingBox >::size_type size, std::vector< BoundingBox >::value_type const & value) -> bbvector
-
-        Parameters:
-            size: std::vector< BoundingBox >::size_type
-            value: std::vector< BoundingBox >::value_type const &
-
-        """
-        this = _gippy.new_bbvector(*args)
-        try: self.this.append(this)
-        except: self.this = this
-    def push_back(self, *args, **kwargs):
-        """
-        push_back(bbvector self, std::vector< BoundingBox >::value_type const & x)
-
-        Parameters:
-            x: std::vector< BoundingBox >::value_type const &
-
-        """
-        return _gippy.bbvector_push_back(self, *args, **kwargs)
-
-    def front(self):
-        """
-        front(bbvector self) -> std::vector< BoundingBox >::value_type const &
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector_front(self)
-
-    def back(self):
-        """
-        back(bbvector self) -> std::vector< BoundingBox >::value_type const &
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector_back(self)
-
-    def assign(self, *args, **kwargs):
-        """
-        assign(bbvector self, std::vector< BoundingBox >::size_type n, std::vector< BoundingBox >::value_type const & x)
-
-        Parameters:
-            n: std::vector< BoundingBox >::size_type
-            x: std::vector< BoundingBox >::value_type const &
-
-        """
-        return _gippy.bbvector_assign(self, *args, **kwargs)
-
-    def resize(self, *args):
-        """
-        resize(bbvector self, std::vector< BoundingBox >::size_type new_size)
-
-        Parameters:
-            new_size: std::vector< BoundingBox >::size_type
-
-        resize(bbvector self, std::vector< BoundingBox >::size_type new_size, std::vector< BoundingBox >::value_type const & x)
-
-        Parameters:
-            new_size: std::vector< BoundingBox >::size_type
-            x: std::vector< BoundingBox >::value_type const &
-
-        """
-        return _gippy.bbvector_resize(self, *args)
-
-    def insert(self, *args):
-        """
-        insert(bbvector self, std::vector< BoundingBox >::iterator pos, std::vector< BoundingBox >::value_type const & x) -> std::vector< BoundingBox >::iterator
-
-        Parameters:
-            pos: std::vector< BoundingBox >::iterator
-            x: std::vector< BoundingBox >::value_type const &
-
-        insert(bbvector self, std::vector< BoundingBox >::iterator pos, std::vector< BoundingBox >::size_type n, 
-            std::vector< BoundingBox >::value_type const & x)
-
-        Parameters:
-            pos: std::vector< BoundingBox >::iterator
-            n: std::vector< BoundingBox >::size_type
-            x: std::vector< BoundingBox >::value_type const &
-
-        """
-        return _gippy.bbvector_insert(self, *args)
-
-    def reserve(self, *args, **kwargs):
-        """
-        reserve(bbvector self, std::vector< BoundingBox >::size_type n)
-
-        Parameters:
-            n: std::vector< BoundingBox >::size_type
-
-        """
-        return _gippy.bbvector_reserve(self, *args, **kwargs)
-
-    def capacity(self):
-        """
-        capacity(bbvector self) -> std::vector< BoundingBox >::size_type
-
-        Parameters:
-            self: std::vector< BoundingBox > const *
-
-        """
-        return _gippy.bbvector_capacity(self)
-
-    __swig_destroy__ = _gippy.delete_bbvector
-    __del__ = lambda self : None;
-bbvector_swigregister = _gippy.bbvector_swigregister
-bbvector_swigregister(bbvector)
-
 class DataType(_object):
     """Proxy of C++ gip::DataType class"""
     __swig_setmethods__ = {}
@@ -2327,8 +2310,8 @@ class GeoResource(_object):
             update: bool
             temp: bool
 
-        __init__(gip::GeoResource self, std::string arg2, int arg3, int arg4, int arg5, std::string arg6, gip::BoundingBox arg7, 
-            DataType arg8, std::string arg9, bool arg10) -> GeoResource
+        __init__(gip::GeoResource self, std::string arg2, int arg3, int arg4, int arg5, std::string arg6, dRect arg7, DataType arg8, 
+            std::string arg9, bool arg10) -> GeoResource
 
         Parameters:
             arg2: std::string
@@ -2455,7 +2438,7 @@ class GeoResource(_object):
 
     def extent(self):
         """
-        extent(GeoResource self) -> gip::BoundingBox
+        extent(GeoResource self) -> dRect
 
         Parameters:
             self: gip::GeoResource const *
@@ -2766,12 +2749,12 @@ class GeoRaster(GeoResource):
 
     def autoscale(self, *args, **kwargs):
         """
-        autoscale(GeoRaster self, double const & minout, double const & maxout, double const percent=0.0) -> GeoRaster
+        autoscale(GeoRaster self, double const & minout, double const & maxout, double const & percent=0.0) -> GeoRaster
 
         Parameters:
             minout: double const &
             maxout: double const &
-            percent: double const
+            percent: double const &
 
         """
         return _gippy.GeoRaster_autoscale(self, *args, **kwargs)
@@ -3139,10 +3122,10 @@ class GeoRaster(GeoResource):
 
     def percentile(self, *args, **kwargs):
         """
-        percentile(GeoRaster self, float p) -> float
+        percentile(GeoRaster self, double const & p) -> double
 
         Parameters:
-            p: float
+            p: double const &
 
         """
         return _gippy.GeoRaster_percentile(self, *args, **kwargs)
@@ -3246,8 +3229,8 @@ class GeoImage(GeoResource):
         Parameters:
             filenames: std::vector< std::string,std::allocator< std::string > >
 
-        __init__(gip::GeoImage self, std::string filename, int xsz, int ysz, int nb, std::string proj, gip::BoundingBox bbox, 
-            DataType dt, std::string format="", bool temp=False) -> GeoImage
+        __init__(gip::GeoImage self, std::string filename, int xsz, int ysz, int nb, std::string proj, dRect bbox, DataType dt, 
+            std::string format="", bool temp=False) -> GeoImage
 
         Parameters:
             filename: std::string
@@ -3824,7 +3807,7 @@ class GeoVectorResource(_object):
 
     def extent(self):
         """
-        extent(GeoVectorResource self) -> gip::BoundingBox
+        extent(GeoVectorResource self) -> dRect
 
         Parameters:
             self: gip::GeoVectorResource const *
@@ -3949,7 +3932,7 @@ class GeoFeature(GeoVectorResource):
 
     def extent(self):
         """
-        extent(GeoFeature self) -> gip::BoundingBox
+        extent(GeoFeature self) -> dRect
 
         Parameters:
             self: gip::GeoFeature const *

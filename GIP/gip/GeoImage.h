@@ -256,9 +256,8 @@ namespace gip {
         //! Calculate spectral correlation
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
-        //template<class T> GeoImage& Save();
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string="", std::string="", bool=false);
+        template<class T> GeoImage save(std::string filename="", std::string dtype="", bool temp=false);
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& add_mask(const GeoRaster& band) {
@@ -267,9 +266,6 @@ namespace gip {
         }
         //! Clear all masks
         void clear_masks() { for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].clear_masks(); }
-
-        // hmm, what's this do?
-        //const GeoImage& ComputeStats() const;
 
         //! \name File I/O
         //! Read raw chunk, across all bands
@@ -418,6 +414,7 @@ namespace gip {
     template<class T> GeoImage GeoImage::save(std::string filename, std::string dt, bool overviews) {
         // TODO: if not supplied base output datatype on units?
         if (dt == "") dt = this->type().string();
+
         GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dt);
         for (unsigned int i=0; i<imgout.nbands(); i++) {
             (*this)[i].save<T>(imgout[i]);

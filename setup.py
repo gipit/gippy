@@ -200,7 +200,7 @@ def update_lib_path_mac(oldpath, newpath, modpath=None):
 # GDAL config parameters
 gdal_config = CConfig(os.environ.get('GDAL_CONFIG', 'gdal-config'))
 
-extra_compile_args = ['-fPIC', '-O3', '-std=c++11', '-Wno-maybe-uninitialized']
+extra_compile_args = ['-fPIC', '-O3', '-std=c++11']
 
 extra_link_args = gdal_config.extra_link_args
 
@@ -231,6 +231,7 @@ else:
     for key, value in cfg_vars.items():
         if type(value) == str:
             cfg_vars[key] = value.replace("-Wstrict-prototypes", "")
+    extra_compile_args.append('-Wno-maybe-uninitialized')
 
 # the libgip.so module containing all the C++ code
 gip_module = Extension(
