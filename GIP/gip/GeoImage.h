@@ -23,7 +23,6 @@
 #define GIP_GEOIMAGE_H
 
 #include <cstddef>
-//#include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/GeoRaster.h>
 #include <gip/GeoFeature.h>

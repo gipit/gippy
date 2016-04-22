@@ -128,7 +128,7 @@ namespace gip {
     double GeoRaster::percentile(const double& p) const {
         CImg<float> st = stats();
         unsigned int bins(100);
-        CImg<float> hist = histogram(bins,true) * 100;
+        CImg<float> hist = histogram(bins,true,true) * 100;
         CImg<float> xaxis(bins);
         float interval( (st(1)-st(0))/((float)bins-1) );
         for (unsigned int i=0;i<bins;i++) xaxis[i] = st(0) + i * interval;
@@ -141,7 +141,7 @@ namespace gip {
     }
 
     //! Compute histogram
-    CImg<float> GeoRaster::histogram(int bins, bool cumulative) const {
+    CImg<float> GeoRaster::histogram(int bins, bool normalize, bool cumulative) const {
         CImg<double> cimg;
         CImg<float> st = stats();
         CImg<float> hist(bins,1,1,1,0);
@@ -153,12 +153,15 @@ namespace gip {
             cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nd) {
-                    hist[(unsigned int)( (*ptr-st(0))*bins / (st(1)-st(0)) )]++;
+                    unsigned int index(*ptr==st(1)?bins-1:((*ptr-st(0))*bins / (st(1)-st(0))));
+                    hist[index]++;
                     numpixels++;
                 }
             }
         }
-        hist/=numpixels;
+        // normalize
+        if (normalize)
+            hist/=numpixels;
         if (cumulative) for (int i=1;i<bins;i++) hist[i] += hist[i-1];
         //if (Options::verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
         return hist;
