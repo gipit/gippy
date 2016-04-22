@@ -3,7 +3,7 @@ from stestdata import TestData
 
 
 # TODO - download landsat test image if not already
-def get_test_image(sensor='landsat8', name=''):
+def get_test_image(sensor='landsat8', name='', bands=[]):
     """ get test image from sat-testdata """
     t = TestData(sensor)
 
@@ -11,8 +11,11 @@ def get_test_image(sensor='landsat8', name=''):
         name = t.names[0]
 
     dat = t.examples[name].values()
-    # filter out pan band
-    dat = [d for d in dat if d['band_type'] != 'pan']
+    if len(bands) > 0:
+        dat = [d for d in dat if d['band_type'] in bands]
+    else:
+        # filter out pan band
+        dat = [d for d in dat if d['band_type'] != 'pan']
 
     filenames = [d['path'] for d in dat]
     bandnames = [d['band_type'] for d in dat]
