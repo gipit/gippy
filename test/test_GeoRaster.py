@@ -94,6 +94,6 @@ class GeoRasterTests(unittest.TestCase):
         """ Scale image to byte range """
         geoimg = get_test_image()
         for band in geoimg:
-            band = band.autoscale(minout=1, maxout=255) #, percent=2.0)
+            band = band.autoscale(minout=1, maxout=255, percent=2.0)
             self.assertTrue(band.min() == 1)
             self.assertTrue(band.max() == 255)

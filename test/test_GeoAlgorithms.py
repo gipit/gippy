@@ -9,7 +9,7 @@ from utils import get_test_image
 class GeoAlgorithmsTests(unittest.TestCase):
 
     def test_rxd(self):
-        geoimg = get_test_image()
+        geoimg = get_test_image().select(['red', 'green', 'blue'])
         rxd = alg.rxd(geoimg)
         self.assertEqual(rxd.bandnames()[0], "RXD")
         self.assertEqual(rxd.xsize(), geoimg.xsize())
