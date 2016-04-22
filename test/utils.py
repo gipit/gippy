@@ -1,16 +1,20 @@
-
-import os
-import glob
 import gippy
+from stestdata import TestData
+
 
 # TODO - download landsat test image if not already
 def get_test_image():
     """ get test image """
-    # look in samples directory
-    #dirs = [d for d in os.listdir(os.path.join(path, 'samples')) if os.path.isdir(d)]
-    bname = os.path.join(os.path.dirname(__file__), 'samples/landsat8/test')
-    bands = [4, 5]
-    fnames = ['%s_B%s.tif' % (bname, b) for b in bands]
+    t = TestData('landsat8')
+
+    fnames = [None, None]
+    for k, v in t.examples[t.names[0]].iteritems():
+        if v['band_type'] == 'red':
+            fnames[0] = v['path']
+
+        if v['band_type'] == 'nir':
+            fnames[1] = v['path']
+
     geoimg = gippy.GeoImage(fnames)
     geoimg.set_bandname('RED', 1)
     geoimg.set_bandname('NIR', 2)
