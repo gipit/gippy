@@ -293,7 +293,7 @@ namespace gip {
         template<class T> CImg<T> read(Chunk chunk=Chunk()) const;
         template<class T> GeoRaster& write_raw(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& write(CImg<T> img, Chunk chunk=Chunk());
-        template<class T> GeoRaster& save(GeoRaster& raster);
+        template<class T> GeoRaster& save(GeoRaster& raster) const;
 
          //! Get Saturation mask: 1's where it's saturated
         CImg<unsigned char> saturation_mask(Chunk chunk=Chunk()) const {
@@ -509,7 +509,7 @@ namespace gip {
     }
 
     //! Process into input band "raster"
-    template<class T> GeoRaster& GeoRaster::save(GeoRaster& raster) {
+    template<class T> GeoRaster& GeoRaster::save(GeoRaster& raster) const {
         GDALRasterBand* band = raster._GDALRasterBand;
         band->SetColorInterpretation(_GDALRasterBand->GetColorInterpretation());
         band->SetMetadata(_GDALRasterBand->GetMetadata());
@@ -526,7 +526,7 @@ namespace gip {
                 }
                 raster.write(cimg,*iCh);
         }
-        return *this;
+        return raster;
     }
 
 } // namespace GIP

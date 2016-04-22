@@ -134,12 +134,6 @@ namespace gip {
         return imgout;
     }
 
-
-    /*const GeoImage& GeoImage::ComputeStats() const {
-        for (unsigned int b=0;b<nbands();b++) _RasterBands[b].ComputeStats();
-        return *this;
-    }*/
-
     //! Load bands from dataset
     void GeoImage::load_bands() {
         vector<unsigned int> bandnums; // = _Options.Bands();
@@ -228,7 +222,7 @@ namespace gip {
 
     GeoImage GeoImage::warp(std::string filename, GeoFeature feature,
                 bool crop, std::string proj,
-                float xres, float yres, int interpolation) {
+                float xres, float yres, int interpolation) const {
 
         // get the desired Spatial Reference System from feature or override with srs argument
         // TODO - check for valid srs
@@ -256,34 +250,35 @@ namespace gip {
         CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
         GeoImage imgout = GeoImage::create(filename, xsz, ysz, nbands(), proj, bbox, type().string());
 
-        // save existing as temp file
-        GeoImage geoimg = save<double>();
         // warp temp into output image
-        geoimg.warp_into(imgout, feature, interpolation);
+        warp_into(imgout, feature, interpolation);
         return imgout;
     }
 
 
-    GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit) {
+    GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit) const {
         //if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << " " << std::flush;
+
+        // save existing as temp file
+        GeoImage imgin = save<double>();
 
         // warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
-        GDALDataset* srcDS = _GDALDataset.get();
+        GDALDataset* srcDS = imgin._GDALDataset.get();
         GDALDataset* dstDS = imgout._GDALDataset.get();
         psWarpOptions->hSrcDS = srcDS;
         psWarpOptions->hDstDS = dstDS;
-        psWarpOptions->nBandCount = nbands();
+        psWarpOptions->nBandCount = imgin.nbands();
         psWarpOptions->panSrcBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
         psWarpOptions->panDstBands = (int *) CPLMalloc(sizeof(int) * psWarpOptions->nBandCount );
         psWarpOptions->padfSrcNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfSrcNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfDstNoDataReal = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
         psWarpOptions->padfDstNoDataImag = (double *) CPLMalloc(sizeof(double) * psWarpOptions->nBandCount );
-        for (unsigned int b=0;b<nbands();b++) {
+        for (unsigned int b=0;b<imgin.nbands();b++) {
             psWarpOptions->panSrcBands[b] = b+1;
             psWarpOptions->panDstBands[b] = b+1;
-            psWarpOptions->padfSrcNoDataReal[b] = (*this)[b].nodata();
+            psWarpOptions->padfSrcNoDataReal[b] = imgin[b].nodata();
             // TODO - note this assumes output nodata is same as input
             psWarpOptions->padfDstNoDataReal[b] = imgout[b].nodata();
             psWarpOptions->padfSrcNoDataImag[b] = 0.0;
