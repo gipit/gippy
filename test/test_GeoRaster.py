@@ -43,7 +43,7 @@ class GeoRasterTests(unittest.TestCase):
             arr = band.read()
             self.assertAlmostEqual(arr[mask].min(), stats[0])
             self.assertAlmostEqual(arr[mask].max(), stats[1])
-            self.assertAlmostEqual(arr[mask].mean(), stats[2], places=3)
+            self.assertAlmostEqual(arr[mask].mean(), stats[2], places=2)
 
     def test_ndvi(self):
         """ Test NDVI using gippy """
