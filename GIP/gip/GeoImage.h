@@ -23,7 +23,6 @@
 #define GIP_GEOIMAGE_H
 
 #include <cstddef>
-//#include <cstdio>
 #include <gip/GeoResource.h>
 #include <gip/GeoRaster.h>
 #include <gip/GeoFeature.h>
@@ -211,9 +210,9 @@ namespace gip {
         //! Adds a band (as last band)
         GeoImage& add(GeoRaster band);
         //! Keep only these band names
-        GeoImage& select(std::vector<std::string> names);
+        GeoImage select(std::vector<std::string> names);
         //! Keep only these band numbers
-        GeoImage& select(std::vector<int> nums);
+        GeoImage select(std::vector<int> nums);
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands

@@ -115,11 +115,12 @@ namespace gip {
         return *this;
     }
     // Keep only these band names
-    GeoImage& GeoImage::select(vector<string> names) {
+    GeoImage GeoImage::select(vector<string> names) {
         return select(Descriptions2Indices(names));
     }
     // Keep only these band numbers
-    GeoImage& GeoImage::select(vector<int> nums) {
+    GeoImage GeoImage::select(vector<int> nums) {
+        GeoImage imgout(*this);
         vector<GeoRaster> _bands;
         vector<string> _names;
         vector<int> _bandnums;
@@ -128,9 +129,9 @@ namespace gip {
             _bands.push_back(_RasterBands[*i]);
             _names.push_back(_BandNames[*i]);
         }
-        _RasterBands = _bands;
-        _BandNames = _names;
-        return *this;
+        imgout._RasterBands = _bands;
+        imgout._BandNames = _names;
+        return imgout;
     }
 
 

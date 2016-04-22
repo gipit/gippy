@@ -4,7 +4,6 @@ import os
 import numpy as np
 import gippy
 import unittest
-from datetime import datetime
 import gippy.algorithms as alg
 from utils import get_test_image
 
@@ -32,7 +31,6 @@ class GeoRasterTests(unittest.TestCase):
             # check against numpy
             arr = band.read()
 
-
     def test_stats(self):
         """ Calculate statistics using gippy """
         geoimg = get_test_image()
@@ -44,6 +42,29 @@ class GeoRasterTests(unittest.TestCase):
             self.assertAlmostEqual(arr[mask].min(), stats[0])
             self.assertAlmostEqual(arr[mask].max(), stats[1])
             self.assertAlmostEqual(arr[mask].mean(), stats[2], places=2)
+
+    def test_histogram(self):
+        """ Test histogram """
+        geoimg = gippy.GeoImage.create(xsz=10, ysz=10, nb=2)
+        arr = np.arange(10).reshape(1, 10) + 1
+        for i in range(9):
+            arr = np.append(arr, arr, axis=0)
+        geoimg[0].write(arr.astype('uint8'))
+        hist = geoimg[0].histogram(bins=10, normalize=False)
+        self.assertEqual(hist[0], 10)
+        self.assertEqual(hist.sum(), geoimg.size())
+        hist = geoimg[0].histogram(bins=10)
+        self.assertAlmostEqual(hist.sum(), 1.0)
+        self.assertAlmostEqual(hist[0], 0.1)
+        hist = geoimg[0].histogram(bins=10, normalize=False, cumulative=True)
+        self.assertAlmostEqual(hist[-1], geoimg.size())
+
+    def test_real_histogram(self):
+        """ Test histogram of real data """
+        geoimg = get_test_image()
+        hist = geoimg[0].histogram(normalize=False)
+        self.assertEqual(len(hist), 100)
+        self.assertEqual(hist.sum(), geoimg.size())
 
     def test_ndvi(self):
         """ Test NDVI using gippy """
@@ -73,6 +94,6 @@ class GeoRasterTests(unittest.TestCase):
         """ Scale image to byte range """
         geoimg = get_test_image()
         for band in geoimg:
-            band = band.autoscale(minout=1, maxout=255) #, percent=2.0)
+            band = band.autoscale(minout=1, maxout=255, percent=2.0)
             self.assertTrue(band.min() == 1)
             self.assertTrue(band.max() == 255)
