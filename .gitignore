@@ -4,3 +4,4 @@
 *.so
 build/
 gippy.egg-info/
+*.aux.xml
