@@ -5,3 +5,8 @@
 build/
 gippy.egg-info/
 *.aux.xml
+
+gippy/gippy.py
+gippy/gippy_wrap.cpp
+gippy/algorithms.py
+gippy/algorithms_wrap.cpp
