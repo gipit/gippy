@@ -11,7 +11,7 @@ addons:
     - libgdal1h
     - gdal-bin
     - libgdal-dev
-    - swig3.0
+    - swig
     - g++-4.8
 
 before_install:
