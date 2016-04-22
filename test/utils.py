@@ -3,21 +3,22 @@ from stestdata import TestData
 
 
 # TODO - download landsat test image if not already
-def get_test_image():
+def get_test_image(sensor='landsat8', name=''):
     """ get test image """
-    t = TestData('landsat8')
+    t = TestData(sensor)
 
-    fnames = [None, None]
-    for k, v in t.examples[t.names[0]].iteritems():
-        if v['band_type'] == 'red':
-            fnames[0] = v['path']
+    if name == '':
+        name = t.names[0]
 
-        if v['band_type'] == 'nir':
-            fnames[1] = v['path']
+    dat = t.examples[name].values()
+    # filter out pan band
+    dat = [d for d in dat if d['band_type'] != 'pan']
 
-    geoimg = gippy.GeoImage(fnames)
-    geoimg.set_bandname('RED', 1)
-    geoimg.set_bandname('NIR', 2)
+    filenames = [d['path'] for d in dat]
+    bandnames = [d['band_type'] for d in dat]
+
+    geoimg = gippy.GeoImage(filenames)
+    geoimg.set_bandnames(bandnames)
     geoimg.set_nodata(0)
     return geoimg
 
