@@ -584,6 +584,41 @@ namespace gip {
         return imgout;
     }
 
+
+    GeoImage pansharp_brovey(const GeoImage& geoimg, const GeoImage& panimg, CImg<float> weights, std::string filename) {
+        // create output image
+        BoundingBox ext = geoimg.extent().intersect(panimg.extent());
+        Point<double> res = panimg.resolution();
+        int xsz(ext.width()/std::abs(res.x()));
+        int ysz(ext.height()/std::abs(res.y()));
+        CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
+
+        // create upscaled output file using nearest neighbor
+        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimg.nbands(), 
+                                           panimg.srs(), bbox, geoimg.type().string());
+        // warp to common footprint and resolution
+        geoimg.warp_into(imgout, GeoFeature(), 2);
+
+        // create warped pan-band - TODO make faster by adjust extents directly
+        GeoImage panout = GeoImage::create("", xsz, ysz, 1, panimg.srs(), bbox, panimg.type().string());
+        panimg.warp_into(panout);
+
+        // Chunk image
+        CImg<float> cimgs;
+        CImg<float> pancimg;
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = imgout.chunks();
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            // this is a multidimensional array (X x Y x 1 x B)
+            cimgs = imgout.read<float>();
+            pancimg = panout.read<float>();
+
+        }
+
+        return imgout;
+    }
+
+
     //! Runs the RX Detector (RXD) anamoly detection algorithm
     GeoImage rxd(const GeoImage& img, string filename) {
         if (img.nbands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");

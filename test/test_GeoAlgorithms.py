@@ -9,6 +9,7 @@ from utils import get_test_image
 class GeoAlgorithmsTests(unittest.TestCase):
 
     def test_rxd(self):
+        """ Test RX Detector algorithm """
         geoimg = get_test_image().select(['red', 'green', 'blue'])
         rxd = alg.rxd(geoimg)
         self.assertEqual(rxd.bandnames()[0], "RXD")
@@ -18,3 +19,10 @@ class GeoAlgorithmsTests(unittest.TestCase):
         fname = rxd.filename()
         rxd = None
         self.assertFalse(os.path.exists(fname))
+
+    def test_pansharpen(self):
+        """ Test pan-sharpening algorithm """
+        geoimg = get_test_image().select(['red', 'green', 'blue', 'nir'])
+        panimg = get_test_image(bands=['pan'])
+        fout = 'test-pansharpen.tif'
+        imgout = alg.pansharpen(geoimg, panimg, fout)
