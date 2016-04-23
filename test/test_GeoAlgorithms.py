@@ -25,4 +25,4 @@ class GeoAlgorithmsTests(unittest.TestCase):
         geoimg = get_test_image().select(['red', 'green', 'blue', 'nir'])
         panimg = get_test_image(bands=['pan'])
         fout = 'test-pansharpen.tif'
-        imgout = alg.pansharpen(geoimg, panimg, fout)
+        imgout = alg.pansharp_brovey(geoimg, panimg, filename=fout)
