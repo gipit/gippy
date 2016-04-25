@@ -2,6 +2,9 @@
 *~
 *.o
 *.so
+_build/
+_static/
+_templates/
 build/
 gippy.egg-info/
 *.aux.xml
