@@ -1,8 +1,12 @@
-# Quickstart
+Quickstart
+==========
 
-The two main classes in GIPPY are GeoImage and GeoRaster.  A GeoRaster is a single raster band, analagous to GDALRasterBand.  A GeoImage is a collection of GeoRaster objects, similar to GDALDataset however the GeoRaster objects that it contains could be from different locations (different files).
+The two main classes in GIPPY are GeoImage and GeoRaster. A GeoRaster is a single raster band, analagous to GDALRasterBand. A GeoImage is a collection of GeoRaster objects, similar to GDALDataset however the GeoRaster objects that it contains could be from different locations (different files).
 
 Open existing images
+++++++++++++++++++++
+
+.. code::python
 
     from gippy import GeoImage
 
@@ -15,11 +19,16 @@ Open existing images
     # Open up multiple files as a single image where numbands = numfiles x numbands
     image = GeoImage(['test1.tif', 'test2.tif', 'test3.tif'])
 
+
 Creating new images
++++++++++++++++++++
+
+
+.. code::
 
     import gippy
 
-    # Create new 1000x1000 single-band byte image 
+    # Create new 1000x1000 single-band byte image
     image = gippy.GeoImage('test.tif', 1000, 1000, 1, gippy.GDT_Byte)
 
     # Create new image with same properties (size, metadata, SRS) as existing gimage GeoImage
