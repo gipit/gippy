@@ -4,8 +4,6 @@ import os
 import numpy as np
 import gippy as gp
 import unittest
-from datetime import datetime
-import gippy.algorithms as alg
 from utils import get_test_image
 
 
@@ -21,8 +19,8 @@ class GeoImageTests(unittest.TestCase):
     def test0_open(self):
         """ Open existing image """
         geoimg = get_test_image()
-        self.assertTrue(geoimg.xsize() > 0)
-        self.assertTrue(geoimg.ysize() > 0)
+        self.assertEqual(geoimg.xsize(), 627)
+        self.assertEqual(geoimg.ysize(), 603)
 
     def test1_create(self):
         """ Create single band image """
@@ -36,6 +34,14 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(res.x(), 1.0/geoimg.xsize())
         self.assertEqual(res.y(), -1.0/geoimg.ysize())
         os.remove(fout)
+
+    def test_read(self):
+        """ Test reading of multiband image """
+        geoimg = get_test_image()
+        arr = geoimg.read()
+        self.assertEqual(geoimg.nbands(), arr.shape[0])
+        # make sure x, y dimensions are same when reading single bands
+        self.assertEqual(arr.shape[1:3], geoimg[0].read().shape)
 
     def test_select(self):
         img1 = get_test_image()

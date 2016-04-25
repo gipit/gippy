@@ -11,14 +11,14 @@ class GeoAlgorithmsTests(unittest.TestCase):
     def test_rxd(self):
         """ Test RX Detector algorithm """
         geoimg = get_test_image().select(['red', 'green', 'blue'])
-        rxd = alg.rxd(geoimg)
+        fout = 'test-rxd.tif'
+        rxd = alg.rxd(geoimg, filename=fout)
         self.assertEqual(rxd.bandnames()[0], "RXD")
         self.assertEqual(rxd.xsize(), geoimg.xsize())
         self.assertEqual(rxd.ysize(), geoimg.ysize())
         self.assertEqual(rxd.nbands(), 1)
-        fname = rxd.filename()
         rxd = None
-        self.assertFalse(os.path.exists(fname))
+        os.remove(fout)
 
     def test_pansharpen(self):
         """ Test pan-sharpening algorithm """
