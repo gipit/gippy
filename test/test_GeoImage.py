@@ -4,7 +4,7 @@ import os
 import numpy as np
 import gippy as gp
 import unittest
-from utils import get_test_image
+from gippy.test import get_test_image
 
 
 class GeoImageTests(unittest.TestCase):

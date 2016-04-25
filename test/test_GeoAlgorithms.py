@@ -3,7 +3,7 @@
 import os
 import gippy.algorithms as alg
 import unittest
-from utils import get_test_image
+from gippy.test import get_test_image
 
 
 class GeoAlgorithmsTests(unittest.TestCase):

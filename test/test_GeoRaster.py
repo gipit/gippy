@@ -5,7 +5,7 @@ import numpy as np
 import gippy
 import unittest
 import gippy.algorithms as alg
-from utils import get_test_image
+from gippy.test import get_test_image
 
 """
 Included are some tests for doing processing in NumPy instead of Gippy,
@@ -42,6 +42,16 @@ class GeoRasterTests(unittest.TestCase):
             self.assertAlmostEqual(arr[mask].min(), stats[0])
             self.assertAlmostEqual(arr[mask].max(), stats[1])
             self.assertAlmostEqual(arr[mask].mean(), stats[2], places=2)
+
+    def test_write(self):
+        """ Test writing arrays of different datatype """
+        geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
+        arr = np.ones((100, 100)).astype('uint8')
+        geoimg[0].write(arr)
+        self.assertTrue(np.array_equal(arr, geoimg[0].read()))
+        arr = np.ones((100, 100)).astype('float32')
+        geoimg[0].write(arr)
+        self.assertTrue(np.array_equal(arr, geoimg[0].read()))
 
     def test_histogram(self):
         """ Test histogram """
