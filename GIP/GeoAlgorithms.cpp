@@ -662,9 +662,9 @@ namespace gip {
         vector<Chunk> chunks = img.chunks();
         for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
             chip = img.read<double>(*iCh);
-            chipout = CImg<double>(chip, "xyzc");
+            chipout = CImg<double>(chip);
             cimg_forXY(chip,x,y) {
-                pixel = chip.get_crop(x,y,0,0,x,y,0,chip.spectrum()-1).unroll('x') - bandmeans;
+                pixel = chip.get_crop(x,y,0,0,x,y,chip.depth()-1,0).unroll('x') - bandmeans;
                 chipout(x,y) = (pixel * K.get_transpose() * pixel.get_transpose())[0];
             }
             imgout[0].write(chipout, *iCh);
