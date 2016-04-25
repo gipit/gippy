@@ -68,7 +68,8 @@ namespace gip {
     GeoImage linear_transform(const GeoImage& geoimg, CImg<float> coef, std::string filename);
 
     //! Pansharpen all bands in a GeoImage with a pan band
-    GeoImage pansharp_brovey(const GeoImage& geoimg, const GeoImage& panimg, std::string filename="");
+    GeoImage pansharp_brovey(const GeoImage& geoimg, const GeoImage& panimg,
+                             CImg<float> weights=CImg<float>(), std::string filename="");
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
     GeoImage rxd(const GeoImage& geoimg, std::string filename="");
