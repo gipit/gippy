@@ -37,6 +37,13 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(res.y(), -1.0/geoimg.ysize())
         os.remove(fout)
 
+    def test_select(self):
+        img1 = get_test_image()
+        img2 = img1.select(['red', 'green', 'blue'])
+        self.assertTrue(np.array_equal(img1['red'].read(), img2[0].read()))
+        self.assertTrue(np.array_equal(img1['green'].read(), img2[1].read()))
+        self.assertTrue(np.array_equal(img1['blue'].read(), img2[2].read()))
+
     # TODO - problem with setting band description
     def test_persistent_metadata(self):
         """ Test writing metadata and reopening and reading """

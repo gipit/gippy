@@ -584,6 +584,63 @@ namespace gip {
         return imgout;
     }
 
+
+    //! Calcualte Brovey pansharpening
+    /*!
+        geoimg: red, greem, and blue bands, optionally nir band, in any order
+        weights: weights of Red, Green, Blue, and NIR (if provided), in that order
+    */
+    GeoImage pansharp_brovey(const GeoImage& geoimg, const GeoImage& panimg, CImg<float> weights, std::string filename) {
+        // TODO - check inputs to contain RGB, and maybe NIR
+        if (weights.size()==0)
+            weights = geoimg.nbands() == 4 ? CImg<float>(4,1,1,1, 0.25, 0.25, 0.25, 0.25) : CImg<float>(3,1,1,1, 0.34, 0.33, 0.33);
+
+        // create output image
+        BoundingBox ext = geoimg.extent().intersect(panimg.extent());
+        Point<double> res = panimg.resolution();
+        int xsz(ext.width()/std::abs(res.x()));
+        int ysz(ext.height()/std::abs(res.y()));
+        CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
+
+        // create upscaled output file using nearest neighbor
+        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimg.nbands(), 
+                                           panimg.srs(), bbox, geoimg.type().string());
+        imgout.set_bandnames(geoimg.bandnames());
+        // warp to common footprint and resolution
+        geoimg.warp_into(imgout, GeoFeature(), 2);
+
+        // create warped pan-band - TODO make faster by adjust extents directly
+        GeoImage panout = GeoImage::create("", xsz, ysz, 1, panimg.srs(), bbox, panimg.type().string());
+        panimg.warp_into(panout);
+
+        // Chunk image
+        CImg<float> r, g, b, n;
+        CImg<float> pancimg;
+        CImg<float> dnf;
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = imgout.chunks();
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            // this is a multidimensional array (X x Y x 1 x B)
+            r = imgout["red"].read<float>(*iCh);
+            g = imgout["green"].read<float>(*iCh);
+            b = imgout["blue"].read<float>(*iCh);
+            pancimg = panout.read<float>(*iCh);
+            if (geoimg.band_exists("nir")) {
+                n = imgout["nir"].read<float>(*iCh);
+                pancimg = pancimg - weights[3] * n;
+            }
+            dnf = pancimg.get_div(weights[0] * r + weights[1] * g + weights[2] * b);
+            imgout["red"].write<float>(r.mul(dnf), *iCh);
+            imgout["green"].write<float>(g.mul(dnf), *iCh);
+            imgout["blue"].write<float>(b.mul(dnf), *iCh);
+            if (geoimg.band_exists("nir"))
+                imgout["nir"].write<float>(n.mul(dnf), *iCh);
+        }
+
+        return imgout;
+    }
+
+
     //! Runs the RX Detector (RXD) anamoly detection algorithm
     GeoImage rxd(const GeoImage& img, string filename) {
         if (img.nbands() < 2) throw std::runtime_error("RXD: At least two bands must be supplied");

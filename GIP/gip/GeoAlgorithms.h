@@ -49,10 +49,10 @@ namespace gip {
     }; */
 
     //! Create cloudmask using ACCA
-    GeoImage acca(const GeoImage&, std::string, float, float, int = 5, int = 10, int = 4000);
+    GeoImage acca(const GeoImage&, std::string filename, float, float, int = 5, int = 10, int = 4000);
 
     //! Create new file with a Fmask cloud mask
-    GeoImage fmask(const GeoImage&, std::string, int=3, int=5);
+    GeoImage fmask(const GeoImage& geoimg, std::string filename, int=3, int=5);
 
     //! Create single image from multiple input images using vector file footprint
     //GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
@@ -62,13 +62,17 @@ namespace gip {
     //GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
-    GeoImage indices(const GeoImage&, dictionary);
+    GeoImage indices(const GeoImage& geoimg, dictionary);
 
     //! Create output based on linear combinations of input
-    GeoImage linear_transform(const GeoImage&, CImg<float>, std::string);
+    GeoImage linear_transform(const GeoImage& geoimg, CImg<float> coef, std::string filename);
+
+    //! Pansharpen all bands in a GeoImage with a pan band
+    GeoImage pansharp_brovey(const GeoImage& geoimg, const GeoImage& panimg,
+                             CImg<float> weights=CImg<float>(), std::string filename="");
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
-    GeoImage rxd(const GeoImage&, std::string="");
+    GeoImage rxd(const GeoImage& geoimg, std::string filename="");
 
     //! Calculate spectral statistics and output to new image
     //GeoImage SpectralStatistics(const GeoImage&, std::string);
