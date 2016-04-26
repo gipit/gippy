@@ -24,29 +24,33 @@
     #define SWIG_FILE_WITH_INIT
 %}
 
+
+// Exception handling
+%include exception.i
+%exception {
+    try {
+        $action
+    } catch (const std::out_of_range& e) {
+        SWIG_exception(SWIG_IndexError, e.what());
+    } catch (const std::invalid_argument& e) {
+        SWIG_exception(SWIG_TypeError, e.what());
+    } catch (const std::exception& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
+    }
+}
+
+
 // STL bindings
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_map.i"
+
 namespace std {
     %template(svector) std::vector<std::string>;
     %template(ivector) std::vector<int>;
     %template() std::map<std::string, std::string>;
 }
 
-%include "exception.i"
-%exception {
-    try {
-        $action
-    } catch (const std::out_of_range& e) {
-        //PyErr_SetString(PyExc_StopIteration, e.what());
-        PyErr_SetString(PyExc_IndexError, e.what());
-        return NULL;
-    } catch (const std::exception& e) {
-        PyErr_SetString(PyExc_RuntimeError, e.what());
-        return NULL;
-    }
-}
 
 // Ignore these standard functions
 %ignore std::cout;
@@ -56,6 +60,8 @@ namespace std {
 %{
     #include <gip/gip.h>
 %}
+
+
 // Wrap CImg
 %include "cimg.i"
 
@@ -126,6 +132,10 @@ namesace gip {
 %include "gip/GeoRaster.h"
 namespace gip {
     %extend GeoRaster {
+        // templated functions that need to be instantiated
+        GeoRaster& save(GeoRaster& raster) {
+            return self->save<double>(raster);
+        }
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
@@ -139,7 +149,7 @@ namespace gip {
                     case 5: return CImgToArr(self->read<int>(chunk));
                     case 6: return CImgToArr(self->read<float>(chunk));
                     case 7: return CImgToArr(self->read<double>(chunk));
-                    default: throw(std::exception());
+                    default: throw(std::runtime_error("error reading raster"));
                 }
             }
             return CImgToArr(self->read<float>(chunk));
@@ -148,23 +158,21 @@ namespace gip {
                  "PyObject passed in is a numpy.array.\n"
                  "Comply!\n ");
         GeoRaster& write(PyObject* obj, Chunk chunk=Chunk()) {
-            switch( PyArray_TYPE((PyArrayObject*)obj)) {
-                case NPY_UINT8: self->write(ArrToCImg<unsigned char>(obj), chunk); break;
-                case NPY_UINT16: self->write(ArrToCImg<unsigned short>(obj), chunk); break;
-                case NPY_INT16: self->write(ArrToCImg<short>(obj), chunk); break;
-                case NPY_UINT32: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT32: self->write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_UINT64: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT64: self->write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_FLOAT32: self->write(ArrToCImg<float>(obj), chunk); break;
-                case NPY_FLOAT64: self->write(ArrToCImg<double>(obj), chunk); break;
+            PyArrayObject* arr((PyArrayObject*)obj);
+            switch(PyArray_TYPE(arr)) {
+                case NPY_UINT8: self->write(ArrToCImg<unsigned char>(arr), chunk); break;
+                case NPY_UINT16: self->write(ArrToCImg<unsigned short>(arr), chunk); break;
+                case NPY_INT16: self->write(ArrToCImg<short>(arr), chunk); break;
+                case NPY_UINT32: self->write(ArrToCImg<unsigned int>(arr), chunk); break;
+                case NPY_INT32: self->write(ArrToCImg<int>(arr), chunk); break;
+                case NPY_UINT64: self->write(ArrToCImg<unsigned int>(arr), chunk); break;
+                case NPY_INT64: self->write(ArrToCImg<int>(arr), chunk); break;
+                case NPY_FLOAT32: self->write(ArrToCImg<float>(arr), chunk); break;
+                case NPY_FLOAT64: self->write(ArrToCImg<double>(arr), chunk); break;
                 default:
-                    throw(std::exception());
+                    throw(std::invalid_argument("a numpy array is required"));
             }
             return *self;
-        }
-        GeoRaster& save(GeoRaster& raster) {
-            return self->save<double>(raster);
         }
     }
 }
@@ -192,47 +200,43 @@ namespace gip {
         unsigned long int __len__() {
             return self->nbands();
         }
-        GeoImage save(std::string filename, std::string dtype="unknown") {
-            return self->save<double>(filename, dtype);
-        }
-        /*GeoImage& save() {
-            return self->save<double>();
-        }*/
         GeoImage __deepcopy__(GeoImage image) {
             return GeoImage(image);
         }
-        %feature("docstring",
-                 "PyObject returned is a numpy.array.\n"
-                 "Enjoy!\n ");
+        // templated functions that need to be instantiated
+        GeoImage save(std::string filename, std::string dtype="unknown") {
+            return self->save<double>(filename, dtype);
+        }
         PyObject* read(Chunk chunk=Chunk()) {
-            // Only looks at first band for gain and offset
+            // TODO - look at all bands for gain and offset
             if ((*self)[0].gain() == 1.0 && (*self)[0].offset() == 0.0) {
                 switch(self->type().type()) {
-                    case 1: return CImgToArr(self->read<unsigned char>(chunk));
-                    case 2: return CImgToArr(self->read<unsigned short>(chunk));
-                    case 3: return CImgToArr(self->read<short>(chunk));
-                    case 4: return CImgToArr(self->read<unsigned int>(chunk));
-                    case 5: return CImgToArr(self->read<int>(chunk));
+                    case 1: return CImgToArr(self->read<uint8_t>(chunk));
+                    case 2: return CImgToArr(self->read<uint16_t>(chunk));
+                    case 3: return CImgToArr(self->read<int16_t>(chunk));
+                    case 4: return CImgToArr(self->read<uint32_t>(chunk));
+                    case 5: return CImgToArr(self->read<int32_t>(chunk));
                     case 6: return CImgToArr(self->read<float>(chunk));
                     case 7: return CImgToArr(self->read<double>(chunk));
-                    default: throw(std::exception());
+                    default: throw(std::runtime_error("error reading raster"));
                 }
             }
             return CImgToArr(self->read<float>(chunk));
         }
         GeoImage& write(PyObject* obj, Chunk chunk=Chunk()) {
-            switch( PyArray_TYPE((PyArrayObject*)obj)) {
-                case NPY_UINT8: self->write(ArrToCImg<unsigned char>(obj), chunk); break;
-                case NPY_UINT16: self->write(ArrToCImg<unsigned short>(obj), chunk); break;
-                case NPY_INT16: self->write(ArrToCImg<short>(obj), chunk); break;
-                case NPY_UINT32: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT32: self->write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_UINT64: self->write(ArrToCImg<unsigned int>(obj), chunk); break;
-                case NPY_INT64: self->write(ArrToCImg<int>(obj), chunk); break;
-                case NPY_FLOAT32: self->write(ArrToCImg<float>(obj), chunk); break;
-                case NPY_FLOAT64: self->write(ArrToCImg<double>(obj), chunk); break;
+            PyArrayObject* arr((PyArrayObject*)obj);
+            switch( PyArray_TYPE(arr) ) {
+                case NPY_UINT8: self->write(ArrToCImg<uint8_t>(arr), chunk); break;
+                case NPY_UINT16: self->write(ArrToCImg<uint16_t>(arr), chunk); break;
+                case NPY_INT16: self->write(ArrToCImg<int16_t>(arr), chunk); break;
+                case NPY_UINT32: self->write(ArrToCImg<uint32_t>(arr), chunk); break;
+                case NPY_INT32: self->write(ArrToCImg<int32_t>(arr), chunk); break;
+                case NPY_UINT64: self->write(ArrToCImg<uint64_t>(arr), chunk); break;
+                case NPY_INT64: self->write(ArrToCImg<int64_t>(arr), chunk); break;
+                case NPY_FLOAT32: self->write(ArrToCImg<float>(arr), chunk); break;
+                case NPY_FLOAT64: self->write(ArrToCImg<double>(arr), chunk); break;
                 default:
-                    throw(std::exception());
+                    throw(std::invalid_argument("a numpy array is required"));
             }
             return *self;
         }
