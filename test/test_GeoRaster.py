@@ -54,13 +54,12 @@ class GeoRasterTests(unittest.TestCase):
         geoimg[0].write(arr)
         self.assertTrue(np.array_equal(arr, geoimg[0].read()))
 
-    """
-    @raises(TypeError)
     def test_invalid_args(self):
-        # Test passing invalid arguments
+        """ Test passing invalid arguments """
         geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
-        geoimg[0].write('invalid arg')
-    """
+        with self.assertRaises(TypeError):
+            geoimg[0].write('invalid arg')
+            geoimg[0].write([1.0, 1.0])
 
     def test_histogram(self):
         """ Test histogram """
