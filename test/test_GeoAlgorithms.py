@@ -3,14 +3,14 @@
 import os
 import gippy.algorithms as alg
 import unittest
-from gippy.test import get_test_image
+import gippy.test as gpt
 
 
 class GeoAlgorithmsTests(unittest.TestCase):
 
     def test_rxd(self):
         """ Test RX Detector algorithm """
-        geoimg = get_test_image().select(['red', 'green', 'blue'])
+        geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
         fout = 'test-rxd.tif'
         rxd = alg.rxd(geoimg, filename=fout)
         self.assertEqual(rxd.bandnames()[0], "RXD")
@@ -22,17 +22,17 @@ class GeoAlgorithmsTests(unittest.TestCase):
 
     def test_pansharpen(self):
         """ Test pan-sharpening algorithm """
-        geoimg = get_test_image().select(['red', 'green', 'blue', 'nir'])
-        panimg = get_test_image(bands=['pan'])
+        geoimg = gpt.get_test_image().select(['red', 'green', 'blue', 'nir'])
+        panimg = gpt.get_test_image(bands=['pan'])
         fout = 'test-pansharpen.tif'
         imgout = alg.pansharp_brovey(geoimg, panimg, filename=fout)
         self.assertAlmostEqual(imgout.resolution().x(), panimg.resolution().x(), places=1)
         self.assertAlmostEqual(imgout.resolution().y(), panimg.resolution().y(), places=1)
         self.assertEqual(imgout.nbands(), 4)
         os.remove(fout)
-        geoimg = get_test_image().select(['red', 'green', 'blue'])
+        geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
         imgout = alg.pansharp_brovey(geoimg, panimg, filename=fout)
         self.assertEqual(imgout.nbands(), 3)
         self.assertAlmostEqual(imgout.resolution().x(), panimg.resolution().x(), places=1)
         self.assertAlmostEqual(imgout.resolution().y(), panimg.resolution().y(), places=1)
-        os.remove(fout)
+        #os.remove(fout)

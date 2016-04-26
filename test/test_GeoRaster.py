@@ -5,7 +5,8 @@ import numpy as np
 import gippy
 import unittest
 import gippy.algorithms as alg
-from gippy.test import get_test_image
+import gippy.test as gpt
+from nose.tools import raises
 
 """
 Included are some tests for doing processing in NumPy instead of Gippy,
@@ -19,12 +20,12 @@ class GeoRasterTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.set_verbose(2)
+        gippy.Options.set_verbose(1)
         gippy.Options.set_chunksize(128.0)
 
     def test_sqrt(self):
         """ Calculate sqrt of image """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         for band in geoimg:
             vals = band.sqrt().read()
             mask = band.data_mask() == 1
@@ -33,7 +34,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def test_stats(self):
         """ Calculate statistics using gippy """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         for band in geoimg:
             stats = band.stats()
             mask = band.data_mask() == 1
@@ -53,6 +54,12 @@ class GeoRasterTests(unittest.TestCase):
         geoimg[0].write(arr)
         self.assertTrue(np.array_equal(arr, geoimg[0].read()))
 
+    @raises(TypeError)
+    def test_invalid_args(self):
+        """ Test passing invalid arguments """
+        geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
+        geoimg[0].write('invalid arg')
+
     def test_histogram(self):
         """ Test histogram """
         geoimg = gippy.GeoImage.create(xsz=10, ysz=10, nb=2)
@@ -71,14 +78,14 @@ class GeoRasterTests(unittest.TestCase):
 
     def test_real_histogram(self):
         """ Test histogram of real data """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         hist = geoimg[0].histogram(normalize=False)
         self.assertEqual(len(hist), 100)
         self.assertEqual(hist.sum(), geoimg.size())
 
     def test_ndvi(self):
         """ Test NDVI using gippy """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
         alg.indices(geoimg, {'ndvi': fout})
         geoimg = None
@@ -86,7 +93,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def test_ndvi_numpy(self):
         """ Test NDVI separately using numpy for speed comparison """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         nodata = geoimg[0].nodata()
         red = geoimg['RED'].read().astype('double')
         nir = geoimg['NIR'].read().astype('double')
@@ -102,7 +109,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def test_scale(self):
         """ Scale image to byte range """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         for band in geoimg:
             band = band.autoscale(minout=1, maxout=255, percent=2.0)
             self.assertTrue(band.min() == 1)
