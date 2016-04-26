@@ -57,10 +57,9 @@ class GeoImageTests(unittest.TestCase):
         self.assertTrue(np.array_equal(img1['green'].read(), img2[1].read()))
         self.assertTrue(np.array_equal(img1['blue'].read(), img2[2].read()))
 
-    # TODO - problem with setting band description
     def test_persistent_metadata(self):
         """ Test writing metadata and reopening and reading """
-        fout = 'test.tif'
+        fout = 'test-meta.tif'
         geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000, nb=3)
         geoimg.set_bandnames(['red', 'green', 'blue'])
         geoimg.set_nodata(7)
@@ -69,12 +68,8 @@ class GeoImageTests(unittest.TestCase):
         # reopen
         geoimg = gp.GeoImage(fout)
         self.assertEqual(geoimg[0].nodata(), 7)
-        bnames = geoimg.bandnames()
-        #self.assertEqual(list(bnames), ['red', 'green', 'blue'])
-        #geoimg.set_bandname('anotherband', 1)
+        self.assertEqual(list(geoimg.bandnames()), ['red', 'green', 'blue'])
         geoimg = None
-        #geoimg = gp.GeoImage(fout)
-        #self.assertEqual(geoimg.bandnames(), ['anotherband'])
         os.remove(fout)
 
     def test_create_multiband(self):

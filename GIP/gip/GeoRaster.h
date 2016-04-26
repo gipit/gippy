@@ -376,7 +376,7 @@ namespace gip {
             // if not valid then set a nodata value
             if (pbSuccess == 0) {
                 // TODO - also check for out of range value ?
-                set_nodata(type().nodata());
+                //set_nodata(type().nodata());
             }
         }
 

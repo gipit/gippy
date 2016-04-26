@@ -155,9 +155,7 @@ namespace gip {
                 throw std::out_of_range ("Band " + bandname + " already exists in GeoImage!");
             } catch(...) {
                 _BandNames[bandnum-1] = bandname;
-                //_RasterBands[bandnum-1]._GDALRasterBand->SetDescription(bandname.c_str());
                 _RasterBands[bandnum-1].set_color(bandname);
-                _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(bandname.c_str());
             }
             return *this;
         }
@@ -405,11 +403,11 @@ namespace gip {
     */
 
     // Save input file with processing applied into new output file
-    template<class T> GeoImage GeoImage::save(std::string filename, std::string dt, bool overviews) const {
+    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, bool overviews) const {
         // TODO: if not supplied base output datatype on units?
-        if (dt == "") dt = this->type().string();
+        if (dtype == "") dtype = this->type().string();
 
-        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dt);
+        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype);
         for (unsigned int i=0; i<imgout.nbands(); i++) {
             (*this)[i].save<T>(imgout[i]);
         }
