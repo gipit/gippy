@@ -35,4 +35,4 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertEqual(imgout.nbands(), 3)
         self.assertAlmostEqual(imgout.resolution().x(), panimg.resolution().x(), places=1)
         self.assertAlmostEqual(imgout.resolution().y(), panimg.resolution().y(), places=1)
-        #os.remove(fout)
+        os.remove(fout)

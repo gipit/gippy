@@ -155,9 +155,7 @@ namespace gip {
                 throw std::out_of_range ("Band " + bandname + " already exists in GeoImage!");
             } catch(...) {
                 _BandNames[bandnum-1] = bandname;
-                //_RasterBands[bandnum-1]._GDALRasterBand->SetDescription(bandname.c_str());
                 _RasterBands[bandnum-1].set_color(bandname);
-                _RasterBands[bandnum-1]._GDALRasterBand->SetDescription(bandname.c_str());
             }
             return *this;
         }
