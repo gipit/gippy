@@ -28,5 +28,8 @@
 %}
 
 %include "cimg.i"
+%include "exception.i"
 %import "gippy.i"
+
+// wrap algorithms
 %include <gip/GeoAlgorithms.h>

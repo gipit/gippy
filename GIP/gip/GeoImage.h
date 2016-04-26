@@ -269,7 +269,7 @@ namespace gip {
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->read_raw<T>(chunk) );
             }
-            return images.get_append('v','p');
+            return images.get_append('z');
         }
 
         //! Read chunk, across all bands
@@ -279,7 +279,7 @@ namespace gip {
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
                 images.insert( iBand->read<T>(chunk) );
             }
-            return images.get_append('v','p');
+            return images.get_append('z');
         }
 
         //! Write cube across all bands

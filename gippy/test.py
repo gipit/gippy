@@ -4,7 +4,7 @@ from stestdata import TestData
 
 # TODO - download landsat test image if not already
 def get_test_image(sensor='landsat8', name='', bands=[]):
-    """ get test image from sat-testdata """
+    """ Get test image from sat-testdata """
     t = TestData(sensor)
 
     if name == '':

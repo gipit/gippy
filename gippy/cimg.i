@@ -65,60 +65,99 @@
     }
 
     // Convert numpy array into CImg
-    template<typename T> CImg<T> ArrToCImg(PyObject* obj) {
-        T* data((T*)PyArray_DATA((PyArrayObject*)obj));
-        npy_intp* dims(PyArray_DIMS((PyArrayObject*)obj));
-        int numdim(PyArray_NDIM((PyArrayObject*)obj));
-        if (numdim == 1) {
-            return CImg<T>(data, dims[0]);
-        } else if (numdim == 2) {
-            return CImg<T>(data, dims[1], dims[0]);
-        } else if (numdim == 3) {
-            return CImg<T>(data, dims[2], dims[1], dims[0]);
-        } else if (numdim == 4) {
-            return CImg<T>(data, dims[3], dims[2], dims[1], dims[0]);
-        } else {
-            throw(std::runtime_error("Error converting numpy array to CImg"));
-        }
-    }
+    template<typename T> CImg<T> ArrToCImg(PyArrayObject* arr) {
+        npy_intp* dims(PyArray_DIMS(arr));
+        int ndim(PyArray_NDIM(arr));
 
-    /*template<typename T> int numpytype() {
-        int typenum;
-        if (typeid(T) == typeid(unsigned char)) typenum = NPY_UINT8;
-        else if (typeid(T) == typeid(char)) typenum = NPY_INT8;
-        else if (typeid(T) == typeid(unsigned short)) typenum = NPY_UINT16;
-        else if (typeid(T) == typeid(short)) typenum = NPY_INT16;
-        else if (typeid(T) == typeid(unsigned int)) typenum = NPY_UINT32;
-        else if (typeid(T) == typeid(int)) typenum = NPY_INT32;
-        else if (typeid(T) == typeid(float)) typenum = NPY_FLOAT32;
-        else if (typeid(T) == typeid(double)) typenum = NPY_FLOAT64;
-        else throw(std::runtime_error());
-        return typenum;
-    }*/
-    //std::vector<int> test_vectori() { return {1,2,3,4,5}; }
-
-    /*
-    namespace gip {
-        PyObject* test(PyObject* obj) {
-            //return CImgToArr(_test(ArrToCImg<float>(obj)));
-            switch( PyArray_TYPE((PyArrayObject*)obj)) {
-                case NPY_UINT8: return CImgToArr(_test(ArrToCImg<uint8_t>(obj)));
-                case NPY_INT8: return CImgToArr(_test(ArrToCImg<int8_t>(obj)));
-                case NPY_UINT16: return CImgToArr(_test(ArrToCImg<uint16_t>(obj)));
-                case NPY_INT16: return CImgToArr(_test(ArrToCImg<int16_t>(obj)));
-                case NPY_UINT32: returnedrn CImgToArr(_test(ArrToCImg<uint32_t>(obj)));
-                case NPY_INT32: return CImgToArr(_test(ArrToCImg<int32_t>(obj)));
-                case NPY_UINT64: return CImgToArr(_test(ArrToCImg<uint64_t>(obj)));
-                case NPY_INT64: return CImgToArr(_test(ArrToCImg<int64_t>(obj)));
-                case NPY_FLOAT32: return CImgToArr(_test(ArrToCImg<float>(obj)));
-                case NPY_FLOAT64: return CImgToArr(_test(ArrToCImg<double>(obj)));
-                default:
-                    throw(std::exception());
-            }
-        }
-    }*/
+        switch(PyArray_DTYPE(arr)->type_num) {
+            case NPY_UINT8: {
+                uint8_t* data((uint8_t*)PyArray_DATA(arr));
+                switch (ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_INT8: {
+                int8_t* data((int8_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_UINT16: {
+                uint16_t* data((uint16_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_INT16: {
+                int16_t* data((int16_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_UINT32: {
+                uint32_t* data((uint32_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_INT32: {
+                int32_t* data((int32_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_UINT64: {
+                uint64_t* data((uint64_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_INT64: {
+                int64_t* data((int64_t*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_FLOAT32: {
+                float* data((float*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            case NPY_FLOAT64: {
+                double* data((double*)PyArray_DATA(arr));
+                switch(ndim) {
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                }}
+            default:
+                throw(std::runtime_error("array data type not supported"));
+        } // switch(type_num)
+    } // ArrToCImg
 
 %}
+
+//%include "numpy.i"
 
 %init %{
     // initialization for using numpy
@@ -142,53 +181,74 @@
 %typemap (out) CImg<double> { return CImgToArr($1); }
 
 // numpy -> CImg
+%typemap(typecheck) CImg<uint8_t> = PyObject*;
+%typemap(typecheck) CImg<int8_t> = PyObject*;
+%typemap(typecheck) CImg<uint16_t> = PyObject*;
+%typemap(typecheck) CImg<int16_t> = PyObject*;
+%typemap(typecheck) CImg<uint32_t> = PyObject*;
+%typemap(typecheck) CImg<int32_t> = PyObject*;
+%typemap(typecheck) CImg<uint64_t> = PyObject*;
+%typemap(typecheck) CImg<int64_t> = PyObject*;
+%typemap(typecheck) CImg<float> = PyObject*;
+%typemap(typecheck) CImg<double> = PyObject*;
+
 %typemap (in) CImg<uint8_t> { 
     //std::cout << "uint8" << std::endl;
-    $1 = ArrToCImg<uint8_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<uint8_t>(arr); 
 }
-%typemap(typecheck) CImg<uint8_t> = PyObject*;
+
 %typemap (in) CImg<int8_t> { 
     //std::cout << "int8" << std::endl;
-    $1 = ArrToCImg<int8_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<int8_t>(arr); 
 }
-%typemap(typecheck) CImg<int8_t> = PyObject*;
+
 %typemap (in) CImg<uint16_t> { 
     //std::cout << "uint16" << std::endl;
-    $1 = ArrToCImg<uint16_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<uint16_t>(arr); 
 }
-%typemap(typecheck) CImg<uint16_t> = PyObject*;
+
 %typemap (in) CImg<int16_t> { 
     //std::cout << "int16" << std::endl;
-    $1 = ArrToCImg<int16_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<int16_t>(arr); 
 }
-%typemap(typecheck) CImg<int16_t> = PyObject*;
+
 %typemap (in) CImg<uint32_t> { 
     //std::cout << "uint32" << std::endl;
-    $1 = ArrToCImg<uint32_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<uint32_t>(arr); 
 }
-%typemap(typecheck) CImg<uint32_t> = PyObject*;
+
 %typemap (in) CImg<int32_t> { 
     //std::cout << "int32" << std::endl;
-    $1 = ArrToCImg<int32_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<int32_t>(arr); 
 }
-%typemap(typecheck) CImg<int32_t> = PyObject*;
+
 %typemap (in) CImg<uint64_t> { 
     //std::cout << "uint64" << std::endl;
-    $1 = ArrToCImg<uint64_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<uint64_t>(arr); 
 }
-%typemap(typecheck) CImg<uint64_t> = PyObject*;
+
 %typemap (in) CImg<int64_t> { 
     //std::cout << "int64" << std::endl;
-    $1 = ArrToCImg<int64_t>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<int64_t>(arr); 
 }
-%typemap(typecheck) CImg<int64_t> = PyObject*;
+
 %typemap (in) CImg<float> { 
     //std::cout << "float" << std::endl;
-    $1 = ArrToCImg<float>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<float>(arr); 
 }
-%typemap(typecheck) CImg<float> = PyObject*;
+
 %typemap (in) CImg<double> { 
     //std::cout << "double" << std::endl;
-    $1 = ArrToCImg<double>($input); 
+    PyArrayObject* arr((PyArrayObject*)$input);
+    $1 = ArrToCImg<double>(arr); 
 }
-%typemap(typecheck) CImg<double> = PyObject*;
+

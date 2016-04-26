@@ -4,9 +4,7 @@ import os
 import numpy as np
 import gippy as gp
 import unittest
-from datetime import datetime
-import gippy.algorithms as alg
-from utils import get_test_image
+import gippy.test as gpt
 
 
 class GeoImageTests(unittest.TestCase):
@@ -15,14 +13,14 @@ class GeoImageTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gp.Options.set_verbose(2)
+        gp.Options.set_verbose(1)
         gp.Options.set_chunksize(4.0)
 
     def test0_open(self):
         """ Open existing image """
-        geoimg = get_test_image()
-        self.assertTrue(geoimg.xsize() > 0)
-        self.assertTrue(geoimg.ysize() > 0)
+        geoimg = gpt.get_test_image()
+        self.assertEqual(geoimg.xsize(), 627)
+        self.assertEqual(geoimg.ysize(), 603)
 
     def test1_create(self):
         """ Create single band image """
@@ -37,8 +35,23 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(res.y(), -1.0/geoimg.ysize())
         os.remove(fout)
 
+    def test_read(self):
+        """ Test reading of multiband image """
+        geoimg = gpt.get_test_image()
+        arr = geoimg.read()
+        self.assertEqual(geoimg.nbands(), arr.shape[0])
+        # make sure x, y dimensions are same when reading single bands
+        self.assertEqual(arr.shape[1:3], geoimg[0].read().shape)
+
+    def test_loop_through_bands(self):
+        """ Test that GeoImage is iterable """
+        geoimg = gpt.get_test_image()
+        for band in geoimg:
+            self.assertEqual(band.xsize(), geoimg.xsize())
+
     def test_select(self):
-        img1 = get_test_image()
+        """ Test selection of bands """
+        img1 = gpt.get_test_image()
         img2 = img1.select(['red', 'green', 'blue'])
         self.assertTrue(np.array_equal(img1['red'].read(), img2[0].read()))
         self.assertTrue(np.array_equal(img1['green'].read(), img2[1].read()))
@@ -101,7 +114,7 @@ class GeoImageTests(unittest.TestCase):
 
     def test_autoscale(self):
         """ Auto scale each band in image """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         for band in geoimg:
             self.assertTrue(band.min() != 1.0)
             self.assertTrue(band.max() != 255.0)
@@ -113,7 +126,7 @@ class GeoImageTests(unittest.TestCase):
     def test_save(self):
         """ Save image as new image with different datatype """
         fout = 'test-byte.tif'
-        geoimg = get_test_image().autoscale(1.0, 255.0).save(fout, 'uint8')
+        geoimg = gpt.get_test_image().autoscale(1.0, 255.0).save(fout, 'uint8')
         geoimg = None
         geoimg = gp.GeoImage(fout)
         self.assertEqual(geoimg.type().string(), 'uint8')
@@ -135,7 +148,7 @@ class GeoImageTests(unittest.TestCase):
 
     def test_real_warp(self):
         """ Test warping a real image to another projection """
-        geoimg = get_test_image()
+        geoimg = gpt.get_test_image()
         fout = 'test-realwarp.tif'
         imgout = geoimg.warp(fout, proj='EPSG:4326', xres=0.0003, yres=0.0003)
         self.assertEqual(imgout.xsize(), 653)
