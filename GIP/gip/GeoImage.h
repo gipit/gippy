@@ -403,11 +403,11 @@ namespace gip {
     */
 
     // Save input file with processing applied into new output file
-    template<class T> GeoImage GeoImage::save(std::string filename, std::string dt, bool overviews) const {
+    template<class T> GeoImage GeoImage::save(std::string filename, std::string datatype, bool overviews) const {
         // TODO: if not supplied base output datatype on units?
-        if (dt == "") dt = this->type().string();
+        if (datatype == "") datatype = this->type().string();
 
-        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dt);
+        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), datatype);
         for (unsigned int i=0; i<imgout.nbands(); i++) {
             (*this)[i].save<T>(imgout[i]);
         }
