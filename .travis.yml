@@ -22,4 +22,4 @@ install:
 - pip install -e .
 
 script:
-- nosetests
+- nosetests -v -s
