@@ -166,7 +166,7 @@ namespace gip {
     }
 
     Point<double> GeoResource::maxxy() const { 
-        Point<double> pt1(geoloc(0,0)), pt2(geoloc(xsize()-1, ysize()-1));
+        Point<double> pt1(geoloc(0,0)), pt2(geoloc(xsize(), ysize()));
         double MaxX(std::max(pt1.x(), pt2.x()));
         double MaxY(std::max(pt1.y(), pt2.y()));
         return Point<double>(MaxX, MaxY);
