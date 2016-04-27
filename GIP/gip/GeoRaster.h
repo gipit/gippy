@@ -156,18 +156,18 @@ namespace gip {
         }
         GeoRaster operator<(const double &val) const {
             GeoRaster r(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, false); });
-            return r.BXOR(1);
+            return r.bxor(1);
         }
         GeoRaster operator<=(const double &val) const {
             GeoRaster r(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, true); });
-            return r.BXOR(1);
+            return r.bxor(1);
         }
         //! Thresholding equality operator
         GeoRaster operator==(const double &val) const {
             return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img == val; });
         }
         //! Bitwise XOR
-        GeoRaster BXOR(const double val) const {
+        GeoRaster bxor(const double val) const {
             return GeoRaster(*this, [=] (CImg<double>& imgin) -> CImg<double>& { return imgin^=(val); });
         }
 
