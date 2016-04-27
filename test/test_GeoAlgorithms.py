@@ -54,10 +54,11 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertEqual(ext.height(), 1.0)
 
     def test_cookiecutter_real(self):
-        # Test cookie cutter on real image
+        """ Test cookie cutter on real image """
         geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
+        vpath = os.path.join(os.path.dirname(__file__), 'vectors')
         # test with feature of different projection
-        feature = gp.GeoVector(os.path.join('vectors', 'aoi1_epsg4326.shp'))
+        feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg4326.shp'))
         extin = feature.extent()
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=0.0003, yres=0.0003)
         extout = imgout.extent()
@@ -66,7 +67,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertAlmostEqual(extout.x1(), extin.x1())
         self.assertAlmostEqual(extout.y1(), extin.y1())
         # test with different projection
-        feature = gp.GeoVector(os.path.join('vectors', 'aoi1_epsg32416.shp'))
+        feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg32416.shp'))
         extin = feature.extent()
         # test extent matches feature
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=30.0, yres=30.0)
