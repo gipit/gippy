@@ -45,7 +45,7 @@ class GeoRasterTests(unittest.TestCase):
             self.assertAlmostEqual(arr[mask].mean(), stats[2], places=2)
 
     def test_write(self):
-        """ Test writing arrays of different datatype """
+        """ Write arrays of different datatype """
         geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
         arr = np.ones((100, 100)).astype('uint8')
         geoimg[0].write(arr)
@@ -56,7 +56,7 @@ class GeoRasterTests(unittest.TestCase):
 
     """
     def test_invalid_args(self):
-        # Test passing invalid arguments
+        # Check that invalid arguments throw error
         geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
         try:
             geoimg[0].write('invalid arg')
@@ -67,7 +67,7 @@ class GeoRasterTests(unittest.TestCase):
     """
 
     def test_histogram(self):
-        """ Test histogram """
+        """ Calculate histogram of blank data """
         geoimg = gippy.GeoImage.create(xsz=10, ysz=10, nb=2)
         arr = np.arange(10).reshape(1, 10) + 1
         for i in range(9):
@@ -83,14 +83,14 @@ class GeoRasterTests(unittest.TestCase):
         self.assertAlmostEqual(hist[-1], geoimg.size())
 
     def test_real_histogram(self):
-        """ Test histogram of real data """
+        """ Calculate histogram of real data """
         geoimg = gpt.get_test_image()
         hist = geoimg[0].histogram(normalize=False)
         self.assertEqual(len(hist), 100)
         self.assertEqual(hist.sum(), geoimg.size())
 
     def test_ndvi(self):
-        """ Test NDVI using gippy """
+        """ Calculate NDVI using gippy """
         geoimg = gpt.get_test_image()
         fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
         alg.indices(geoimg, {'ndvi': fout})
@@ -98,7 +98,7 @@ class GeoRasterTests(unittest.TestCase):
         os.remove(fout)
 
     def test_ndvi_numpy(self):
-        """ Test NDVI separately using numpy for speed comparison """
+        """ Calculate NDVI using numpy (for speed comparison) """
         geoimg = gpt.get_test_image()
         nodata = geoimg[0].nodata()
         red = geoimg['RED'].read().astype('double')

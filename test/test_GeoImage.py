@@ -36,7 +36,7 @@ class GeoImageTests(unittest.TestCase):
         os.remove(fout)
 
     def test_read(self):
-        """ Test reading of multiband image """
+        """ Read multiband image """
         geoimg = gpt.get_test_image()
         arr = geoimg.read()
         self.assertEqual(geoimg.nbands(), arr.shape[0])
@@ -44,13 +44,13 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(arr.shape[1:3], geoimg[0].read().shape)
 
     def test_loop_through_bands(self):
-        """ Test that GeoImage is iterable """
+        """ Check that GeoImage is iterable """
         geoimg = gpt.get_test_image()
         for band in geoimg:
             self.assertEqual(band.xsize(), geoimg.xsize())
 
     def test_select(self):
-        """ Test selection of bands """
+        """ Selection of bands from GeoImage """
         img1 = gpt.get_test_image()
         img2 = img1.select(['red', 'green', 'blue'])
         self.assertTrue(np.array_equal(img1['red'].read(), img2[0].read()))
@@ -58,7 +58,7 @@ class GeoImageTests(unittest.TestCase):
         self.assertTrue(np.array_equal(img1['blue'].read(), img2[2].read()))
 
     def test_persistent_metadata(self):
-        """ Test writing metadata and reopening and reading """
+        """ Writing metadata and check for persistence after reopening """
         fout = 'test-meta.tif'
         geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000, nb=3)
         geoimg.set_bandnames(['red', 'green', 'blue'])
@@ -130,7 +130,7 @@ class GeoImageTests(unittest.TestCase):
         os.remove(fout)
 
     def test_warp(self):
-        """ Test warping image into another """
+        """ Warping image into another (blank) image """
         bbox = np.array([0.0, 0.0, 1.0, 1.0])
         # default image in EPSG:4326 that spans 1 degree
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, nb=3, proj='EPSG:4326', bbox=bbox)
@@ -142,14 +142,10 @@ class GeoImageTests(unittest.TestCase):
         self.assertAlmostEqual(np.ceil(imgout.resolution().x()), 100.0)
 
     def test_real_warp(self):
-        """ Test warping a real image to another projection """
+        """ Warp real image to another projection """
         geoimg = gpt.get_test_image()
         fout = 'test-realwarp.tif'
         imgout = geoimg.warp(fout, proj='EPSG:4326', xres=0.0003, yres=0.0003)
         self.assertEqual(imgout.xsize(), 653)
         self.assertEqual(imgout.ysize(), 547)
         os.remove(fout)
-
-    #def test_warp_crop(self):
-        """ Test crop with feature when warping """
-
