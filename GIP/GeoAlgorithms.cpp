@@ -217,66 +217,73 @@ namespace gip {
 
 
     //! Merge images into one file and crop to vector
-    /*
-    GeoImage cookie_cutter(GeoImages images, GeoFeature feature, std::string filename, 
-        float xres, float yres, bool crop, unsigned char interpolation) {
+    /*!
+        Assumptions
+        - all input bands have same number of bands, and output band will have the same
+        - if GeoFeature is provided it will it's SRS. If not, proj parameter will be used (EPSG:4326 default)
+    */
+    GeoImage cookie_cutter(const std::vector<GeoImage>& geoimgs, string filename,
+            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation) {
         if (Options::verbose() > 1)
-            cout << "GIPPY: cookie_cutter (" << images.nimages() << " files) - " << filename << endl;
-        BoundingBox extent = feature.extent();
+            cout << "GIPPY: cookie_cutter (" << geoimgs.size() << " files) - " << filename << endl;
 
-        if (crop) {
-            BoundingBox _extent = images.extent(feature.srs());
-            // limit to feature extent
-            _extent.intersect(extent);
-            // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
-            extent = BoundingBox(
-                Point<double>(extent.x0() + std::floor((_extent.x0()-extent.x0()) / xres) * xres, _extent.y0()),
-                Point<double>(_extent.x1(), extent.y1() - std::floor((extent.y1()-_extent.y1()) / yres) * yres)
-            );
+        // calculate union of all image extents
+        vector<BoundingBox> extents;
+        for (vector<GeoImage>::const_iterator i=geoimgs.begin(); i!=geoimgs.end(); i++) {
+            extents.push_back(i->extent());
+        }
+        BoundingBox ext = union_all(extents);
+
+        // if valid feature provided use that extent
+        if (feature.valid()) {
+            proj = feature.srs();
+            // transform extent to feature srs
+            ext.transform(geoimgs[0].srs(), proj);
+            if (crop) {
+                BoundingBox fext = feature.extent();
+                // limit to feature extent
+                ext = ext.intersect(feature.extent());
+                // anchor to top left of feature (MinX, MaxY) and make multiple of resolution
+                ext = BoundingBox(
+                    Point<double>(fext.x0() + std::floor((ext.x0()-fext.x0()) / xres) * xres, ext.y0()),
+                    Point<double>(ext.x1(), fext.y1() - std::floor((fext.y1()-ext.y1()) / yres) * yres)
+                );
+            } else
+                // make the extent just the feature
+                ext = feature.extent();
         }
 
         // create output
         // convert extent to resolution units
-        int xsize = std::ceil(extent.width() / xres);
-        int ysize = std::ceil(extent.height() / yres);
-        std::string srs;
-        GeoImage imgout(filename, extent, srs, xsize, ysize, images.nbands(), images.type());
-        imgout.set_meta(images[0].meta());
+        int xsz = std::ceil(ext.width() / std::abs(xres));
+        int ysz = std::ceil(ext.height() / std::abs(yres));
+
+        CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
+        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
+                            proj, bbox, geoimgs[0].type().string());
+
+        imgout.set_meta(geoimgs[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {
-            imgout[b].set_gain(images[0][b].gain());
-            imgout[b].set_offset(images[0][b].offset());
-            imgout[b].set_nodata(images[0][b].nodata());
+            imgout[b].set_gain(geoimgs[0][b].gain());
+            imgout[b].set_offset(geoimgs[0][b].offset());
+            imgout[b].set_nodata(geoimgs[0][b].nodata());
         }
 
         // add additional metadata to output
         dictionary metadata;
-        metadata["SourceFiles"] = to_string(images.basenames());
+        //metadata["SourceFiles"] = to_string(geoimgs.basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
         imgout.set_meta(metadata);
-
-        // set projection and affine transformation
-        imgout.set_srs(feature.srs());
-        // TODO - set affine based on extent and resolution (?)
-        CImg<double> affine(6);
-        affine[0] = extent.x0();
-        affine[1] = xres;
-        affine[2] = 0;
-        affine[3] = extent.y1();
-        affine[4] = 0;
-        affine[5] = -std::abs(yres);
-        imgout.set_affine(affine);
-
-        // warp options
         
         bool noinit(false);
-        for (unsigned int i=0; i<images.nimages(); i++) {
-            images[i].warp_into(imgout, feature, interpolation, noinit);
+        for (unsigned int i=0; i<geoimgs.size(); i++) {
+            geoimgs[i].warp_into(imgout, feature, interpolation, noinit);
             noinit = true;
         }
     
         return imgout;
     }
-    */
+
 
     //! Fmask cloud mask
     GeoImage fmask(const GeoImage& image, string filename, int tolerance, int dilate) {

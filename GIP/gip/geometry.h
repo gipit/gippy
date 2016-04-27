@@ -206,15 +206,13 @@ namespace gip {
     };
 
     //! calculate union of all rects 
-    /*
     template<typename T> Rect<T> union_all(std::vector< Rect<T> > rects) {
         Rect<T> unioned(rects[0]);
         for (unsigned int i=1; i<rects.size(); i++) {
-            unioned.union_with(rects[i]);
+            unioned = unioned.union_with(rects[i]);
         }
         return unioned;
     }
-    */
 
     typedef Rect<int> Chunk;
     typedef Rect<double> BoundingBox;
