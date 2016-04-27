@@ -262,7 +262,7 @@ namespace gip {
         GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
                             proj, bbox, geoimgs[0].type().string());
 
-        imgout.set_meta(geoimgs[0].meta());
+        imgout.add_meta(geoimgs[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {
             imgout[b].set_gain(geoimgs[0][b].gain());
             imgout[b].set_offset(geoimgs[0][b].offset());
@@ -273,7 +273,7 @@ namespace gip {
         dictionary metadata;
         //metadata["SourceFiles"] = to_string(geoimgs.basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
-        imgout.set_meta(metadata);
+        imgout.add_meta(metadata);
         
         bool noinit(false);
         for (unsigned int i=0; i<geoimgs.size(); i++) {
@@ -569,7 +569,7 @@ namespace gip {
         float nodataout = -32768;
         GeoImage imgout = GeoImage::create_from(img, filename, img.nbands(), "float32");
         imgout.set_nodata(nodataout);
-        imgout.set_meta(img.meta());
+        imgout.add_meta(img.meta());
         CImg<float> cimg;
         CImg<unsigned char> mask;
 

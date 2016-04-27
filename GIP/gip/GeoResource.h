@@ -142,9 +142,9 @@ namespace gip {
         dictionary meta() const;
 
         //! Set metadata item
-        GeoResource& set_meta(std::string key, std::string item);
+        GeoResource& add_meta(std::string key, std::string item);
         //! Set multiple metadata items
-        GeoResource& set_meta(dictionary items);
+        GeoResource& add_meta(dictionary items);
 
         // TODO - refactor out this function
         //! Retrieve the GDALdataset this is a member of

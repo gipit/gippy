@@ -223,14 +223,14 @@ namespace gip {
     }
 
 
-    GeoResource& GeoResource::set_meta(string key, string item) {
+    GeoResource& GeoResource::add_meta(string key, string item) {
         _GDALDataset->SetMetadataItem(key.c_str(), item.c_str());
         return *this;
     }
 
-    GeoResource& GeoResource::set_meta(std::map<string, string> items) {
+    GeoResource& GeoResource::add_meta(std::map<string, string> items) {
         for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
-            set_meta(i->first, i->second);
+            add_meta(i->first, i->second);
         }
         return *this;
     }

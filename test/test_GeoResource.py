@@ -129,10 +129,10 @@ class GeoResourceTests(unittest.TestCase):
         meta = geoimg.meta()
         self.assertEqual(len(meta), 0)
         # set single metadata item
-        geoimg.set_meta('testkey', 'testvalue')
+        geoimg.add_meta('testkey', 'testvalue')
         self.assertEqual(geoimg.meta('testkey'), 'testvalue')
         md = {'key1': 'val1', 'key2': 'val2', 'key3': 'val3'}
-        geoimg.set_meta(md)
+        geoimg.add_meta(md)
         md['testkey'] = 'testvalue'
         md2 = geoimg.meta()
         for m in md:

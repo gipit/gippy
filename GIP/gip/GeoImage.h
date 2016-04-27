@@ -98,7 +98,7 @@ namespace gip {
             }
             GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp);
             // copy metadata
-            img.set_meta(geoimg.meta());
+            img.add_meta(geoimg.meta());
             // if same number of bands, set band metadata
             if (geoimg.nbands() == _bs) {
                 for (unsigned int b=0;b<_bs;b++) {
