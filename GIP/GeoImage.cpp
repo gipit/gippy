@@ -41,7 +41,7 @@ namespace gip {
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
             GeoImage img(*f);
             for (b=0; b<img.nbands(); b++) {
-                add(img[b]);
+                add_band(img[b]);
                 _BandNames[nbands()-1] = img.basename() + (img.nbands() > 1 ? "-" + img[b].description() : "");
             }
         }
@@ -105,7 +105,7 @@ namespace gip {
         return this->operator[](index);
     }
     // Add a band (to the end)
-    GeoImage& GeoImage::add(GeoRaster band) { //, unsigned int bandnum) {
+    GeoImage& GeoImage::add_band(GeoRaster band) { //, unsigned int bandnum) {
         string name = (band.description() == "") ? to_string(_RasterBands.size()+1) : band.description();
         if (band_exists(name)) {
             throw std::runtime_error("Band named " + name + " already exists in GeoImage!");
@@ -156,7 +156,7 @@ namespace gip {
         if (names.empty()) {
             // Load Bands
             for (b=0;b<bandnums.size(); b++) {
-                add(GeoRaster(*this, bandnums[b]));
+                add_band(GeoRaster(*this, bandnums[b]));
             }
         } else {
             // Load Subdatasets as bands, assuming 1 band/subdataset

@@ -206,7 +206,7 @@ namespace gip {
         const GeoRaster& operator[](std::string desc) const;
 
         //! Adds a band (as last band)
-        GeoImage& add(GeoRaster band);
+        GeoImage& add_band(GeoRaster band);
         //! Keep only these band names
         GeoImage select(std::vector<std::string> names);
         //! Keep only these band numbers

@@ -91,7 +91,7 @@ namespace gip {
         }
 
         //! Set Color Interp
-        void set_color(std::string col) {
+        GeoRaster& set_color(std::string col) {
             _GDALRasterBand->SetDescription(col.c_str());
             to_lower(col);
             GDALColorInterp gdalcol;
@@ -103,13 +103,15 @@ namespace gip {
                 gdalcol = GCI_BlueBand;
             else gdalcol = GCI_GrayIndex;
             _GDALRasterBand->SetColorInterpretation(gdalcol);
+            return *this;
         }
 
         //! \name Calibration functions
         //! Sets dyanmic range of sensor (min to max digital counts)
-        void set_dynamicrange(int min, int max) {
+        GeoRaster& set_dynamicrange(int min, int max) {
             _minDC = min;
             _maxDC = max;
+            return *this;
         }
 
         //! Adds a mask band (1 for valid), applied on read
