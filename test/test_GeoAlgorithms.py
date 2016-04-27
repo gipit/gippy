@@ -53,14 +53,20 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertEqual(ext.width(), 2.0)
         self.assertEqual(ext.height(), 1.0)
 
-    """
     def test_cookiecutter_real(self):
-        # Test cookie cutter on real image 
+        # Test cookie cutter on real image
         geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
-        path = os.path.dirname(geoimg.filename())
-        feature = gp.GeoVector(os.path.join(path, 'aoi1_epsg4326.shp'))
+        # test with feature of different projection
+        feature = gp.GeoVector(os.path.join('vectors', 'aoi1_epsg4326.shp'))
+        extin = feature.extent()
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=0.0003, yres=0.0003)
-        feature = gp.GeoVector(os.path.join(path, 'aoi1_epsg32416.shp'))
+        extout = imgout.extent()
+        self.assertAlmostEqual(extout.x0(), extin.x0())
+        self.assertAlmostEqual(extout.y0(), extin.y0())
+        self.assertAlmostEqual(extout.x1(), extin.x1())
+        self.assertAlmostEqual(extout.y1(), extin.y1())
+        # test with different projection
+        feature = gp.GeoVector(os.path.join('vectors', 'aoi1_epsg32416.shp'))
         extin = feature.extent()
         # test extent matches feature
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=30.0, yres=30.0)
@@ -76,4 +82,3 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertTrue(extout.y0() >= extin.y0())
         self.assertTrue(extout.x1() <= extin.x1())
         self.assertTrue(extout.y1() <= extin.y1())
-    """
