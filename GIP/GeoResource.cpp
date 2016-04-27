@@ -65,7 +65,8 @@ namespace gip {
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
         // check if extension (case insensitive) is already in filename
-        string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
+        const char* _ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
+        string ext = (_ext == NULL) ? "": _ext;
         string curext = extension();
         if ((to_lower(ext) != to_lower(curext)) && ext != "") {
             _Filename = _Filename + '.' + ext;

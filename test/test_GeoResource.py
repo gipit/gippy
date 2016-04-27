@@ -14,6 +14,11 @@ import gippy.test as gpt
 
 class GeoResourceTests(unittest.TestCase):
 
+    def setUp(self):
+        """ Configure options """
+        gp.Options.set_verbose(1)
+        gp.Options.set_chunksize(4.0)
+
     def test_filename(self):
         """ Test filename, basename, extension """
         fname = 'test.tif'
@@ -25,9 +30,19 @@ class GeoResourceTests(unittest.TestCase):
 
     def test_format(self):
         """ Test getting and setting file format """
+        dformat = gp.Options.defaultformat()
         gp.Options.set_defaultformat('GTiff')
         geoimg = gp.GeoImage.create()
         self.assertEqual(geoimg.extension(), 'tif')
+        # change default format
+        gp.Options.set_defaultformat('MEM')
+        geoimg = gp.GeoImage.create()
+        self.assertEqual(geoimg.extension(), '')
+        # create by specifying format to create
+        geoimg = gp.GeoImage.create(format='GTiff')
+        self.assertEqual(geoimg.extension(), 'tif')
+        # change back to original format
+        gp.Options.set_defaultformat(dformat)
 
     def test_size(self):
         """ Test retrieving of size and dimension in pixels """
@@ -62,7 +77,7 @@ class GeoResourceTests(unittest.TestCase):
         self.assertEqual(extent.y1(), 1.0)
 
     def test_affine(self):
-        """ Test spatial reference and affine """
+        """ Test affine vs coordinates and resolution """
         geoimg = gp.GeoImage.create(xsz=100, ysz=100)
         aff = geoimg.affine()
         self.assertEqual(len(aff), 6)
@@ -102,8 +117,6 @@ class GeoResourceTests(unittest.TestCase):
 
         chunks = geoimg.chunks(numchunks=100)
         # test height of chunks is the same (except last one)
-        for ch in chunks:
-            print ch.x0(), ch.y0(), ch.x1(), ch.y1()
         self.assertEqual(len(chunks), 100)
         for i in range(1, len(chunks)-1):
             self.assertEqual(chunks[i].height(), chunks[i-1].height())
