@@ -146,12 +146,6 @@ namespace gip {
         //! Set multiple metadata items
         GeoResource& add_meta(dictionary items);
 
-        // TODO - refactor out this function
-        //! Retrieve the GDALdataset this is a member of
-        GDALDataset* GetGDALDataset() const {
-            return _GDALDataset.get();
-        }
-
     protected:
         //! Filename, or some other resource identifier
         std::string _Filename;
@@ -161,11 +155,6 @@ namespace gip {
 
         //! Flag indicating temporary file (deleted when last reference gone)
         bool _temp;
-
-        //! Retrieve the GDALMajorObject from (GDALDataset, GDALRasterBand, OGRLayer)
-        /*GDALMajorObject* GetGDALObject() const {
-            return _GDALDataset.get();
-        }*/
 
         // Protected functions for inside use
         // Get group of metadata
