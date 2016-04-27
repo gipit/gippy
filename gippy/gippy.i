@@ -181,6 +181,7 @@ namespace gip {
 // GeoImage
 %ignore gip::GeoImage::operator[];
 %include "gip/GeoImage.h"
+%template(vector_GeoImage) std::vector< gip::GeoImage >;
 namespace gip {
     %extend GeoImage {
         GeoRaster __getitem__(std::string col) {
