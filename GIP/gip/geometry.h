@@ -70,10 +70,10 @@ namespace gip {
     template<typename T> class Rect {
     public:
         //! Default Constructor
-        Rect() : _p0(0,0), _p1(0,0) {}
+        Rect() : _p0(0,0), _p1(0,0), _padding(0)  {}
         //! Constructor takes in top left coordinate and width/height
         Rect(T x, T y, T width, T height) 
-            : _p0(x,y), _p1(x+width,y+height) {
+            : _p0(x,y), _p1(x+width,y+height), _padding(0) {
             // Validate, x0 and y0 should always be the  min values
             /*if (_width < 0) {
                 _width = abs(m_width);
@@ -85,16 +85,17 @@ namespace gip {
             }*/
         }
         Rect(Point<T> p0, Point<T> p1)
-            : _p0(p0), _p1(p1) {
+            : _p0(p0), _p1(p1), _padding(0) {
         }
         //! Copy constructor
         Rect(const Rect<T>& rect)
-            : _p0(rect._p0), _p1(rect._p1) {}
+            : _p0(rect._p0), _p1(rect._p1), _padding(rect._padding) {}
         //! Assignment operator
         Rect& operator=(const Rect& rect) {
             if (this == &rect) return *this;
             _p0 = rect._p0;
             _p1 = rect._p1;
+            _padding = rect._padding;
             return *this;
         }
 
@@ -157,10 +158,30 @@ namespace gip {
         //! Intersects Rect with argument Rect
         Rect intersect(const Rect& rect) {
             // transform rect
-            return Rect<T>(
+            Rect<T> r = Rect<T>(
                 Point<T>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) ),
                 Point<T>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) )
             );
+            r.padding(_padding);
+            return r;
+        }
+
+        //! Get padding
+        T padding() const { return _padding; }
+        //! Set padding
+        Rect<T>& padding(T padding) {
+            _padding = padding;
+            return *this;
+        }
+
+        Rect<T>& pad() {
+            return pad(_padding);
+        }
+
+        Rect<T>& pad(T pad) {
+            _p0 = _p0 - Point<T>(pad,pad);
+            _p1 = _p1 + Point<T>(pad,pad);
+            return *this;
         }
 
         // Calculates union (outer bounding box) of Rect with argument Rect
@@ -180,6 +201,8 @@ namespace gip {
         Point<T> _p0;
         // bottom-right
         Point<T> _p1;
+        // Amount of padding around the rect (Rect is always stored WITHOUT padding)
+        T _padding;
     };
 
     //! calculate union of all rects 
@@ -193,76 +216,7 @@ namespace gip {
     }
     */
 
-    //! Rect representing region of interest on a raster (ie pixel coordinates)
-    class Chunk : public Rect<int> {
-    public:
-        //! Default Constructor
-        Chunk() : Rect<int>(), _padding(0) {}
-        //! Constructor takes in top left coordinate and width/height
-        Chunk(int x, int y, int width, int height) 
-            : Rect<int>(x, y, width, height), _padding(0) {}
-        Chunk(Point<int> p0, Point<int> p1)
-            : Rect<int>(p0, p1), _padding(0) {
-        }
-        //! Copy constructor
-        Chunk(const Chunk& ch)
-            : Rect<int>(ch), _padding(ch._padding) {}
-        //! Assignment operator
-        Chunk& operator=(const Chunk& ch) {
-            if (this == &ch) return *this;
-            Rect<int>::operator=(ch);
-            _padding = ch._padding;
-            return *this;
-        }
-
-        //! Intersects Rect with argument Rect
-        Chunk intersect(const Chunk& rect) {
-            // transform rect
-            Chunk ch = Chunk(
-                Point<int>( std::max(_p0.x(), rect.x0()), std::max(_p0.y(), rect.y0()) ),
-                Point<int>( std::min(_p1.x(), rect.x1()), std::min(_p1.y(), rect.y1()) )
-            );
-            ch.padding(_padding);
-            return ch;
-        }
-
-        //! Get padding
-        unsigned int padding() const { return _padding; }
-        //! Set padding
-        Chunk& padding(unsigned int padding) {
-            _padding = padding;
-            return *this;
-        }
-
-        //! Determines if ROI is valid (not valid if height or width is 0 or less)
-        //bool valid() const { if (width() <= 0 || height() <=0) return false; else return true; }
-
-        //! Shift Rect by (x,y,z)
-        /*Rect& Shift(T x, T y) {
-            _x += x;
-            _y += y;
-            return *this;
-        }
-        //! Shift Rect by (x,y) and return new Rect
-        Rect get_Shift(T x, T y) const {
-            return Rect(*this).Shift(x,y);
-        }*/
-
-        Chunk& pad() {
-            return pad(_padding);
-        }
-
-        Chunk& pad(int pad) {
-            _p0 = _p0 - Point<int>(pad,pad);
-            _p1 = _p1 + Point<int>(pad,pad);
-            return *this;
-        }
-
-    private:
-        // Amount of padding around the rect (Rect is always stored WITHOUT padding)
-        unsigned int _padding;
-    };
-
+    typedef Rect<int> Chunk;
     typedef Rect<double> BoundingBox;
 
 } // namespace GIP

@@ -98,8 +98,8 @@ namespace std {
 
 %template(iPoint) gip::Point<int>;
 %template(dPoint) gip::Point<double>;
-%template(iRect) gip::Rect<int>;
-%template(dRect) gip::Rect<double>;
+//%template(iRect) gip::Rect<int>;
+//%template(dRect) gip::Rect<double>;
 %template(chvector) std::vector<Chunk>;
 //%template(bbvector) std::vector<BoundingBox>;
 
