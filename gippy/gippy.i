@@ -98,10 +98,10 @@ namespace std {
 
 %template(iPoint) gip::Point<int>;
 %template(dPoint) gip::Point<double>;
-%template(iRect) gip::Rect<int>;
-%template(dRect) gip::Rect<double>;
-%template(chvector) std::vector<Chunk>;
-//%template(bbvector) std::vector<BoundingBox>;
+%template(Chunk) gip::Rect<int>;
+%template(BoundingBox) gip::Rect<double>;
+%template(chvector) std::vector< gip::Rect<int> >;
+%template(bbvector) std::vector< gip::Rect<double> >;
 
 // DataType
 %ignore gip::DataTypes;
@@ -181,6 +181,7 @@ namespace gip {
 // GeoImage
 %ignore gip::GeoImage::operator[];
 %include "gip/GeoImage.h"
+%template(vector_GeoImage) std::vector< gip::GeoImage >;
 namespace gip {
     %extend GeoImage {
         GeoRaster __getitem__(std::string col) {

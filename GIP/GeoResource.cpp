@@ -65,7 +65,8 @@ namespace gip {
         GDALDriver *driver = GetGDALDriverManager()->GetDriverByName(format.c_str());
         // TODO check for null driver and create method
         // check if extension (case insensitive) is already in filename
-        string ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
+        const char* _ext = driver->GetMetadataItem(GDAL_DMD_EXTENSION);
+        string ext = (_ext == NULL) ? "": _ext;
         string curext = extension();
         if ((to_lower(ext) != to_lower(curext)) && ext != "") {
             _Filename = _Filename + '.' + ext;
@@ -166,7 +167,7 @@ namespace gip {
     }
 
     Point<double> GeoResource::maxxy() const { 
-        Point<double> pt1(geoloc(0,0)), pt2(geoloc(xsize()-1, ysize()-1));
+        Point<double> pt1(geoloc(0,0)), pt2(geoloc(xsize(), ysize()));
         double MaxX(std::max(pt1.x(), pt2.x()));
         double MaxY(std::max(pt1.y(), pt2.y()));
         return Point<double>(MaxX, MaxY);
