@@ -76,7 +76,6 @@ namespace gip {
             return _PrimaryKey;
         }
 
-
         //! Get list of attributes
         std::vector<std::string> attributes() const {
             std::vector<std::string> atts;

@@ -140,19 +140,19 @@ namespace gip {
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
         PyObject* read(Chunk chunk=Chunk()) {
-            if (self->gain() == 1.0 && self->offset() == 0.0) {
+            if (!self->is_double()) {
                 switch(self->type().type()) {
-                    case 1: return CImgToArr(self->read<unsigned char>(chunk));
-                    case 2: return CImgToArr(self->read<unsigned short>(chunk));
-                    case 3: return CImgToArr(self->read<short>(chunk));
-                    case 4: return CImgToArr(self->read<unsigned int>(chunk));
-                    case 5: return CImgToArr(self->read<int>(chunk));
+                    case 1: return CImgToArr(self->read<uint8_t>(chunk));
+                    case 2: return CImgToArr(self->read<uint16_t>(chunk));
+                    case 3: return CImgToArr(self->read<int16_t>(chunk));
+                    case 4: return CImgToArr(self->read<uint32_t>(chunk));
+                    case 5: return CImgToArr(self->read<int32_t>(chunk));
                     case 6: return CImgToArr(self->read<float>(chunk));
                     case 7: return CImgToArr(self->read<double>(chunk));
                     default: throw(std::runtime_error("error reading raster"));
                 }
             }
-            return CImgToArr(self->read<float>(chunk));
+            return CImgToArr(self->read<double>(chunk));
         }
         %feature("docstring",
                  "PyObject passed in is a numpy.array.\n"
@@ -210,7 +210,7 @@ namespace gip {
         }
         PyObject* read(Chunk chunk=Chunk()) {
             // TODO - look at all bands for gain and offset
-            if ((*self)[0].gain() == 1.0 && (*self)[0].offset() == 0.0) {
+            if (!(*self)[0].is_double()) {
                 switch(self->type().type()) {
                     case 1: return CImgToArr(self->read<uint8_t>(chunk));
                     case 2: return CImgToArr(self->read<uint16_t>(chunk));
@@ -222,7 +222,7 @@ namespace gip {
                     default: throw(std::runtime_error("error reading raster"));
                 }
             }
-            return CImgToArr(self->read<float>(chunk));
+            return CImgToArr(self->read<double>(chunk));
         }
         GeoImage& write(PyObject* obj, Chunk chunk=Chunk()) {
             PyArrayObject* arr((PyArrayObject*)obj);

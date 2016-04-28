@@ -114,13 +114,6 @@ namespace gip {
             return geom;
         }
 
-        //! Get geometry in Well Known Text format
-        std::string wkt(OGRSpatialReference* srs = NULL) const {
-            char* wkt(NULL);
-            geometry(srs)->exportToWkt(&wkt);
-            return std::string(wkt);
-        }
-
         long int fid() const {
             return _Feature->GetFID();
         }
@@ -140,18 +133,13 @@ namespace gip {
             return _Feature->GetFieldAsString(i);
         }
 
-        // output operator
-        //void print() const {
-        //    _Feature->DumpReadable(NULL);
-        //}
+    protected:
+        std::shared_ptr<OGRFeature> _Feature;
 
         void use_count(std::string s="") const {
             GeoVectorResource::use_count(s);
             std::cout << "\tFeature use_count: " << _Feature.use_count() << std::endl;
         }
-
-    protected:
-        std::shared_ptr<OGRFeature> _Feature;
 
     private:
         void OpenFeature(long int fid) {

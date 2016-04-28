@@ -20,16 +20,17 @@ class GeoResourceTests(unittest.TestCase):
         gp.Options.set_chunksize(4.0)
 
     def test_filename(self):
-        """ Test filename, basename, extension """
-        fname = 'test.tif'
-        geoimg = gp.GeoImage.create(fname)
-        self.assertTrue(os.path.exists(fname))
-        self.assertEqual(geoimg.filename(), fname)
+        """ Check filename, basename, extension functions """
+        fout = 'test.tif'
+        geoimg = gp.GeoImage.create(fout)
+        self.assertTrue(os.path.exists(fout))
+        self.assertEqual(geoimg.filename(), fout)
         self.assertEqual(geoimg.basename(), 'test')
         self.assertEqual(geoimg.extension(), 'tif')
+        os.remove(fout)
 
     def test_format(self):
-        """ Test getting and setting file format """
+        """ Get and set file format and verify """
         dformat = gp.Options.defaultformat()
         gp.Options.set_defaultformat('GTiff')
         geoimg = gp.GeoImage.create()
@@ -45,14 +46,14 @@ class GeoResourceTests(unittest.TestCase):
         gp.Options.set_defaultformat(dformat)
 
     def test_size(self):
-        """ Test retrieving of size and dimension in pixels """
+        """ Retrieve size and dimension in pixels """
         geoimg = gp.GeoImage.create(xsz=500, ysz=1500)
         self.assertEqual(geoimg.xsize(), 500)
         self.assertEqual(geoimg.ysize(), 1500)
         self.assertEqual(geoimg.size(), 1500*500)
 
     def test_coordinates(self):
-        """ Test coordinates of pixel locations """
+        """ Validaet coordinates of pixel locations """
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000)
         pt = geoimg.geoloc(0, 0)
         self.assertEqual(pt.x(), 0.0)
@@ -77,7 +78,7 @@ class GeoResourceTests(unittest.TestCase):
         self.assertEqual(extent.y1(), 1.0)
 
     def test_affine(self):
-        """ Test affine vs coordinates and resolution """
+        """ Compare affine vs coordinates and resolution """
         geoimg = gp.GeoImage.create(xsz=100, ysz=100)
         aff = geoimg.affine()
         self.assertEqual(len(aff), 6)
@@ -99,7 +100,7 @@ class GeoResourceTests(unittest.TestCase):
         self.assertEqual(aff[5], geoimg.resolution().y())
 
     def test_spatialreference(self):
-        """ Test spatial reference """
+        """ Set spatial reference """
         geoimg = gp.GeoImage.create(xsz=100, ysz=100)
         prj = geoimg.srs()
         geoimg.set_srs('EPSG:4326')
@@ -107,14 +108,14 @@ class GeoResourceTests(unittest.TestCase):
         self.assertEqual(geoimg.srs(), prj)
 
     def test_chunks(self):
-        """ Test chunking of an image (creation of rects) """
+        """ Chunk image to create list of rects """
         geoimg = gp.GeoImage.create(xsz=2000, ysz=2000)
         # test with one chunk
         chunks = geoimg.chunks(numchunks=1)
         self.assertEqual(len(chunks), 1)
         self.assertEqual(chunks[0].width(), geoimg.xsize())
         self.assertEqual(chunks[0].height(), geoimg.ysize())
-
+        # test with 100 chunks
         chunks = geoimg.chunks(numchunks=100)
         # test height of chunks is the same (except last one)
         self.assertEqual(len(chunks), 100)
@@ -124,15 +125,15 @@ class GeoResourceTests(unittest.TestCase):
             self.assertEqual(chunks[i].y0(), chunks[i-1].y1())
 
     def test_meta(self):
-        """ Test setting and retrieving metadata """
+        """ Set and retrieve metadata """
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000)
         meta = geoimg.meta()
         self.assertEqual(len(meta), 0)
         # set single metadata item
-        geoimg.set_meta('testkey', 'testvalue')
+        geoimg.add_meta('testkey', 'testvalue')
         self.assertEqual(geoimg.meta('testkey'), 'testvalue')
         md = {'key1': 'val1', 'key2': 'val2', 'key3': 'val3'}
-        geoimg.set_meta(md)
+        geoimg.add_meta(md)
         md['testkey'] = 'testvalue'
         md2 = geoimg.meta()
         for m in md:

@@ -11,7 +11,7 @@ import gippy.test as gpt
 class GeoAlgorithmsTests(unittest.TestCase):
 
     def test_rxd(self):
-        """ Test RX Detector algorithm """
+        """ RX anamoly detector """
         geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
         fout = 'test-rxd.tif'
         rxd = alg.rxd(geoimg, filename=fout)
@@ -23,7 +23,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         os.remove(fout)
 
     def test_pansharpen(self):
-        """ Test pan-sharpening algorithm """
+        """ Pansharpen multispectral image with panchromatic image """
         geoimg = gpt.get_test_image().select(['red', 'green', 'blue', 'nir'])
         panimg = gpt.get_test_image(bands=['pan'])
         fout = 'test-pansharpen.tif'
@@ -40,7 +40,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         os.remove(fout)
 
     def test_cookiecutter(self):
-        """ Test creating mosaic from multiple images """
+        """ Create mosaic from multiple images (cookie cutter) """
         bbox1 = np.array([0.0, 0.0, 1.0, 1.0])
         geoimg1 = gp.GeoImage.create(xsz=1000, ysz=1000, bbox=bbox1)
         bbox2 = np.array([1.0, 0.0, 1.0, 1.0])
@@ -54,7 +54,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertEqual(ext.height(), 1.0)
 
     def test_cookiecutter_real(self):
-        """ Test cookie cutter on real image """
+        """ Cookie cutter on single real image """
         geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
         vpath = os.path.join(os.path.dirname(__file__), 'vectors')
         # test with feature of different projection
@@ -83,3 +83,27 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertTrue(extout.y0() >= extin.y0())
         self.assertTrue(extout.x1() <= extin.x1())
         self.assertTrue(extout.y1() <= extin.y1())
+
+    def test_ndvi(self):
+        """ Calculate NDVI using gippy """
+        geoimg = gpt.get_test_image()
+        fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
+        alg.indices(geoimg, {'ndvi': fout})
+        geoimg = None
+        os.remove(fout)
+
+    def test_ndvi_numpy(self):
+        """ Calculate NDVI using numpy (for speed comparison) """
+        geoimg = gpt.get_test_image()
+        nodata = geoimg[0].nodata()
+        red = geoimg['RED'].read().astype('double')
+        nir = geoimg['NIR'].read().astype('double')
+        ndvi = np.zeros(red.shape) + nodata
+        inds = np.logical_and(red != nodata, nir != nodata)
+        ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
+        fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
+        geoimgout = gp.GeoImage.create_from(geoimg, fout, dtype="float64")
+        geoimgout[0].write(ndvi)
+        geoimgout = None
+        geoimg = None
+        os.remove(fout)

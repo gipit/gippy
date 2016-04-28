@@ -80,6 +80,16 @@ namespace gip {
         //! Set offset
         GeoRaster& set_offset(float offset) { _GDALRasterBand->SetOffset(offset); return *this; }
 
+        //! Indicates if processing will be done on reads
+        bool is_processed() const { 
+            return (_Functions.size() > 0) ? true : false;
+        }
+
+        //! Indicates if data should be read as doubles (functions or gain/offset)
+        bool is_double() const {
+            return (is_processed() || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
+        }
+
         //! Get NoData value
         double nodata() const {
             return _GDALRasterBand->GetNoDataValue();
@@ -91,7 +101,7 @@ namespace gip {
         }
 
         //! Set Color Interp
-        void set_color(std::string col) {
+        GeoRaster& set_color(std::string col) {
             _GDALRasterBand->SetDescription(col.c_str());
             to_lower(col);
             GDALColorInterp gdalcol;
@@ -103,13 +113,16 @@ namespace gip {
                 gdalcol = GCI_BlueBand;
             else gdalcol = GCI_GrayIndex;
             _GDALRasterBand->SetColorInterpretation(gdalcol);
+            return *this;
         }
 
         //! \name Calibration functions
         //! Sets dyanmic range of sensor (min to max digital counts)
-        void set_dynamicrange(int min, int max) {
+        // TODO - consider this function, there is no get....what does it do?
+        GeoRaster& set_dynamicrange(int min, int max) {
             _minDC = min;
             _maxDC = max;
+            return *this;
         }
 
         //! Adds a mask band (1 for valid), applied on read
@@ -125,25 +138,6 @@ namespace gip {
             return *this;
         }
 
-        // Scale input image range (minin, maxin) to output range (minout, maxout)
-        GeoRaster scale(const double& minin, const double& maxin, const double& minout, const double& maxout) {
-            // Calculate gain and offset
-            double gain = (maxout-minout)/(maxin-minin);
-            double offset = minout - gain*minin;
-            return ((*this) * gain + offset).min(maxout).max(minout);
-        }
-
-        //! Scale image to given range (minout, maxout)
-        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
-            double minin = this->min();
-            double maxin = this->max();
-            if (percent > 0.0) {
-                minin = percentile(percent);
-                maxin = percentile(100.0 - percent);
-            }
-            return scale(minin, maxin, minout, maxout);
-        }
-
         //! \name Processing functions
         // Logical operators
         GeoRaster operator>(const double &val) const {
@@ -154,18 +148,18 @@ namespace gip {
         }
         GeoRaster operator<(const double &val) const {
             GeoRaster r(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, false); });
-            return r.BXOR(1);
+            return r.bxor(1);
         }
         GeoRaster operator<=(const double &val) const {
             GeoRaster r(*this, [=] (CImg<double>& img) -> CImg<double>& { return img.threshold(val, false, true); });
-            return r.BXOR(1);
+            return r.bxor(1);
         }
         //! Thresholding equality operator
         GeoRaster operator==(const double &val) const {
             return GeoRaster(*this, [=] (CImg<double>& img) -> CImg<double>& { return img == val; });
         }
         //! Bitwise XOR
-        GeoRaster BXOR(const double val) const {
+        GeoRaster bxor(const double val) const {
             return GeoRaster(*this, [=] (CImg<double>& imgin) -> CImg<double>& { return imgin^=(val); });
         }
 
@@ -287,6 +281,25 @@ namespace gip {
 
         //! Get value for this percentile in the cumulative distribution histogram
         double percentile(const double& p) const;
+
+        // Scale input image range (minin, maxin) to output range (minout, maxout)
+        GeoRaster scale(const double& minin, const double& maxin, const double& minout, const double& maxout) {
+            // Calculate gain and offset
+            double gain = (maxout-minout)/(maxin-minin);
+            double offset = minout - gain*minin;
+            return ((*this) * gain + offset).min(maxout).max(minout);
+        }
+
+        //! Scale image to given range (minout, maxout)
+        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
+            double minin = this->min();
+            double maxin = this->max();
+            if (percent > 0.0) {
+                minin = percentile(percent);
+                maxin = percentile(100.0 - percent);
+            }
+            return scale(minin, maxin, minout, maxout);
+        }
 
         //! \name File I/O
         template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const;
