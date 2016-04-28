@@ -63,7 +63,7 @@ namespace gip {
     //GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
-    GeoImage indices(const GeoImage& geoimg, dictionary);
+    GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string filename="");
 
     //! Create output based on linear combinations of input
     GeoImage linear_transform(const GeoImage& geoimg, CImg<float> coef, std::string filename);
