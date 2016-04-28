@@ -80,6 +80,7 @@ class GeoRasterTests(unittest.TestCase):
         arr = np.where(geoimg.read() == np.nan)
         self.assertEqual(len(arr[0]), 0)
         self.assertEqual(len(arr[1]), 0)
+        os.remove(fout)
 
     # TODO - test masking
 
