@@ -111,7 +111,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         ndvi = np.zeros(red.shape) + nodata
         inds = np.logical_and(red != nodata, nir != nodata)
         ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
-        fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
+        fout = 'test-ndvi2.tif'
         geoimgout = gp.GeoImage.create_from(geoimg, fout, dtype="float64")
         geoimgout[0].write(ndvi)
         geoimgout = None
