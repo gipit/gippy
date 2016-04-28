@@ -102,8 +102,7 @@ namespace gip {
             // if same number of bands, set band metadata
             if (geoimg.nbands() == _bs) {
                 for (unsigned int b=0;b<_bs;b++) {
-                    img[b].set_gain(geoimg[b].gain());
-                    img[b].set_offset(geoimg[b].offset());
+                    img[b].add_meta(geoimg[b].meta());
                     img[b].set_nodata(geoimg[b].nodata());
                 }
                 img.set_bandnames(geoimg.bandnames());
