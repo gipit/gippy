@@ -85,11 +85,21 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertTrue(extout.y1() <= extin.y1())
 
     def test_ndvi(self):
-        """ Calculate NDVI using gippy """
+        """ Calculate NDVI using gippy and apply colortable """
         geoimg = gpt.get_test_image()
-        fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
-        alg.indices(geoimg, {'ndvi': fout})
-        geoimg = None
+        fout = 'test-ndvi.tif'
+        imgout = alg.indices(geoimg, ['ndvi'])
+        # add colorramp
+        red = np.array([255, 0, 0])
+        green = np.array([0, 255, 0])
+        white = np.array([255, 255, 255])
+        imgout[0] = imgout[0].scale(-1.0, 1.0, 1, 255)
+        imgout = imgout.save(fout, dtype='byte')
+        # add color ramp for negative values
+        imgout[0].add_colortable(red, white, value1=0, value2=128)
+        # add color ramp for positive values
+        imgout[0].add_colortable(white, green, value1=128, value2=255)
+        # TODO - actually test something here
         os.remove(fout)
 
     def test_ndvi_numpy(self):
@@ -101,7 +111,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         ndvi = np.zeros(red.shape) + nodata
         inds = np.logical_and(red != nodata, nir != nodata)
         ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
-        fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
+        fout = 'test-ndvi2.tif'
         geoimgout = gp.GeoImage.create_from(geoimg, fout, dtype="float64")
         geoimgout[0].write(ndvi)
         geoimgout = None

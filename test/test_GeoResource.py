@@ -53,7 +53,7 @@ class GeoResourceTests(unittest.TestCase):
         self.assertEqual(geoimg.size(), 1500*500)
 
     def test_coordinates(self):
-        """ Validaet coordinates of pixel locations """
+        """ Validate coordinates of pixel locations """
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000)
         pt = geoimg.geoloc(0, 0)
         self.assertEqual(pt.x(), 0.0)

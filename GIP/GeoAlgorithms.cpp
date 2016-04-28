@@ -443,26 +443,15 @@ namespace gip {
         return imgout;
     }
 
-    GeoImage indices(const GeoImage& image, dictionary products) {
+    GeoImage indices(const GeoImage& image, vector<string> products, string filename) {
         if (Options::verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
 
-        std::map< string, GeoImage > imagesout;
-        std::map<string, string>::const_iterator iprod;
-        std::vector<string> filenames;
-        string prodname;
-        for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-            //imagesout[*iprod] = GeoImageIO<float>(GeoImage(basename + '_' + *iprod, image, GDT_Int16));
-            if (Options::verbose() > 2) cout << iprod->first << " -> " << iprod->second << endl;
-            prodname = iprod->first;
-            imagesout[prodname] = GeoImage::create_from(image, iprod->second, 1, "int16");
-            imagesout[prodname].set_nodata(nodataout);
-            imagesout[prodname].set_gain(0.0001);
-            imagesout[prodname].set_bandname(prodname, 1);
-            filenames.push_back(imagesout[prodname].filename());
-        }
-        if (imagesout.size() == 0) throw std::runtime_error("No indices selected for calculation!");
+        GeoImage imgout = GeoImage::create_from(image, filename, products.size(), "int16");
+        imgout.set_bandnames(products);
+        imgout.set_nodata(nodataout);
+        imgout.set_gain(0.0001);
 
         std::map< string, std::vector<string> > colors;
         colors["ndvi"] = {"nir","red"};
@@ -485,9 +474,9 @@ namespace gip {
         // Figure out what colors are needed
         std::set< string > used_colors;
         std::set< string >::const_iterator isstr;
-        std::vector< string >::const_iterator ivstr;
+        std::vector< string >::const_iterator iprod, ivstr;
         for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-            for (ivstr=colors[iprod->first].begin();ivstr!=colors[iprod->first].end();ivstr++) {
+            for (ivstr=colors[*iprod].begin();ivstr!=colors[*iprod].end();ivstr++) {
                 used_colors.insert(*ivstr);
             }
         }
@@ -501,6 +490,7 @@ namespace gip {
 
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> chunks = image.chunks();
+        std::string prodname;
 
         // need to add overlap
         for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
@@ -515,8 +505,8 @@ namespace gip {
             }
 
             for (iprod=products.begin(); iprod!=products.end(); iprod++) {
-                prodname = iprod->first;
-                //string pname = iprod->toupper();
+                prodname = *iprod;
+                prodname = to_lower(prodname);
                 if (prodname == "ndvi") {
                     cimgout = (nir-red).div(nir+red);
                 } else if (prodname == "evi") {
@@ -554,10 +544,10 @@ namespace gip {
                 // TODO don't read mask again...create here
                 cimgmask = image.nodata_mask(colors[prodname], *iCh);
                 cimg_forXY(cimgout,x,y) if (cimgmask(x,y)) cimgout(x,y) = nodataout;
-                imagesout[prodname].write(cimgout,*iCh);
+                imgout[prodname].write(cimgout, *iCh);
             }
         }
-        return GeoImage(filenames);
+        return imgout;
     }
 
     //! Perform linear transform with given coefficients (e.g., PC transform)

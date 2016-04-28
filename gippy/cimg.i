@@ -68,87 +68,98 @@
     template<typename T> CImg<T> ArrToCImg(PyArrayObject* arr) {
         npy_intp* dims(PyArray_DIMS(arr));
         int ndim(PyArray_NDIM(arr));
+        bool shared = true;
 
         switch(PyArray_DTYPE(arr)->type_num) {
             case NPY_UINT8: {
                 uint8_t* data((uint8_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(uint8_t) ? true : false;
                 switch (ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_INT8: {
                 int8_t* data((int8_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(int8_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_UINT16: {
                 uint16_t* data((uint16_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(uint16_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_INT16: {
                 int16_t* data((int16_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(int16_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_UINT32: {
                 uint32_t* data((uint32_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(uint32_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_INT32: {
                 int32_t* data((int32_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(int32_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_UINT64: {
                 uint64_t* data((uint64_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(uint64_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_INT64: {
                 int64_t* data((int64_t*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(int64_t) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_FLOAT32: {
                 float* data((float*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(float) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             case NPY_FLOAT64: {
                 double* data((double*)PyArray_DATA(arr));
+                shared = typeid(T) == typeid(double) ? true : false;
                 switch(ndim) {
-                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, true);
-                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, true);
-                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, true);
-                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], true);
+                    case 1: return CImg<T>(data, dims[0], 1, 1, 1, shared);
+                    case 2: return CImg<T>(data, dims[1], dims[0], 1, 1, shared);
+                    case 3: return CImg<T>(data, dims[2], dims[1], dims[0], 1, shared);
+                    case 4: return CImg<T>(data, dims[3], dims[2], dims[1], dims[0], shared);
                 }}
             default:
                 throw(std::runtime_error("array data type not supported"));

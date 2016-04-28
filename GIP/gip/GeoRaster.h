@@ -116,6 +116,31 @@ namespace gip {
             return *this;
         }
 
+        //! Add color ramp (byte image only)
+        GeoRaster& add_colortable(CImg<uint8_t> color1, CImg<uint8_t> color2,
+                unsigned char value1=0, unsigned char value2=255) {
+            if (type().type() != 1)
+                throw std::runtime_error("can only add color table to byte image");
+            if ((color1.size() != 3) || (color2.size() != 3))
+                throw std::invalid_argument("colors must be 3 element array");
+            GDALColorTable* existing = _GDALRasterBand->GetColorTable();
+            GDALColorTable ct;
+            if (existing)
+                ct = *(existing->Clone());
+            GDALColorEntry col1, col2;
+            col1.c1 = color1[0]; col1.c2 = color1[1]; col1.c3 = color1[2]; col1.c4 = 255;
+            col2.c1 = color2[0]; col2.c2 = color2[1]; col2.c3 = color2[2]; col2.c4 = 255;
+            ct.CreateColorRamp(value1, &col1, value2, &col2);
+            _GDALRasterBand->SetColorTable(&ct);
+            return *this;
+        }
+
+        //! Clear color table from image
+        GeoRaster& clear_colortable() {
+            _GDALRasterBand->SetColorTable(NULL);
+            return *this;
+        }
+
         //! \name Calibration functions
         //! Sets dyanmic range of sensor (min to max digital counts)
         // TODO - consider this function, there is no get....what does it do?
