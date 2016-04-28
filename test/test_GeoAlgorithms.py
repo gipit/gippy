@@ -83,3 +83,27 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertTrue(extout.y0() >= extin.y0())
         self.assertTrue(extout.x1() <= extin.x1())
         self.assertTrue(extout.y1() <= extin.y1())
+
+    def test_ndvi(self):
+        """ Calculate NDVI using gippy """
+        geoimg = gpt.get_test_image()
+        fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
+        alg.indices(geoimg, {'ndvi': fout})
+        geoimg = None
+        os.remove(fout)
+
+    def test_ndvi_numpy(self):
+        """ Calculate NDVI using numpy (for speed comparison) """
+        geoimg = gpt.get_test_image()
+        nodata = geoimg[0].nodata()
+        red = geoimg['RED'].read().astype('double')
+        nir = geoimg['NIR'].read().astype('double')
+        ndvi = np.zeros(red.shape) + nodata
+        inds = np.logical_and(red != nodata, nir != nodata)
+        ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
+        fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
+        geoimgout = gp.GeoImage.create_from(geoimg, fout, dtype="float64")
+        geoimgout[0].write(ndvi)
+        geoimgout = None
+        geoimg = None
+        os.remove(fout)

@@ -2,11 +2,10 @@
 
 import os
 import numpy as np
-import gippy
+import gippy as gp
 import unittest
-import gippy.algorithms as alg
 import gippy.test as gpt
-from nose.tools import raises
+# from nose.tools import raises
 
 """
 Included are some tests for doing processing in NumPy instead of Gippy,
@@ -20,17 +19,69 @@ class GeoRasterTests(unittest.TestCase):
 
     def setUp(self):
         """ Configure options """
-        gippy.Options.set_verbose(1)
-        gippy.Options.set_chunksize(128.0)
+        gp.Options.set_verbose(1)
+        gp.Options.set_chunksize(256.0)
 
-    def test_sqrt(self):
-        """ Calculate sqrt of image """
-        geoimg = gpt.get_test_image()
-        for band in geoimg:
-            vals = band.sqrt().read()
-            mask = band.data_mask() == 1
-            # check against numpy
-            arr = band.read()
+    def test_size(self):
+        """ Retrieve size and dimension in pixels """
+        # note that xsize and ysize are redefined in GeoRaster from
+        # GeoResource, thus it is tested again
+        geoimg = gp.GeoImage.create(xsz=500, ysz=1500)
+        self.assertEqual(geoimg.xsize(), 500)
+        self.assertEqual(geoimg.ysize(), 1500)
+        self.assertEqual(geoimg.size(), 1500*500)
+
+    def test_type(self):
+        """ Set datatype on create and verify """
+        geoimg = gp.GeoImage.create(dtype='uint32')
+        self.assertEqual(geoimg.type().string(), 'uint32')
+
+    def test_naming(self):
+        """ Get basename and desription """
+        fout = 'test-image.tif'
+        bname = os.path.splitext(fout)[0]
+        bandnames = ['red', 'green', 'blue']
+        geoimg = gp.GeoImage.create(fout, nb=3)
+        geoimg.set_bandnames(bandnames)
+        for i in range(0, 3):
+            self.assertEqual(geoimg[i].description(), bandnames[i])
+            self.assertEqual(geoimg[i].basename(), '%s[%s]' % (bname, bandnames[i]))
+        os.remove(fout)
+        # TODO - test color
+
+    def test_gain_and_offset(self):
+        """ Set and retrieve gain and offset """
+        fout = 'test-gainoffset.tif'
+        gains = [2.0, 3.0]
+        offsets = [4.0, 5.0]
+        geoimg = gp.GeoImage.create(fout, nb=2)
+        geoimg[0].set_gain(gains[0])
+        geoimg[1].set_gain(gains[1])
+        geoimg[0].set_offset(offsets[0])
+        geoimg[1].set_offset(offsets[1])
+        # check persistance
+        geoimg = None
+        geoimg = gp.GeoImage(fout)
+        for i in range(0, 2):
+            self.assertEqual(geoimg[i].gain(), gains[i])
+            self.assertEqual(geoimg[i].offset(), offsets[i])
+        os.remove(fout)
+
+    def test_nodata(self):
+        """ Set nodata and retrieve """
+        fout = 'test-nodata.tif'
+        geoimg = gp.GeoImage.create(fout, xsz=100, ysz=100)
+        geoimg.set_nodata(1)
+        self.assertEqual(geoimg[0].nodata(), 1)
+        geoimg = None
+        geoimg = gp.GeoImage(fout)
+        self.assertEqual(geoimg[0].nodata(), 1)
+        # check that entire array is nan
+        arr = np.where(geoimg.read() == np.nan)
+        self.assertEqual(len(arr[0]), 0)
+        self.assertEqual(len(arr[1]), 0)
+
+    # TODO - test masking
 
     def test_stats(self):
         """ Calculate statistics using gippy """
@@ -44,31 +95,17 @@ class GeoRasterTests(unittest.TestCase):
             self.assertAlmostEqual(arr[mask].max(), stats[1])
             self.assertAlmostEqual(arr[mask].mean(), stats[2], places=2)
 
-    def test_write(self):
-        """ Write arrays of different datatype """
-        geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
-        arr = np.ones((100, 100)).astype('uint8')
-        geoimg[0].write(arr)
-        self.assertTrue(np.array_equal(arr, geoimg[0].read()))
-        arr = np.ones((100, 100)).astype('float32')
-        geoimg[0].write(arr)
-        self.assertTrue(np.array_equal(arr, geoimg[0].read()))
-
-    """
-    def test_invalid_args(self):
-        # Check that invalid arguments throw error
-        geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
-        try:
-            geoimg[0].write('invalid arg')
-            geoimg[0].write([1.0, 1.0])
-            self.assertTrue(False)
-        except:
-            pass
-    """
+    def test_scale(self):
+        """ Scale image to byte range """
+        geoimg = gpt.get_test_image()
+        for band in geoimg:
+            band = band.autoscale(minout=1, maxout=255, percent=2.0)
+            self.assertTrue(band.min() == 1)
+            self.assertTrue(band.max() == 255)
 
     def test_histogram(self):
         """ Calculate histogram of blank data """
-        geoimg = gippy.GeoImage.create(xsz=10, ysz=10, nb=2)
+        geoimg = gp.GeoImage.create(xsz=10, ysz=10, nb=2)
         arr = np.arange(10).reshape(1, 10) + 1
         for i in range(9):
             arr = np.append(arr, arr, axis=0)
@@ -89,34 +126,36 @@ class GeoRasterTests(unittest.TestCase):
         self.assertEqual(len(hist), 100)
         self.assertEqual(hist.sum(), geoimg.size())
 
-    def test_ndvi(self):
-        """ Calculate NDVI using gippy """
-        geoimg = gpt.get_test_image()
-        fout = os.path.splitext(geoimg.filename())[0] + '_gippy_ndvi.tif'
-        alg.indices(geoimg, {'ndvi': fout})
-        geoimg = None
-        os.remove(fout)
-
-    def test_ndvi_numpy(self):
-        """ Calculate NDVI using numpy (for speed comparison) """
-        geoimg = gpt.get_test_image()
-        nodata = geoimg[0].nodata()
-        red = geoimg['RED'].read().astype('double')
-        nir = geoimg['NIR'].read().astype('double')
-        ndvi = np.zeros(red.shape) + nodata
-        inds = np.logical_and(red != nodata, nir != nodata)
-        ndvi[inds] = (nir[inds] - red[inds])/(nir[inds] + red[inds])
-        fout = os.path.splitext(geoimg.filename())[0] + '_numpy_ndvi.tif'
-        geoimgout = gippy.GeoImage.create_from(geoimg, fout, dtype="float64")
-        geoimgout[0].write(ndvi)
-        geoimgout = None
-        geoimg = None
-        os.remove(fout)
-
-    def test_scale(self):
-        """ Scale image to byte range """
-        geoimg = gpt.get_test_image()
+    def test_sqrt(self):
+        """ Calculate sqrt of image """
+        geoimg = gpt.get_test_image().select(['red', 'green', 'swir1', 'nir'])
         for band in geoimg:
-            band = band.autoscale(minout=1, maxout=255, percent=2.0)
-            self.assertTrue(band.min() == 1)
-            self.assertTrue(band.max() == 255)
+            vals = band.sqrt().read()
+            mask = band.data_mask() == 1
+            # check against numpy
+            arr = band.read()
+            self.assertTrue((vals[mask] == np.sqrt(arr[mask])).any())
+
+    # TODO - test processing functions
+
+    def test_write(self):
+        """ Write arrays of different datatype """
+        geoimg = gp.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
+        arr = np.ones((100, 100)).astype('uint8')
+        geoimg[0].write(arr)
+        self.assertTrue(np.array_equal(arr, geoimg[0].read()))
+        arr = np.ones((100, 100)).astype('float32')
+        geoimg[0].write(arr)
+        self.assertTrue(np.array_equal(arr, geoimg[0].read()))
+
+    """
+    def test_invalid_args(self):
+        # Check that invalid arguments throw error
+        geoimg = gippy.GeoImage.create(xsz=100, ysz=100, dtype='uint8')
+        try:
+            geoimg[0].write('invalid arg')
+            geoimg[0].write([1.0, 1.0])
+            self.assertTrue(False)
+        except:
+            pass
+    """
