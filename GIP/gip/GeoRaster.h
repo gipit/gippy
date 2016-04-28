@@ -80,6 +80,16 @@ namespace gip {
         //! Set offset
         GeoRaster& set_offset(float offset) { _GDALRasterBand->SetOffset(offset); return *this; }
 
+        //! Indicates if processing will be done on reads
+        bool is_processed() const { 
+            return (_Functions.size() > 0) ? true : false;
+        }
+
+        //! Indicates if data should be read as doubles (functions or gain/offset)
+        bool is_double() const {
+            return (is_processed() || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
+        }
+
         //! Get NoData value
         double nodata() const {
             return _GDALRasterBand->GetNoDataValue();
@@ -108,6 +118,7 @@ namespace gip {
 
         //! \name Calibration functions
         //! Sets dyanmic range of sensor (min to max digital counts)
+        // TODO - consider this function, there is no get....what does it do?
         GeoRaster& set_dynamicrange(int min, int max) {
             _minDC = min;
             _maxDC = max;
@@ -125,25 +136,6 @@ namespace gip {
             if (!_Masks.empty()) _ValidStats = false;
             _Masks.clear();
             return *this;
-        }
-
-        // Scale input image range (minin, maxin) to output range (minout, maxout)
-        GeoRaster scale(const double& minin, const double& maxin, const double& minout, const double& maxout) {
-            // Calculate gain and offset
-            double gain = (maxout-minout)/(maxin-minin);
-            double offset = minout - gain*minin;
-            return ((*this) * gain + offset).min(maxout).max(minout);
-        }
-
-        //! Scale image to given range (minout, maxout)
-        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
-            double minin = this->min();
-            double maxin = this->max();
-            if (percent > 0.0) {
-                minin = percentile(percent);
-                maxin = percentile(100.0 - percent);
-            }
-            return scale(minin, maxin, minout, maxout);
         }
 
         //! \name Processing functions
@@ -289,6 +281,25 @@ namespace gip {
 
         //! Get value for this percentile in the cumulative distribution histogram
         double percentile(const double& p) const;
+
+        // Scale input image range (minin, maxin) to output range (minout, maxout)
+        GeoRaster scale(const double& minin, const double& maxin, const double& minout, const double& maxout) {
+            // Calculate gain and offset
+            double gain = (maxout-minout)/(maxin-minin);
+            double offset = minout - gain*minin;
+            return ((*this) * gain + offset).min(maxout).max(minout);
+        }
+
+        //! Scale image to given range (minout, maxout)
+        GeoRaster autoscale(const double& minout, const double& maxout, const double& percent=0.0) {
+            double minin = this->min();
+            double maxin = this->max();
+            if (percent > 0.0) {
+                minin = percentile(percent);
+                maxin = percentile(100.0 - percent);
+            }
+            return scale(minin, maxin, minout, maxout);
+        }
 
         //! \name File I/O
         template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const;
