@@ -21,12 +21,13 @@ class GeoResourceTests(unittest.TestCase):
 
     def test_filename(self):
         """ Check filename, basename, extension functions """
-        fname = 'test.tif'
-        geoimg = gp.GeoImage.create(fname)
-        self.assertTrue(os.path.exists(fname))
-        self.assertEqual(geoimg.filename(), fname)
+        fout = 'test.tif'
+        geoimg = gp.GeoImage.create(fout)
+        self.assertTrue(os.path.exists(fout))
+        self.assertEqual(geoimg.filename(), fout)
         self.assertEqual(geoimg.basename(), 'test')
         self.assertEqual(geoimg.extension(), 'tif')
+        os.remove(fout)
 
     def test_format(self):
         """ Get and set file format and verify """
