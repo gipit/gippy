@@ -17,6 +17,7 @@ addons:
 before_install:
 - export CXX="g++-4.8" CC="gcc-4.8"
 - pip install -r requirements.txt
+- pip install -r requirements-dev.txt
 
 install:
 - pip install -e .
