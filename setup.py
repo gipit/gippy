@@ -170,10 +170,17 @@ class _bdist_egg(bdist_egg):
 
 class _bdist_wheel(bdist_wheel):
     def run(self):
+        global build_dir
         log.debug('_bdist_wheel run')
         self.distribution.ext_modules = swig_modules
         self.run_command('build_ext')
         bdist_wheel.run(self)
+        if sys.platform == 'darwin':
+            # change the link path set in the library
+            update_lib_path_mac(
+                os.path.join(build_dir, gip_module._file_name),
+                os.path.join(os.path.abspath(build_dir), gip_module._file_name)
+            )        
 
 
 def add_runtime_library_dirs(path):
