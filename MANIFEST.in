@@ -5,3 +5,5 @@ include requirements-dev.txt
 
 recursive-include GIP *
 recursive-include gippy *
+
+recursive-include docs *.rst conf.py Makefile make.bat
