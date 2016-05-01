@@ -75,7 +75,7 @@ namespace gip {
                 CImg<double> bbox=CImg<double>(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0),
                 std::string dtype="uint8", std::string format="", bool temp=false) {
             if (filename == "") {
-                filename = std::tmpnam(nullptr);
+                filename = random_filename();
                 temp = true;
             }
             BoundingBox ext(bbox[0], bbox[1], bbox[2], bbox[3]);
@@ -93,7 +93,7 @@ namespace gip {
             _bs = nb > 0 ? nb : _bs;
             _dtype = dtype != "unknown" ? dtype : _dtype;
             if (filename == "") {
-                filename = std::tmpnam(nullptr);
+                filename = random_filename();
                 temp = true;
             }
             GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp);

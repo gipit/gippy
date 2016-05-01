@@ -60,6 +60,12 @@ namespace gip {
         return str;
     }
 
+    inline std::string random_filename() {
+        std::string filename = std::tmpnam(nullptr);    
+        std::replace( filename.begin(), filename.end(), '.', '_');
+        return filename;
+    }
+
     //! Splits the string s on the given delimiter(s) and returns a list of tokens without the delimiter(s)
     /// <param name=s>The string being split</param>
     /// <param name=match>The delimiter(s) for splitting</param>
