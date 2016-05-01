@@ -4,21 +4,9 @@ GIPPY
 .. image:: https://travis-ci.org/gipit/gippy.svg?branch=develop
     :target: https://travis-ci.org/gipit/gippy
 
-GIPPY is a library of python bindings to a C++ library called GIPS. GIPS is built on top of GDAL and CImg, an image processing template library. GIPPY provides a similar, yet simpler interface than GDAL for opening, creating, and reading geospatial raster files. Convenience functions have been added to make common tasks achievable with fewer lines of code.
+Gippy is a Python library for image processing of geospatial raster data. The core of the library is implemented as a C++ library, libgip, with Python bindings automatically generated with `swig <http://www.swig.org/>`_. Gippy encapsulates the functionality of `GDAL <http://www.gdal.org/>`_ and `CImg <http://cimg.eu/>`_ that automatically handles issues common to geospatial data, such as handling of nodata values and chunking up of very large images by saving chains of functions and only processing the image in pieces upon a read request. In addition to providing a library of image processing functions and algorithms, Gippy can also be used as a simpler interface to GDAL for the opening, creating, reading and writing of geospatial raster files in Python.
 
-Most notably GIPPY adds image processing functionality on top of GDAL for easier automation of processing functions. The main objects in the GIPPY library are the GeoRaster, which is a single raster band, and a GeoImage, which is a collection of GeoRaster objects (possibly from different files).  GeoImage and GeoRaster objects support various processing operations (e.g., +, -, log, abs) that can be chained together and saved as a processing chain.  The processing does not actually occur until the file is read (frequently followed by a write to a new file).  Reading may also occur in chunks, thereby facilitating the processing of very large files.
-
-Docs
-++++
-
-To generate docs:
-
-.. code::
-
-    cd docs
-    make html
-
-Open `docs/_build/html/index.html` in the browser
+See the full `documentation <http://pythonhosted.org/gippy>`_.
 
 
 Authors and Contributors
