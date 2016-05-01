@@ -42,6 +42,13 @@ from wheel.bdist_wheel import bdist_wheel
 
 __version__ = load_source('gippy.version', 'gippy/version.py').__version__
 
+# get the dependencies and installs
+with open('requirements.txt') as fid:
+    install_requires = [l.strip() for l in fid.readlines() if l]
+
+with open('requirements-dev.txt') as fid:
+    test_requires = [l.strip() for l in fid.readlines() if l]
+
 # logging
 # logging.basicConfig(level=logging.DEBUG)
 logging.basicConfig()
@@ -288,6 +295,9 @@ setup(
     ],
     ext_modules=[gip_module] + swig_modules,
     packages=['gippy'],
+    install_requires=install_requires,
+    test_suite='nose.collector',
+    tests_require=test_requires,
     cmdclass={
         "develop": _develop,
         "install": _install,
