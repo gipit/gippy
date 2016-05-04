@@ -1,2 +1,1 @@
 numpy>=1.9.1
-stestdata==0.0.1
