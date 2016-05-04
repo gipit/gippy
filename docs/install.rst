@@ -4,21 +4,15 @@ Installation
 Gippy is a C++ library with Python bindings. The C++ portion, libgip.so and C++ wrappers wrappers around it, are built as extensions using Python setuptools, so do not require seperate installation. Gippy has been designed to use as few system dependencies as possible, however there are a few.s
 
 
-On Ubuntu::
+On Ubuntu (14.04)::
 
-    # if not already added, add the UbuntuGIS repository
-    $ sudo apt-get install python-software-properties
-    $ sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
-    $ sudo apt-get update
-
-    # install dependencies
-    $ sudo apt-get install libgdal1h gdal-bin libgdal-dev g++4.8
-    # install pip if not installed
-    # sudo easy_install pip
+    $ sudo apt-get install libgdal-dev python-setuptools g++ python-dev
+    # sudo easy_install pip             # if pip not already installed
+    $ sudo pip install numpy            # pre-install numpy
 
 On OS X (using brew)::
 
-    $ brew install 
+    $ brew install gdal
 
 
 With the dependencies met, gippy can be installed via pip from it's repository on PyPi. If installing to a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_, activate the environment first. If installing systeym-wide pip will need to be run as sudo.
