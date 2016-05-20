@@ -74,6 +74,14 @@ namespace gip {
 
         // add options
         char **papszOptions = NULL;
+        // if tif and 3 or 4 band make RGBA
+        if (format == "GTiff") {
+            if (bsz == 3 || bsz == 4)
+                papszOptions = CSLSetNameValue(papszOptions, "PHOTOMETRIC", "RGB");
+            if (bsz == 4)
+                papszOptions = CSLSetNameValue(papszOptions, "ALPHA", "YES");
+        }
+        
         /*if (options.size()) {
             for (dictionary::const_iterator imap=options.begin(); imap!=options.end(); imap++)
                 papszOptions = CSLSetNameValue(papszOptions,imap->first.c_str(),imap->second.c_str());
