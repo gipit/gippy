@@ -20,15 +20,29 @@
 #    limitations under the License.
 ################################################################################
 from .version import __version__
-from gippy import *
-
-# remove _swigregister and Options_ functions
-remove_f = [f for f in list(locals()) if f.endswith('_swigregister') or f.startswith('Options_')]
-for f in remove_f:
-    del locals()[f] 
-del remove_f
-del f
+from gippy import init, DataType, GeoImage, GeoVector, Options
 
 # register GDAL and OGR formats
 init()
-del locals()['init'] 
+
+def mac_update():
+    """ update search path on mac """
+    import sys
+    if sys.platform == 'darwin':
+        import os
+        from subprocess import check_output
+        lib = 'libgip.so'
+        path = os.path.dirname(__file__)
+        for f in ['_gippy.so', '_algorithms.so']:
+            fin = os.path.join(path, f)
+    	    cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), fin]
+    	    check_output(cmd)
+
+mac_update()
+
+# cleanup functions
+del gippy
+del version
+del init
+del mac_update
+
