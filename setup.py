@@ -106,6 +106,7 @@ class CConfig(object):
         match = re.match(r'(\d+)\.(\d+)\.(\d+)', self.get('--version').strip())
         return tuple(map(int, match.groups()))
 
+
 class _build_ext(build_ext):
     # builds the external modules: libgip.so, _gippy.so, _algorithms.so
     def run(self):
@@ -115,11 +116,17 @@ class _build_ext(build_ext):
             m.library_dirs.append(os.path.join(self.build_lib, 'gippy'))
         build_ext.run(self)
 
+
 class _develop(develop):
     # development installation (editable links via pip install -e)
     # TODO - remove the libs appended by _install which is called
     # for some reason during the develop.finalize_options(self) call
     # and which generates a warning (low priority)
+    def finalize_options(self):
+        log.debug('_develop finalize_options')
+        develop.finalize_options(self)
+        if sys.platform != 'darwin':
+            [m.runtime_library_dirs.append(os.path.abspath('./')) for m in swig_modules]
 
     def run(self):
         # for some reason we must get build_dir this way, which is available
@@ -131,8 +138,8 @@ class _develop(develop):
         update_lib_path_mac(
             os.path.join(build_dir, gip_module._file_name),
         )
-	# move lib files into gippy directory
-	[shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
+    # move lib files into gippy directory
+    [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
 
 
 class _install(install):
@@ -153,7 +160,7 @@ class _install(install):
         install.run(self)
         update_lib_path_mac(
             os.path.join(self.build_lib, gip_module._file_name),
-            modpath = self.install_lib
+            modpath=self.install_lib
         )
 
 
@@ -167,8 +174,8 @@ class _bdist_wheel(bdist_wheel):
         bdist_wheel.run(self)
         update_lib_path_mac(
             os.path.join(build_dir, gip_module._file_name),
-	    modpath = build_dir
-        )        
+            modpath=build_dir
+        )
 
 # Binary wheel should be used instead, this is unsupported for now
 """
@@ -179,6 +186,7 @@ class _bdist_egg(bdist_egg):
         self.run_command('build_ext')
         bdist_egg.run(self)
 """
+
 
 # use 'otool -L filename.so' to see the linked libraries in an
 # extension. This function updates swig .so files with absolute
@@ -257,8 +265,8 @@ gip_module = Extension(
 swig_modules = []
 for n in ['gippy', 'algorithms']:
     src = os.path.join('gippy', n + '.i')
-    #cppsrc = os.path.join('gippy', n + '_wrap.cpp')
-    #src = cppsrc if  os.path.exists(cppsrc) else src
+    # cppsrc = os.path.join('gippy', n + '_wrap.cpp')
+    # src = cppsrc if  os.path.exists(cppsrc) else src
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),
