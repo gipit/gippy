@@ -28,6 +28,7 @@ init()
 def mac_update():
     """ update search path on mac """
     import sys
+    print 'here'
     if sys.platform == 'darwin':
         import os
         from subprocess import check_output
@@ -36,6 +37,7 @@ def mac_update():
         for f in ['_gippy.so', '_algorithms.so']:
             fin = os.path.join(path, f)
     	    cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), fin]
+	    print cmd
     	    check_output(cmd)
 
 mac_update()
