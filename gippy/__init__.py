@@ -20,10 +20,6 @@
 #    limitations under the License.
 ################################################################################
 from .version import __version__
-from gippy import init, DataType, GeoImage, GeoVector, Options
-
-# register GDAL and OGR formats
-init()
 
 def mac_update():
     """ update search path on mac """
@@ -41,6 +37,11 @@ def mac_update():
     	    check_output(cmd)
 
 mac_update()
+
+from gippy import init, DataType, GeoImage, GeoVector, Options
+
+# register GDAL and OGR formats
+init()
 
 # cleanup functions
 del gippy
