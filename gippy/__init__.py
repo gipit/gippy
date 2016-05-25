@@ -24,7 +24,6 @@ from .version import __version__
 def mac_update():
     """ update search path on mac """
     import sys
-    print 'here'
     if sys.platform == 'darwin':
         import os
         from subprocess import check_output
