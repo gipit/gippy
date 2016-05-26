@@ -79,7 +79,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         # test cropping
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=30.0, yres=30.0, crop=True)
         extout = imgout.extent()
-        self.assertTrue(extout.x0 >= extin.x0())
+        self.assertTrue(extout.x0() >= extin.x0())
         self.assertTrue(extout.y0() >= extin.y0())
         self.assertTrue(extout.x1() <= extin.x1())
         self.assertTrue(extout.y1() <= extin.y1())
