@@ -31,8 +31,8 @@ def mac_update():
         path = os.path.dirname(__file__)
         for f in ['_gippy.so', '_algorithms.so']:
             fin = os.path.join(path, f)
-    	    cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), fin]
-    	    check_output(cmd)
+            cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), fin]
+            check_output(cmd)
 
 mac_update()
 
