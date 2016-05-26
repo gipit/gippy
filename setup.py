@@ -138,7 +138,7 @@ class _develop(develop):
         log.debug('_develop finalize_options')
         develop.finalize_options(self)
         if sys.platform != 'darwin':
-            [m.runtime_library_dirs.append(os.path.abspath('./')) for m in swig_modules]
+            [m.runtime_library_dirs.append(os.path.abspath('gippy')) for m in swig_modules]
 
     def run(self):
         # for some reason we must get build_dir this way, which is available
