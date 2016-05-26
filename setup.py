@@ -114,7 +114,19 @@ class _build_ext(build_ext):
         # know where to find libgip for linking
         for m in swig_modules:
             m.library_dirs.append(os.path.join(self.build_lib, 'gippy'))
+        # in python3 the created .so files have funny names, see PEP 3147
+        libfile = os.path.basename(gip_module._file_name)
+        link = os.path.join(self.build_lib, gip_module.name + '.so')
+        libpath = os.path.join(self.build_lib, 'gippy')
+        if not os.path.exists(libpath):
+            os.makedirs(os.path.join(self.build_lib, 'gippy'))
+        if libfile != os.path.basename(link) and not os.path.exists(link):
+            os.symlink(libfile, link)
         build_ext.run(self)
+	    # if created, remove the link and rename the libgip file
+        if libfile != os.path.basename(link):
+            os.remove(link)
+            os.rename(os.path.join(libpath, libfile), link)
 
 
 class _develop(develop):
