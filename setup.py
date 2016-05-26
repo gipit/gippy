@@ -150,8 +150,12 @@ class _develop(develop):
         update_lib_path_mac(
             os.path.join(build_dir, gip_module._file_name),
         )
-    # move lib files into gippy directory
-    [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
+        # move lib files into gippy directory
+        [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
+        # rename libgip if it has crazy python3 extension
+        f = glob.glob(os.path.join('gippy', 'libgip.*.so'))
+        if len(f) > 0:
+            os.rename(f[0], os.path.join('gippy', 'libgip.so'))
 
 
 class _install(install):
