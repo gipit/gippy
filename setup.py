@@ -114,7 +114,19 @@ class _build_ext(build_ext):
         # know where to find libgip for linking
         for m in swig_modules:
             m.library_dirs.append(os.path.join(self.build_lib, 'gippy'))
+        # in python3 the created .so files have funny names, see PEP 3147
+        libfile = os.path.basename(gip_module._file_name)
+        link = os.path.join(self.build_lib, gip_module.name + '.so')
+        libpath = os.path.join(self.build_lib, 'gippy')
+        if not os.path.exists(libpath):
+            os.makedirs(os.path.join(self.build_lib, 'gippy'))
+        if libfile != os.path.basename(link) and not os.path.exists(link):
+            os.symlink(libfile, link)
         build_ext.run(self)
+	    # if created, remove the link and rename the libgip file
+        if libfile != os.path.basename(link):
+            os.remove(link)
+            os.rename(os.path.join(libpath, libfile), link)
 
 
 class _develop(develop):
@@ -126,7 +138,7 @@ class _develop(develop):
         log.debug('_develop finalize_options')
         develop.finalize_options(self)
         if sys.platform != 'darwin':
-            [m.runtime_library_dirs.append(os.path.abspath('./')) for m in swig_modules]
+            [m.runtime_library_dirs.append(os.path.abspath('gippy')) for m in swig_modules]
 
     def run(self):
         # for some reason we must get build_dir this way, which is available
@@ -138,8 +150,12 @@ class _develop(develop):
         update_lib_path_mac(
             os.path.join(build_dir, gip_module._file_name),
         )
-    # move lib files into gippy directory
-    [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
+        # move lib files into gippy directory
+        [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
+        # rename libgip if it has crazy python3 extension
+        f = glob.glob(os.path.join('gippy', 'libgip.*.so'))
+        if len(f) > 0:
+            os.rename(f[0], os.path.join('gippy', 'libgip.so'))
 
 
 class _install(install):

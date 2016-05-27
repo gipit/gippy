@@ -29,14 +29,16 @@ def mac_update():
         from subprocess import check_output
         lib = 'libgip.so'
         path = os.path.dirname(__file__)
-        for f in ['_gippy.so', '_algorithms.so']:
-            fin = os.path.join(path, f)
-    	    cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), fin]
-    	    check_output(cmd)
+        import glob
+	# find all dynamic libraries
+        libs = glob.glob(os.path.join(path, '_*.so'))
+        for f in libs:
+            cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), f]
+            check_output(cmd)
 
 mac_update()
 
-from gippy import init, DataType, GeoImage, GeoVector, Options
+from .gippy import init, DataType, GeoImage, GeoVector, Options
 
 # register GDAL and OGR formats
 init()
