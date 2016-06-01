@@ -281,8 +281,8 @@ gip_module = Extension(
 swig_modules = []
 for n in ['gippy', 'algorithms']:
     src = os.path.join('gippy', n + '.i')
-    # cppsrc = os.path.join('gippy', n + '_wrap.cpp')
-    # src = cppsrc if  os.path.exists(cppsrc) else src
+    cppsrc = os.path.join('gippy', n + '_wrap.cpp')
+    src = cppsrc if  os.path.exists(cppsrc) else src
     swig_modules.append(
         Extension(
             name=os.path.join('gippy', '_' + n),
