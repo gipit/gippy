@@ -15,11 +15,11 @@ On OS X (using brew)::
     $ brew install gdal
 
 
-With the dependencies met, gippy can be installed via pip from it's repository on PyPi. If installing to a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_, activate the environment first. If installing systeym-wide pip will need to be run as sudo.
+With the dependencies met, gippy can be installed via pip from it's repository on PyPi. If installing to a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_, activate the environment first. If installing system-wide pip will need to be run as sudo.
 
     $ pip install gippy --pre
 
-The --pre switch will allow pre-release versions to install, and thus will install the beta version of 1.0.0. Without --pre, pip will install the last release version, which is 0.3.5.
+To install a beta version use the --pre switch. Without --pre, pip will install the last release version, which is currently 0.3.5.
 
 
 Development Installation
