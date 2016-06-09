@@ -51,7 +51,7 @@ namespace gip {
             load_bands();
         }
         //! Open file from vector of individual files
-        explicit GeoImage(std::vector<std::string> filenames);
+        explicit GeoImage(std::vector<std::string> filenames, bool update=false);
         //! Constructor for creating new file
         explicit GeoImage(std::string filename, 
                           int xsz, int ysz, int nb, 
@@ -111,11 +111,11 @@ namespace gip {
         }
 
         //! Open new image
-        static GeoImage open(std::string filename, bool update=false, float nodata=0,
+        static GeoImage open(std::vector<std::string> filenames, bool update=false, float nodata=0,
             std::vector<std::string> bandnames=std::vector<std::string>({}),
             double gain=1.0, double offset=0.0) {
             // open image, then set all these things
-            GeoImage geoimg = GeoImage(filename, update);
+            GeoImage geoimg = GeoImage(filenames, update);
             geoimg.set_gain(gain);
             geoimg.set_offset(offset);            
             if (bandnames.size() != geoimg.nbands())
@@ -206,6 +206,8 @@ namespace gip {
 
         //! Adds a band (as last band)
         GeoImage& add_band(GeoRaster band);
+        //! Adds all bands in another image
+        GeoImage& add_bands(GeoImage img);
         //! Keep only these band names
         GeoImage select(std::vector<std::string> names);
         //! Keep only these band numbers
