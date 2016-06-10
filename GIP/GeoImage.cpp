@@ -30,8 +30,8 @@ namespace gip {
     using std::vector;
     using std::endl;
 
-    GeoImage::GeoImage(vector<string> filenames)
-        : GeoResource(filenames[0]) {
+    GeoImage::GeoImage(vector<string> filenames, bool update)
+        : GeoResource(filenames[0], update) {
         vector<string>::const_iterator f;
         load_bands();
         unsigned int b;
@@ -39,7 +39,7 @@ namespace gip {
             _BandNames[b] = basename() + (nbands() > 1 ? "-" + _BandNames[b] : "");
         }
         for (f=filenames.begin()+1; f!=filenames.end(); f++) {
-            GeoImage img(*f);
+            GeoImage img(*f, update);
             for (b=0; b<img.nbands(); b++) {
                 add_band(img[b]);
                 _BandNames[nbands()-1] = img.basename() + (img.nbands() > 1 ? "-" + img[b].description() : "");
@@ -112,6 +112,13 @@ namespace gip {
         }
         _RasterBands.push_back(band);
         _BandNames.push_back(name);
+        return *this;
+    }
+    // Adds all bands from image to this one
+    GeoImage& GeoImage::add_bands(GeoImage img) {
+        for (unsigned int i=0; i<img.nbands(); i++) {
+            this->add_band(img[i]);
+        }
         return *this;
     }
     // Keep only these band names
