@@ -117,11 +117,12 @@ namespace gip {
             // open image, then set all these things
             GeoImage geoimg = GeoImage(filenames, update);
             geoimg.set_gain(gain);
-            geoimg.set_offset(offset);            
-            if (bandnames.size() != geoimg.nbands())
-                throw std::runtime_error("bandnames must be provided for all bands in file");
-            geoimg.set_bandnames(bandnames);
-
+            geoimg.set_offset(offset);
+            if (bandnames.size() > 0) {
+                if (bandnames.size() != geoimg.nbands())
+                    throw std::runtime_error("bandnames must be provided for all bands in file");
+                geoimg.set_bandnames(bandnames);
+            }
             return geoimg;
         }
 
