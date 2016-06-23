@@ -153,7 +153,7 @@ namespace gip {
         std::map<std::string, std::string> intersections(GeoFeature feat) {
             // transform passed in feature to native
             OGRSpatialReference* srs = _Layer->GetSpatialRef();
-            OGRGeometry* geom = feat.geometry(srs);
+            OGRGeometry* geom = feat.ogr_geometry(srs);
             _Layer->SetSpatialFilter(geom);
             _Layer->ResetReading();
             OGRFeature* f;

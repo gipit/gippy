@@ -98,15 +98,22 @@ namespace gip {
         //! \name Geospatial information
         BoundingBox extent() const {
             OGREnvelope ext;
-            geometry()->getEnvelope(&ext);
+            _Feature->GetGeometryRef()->getEnvelope(&ext);
             return BoundingBox(
                 Point<double>(ext.MinX, ext.MinY),
                 Point<double>(ext.MaxX, ext.MaxY)
             );
         }
 
+        //! Get geometry in Well Known Text format
+        std::string geometry() const {
+            char* wkt(NULL);
+            ogr_geometry()->exportToWkt(&wkt);
+            return std::string(wkt);
+        }
+
         //! Get feature as geometry, warp to SRS if provided
-        OGRGeometry* geometry(OGRSpatialReference* srs = NULL) const {
+        OGRGeometry* ogr_geometry(OGRSpatialReference* srs = NULL) const {
             OGRGeometry* geom = _Feature->GetGeometryRef();
             if (srs != NULL) {
                 geom->transformTo(srs);
