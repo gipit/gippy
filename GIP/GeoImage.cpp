@@ -318,7 +318,7 @@ namespace gip {
         char **papszOptionsCutline = NULL;
         CutlineTransformer oTransformer;
         if (feature.valid()) {
-            OGRGeometry* site = feature.geometry();
+            OGRGeometry* site = feature.ogr_geometry();
 
             // Create cutline transform to pixel coordinates        
             papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.srs().c_str() );
