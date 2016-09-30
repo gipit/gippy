@@ -134,11 +134,11 @@ class _develop(develop):
     # TODO - remove the libs appended by _install which is called
     # for some reason during the develop.finalize_options(self) call
     # and which generates a warning (low priority)
-    #def finalize_options(self):
-        #log.debug('_develop finalize_options')
-        #develop.finalize_options(self)
-        #if sys.platform != 'darwin':
-        #    [m.runtime_library_dirs.append(os.path.abspath('gippy')) for m in swig_modules]
+    def finalize_options(self):
+        log.debug('_develop finalize_options')
+        develop.finalize_options(self)
+        if sys.platform != 'darwin':
+            [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
         # for some reason we must get build_dir this way, which is available
@@ -163,11 +163,11 @@ class _install(install):
         log.debug('_install finalize_options')
         global build_dir
         install.finalize_options(self)
+        # this sets te build_dir global for later in the develop class
         build_dir = self.build_lib
-        # add libgip to runtime
-        path = os.path.abspath(os.path.join(self.install_lib, 'gippy'))
-        #if sys.platform != 'darwin':
-        #    [m.runtime_library_dirs.append(path) for m in swig_modules]
+        # change rpath to be relative to the current lib dir (same path)
+        if sys.platform != 'darwin':
+            [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
         log.debug('_install run')
