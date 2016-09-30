@@ -269,7 +269,7 @@ gip_module = Extension(
     name=os.path.join("gippy", "libgip"),
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
-    #library_dirs=lib_dirs,
+    library_dirs=lib_dirs,
     libraries=[
         'pthread'
     ] + gdal_config.libs,
@@ -289,7 +289,7 @@ for n in ['gippy', 'algorithms']:
             sources=[src],
             swig_opts=['-c++', '-w509', '-w511', '-w315', '-IGIP', '-fcompact', '-fvirtual', '-keyword'],
             include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
-            #library_dirs=lib_dirs,
+            library_dirs=lib_dirs,
             libraries=[
                 'gip', 'pthread'
             ] + gdal_config.libs,
