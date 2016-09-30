@@ -23,16 +23,6 @@ import os
 from .version import __version__
 from ctypes import cdll
 
-# load shared libraries
-path = os.path.dirname(os.path.realpath(__file__))
-libs = [
-    os.path.join(path, 'libgip.so'),
-    os.path.join(path, '_gippy.so')
-]
-
-for l in libs:
-    print('LIB = ', l)
-    cdll.LoadLibrary(l)
 from .gippy import init, DataType, GeoImage, GeoVector, Options
 
 # register GDAL and OGR formats
