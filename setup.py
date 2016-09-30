@@ -138,7 +138,7 @@ class _develop(develop):
         log.debug('_develop finalize_options')
         develop.finalize_options(self)
         if sys.platform != 'darwin':
-            [m.runtime_library_dirs.append(os.path.abspath('gippy')) for m in swig_modules]
+            [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
         # for some reason we must get build_dir this way, which is available
@@ -163,11 +163,11 @@ class _install(install):
         log.debug('_install finalize_options')
         global build_dir
         install.finalize_options(self)
+        # this sets te build_dir global for later in the develop class
         build_dir = self.build_lib
-        # add libgip to runtime
-        path = os.path.abspath(os.path.join(self.install_lib, 'gippy'))
+        # change rpath to be relative to the current lib dir (same path)
         if sys.platform != 'darwin':
-            [m.runtime_library_dirs.append(path) for m in swig_modules]
+            [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
         log.debug('_install run')
@@ -211,7 +211,7 @@ def update_lib_path_mac(oldpath, modpath=None):
     """ Change the link path set in the library on mac os """
     if sys.platform != 'darwin':
         return
-    newpath = 'libgip.so'
+    newpath = '@loader_path/libgip.so'
     for m in swig_modules:
         if modpath is None:
             fin = os.path.basename(m._file_name)
@@ -269,7 +269,7 @@ gip_module = Extension(
     name=os.path.join("gippy", "libgip"),
     sources=glob.glob('GIP/*.cpp'),
     include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
-    library_dirs=lib_dirs,
+    #library_dirs=lib_dirs,
     libraries=[
         'pthread'
     ] + gdal_config.libs,
@@ -289,7 +289,7 @@ for n in ['gippy', 'algorithms']:
             sources=[src],
             swig_opts=['-c++', '-w509', '-w511', '-w315', '-IGIP', '-fcompact', '-fvirtual', '-keyword'],
             include_dirs=['GIP', numpy_get_include()] + gdal_config.include,
-            library_dirs=lib_dirs,
+            #library_dirs=lib_dirs,
             libraries=[
                 'gip', 'pthread'
             ] + gdal_config.libs,

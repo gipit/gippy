@@ -19,25 +19,20 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+import os
 from .version import __version__
+from ctypes import cdll
 
-def mac_update():
-    """ update search path on mac """
-    import sys
-    if sys.platform == 'darwin':
-        import os
-        from subprocess import check_output
-        lib = 'libgip.so'
-        path = os.path.dirname(__file__)
-        import glob
-	# find all dynamic libraries
-        libs = glob.glob(os.path.join(path, '_*.so'))
-        for f in libs:
-            cmd = ['install_name_tool', '-change', lib, os.path.join(path, lib), f]
-            check_output(cmd)
+# load shared libraries
+path = os.path.dirname(os.path.realpath(__file__))
+libs = [
+    os.path.join(path, 'libgip.so'),
+    os.path.join(path, '_gippy.so')
+]
 
-mac_update()
-
+for l in libs:
+    print('LIB = ', l)
+    cdll.LoadLibrary(l)
 from .gippy import init, DataType, GeoImage, GeoVector, Options
 
 # register GDAL and OGR formats
@@ -47,5 +42,4 @@ init()
 del gippy
 del version
 del init
-del mac_update
-
+del os
