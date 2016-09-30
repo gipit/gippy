@@ -1,0 +1,21 @@
+version: '2'
+
+services:
+
+  build:
+    build:
+      context: .
+    image: 'gippy:develop'
+
+  bash:
+    image: 'gippy:develop'
+    entrypoint: /bin/bash
+    volumes:
+      - './:/work'
+
+  test:
+    image: 'gippy:develop'
+    entrypoint: bash -c 'pip install -r requirements-dev.txt; nosetests -v -s'
+    working_dir: /work
+    volumes:
+      - './:/work'
