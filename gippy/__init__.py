@@ -21,7 +21,6 @@
 ################################################################################
 import os
 from .version import __version__
-from ctypes import cdll
 
 from .gippy import init, DataType, GeoImage, GeoVector, Options
 
@@ -30,6 +29,5 @@ init()
 
 # cleanup functions
 del gippy
-del version
 del init
 del os
