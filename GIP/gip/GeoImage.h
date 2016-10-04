@@ -216,12 +216,12 @@ namespace gip {
 
         //! \name Multiple band convenience functions
         //! Set gain for all bands
-        GeoImage& set_gain(float gain) { 
+        GeoImage& set_gain(double gain) { 
             for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_gain(gain);
             return *this;
         }
         //! Set gain for all bands
-        GeoImage& set_offset(float offset) { 
+        GeoImage& set_offset(double offset) { 
             for (unsigned int i=0;i<_RasterBands.size();i++) _RasterBands[i].set_offset(offset);
             return *this;
         }
