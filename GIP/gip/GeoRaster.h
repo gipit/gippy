@@ -72,13 +72,13 @@ namespace gip {
             return _GDALRasterBand->GetDescription();
         }
         //! Get gain
-        float gain() const { return _GDALRasterBand->GetScale(); }
+        double gain() const { return _GDALRasterBand->GetScale(); }
         //! Get offset
-        float offset() const { return _GDALRasterBand->GetOffset(); }
+        double offset() const { return _GDALRasterBand->GetOffset(); }
         //! Set gain
-        GeoRaster& set_gain(float gain) { _GDALRasterBand->SetScale(gain); return *this; }
+        GeoRaster& set_gain(double gain) { _GDALRasterBand->SetScale(gain); return *this; }
         //! Set offset
-        GeoRaster& set_offset(float offset) { _GDALRasterBand->SetOffset(offset); return *this; }
+        GeoRaster& set_offset(double offset) { _GDALRasterBand->SetOffset(offset); return *this; }
 
         //! Indicates if processing will be done on reads
         bool is_processed() const { 
