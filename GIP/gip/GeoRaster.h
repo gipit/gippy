@@ -122,15 +122,15 @@ namespace gip {
             return units;
         }
         //! Get gain
-        float Gain() const { return _GDALRasterBand->GetScale(); }
+        double Gain() const { return _GDALRasterBand->GetScale(); }
         //! Get offset
-        float Offset() const { return _GDALRasterBand->GetOffset(); }
+        double Offset() const { return _GDALRasterBand->GetOffset(); }
         //! Set Unit type
         GeoRaster& SetUnits(std::string units) { _GDALRasterBand->SetUnitType(units.c_str()); return *this; }
         //! Set gain
-        GeoRaster& SetGain(float gain) { _GDALRasterBand->SetScale(gain); return *this; }
+        GeoRaster& SetGain(double gain) { _GDALRasterBand->SetScale(gain); return *this; }
         //! Set offset
-        GeoRaster& SetOffset(float offset) { _GDALRasterBand->SetOffset(offset); return *this; }
+        GeoRaster& SetOffset(double offset) { _GDALRasterBand->SetOffset(offset); return *this; }
         //! Flag indicating if NoData value is used or not
         bool NoData() const { return _NoData; }
         //! Get NoDataValue
