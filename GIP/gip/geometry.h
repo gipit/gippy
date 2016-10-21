@@ -57,6 +57,22 @@ namespace gip {
         T x() const { return _x; }
         //! Get y coordinate
         T y() const { return _y; }
+
+        //! Transform between coordinate systems
+        Point transform(std::string src, std::string dst) {
+            if (src == dst) return *this;
+            OGRSpatialReference _src;
+            _src.SetFromUserInput(src.c_str());
+            OGRSpatialReference _dst;
+            _dst.SetFromUserInput(dst.c_str());
+            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
+            double x, y;
+            x = _x;
+            y = _y;
+            trans->Transform(1, &x, &y);
+            return Point<T>(x, y);
+        }
+
         // output operator
         friend std::ostream& operator<<(std::ostream& stream,const Point& p) {
             return stream << "(" << p._x << "," << p._y << ")";
@@ -135,24 +151,9 @@ namespace gip {
         }
 
         //! Transform between coordinate systems
-        Rect transform(std::string src, std::string dst) {
+        Rect<T> transform(std::string src, std::string dst) {
             if (src == dst) return *this;
-            OGRSpatialReference _src;
-            _src.SetFromUserInput(src.c_str());
-            OGRSpatialReference _dst;
-            _dst.SetFromUserInput(dst.c_str());
-            OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
-            double x, y;
-            x = _p0.x();
-            y = _p0.y();
-            trans->Transform(1, &x, &y);
-            Point<T> pt0 (x, y);
-            x = _p1.x();
-            y = _p1.y();
-            trans->Transform(1, &x, &y);
-            Point<T> pt1(x, y);
-            delete trans;
-            return Rect<T>(pt0, pt1);
+            return Rect<T>(_p0.transform(src, dst), _p1.transform(src, dst));
         }
 
         //! Intersects Rect with argument Rect
