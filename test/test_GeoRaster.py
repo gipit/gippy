@@ -82,6 +82,15 @@ class GeoRasterTests(unittest.TestCase):
         self.assertEqual(len(arr[1]), 0)
         os.remove(fout)
 
+    def test_meta(self):
+        fout = 'test-meta.tif'
+        geoimg = gp.GeoImage.create(fout, xsz=100, ysz=100)
+        geoimg[0].set_meta('TESTKEY', 'TESTVALUE')
+        geoimg = None
+        geoimg = gp.GeoImage(fout)
+        self.assertEqual(geoimg[0].meta('TESTKEY'), 'TESTVALUE')
+        os.remove(fout)
+
     # TODO - test masking
 
     def test_stats(self):
