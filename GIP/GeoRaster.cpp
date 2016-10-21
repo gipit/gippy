@@ -167,6 +167,38 @@ namespace gip {
         return hist;
     }
 
+    // Metadata
+    string GeoRaster::bandmeta(string key) const {
+        const char* item = _GDALRasterBand->GetMetadataItem(key.c_str());
+        return (item == NULL) ? "": item;
+    }
+
+    dictionary GeoRaster::bandmeta() const {
+        char** meta = _GDALRasterBand->GetMetadata();
+        int num = CSLCount(meta);
+        dictionary items;
+        for (int i=0;i<num; i++) {
+            string md = string(meta[i]);
+            string::size_type pos = md.find("=");
+            if (pos != string::npos) {
+                items[md.substr(0, pos)] = md.substr(pos+1);
+            }
+        }
+        return items;
+    }
+
+    GeoRaster& GeoRaster::add_bandmeta(string key, string item) {
+        _GDALRasterBand->SetMetadataItem(key.c_str(), item.c_str());
+        return *this;
+    }
+
+    GeoRaster& GeoRaster::add_bandmeta(std::map<string, string> items) {
+        for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
+            add_bandmeta(i->first, i->second);
+        }
+        return *this;
+    }
+
     // Smooth/convolution (3x3) taking into account NoData
     /*GeoRaster smooth(GeoRaster raster) {
         CImg<double> kernel(3,3,1,1,1);

@@ -151,6 +151,11 @@ namespace gip {
         return pt;
     }
 
+    // Geospatial
+    Point<double> GeoResource::latlon(float xloc, float yloc) const {
+        return geoloc(xloc, yloc).transform(srs(), "EPSG:4326");
+    }
+
     /*Point<double> GeoResource::topleft() const { 
         return geoloc(0, 0); 
     }

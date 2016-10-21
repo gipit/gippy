@@ -15,7 +15,7 @@ services:
 
   test:
     image: 'gippy:develop'
-    entrypoint: bash -c 'pip install -r requirements-dev.txt; nosetests -v -s'
+    entrypoint: bash -c 'cd test; nosetests -v -s'
     working_dir: /work
     volumes:
       - './:/work'

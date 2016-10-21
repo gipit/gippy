@@ -100,6 +100,17 @@ namespace gip {
             return *this;
         }
 
+        //! \name Metadata functions
+        //! Get metadata item
+        std::string bandmeta(std::string key) const;
+        //! Get all metadata
+        dictionary bandmeta() const;
+
+        //! Set metadata item
+        GeoRaster& add_bandmeta(std::string key, std::string item);
+        //! Set multiple metadata items
+        GeoRaster& add_bandmeta(dictionary items);
+
         //! Set Color Interp
         GeoRaster& set_color(std::string col) {
             _GDALRasterBand->SetDescription(col.c_str());

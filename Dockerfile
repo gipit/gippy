@@ -8,4 +8,5 @@ RUN pip install numpy
 WORKDIR /work
 COPY ./ /work
 
+RUN pip install -r requirements-dev.txt
 RUN pip install .
