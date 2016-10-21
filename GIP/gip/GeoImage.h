@@ -111,7 +111,7 @@ namespace gip {
         }
 
         //! Open new image
-        static GeoImage open(std::vector<std::string> filenames, bool update=false, float nodata=0,
+        static GeoImage open(std::vector<std::string> filenames, bool update=true, float nodata=0,
             std::vector<std::string> bandnames=std::vector<std::string>({}),
             double gain=1.0, double offset=0.0) {
             // open image, then set all these things
@@ -248,7 +248,8 @@ namespace gip {
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string filename="", std::string dtype="", bool temp=false) const;
+        template<class T> GeoImage save(std::string filename="", std::string dtype="",
+                                        std::string format="", bool temp=false, bool overviews=false) const;
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& add_mask(const GeoRaster& band) {
@@ -405,11 +406,12 @@ namespace gip {
     */
 
     // Save input file with processing applied into new output file
-    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, bool overviews) const {
+    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, 
+                std::string format, bool temp, bool overviews) const {
         // TODO: if not supplied base output datatype on units?
         if (dtype == "") dtype = this->type().string();
 
-        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype);
+        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp);
         for (unsigned int i=0; i<imgout.nbands(); i++) {
             (*this)[i].save<T>(imgout[i]);
         }
