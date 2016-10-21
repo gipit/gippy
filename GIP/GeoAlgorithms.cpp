@@ -236,7 +236,7 @@ namespace gip {
 
         // if valid feature provided use that extent
         if (feature.valid()) {
-            if (proj != "")
+            if (proj == "")
                 proj = feature.srs();
             // transform extent to desired srs
             ext.transform(geoimgs[0].srs(), proj);
