@@ -102,12 +102,14 @@ namespace gip {
 
         //! \name Metadata functions
         //! Get metadata item
-        std::string meta(std::string key) const;
+        std::string bandmeta(std::string key) const;
         //! Get all metadata
-        dictionary meta() const;
+        dictionary bandmeta() const;
 
         //! Set metadata item
-        GeoRaster& add_meta(std::string key, std::string item);
+        GeoRaster& add_bandmeta(std::string key, std::string item);
+        //! Set multiple metadata items
+        GeoRaster& add_bandmeta(dictionary items);
 
         //! Set Color Interp
         GeoRaster& set_color(std::string col) {

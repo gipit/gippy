@@ -168,12 +168,12 @@ namespace gip {
     }
 
     // Metadata
-    string GeoRaster::meta(string key) const {
+    string GeoRaster::bandmeta(string key) const {
         const char* item = _GDALRasterBand->GetMetadataItem(key.c_str());
         return (item == NULL) ? "": item;
     }
 
-    dictionary GeoRaster::meta() const {
+    dictionary GeoRaster::bandmeta() const {
         char** meta = _GDALRasterBand->GetMetadata();
         int num = CSLCount(meta);
         dictionary items;
@@ -187,8 +187,15 @@ namespace gip {
         return items;
     }
 
-    GeoRaster& GeoRaster::add_meta(string key, string item) {
+    GeoRaster& GeoRaster::add_bandmeta(string key, string item) {
         _GDALRasterBand->SetMetadataItem(key.c_str(), item.c_str());
+        return *this;
+    }
+
+    GeoRaster& GeoRaster::add_bandmeta(std::map<string, string> items) {
+        for (dictionary::const_iterator i=items.begin(); i!=items.end(); i++) {
+            add_bandmeta(i->first, i->second);
+        }
         return *this;
     }
 

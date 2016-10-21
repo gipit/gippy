@@ -82,13 +82,14 @@ class GeoRasterTests(unittest.TestCase):
         self.assertEqual(len(arr[1]), 0)
         os.remove(fout)
 
-    def test_meta(self):
+    def test_bandmeta(self):
+        """ Set metadata on band and retrieve """
         fout = 'test-meta.tif'
         geoimg = gp.GeoImage.create(fout, xsz=100, ysz=100)
-        geoimg[0].set_meta('TESTKEY', 'TESTVALUE')
+        geoimg[0].add_bandmeta('TESTKEY', 'TESTVALUE')
         geoimg = None
         geoimg = gp.GeoImage(fout)
-        self.assertEqual(geoimg[0].meta('TESTKEY'), 'TESTVALUE')
+        self.assertEqual(geoimg[0].bandmeta('TESTKEY'), 'TESTVALUE')
         os.remove(fout)
 
     # TODO - test masking
