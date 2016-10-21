@@ -236,8 +236,9 @@ namespace gip {
 
         // if valid feature provided use that extent
         if (feature.valid()) {
-            proj = feature.srs();
-            // transform extent to feature srs
+            if (proj != "")
+                proj = feature.srs();
+            // transform extent to desired srs
             ext.transform(geoimgs[0].srs(), proj);
             if (crop) {
                 BoundingBox fext = feature.extent();
@@ -250,7 +251,7 @@ namespace gip {
                 );
             } else
                 // make the extent just the feature
-                ext = feature.extent();
+                ext = feature.extent().transform(feature.srs(), proj);
         }
 
         // create output
