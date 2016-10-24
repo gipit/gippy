@@ -264,10 +264,11 @@ namespace gip {
 
 
     GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit) const {
-        //if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << " " << std::flush;
+        if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << std::endl;
 
         // save existing as temp file
         GeoImage imgin = save<double>();
+        imgin._GDALDataset->FlushCache();
 
         // warp options
         GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
