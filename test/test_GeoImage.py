@@ -149,3 +149,14 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(imgout.xsize(), 653)
         self.assertEqual(imgout.ysize(), 547)
         os.remove(fout)
+
+    def test_warp_into(self):
+        """ Warp real image into an existing image """
+        geoimg = gpt.get_test_image().select([0])
+        ext = geoimg.extent()
+        bbox = np.array([ext.x0(), ext.y0(), ext.width(), ext.height()])
+        imgout = gp.GeoImage.create('', geoimg.xsize(), geoimg.ysize(), 1, geoimg.srs(),
+                                    bbox, geoimg.type().string());
+        geoimg.warp_into(imgout)
+        self.assertEqual(imgout.read().sum(), geoimg.read().sum())
+
