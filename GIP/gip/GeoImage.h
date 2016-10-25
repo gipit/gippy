@@ -412,6 +412,8 @@ namespace gip {
         if (dtype == "") dtype = this->type().string();
 
         GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp);
+        if (Options::verbose() > 2)
+            std::cout << "Saving " << basename() << " into " << imgout.filename() << std::endl;
         for (unsigned int i=0; i<imgout.nbands(); i++) {
             (*this)[i].save<T>(imgout[i]);
         }
