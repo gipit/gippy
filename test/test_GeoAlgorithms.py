@@ -10,6 +10,9 @@ import gippy.test as gpt
 
 class GeoAlgorithmsTests(unittest.TestCase):
 
+    def setUp(self):
+        gp.Options.set_verbose(5)
+
     def test_rxd(self):
         """ RX anamoly detector """
         geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
@@ -55,7 +58,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
 
     def test_cookiecutter_real(self):
         """ Cookie cutter on single real image """
-        geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
+        geoimg = gpt.get_test_image().select(['red']) #, 'green', 'blue'])
         vpath = os.path.join(os.path.dirname(__file__), 'vectors')
         # test with feature of different projection
         feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg4326.shp'))
@@ -66,7 +69,11 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertAlmostEqual(extout.y0(), extin.y0())
         self.assertAlmostEqual(extout.x1(), extin.x1())
         self.assertAlmostEqual(extout.y1(), extin.y1())
-        # test with different projection
+
+    def test_cookiecutter_real_reproj(self):
+        """ Test with different projection """
+        geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
+        vpath = os.path.join(os.path.dirname(__file__), 'vectors')
         feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg32416.shp'))
         extin = feature.extent()
         # test extent matches feature
@@ -76,8 +83,14 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertAlmostEqual(extout.y0(), extin.y0())
         self.assertAlmostEqual(extout.x1(), extin.x1())
         self.assertAlmostEqual(extout.y1(), extin.y1())
-        # test cropping
+
+    def test_cookiecutter_real_crop(self):
+        """ Test cookie cutter with cropping """
+        geoimg = gpt.get_test_image().select(['red', 'green', 'blue'])
+        vpath = os.path.join(os.path.dirname(__file__), 'vectors')
+        feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg32416.shp'))
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=30.0, yres=30.0, crop=True)
+        extin = feature.extent()
         extout = imgout.extent()
         self.assertTrue(extout.x0() >= extin.x0())
         self.assertTrue(extout.y0() >= extin.y0())
