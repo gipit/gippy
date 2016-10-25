@@ -321,7 +321,7 @@ namespace gip {
         if (feature.valid()) {
             OGRGeometry* site = feature.ogr_geometry();
             // if imgout srs different than feature srs
-            OGRSpatialReference* srs;
+            OGRSpatialReference* srs = new OGRSpatialReference;
             srs->SetFromUserInput(imgout.srs().c_str());
             site->transformTo(srs);
             OGRSpatialReference::DestroySpatialReference(srs);
