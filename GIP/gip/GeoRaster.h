@@ -174,6 +174,15 @@ namespace gip {
             return *this;
         }
 
+        //! \name Morphological operators
+        GeoRaster dilate(const double &w, const double &h) const {
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.dilate(w, h); });
+        }
+        //! \name Morphological operators
+        GeoRaster erode(const double &w, const double &h) const {
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.erode(w, h); });
+        }
+
         //! \name Processing functions
         // Logical operators
         GeoRaster operator>(const double &val) const {
