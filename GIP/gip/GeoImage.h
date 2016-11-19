@@ -83,30 +83,18 @@ namespace gip {
         }
 
         //! Create new image using foorprint of another
-        static GeoImage create_from(GeoImage geoimg, std::string filename="", unsigned int nb=0, 
-                std::string dtype="unknown", std::string format="", bool temp=false) {
+        static GeoImage create_from(GeoResource geoimg, std::string filename="", unsigned int nb=1, 
+                std::string dtype="byte", std::string format="", bool temp=false) {
             unsigned int _xs(geoimg.xsize());
             unsigned int _ys(geoimg.ysize());
-            unsigned int _bs(geoimg.nbands());
             std::string _srs(geoimg.srs());
-            std::string _dtype(geoimg.type().string());
-            _bs = nb > 0 ? nb : _bs;
-            _dtype = dtype != "unknown" ? dtype : _dtype;
             if (filename == "") {
                 filename = random_filename();
                 temp = true;
             }
-            GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp);
+            GeoImage img = GeoImage(filename, _xs, _ys, nb, _srs, geoimg.extent(), DataType(dtype), format, temp);
             // copy metadata
             img.add_meta(geoimg.meta());
-            // if same number of bands, set band metadata
-            if (geoimg.nbands() == _bs) {
-                for (unsigned int b=0;b<_bs;b++) {
-                    img[b].add_meta(geoimg[b].meta());
-                    img[b].set_nodata(geoimg[b].nodata());
-                }
-                img.set_bandnames(geoimg.bandnames());
-            }
             return img;
         }
 

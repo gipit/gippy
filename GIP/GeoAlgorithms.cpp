@@ -559,6 +559,7 @@ namespace gip {
             throw std::runtime_error("Coefficient array needs to be of size NumBands x NumBands!");
         float nodataout = -32768;
         GeoImage imgout = GeoImage::create_from(img, filename, img.nbands(), "float32");
+        imgout.set_bandnames(img.bandnames());
         imgout.set_nodata(nodataout);
         imgout.add_meta(img.meta());
         CImg<float> cimg;
