@@ -30,7 +30,7 @@
 #include <functional>
 
 #include <gip/GeoResource.h>
-
+#include <gip/GeoFeature.h>
 
 namespace gip {
     typedef Point<int> iPoint;
@@ -357,6 +357,8 @@ namespace gip {
         template<class T> GeoRaster& write_raw(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& write(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& save(GeoRaster& raster) const;
+
+        GeoRaster& warp_into(GeoRaster&, GeoFeature=GeoFeature(), int=0, bool=false) const;
 
         //! NoData mask: 1's where it's bad data
         CImg<unsigned char> nodata_mask(Chunk chunk=Chunk()) const {
