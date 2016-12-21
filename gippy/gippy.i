@@ -136,6 +136,18 @@ namespace gip {
         GeoRaster& save(GeoRaster& raster) {
             return self->save<double>(raster);
         }
+        PyObject* read_raw(Chunk chunk=Chunk()) {
+            switch(self->type().type()) {
+                case 1: return CImgToArr(self->read_raw<uint8_t>(chunk));
+                case 2: return CImgToArr(self->read_raw<uint16_t>(chunk));
+                case 3: return CImgToArr(self->read_raw<int16_t>(chunk));
+                case 4: return CImgToArr(self->read_raw<uint32_t>(chunk));
+                case 5: return CImgToArr(self->read_raw<int32_t>(chunk));
+                case 6: return CImgToArr(self->read_raw<float>(chunk));
+                case 7: return CImgToArr(self->read_raw<double>(chunk));
+                default: throw(std::runtime_error("error reading raster"));
+            }
+        }
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
