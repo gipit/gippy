@@ -29,14 +29,12 @@ namespace gip {
     // Copy constructor
     GeoRaster::GeoRaster(const GeoRaster& image)
         : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), 
-            _ValidStats(image._ValidStats), _Stats(image._Stats),
-            _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {}
+            _ValidStats(image._ValidStats), _Stats(image._Stats), _Functions(image._Functions) {}
 
     // Copy constructor with added processing
     GeoRaster::GeoRaster(const GeoRaster& image, func f)
         : GeoResource(image), _GDALRasterBand(image._GDALRasterBand), _Masks(image._Masks), 
-            _ValidStats(false), _Stats(image._Stats),
-            _minDC(image._minDC), _maxDC(image._maxDC), _Functions(image._Functions) {
+            _ValidStats(false), _Stats(image._Stats), _Functions(image._Functions) {
         //if (func.Function() != "") AddFunction(func);
         _Functions.push_back(f);
         //std::cout << Basename() << ": GeoRaster copy (" << this << ")" << std::endl;
@@ -52,8 +50,6 @@ namespace gip {
         _ValidStats = image._ValidStats;
         _Stats = image._Stats;
         //_ValidSize = image._ValidSize;
-        _minDC = image._minDC;
-        _maxDC = image._maxDC;
         _Functions = image._Functions;
         //cout << _GeoImage->Basename() << ": " << ref << " references (GeoRaster Assignment)" << endl;
         return *this;

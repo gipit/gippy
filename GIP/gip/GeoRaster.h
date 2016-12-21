@@ -87,7 +87,7 @@ namespace gip {
 
         //! Indicates if data should be read as doubles (functions or gain/offset)
         bool is_double() const {
-            return (is_processed() || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
+            return ((!is_processed()) || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
         }
 
         //! Get NoData value
@@ -152,15 +152,20 @@ namespace gip {
             return *this;
         }
 
-        //! \name Calibration functions
-        //! Sets dyanmic range of sensor (min to max digital counts)
-        // TODO - consider this function, there is no get....what does it do?
-        GeoRaster& set_dynamicrange(int min, int max) {
-            _minDC = min;
-            _maxDC = max;
-            return *this;
+        //! \name Masking functions
+         //! Get Saturation mask: 1's where it's saturated
+        CImg<unsigned char> saturation_mask(float maxDC, Chunk chunk=Chunk()) const {
+            switch (type().type()) {
+                case 1: return _Mask<unsigned char>(maxDC, chunk);
+                case 2: return _Mask<unsigned short>(maxDC, chunk);
+                case 3: return _Mask<short>(maxDC, chunk);
+                case 4: return _Mask<unsigned int>(maxDC, chunk);
+                case 5: return _Mask<int>(maxDC, chunk);
+                case 6: return _Mask<float>(maxDC, chunk);
+                case 7: return _Mask<double>(maxDC, chunk);
+                default: return _Mask<double>(maxDC, chunk);
+            }
         }
-
         //! Adds a mask band (1 for valid), applied on read
         const GeoRaster& add_mask(const GeoRaster& band) const {
             _ValidStats = false;
@@ -353,20 +358,6 @@ namespace gip {
         template<class T> GeoRaster& write(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& save(GeoRaster& raster) const;
 
-         //! Get Saturation mask: 1's where it's saturated
-        CImg<unsigned char> saturation_mask(Chunk chunk=Chunk()) const {
-            switch (type().type()) {
-                case 1: return _Mask<unsigned char>(_maxDC, chunk);
-                case 2: return _Mask<unsigned short>(_maxDC, chunk);
-                case 3: return _Mask<short>(_maxDC, chunk);
-                case 4: return _Mask<unsigned int>(_maxDC, chunk);
-                case 5: return _Mask<int>(_maxDC, chunk);
-                case 6: return _Mask<float>(_maxDC, chunk);
-                case 7: return _Mask<double>(_maxDC, chunk);
-                default: return _Mask<double>(_maxDC, chunk);
-            }
-        }
-
         //! NoData mask: 1's where it's bad data
         CImg<unsigned char> nodata_mask(Chunk chunk=Chunk()) const {
             if (!chunk.valid()) chunk = Chunk(0,0,xsize(),ysize());
@@ -402,10 +393,6 @@ namespace gip {
         //! Statistics
         mutable CImg<double> _Stats;
 
-        // Constants
-        int _minDC;
-        int _maxDC;
-
         //! List of processing functions to apply on reads (in class GeoProcess)
         //std::vector< std::function< CImg<double>& (CImg<double>&) > > _Functions;
         std::vector<func> _Functions;
@@ -417,8 +404,7 @@ namespace gip {
 
         //! Constructor for new band
         GeoRaster(const GeoResource& georesource, int bandnum=1)
-            : GeoResource(georesource), _ValidStats(false),
-            _minDC(1), _maxDC(255) {
+            : GeoResource(georesource), _ValidStats(false) {
             load_band(bandnum);
         }
         //! Copy with a processing function added
@@ -495,7 +481,7 @@ namespace gip {
         bool updatenodata = false;
         // Apply gain and offset
         if (gain() != 1.0 || offset() != 0.0) {
-            img = gain() * (img-_minDC) + offset();
+            img = gain() * img + offset();
             // Update NoData now so applied functions have proper NoData value set (?)
             updatenodata = true;
         }
