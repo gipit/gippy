@@ -137,19 +137,25 @@ namespace gip {
     }
 
     //! Compute histogram
-    CImg<float> GeoRaster::histogram(int bins, bool normalize, bool cumulative) const {
-        CImg<double> cimg;
+    CImg<float> GeoRaster::histogram(unsigned int bins, bool normalize, bool cumulative) const {
+        //CImg<double> cimg;
         CImg<float> st = stats();
         CImg<float> hist(bins,1,1,1,0);
         long numpixels(0);
         float nd = nodata();
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> _chunks = chunks();
+        unsigned int index;
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-            cimg = read<double>(*iCh);
+            CImg<double> cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nd) {
-                    unsigned int index(*ptr==st(1)?bins-1:((*ptr-st(0))*bins / (st(1)-st(0))));
+                    index = floor((*ptr-st(0))/(st(1)-st(0)) * bins);
+                    // this would be due to floating point roundoff error
+                    if (index==bins)
+                        index = bins-1;
+                    else if (index > bins)
+                        index = 0;
                     hist[index]++;
                     numpixels++;
                 }
@@ -158,7 +164,8 @@ namespace gip {
         // normalize
         if (normalize)
             hist/=numpixels;
-        if (cumulative) for (int i=1;i<bins;i++) hist[i] += hist[i-1];
+        if (cumulative)
+            for (int i=1;i<bins;i++) hist[i] += hist[i-1];
         //if (Options::verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
         return hist;
     }
