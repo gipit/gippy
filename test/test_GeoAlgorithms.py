@@ -12,7 +12,7 @@ import gippy.test as gpt
 class GeoAlgorithmsTests(unittest.TestCase):
 
     def setUp(self):
-        gp.Options.set_verbose(5)
+        gp.Options.set_verbose(1)
 
     def test_rxd(self):
         """ RX anamoly detector """
@@ -76,7 +76,7 @@ class GeoAlgorithmsTests(unittest.TestCase):
         # test with feature of different projection
         feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg4326.shp'))
         extin = feature.extent()
-        imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=0.0003, yres=0.0003, filename='cookie.tif')
+        imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=0.0003, yres=0.0003)
         extout = imgout.extent()
         self.assertAlmostEqual(extout.x0(), extin.x0())
         self.assertAlmostEqual(extout.y0(), extin.y0())
