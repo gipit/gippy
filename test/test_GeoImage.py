@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+from copy import deepcopy
 import numpy as np
 import gippy as gp
 import unittest
@@ -70,6 +71,18 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(geoimg[0].nodata(), 7)
         self.assertEqual(list(geoimg.bandnames()), ['red', 'green', 'blue'])
         geoimg = None
+        os.remove(fout)
+
+    def test_create_image_with_gain(self):
+        """ Create int image with floating point gain """
+        fout = 'test-gain.tif'
+        geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000, dtype='int16')
+        geoimg.set_gain(0.0001)
+        arr = np.zeros((1000,1000)) + 0.0001
+        arr[0:500,:] = 0.0002
+        geoimg[0].write(deepcopy(arr))
+        arrout = geoimg[0].read()
+        np.testing.assert_array_equal(arr, arrout)
         os.remove(fout)
 
     def test_create_multiband(self):
@@ -149,3 +162,14 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(imgout.xsize(), 653)
         self.assertEqual(imgout.ysize(), 547)
         os.remove(fout)
+
+    def test_warp_into(self):
+        """ Warp real image into an existing image """
+        geoimg = gpt.get_test_image().select([0])
+        ext = geoimg.extent()
+        bbox = np.array([ext.x0(), ext.y0(), ext.width(), ext.height()])
+        imgout = gp.GeoImage.create('', geoimg.xsize(), geoimg.ysize(), 1, geoimg.srs(),
+                                    bbox, geoimg.type().string());
+        geoimg.warp_into(imgout)
+        self.assertEqual(imgout.read().sum(), geoimg.read().sum())
+

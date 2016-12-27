@@ -136,6 +136,18 @@ namespace gip {
         GeoRaster& save(GeoRaster& raster) {
             return self->save<double>(raster);
         }
+        PyObject* read_raw(Chunk chunk=Chunk()) {
+            switch(self->type().type()) {
+                case 1: return CImgToArr(self->read_raw<uint8_t>(chunk));
+                case 2: return CImgToArr(self->read_raw<uint16_t>(chunk));
+                case 3: return CImgToArr(self->read_raw<int16_t>(chunk));
+                case 4: return CImgToArr(self->read_raw<uint32_t>(chunk));
+                case 5: return CImgToArr(self->read_raw<int32_t>(chunk));
+                case 6: return CImgToArr(self->read_raw<float>(chunk));
+                case 7: return CImgToArr(self->read_raw<double>(chunk));
+                default: throw(std::runtime_error("error reading raster"));
+            }
+        }
         %feature("docstring",
                  "PyObject returned is a numpy.array.\n"
                  "Enjoy!\n ");
@@ -205,8 +217,8 @@ namespace gip {
             return GeoImage(image);
         }
         // templated functions that need to be instantiated
-        GeoImage save(std::string filename, std::string dtype="unknown") {
-            return self->save<double>(filename, dtype);
+        GeoImage save(std::string filename, std::string dtype="", std::string format="", bool temp=false, bool overviews=false) {
+            return self->save<double>(filename, dtype, format, temp, overviews);
         }
         PyObject* read(Chunk chunk=Chunk()) {
             // TODO - look at all bands for gain and offset

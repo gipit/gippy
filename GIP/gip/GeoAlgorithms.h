@@ -56,7 +56,7 @@ namespace gip {
 
     //! Create single image from multiple input images using vector file footprint
     GeoImage cookie_cutter(const std::vector<GeoImage>& geoimgs, std::string filename="",
-        GeoFeature feature=GeoFeature(), bool crop=false, std::string proj="EPSG:4326",
+        GeoFeature feature=GeoFeature(), bool crop=false, std::string proj="",
         float xres=1.0, float yres=1.0, int interpolation=0);
 
     //! Kmeans
