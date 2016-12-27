@@ -61,20 +61,13 @@ namespace gip {
         //! Transform between coordinate systems
         Point transform(std::string src, std::string dst) {
             if (src == dst) return *this;
-            std::cout << "transform" << std::endl;
             OGRSpatialReference _src;
             _src.SetFromUserInput(src.c_str());
-            std::cout << "src: " << src.c_str() << std::endl;
             OGRSpatialReference _dst;
             _dst.SetFromUserInput(dst.c_str());
-            std::cout << "dest: " << dst.c_str() << std::endl;
             OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
-            double x, y;
-            x = _x;
-            y = _y;
-            std::cout << "x = " << x << ", y = " << y << std::endl;
+            double x(_x), y(_y);
             trans->Transform(1, &x, &y);
-            std::cout << "tx = " << x << ", ty = " << y << std::endl;
             return Point<T>(x, y);
         }
 
