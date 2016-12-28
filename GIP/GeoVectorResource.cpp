@@ -34,7 +34,12 @@ namespace gip {
     // Constructors
     GeoVectorResource::GeoVectorResource(string filename, string layer) 
         : _Filename(filename), _PrimaryKey("") {
-        _OGRDataSource.reset((OGRDataSource*)GDALOpenEx(filename.c_str(), GDAL_OF_READONLY, NULL, NULL, NULL), OGRDataSource::DestroyDataSource);
+        // conditional compilation
+        #ifdef GDAL2
+            _OGRDataSource.reset((OGRDataSource*)GDALOpenEx(filename.c_str(), GDAL_OF_READONLY, NULL, NULL, NULL), OGRDataSource::DestroyDataSource);
+        #else
+            _OGRDataSource.reset(OGRSFDriverRegistrar::Open(filename.c_str()), OGRDataSource::DestroyDataSource);
+        #endif
         if (_OGRDataSource == NULL) {
             throw std::runtime_error("Error opening " + filename + ": " + string(CPLGetLastErrorMsg()));
         }
