@@ -66,8 +66,9 @@ namespace gip {
             OGRSpatialReference _dst;
             _dst.SetFromUserInput(dst.c_str());
             OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
-            double newx(_x), newy(_y);
+            double newx(x()), newy(y());
             trans->Transform(1, &newx, &newy);
+            OCTDestroyCoordinateTransformation(trans);
             return Point<T>(newx, newy);
         }
 
