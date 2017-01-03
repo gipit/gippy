@@ -165,7 +165,7 @@ class GeoImageTests(unittest.TestCase):
 
     def test_warp_into(self):
         """ Warp real image into an existing image """
-        geoimg = gpt.get_test_image().select([0])
+        geoimg = gpt.get_test_image().select([1])
         ext = geoimg.extent()
         bbox = np.array([ext.x0(), ext.y0(), ext.width(), ext.height()])
         imgout = gp.GeoImage.create('', geoimg.xsize(), geoimg.ysize(), 1, geoimg.srs(),

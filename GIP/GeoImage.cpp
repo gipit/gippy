@@ -124,7 +124,7 @@ namespace gip {
     // Keep only these band names
     GeoImage GeoImage::select(vector<string> names) {
         vector<int> nums = Descriptions2Indices(names);
-        for (vector<int>::const_iterator i=nums.begin(); i!=nums.end(); i++) {
+        for (vector<int>::iterator i=nums.begin(); i!=nums.end(); i++) {
             *i += 1;
         }
         return select(nums);
