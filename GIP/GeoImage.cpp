@@ -123,7 +123,11 @@ namespace gip {
     }
     // Keep only these band names
     GeoImage GeoImage::select(vector<string> names) {
-        return select(Descriptions2Indices(names));
+        vector<int> nums = Descriptions2Indices(names);
+        for (vector<int>::const_iterator i=nums.begin(); i!=nums.end(); i++) {
+            *i += 1;
+        }
+        return select(nums);
     }
     // Keep only these band numbers
     GeoImage GeoImage::select(vector<int> nums) {
@@ -133,8 +137,8 @@ namespace gip {
         vector<int> _bandnums;
         // TODO - for fun, replace with lambda function and map
         for (vector<int>::const_iterator i=nums.begin(); i!=nums.end(); i++) {
-            _bands.push_back(_RasterBands[*i]);
-            _names.push_back(_BandNames[*i]);
+            _bands.push_back(_RasterBands[*i-1]);
+            _names.push_back(_BandNames[*i-1]);
         }
         imgout._RasterBands = _bands;
         imgout._BandNames = _names;
