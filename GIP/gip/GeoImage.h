@@ -104,10 +104,6 @@ namespace gip {
                 for (unsigned int b=0;b<_bs;b++) {
                     img[b].add_meta(geoimg[b].meta());
                     img[b].set_nodata(geoimg[b].nodata());
-                    if (dtype=="unknown") {
-                        img[b].set_gain(geoimg[b].gain());
-                        img[b].set_offset(geoimg[b].offset());
-                    }
                 }
                 img.set_bandnames(geoimg.bandnames());
             }
@@ -412,7 +408,6 @@ namespace gip {
     // Save input file with processing applied into new output file
     template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, 
                 std::string format, bool temp, bool overviews) const {
-        // TODO: if not supplied base output datatype on units?
         if (dtype == "") dtype = this->type().string();
 
         GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp);

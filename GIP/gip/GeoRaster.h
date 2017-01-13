@@ -565,12 +565,23 @@ namespace gip {
         std::vector<Chunk> _chunks = chunks();
         if (Options::verbose() > 3)
             std::cout << basename() << ": Processing in " << _chunks.size() << " chunks" << std::endl;
+        double gain, offset;
+        if (this->type().string() == raster.type().string()) {
+            gain = this->gain();
+            offset = this->offset();
+            this->set_gain(1);
+            this->set_offset(0);
+        }
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
                 CImg<T> cimg = read<T>(*iCh);
                 if (nodata() != raster.nodata()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == nodata()) *ptr = raster.nodata(); }
                 }
                 raster.write(cimg,*iCh);
+        }
+        if (this-type().string() == raster.type().string()) {
+            this->set_gain(gain);
+            this->set_offset(offset);
         }
         return raster;
     }
