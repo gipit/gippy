@@ -569,8 +569,8 @@ namespace gip {
         if (this->type().string() == raster.type().string()) {
             gain = this->gain();
             offset = this->offset();
-            this->set_gain(1.0);
-            this->set_offset(0.0);
+            (const_cast<GeoRaster*>(this))->set_gain(1.0);
+            (const_cast<GeoRaster*>(this))->set_offset(0.0);
         }
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
                 CImg<T> cimg = read<T>(*iCh);
@@ -579,9 +579,11 @@ namespace gip {
                 }
                 raster.write(cimg,*iCh);
         }
-        if (this-type().string() == raster.type().string()) {
-            this->set_gain(gain);
-            this->set_offset(offset);
+        if (this->type().string() == raster.type().string()) {
+            (const_cast<GeoRaster*>(this))->set_gain(gain);
+            (const_cast<GeoRaster*>(this))->set_offset(offset);
+            raster.set_gain(gain);
+            raster.set_offset(offset);
         }
         return raster;
     }
