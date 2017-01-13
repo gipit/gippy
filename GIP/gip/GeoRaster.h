@@ -569,8 +569,8 @@ namespace gip {
         if (this->type().string() == raster.type().string()) {
             gain = this->gain();
             offset = this->offset();
-            this->set_gain(1);
-            this->set_offset(0);
+            this->set_gain(1.0);
+            this->set_offset(0.0);
         }
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
                 CImg<T> cimg = read<T>(*iCh);
