@@ -82,7 +82,7 @@ namespace gip {
             return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp);
         }
 
-        //! Create new image using foorprint of another
+        //! Create new image using footprint of another
         static GeoImage create_from(GeoImage geoimg, std::string filename="", unsigned int nb=0, 
                 std::string dtype="unknown", std::string format="", bool temp=false) {
             unsigned int _xs(geoimg.xsize());
@@ -104,6 +104,10 @@ namespace gip {
                 for (unsigned int b=0;b<_bs;b++) {
                     img[b].add_meta(geoimg[b].meta());
                     img[b].set_nodata(geoimg[b].nodata());
+                    if (dtype=="unknown") {
+                        img[b].set_gain(geoimg[b].gain());
+                        img[b].set_offset(geoimg[b].offset());
+                    }
                 }
                 img.set_bandnames(geoimg.bandnames());
             }
