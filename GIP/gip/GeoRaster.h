@@ -353,7 +353,7 @@ namespace gip {
 
         //! \name File I/O
         template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const;
-        template<class T> CImg<T> read(Chunk chunk=Chunk()) const;
+        template<class T> CImg<T> read(Chunk chunk=Chunk(), bool nogainoff=false) const;
         template<class T> GeoRaster& write_raw(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& write(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& save(GeoRaster& raster) const;
@@ -474,7 +474,7 @@ namespace gip {
     }
 
     //! Retrieve a piece of the image as a CImg
-    template<class T> CImg<T> GeoRaster::read(Chunk chunk) const {
+    template<class T> CImg<T> GeoRaster::read(Chunk chunk, bool nogainoff) const {
         auto start = std::chrono::system_clock::now();
 
         CImg<T> img(read_raw<T>(chunk));
@@ -482,7 +482,7 @@ namespace gip {
 
         bool updatenodata = false;
         // Apply gain and offset
-        if (gain() != 1.0 || offset() != 0.0) {
+        if ((gain() != 1.0 || offset() != 0.0) && (!nogainoff)) {
             img = gain() * img + offset();
             // Update NoData now so applied functions have proper NoData value set (?)
             updatenodata = true;
@@ -565,25 +565,18 @@ namespace gip {
         std::vector<Chunk> _chunks = chunks();
         if (Options::verbose() > 3)
             std::cout << basename() << ": Processing in " << _chunks.size() << " chunks" << std::endl;
-        double gain, offset;
-        if (this->type().string() == raster.type().string()) {
-            gain = this->gain();
-            offset = this->offset();
-            (const_cast<GeoRaster*>(this))->set_gain(1.0);
-            (const_cast<GeoRaster*>(this))->set_offset(0.0);
-        }
+        bool nogainoff = false;
+        if (this->type().string() == raster.type().string()) nogainoff = true;
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-                CImg<T> cimg = read<T>(*iCh);
+                CImg<T> cimg = read<T>(*iCh, nogainoff);
                 if (nodata() != raster.nodata()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == nodata()) *ptr = raster.nodata(); }
                 }
                 raster.write(cimg,*iCh);
         }
-        if (this->type().string() == raster.type().string()) {
-            (const_cast<GeoRaster*>(this))->set_gain(gain);
-            (const_cast<GeoRaster*>(this))->set_offset(offset);
-            raster.set_gain(gain);
-            raster.set_offset(offset);
+        if (nogainoff) {
+            raster.set_gain(this->gain());
+            raster.set_offset(this->offset());
         }
         return raster;
     }

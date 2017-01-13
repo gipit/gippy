@@ -3,6 +3,7 @@
 import os
 from copy import deepcopy
 import numpy as np
+from numpy.testing import assert_array_equal
 import gippy as gp
 import unittest
 import gippy.test as gpt
@@ -141,6 +142,14 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(geoimg[0].min(), 1.0)
         self.assertEqual(geoimg[0].max(), 255.0)
         os.remove(fout)
+
+    def test_save_with_gain(self):
+        """ Save image with a gain, which should copy through """
+        geoimg = gpt.get_test_image().select([2])
+        geoimg.set_gain(0.0001)
+        fout = 'test-savegain.tif'
+        imgout = geoimg.save(fout)
+        assert_array_equal(imgout.read(), geoimg.read())
 
     def test_warp(self):
         """ Warping image into another (blank) image """
