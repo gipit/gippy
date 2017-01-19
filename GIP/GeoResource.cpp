@@ -55,7 +55,7 @@ namespace gip {
     //! Create new file
     GeoResource::GeoResource(string filename, int xsz, int ysz, int bsz, 
                              string proj, BoundingBox bbox, 
-                             DataType dt, std::string format, bool temp)
+                             DataType dt, std::string format, bool temp, dictionary options)
         : _Filename(filename), _temp(temp) {
 
         // format, driver, and file extension
@@ -82,10 +82,10 @@ namespace gip {
                 papszOptions = CSLSetNameValue(papszOptions, "ALPHA", "YES");
         }
         
-        /*if (options.size()) {
+        if (options.size()) {
             for (dictionary::const_iterator imap=options.begin(); imap!=options.end(); imap++)
                 papszOptions = CSLSetNameValue(papszOptions,imap->first.c_str(),imap->second.c_str());
-        }*/
+        }
 
         // create file
         //BOOST_LOG_TRIVIAL(info) << Basename() << ": create new file " << xsz << " x " << ysz << " x " << bsz << std::endl;
