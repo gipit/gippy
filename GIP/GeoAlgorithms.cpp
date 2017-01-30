@@ -194,7 +194,7 @@ namespace gip {
             clouds = imgout["pass1"].read<unsigned char>(*iCh);
             // should this be a |= ?
             if (addclouds) clouds += imgout["ambclouds"].read<unsigned char>(*iCh);
-            clouds|=(image.saturation_mask(bands_used, *iCh));
+            clouds|=(image.saturation_mask(bands_used, 255, *iCh));
             // Majority filter
             //clouds|=clouds.get_convolve(filter).threshold(majority));
             if (erode > 0)
@@ -338,8 +338,8 @@ namespace gip {
                 & white.get_threshold(0.7,false,true)^=1
                 & nir.get_div(swir1).threshold(0.75);
 
-            redsatmask = image["red"].saturation_mask(*iCh);
-            greensatmask = image["green"].saturation_mask(*iCh);
+            redsatmask = image["red"].saturation_mask(255, *iCh);
+            greensatmask = image["green"].saturation_mask(255, *iCh);
             vprob = red;
             // Calculate "variability probability"
             cimg_forXY(vprob,x,y) {

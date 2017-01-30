@@ -66,11 +66,10 @@ namespace gip {
             OGRSpatialReference _dst;
             _dst.SetFromUserInput(dst.c_str());
             OGRCoordinateTransformation* trans = OGRCreateCoordinateTransformation(&_src, &_dst);
-            double x, y;
-            x = _x;
-            y = _y;
-            trans->Transform(1, &x, &y);
-            return Point<T>(x, y);
+            double newx(x()), newy(y());
+            trans->Transform(1, &newx, &newy);
+            OCTDestroyCoordinateTransformation(trans);
+            return Point<T>(newx, newy);
         }
 
         // output operator

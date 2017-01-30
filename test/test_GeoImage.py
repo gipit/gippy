@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import os
+from copy import deepcopy
 import numpy as np
+from numpy.testing import assert_array_equal
 import gippy as gp
 import unittest
 import gippy.test as gpt
@@ -72,6 +74,18 @@ class GeoImageTests(unittest.TestCase):
         geoimg = None
         os.remove(fout)
 
+    def test_create_image_with_gain(self):
+        """ Create int image with floating point gain """
+        fout = 'test-gain.tif'
+        geoimg = gp.GeoImage.create(fout, xsz=1000, ysz=1000, dtype='int16')
+        geoimg.set_gain(0.0001)
+        arr = np.zeros((1000,1000)) + 0.0001
+        arr[0:500,:] = 0.0002
+        geoimg[0].write(deepcopy(arr))
+        arrout = geoimg[0].read()
+        np.testing.assert_array_equal(arr, arrout)
+        os.remove(fout)
+
     def test_create_multiband(self):
         """ Create an RGB image """
         fout = 'test_3band.tif'
@@ -129,6 +143,14 @@ class GeoImageTests(unittest.TestCase):
         self.assertEqual(geoimg[0].max(), 255.0)
         os.remove(fout)
 
+    def test_save_with_gain(self):
+        """ Save image with a gain, which should copy through """
+        geoimg = gpt.get_test_image().select([2])
+        geoimg.set_gain(0.0001)
+        fout = 'test-savegain.tif'
+        imgout = geoimg.save(fout)
+        assert_array_equal(imgout.read(), geoimg.read())
+
     def test_warp(self):
         """ Warping image into another (blank) image """
         bbox = np.array([0.0, 0.0, 1.0, 1.0])
@@ -152,7 +174,7 @@ class GeoImageTests(unittest.TestCase):
 
     def test_warp_into(self):
         """ Warp real image into an existing image """
-        geoimg = gpt.get_test_image().select([0])
+        geoimg = gpt.get_test_image().select([1])
         ext = geoimg.extent()
         bbox = np.array([ext.x0(), ext.y0(), ext.width(), ext.height()])
         imgout = gp.GeoImage.create('', geoimg.xsize(), geoimg.ysize(), 1, geoimg.srs(),

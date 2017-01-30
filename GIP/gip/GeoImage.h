@@ -56,8 +56,8 @@ namespace gip {
         explicit GeoImage(std::string filename, 
                           int xsz, int ysz, int nb, 
                           std::string proj, BoundingBox bbox, 
-                          DataType dt, std::string format="", bool temp=false) :
-                GeoResource(filename, xsz, ysz, nb, proj, bbox, dt, format, temp) {
+                          DataType dt, std::string format="", bool temp=false, dictionary options=dictionary()) :
+                GeoResource(filename, xsz, ysz, nb, proj, bbox, dt, format, temp, options) {
             load_bands();
         }
         //! Copy constructor - copies GeoResource and all bands
@@ -82,9 +82,9 @@ namespace gip {
             return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp);
         }
 
-        //! Create new image using foorprint of another
+        //! Create new image using footprint of another
         static GeoImage create_from(GeoImage geoimg, std::string filename="", unsigned int nb=0, 
-                std::string dtype="unknown", std::string format="", bool temp=false) {
+                std::string dtype="unknown", std::string format="", bool temp=false, dictionary options=dictionary()) {
             unsigned int _xs(geoimg.xsize());
             unsigned int _ys(geoimg.ysize());
             unsigned int _bs(geoimg.nbands());
@@ -96,7 +96,7 @@ namespace gip {
                 filename = random_filename();
                 temp = true;
             }
-            GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp);
+            GeoImage img = GeoImage(filename, _xs, _ys, _bs, _srs, geoimg.extent(), _dtype, format, temp, options);
             // copy metadata
             img.add_meta(geoimg.meta());
             // if same number of bands, set band metadata
@@ -248,8 +248,8 @@ namespace gip {
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
 
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string filename="", std::string dtype="",
-                                        std::string format="", bool temp=false, bool overviews=false) const;
+        template<class T> GeoImage save(std::string filename="", std::string dtype="", std::string format="",
+                                        bool temp=false, bool overviews=false, dictionary options=dictionary()) const;
 
         //! Adds a mask band (1 for valid) to every band in image
         GeoImage& add_mask(const GeoRaster& band) {
@@ -322,20 +322,20 @@ namespace gip {
         }
 
         //! Saturation mask (all bands).  1's where it is saturated
-        CImg<unsigned char> saturation_mask(std::vector<std::string> bands, Chunk chunk=Chunk()) const {
+        CImg<unsigned char> saturation_mask(std::vector<std::string> bands, float maxDC, Chunk chunk=Chunk()) const {
             std::vector<int> ibands = Descriptions2Indices(bands);
             CImg<unsigned char> mask;
             for (std::vector<int>::const_iterator i=ibands.begin(); i!=ibands.end(); i++) {
                 if (i==ibands.begin()) 
-                    mask = CImg<unsigned char>(_RasterBands[*i].saturation_mask(chunk));
+                    mask = CImg<unsigned char>(_RasterBands[*i].saturation_mask(maxDC, chunk));
                 else
-                    mask|=_RasterBands[*i].saturation_mask(chunk);
+                    mask|=_RasterBands[*i].saturation_mask(maxDC, chunk);
             }
             return mask;
         }
 
-        CImg<unsigned char> saturation_mask(Chunk chunk=Chunk()) const {
-            return saturation_mask({}, chunk);
+        CImg<unsigned char> saturation_mask(float maxDC, Chunk chunk=Chunk()) const {
+            return saturation_mask({}, maxDC, chunk);
         }
 
         //! Whiteness (created from red, green, blue)
@@ -407,11 +407,10 @@ namespace gip {
 
     // Save input file with processing applied into new output file
     template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, 
-                std::string format, bool temp, bool overviews) const {
-        // TODO: if not supplied base output datatype on units?
+                std::string format, bool temp, bool overviews, dictionary options) const {
         if (dtype == "") dtype = this->type().string();
 
-        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp);
+        GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp, options);
         if (Options::verbose() > 2)
             std::cout << "Saving " << basename() << " into " << imgout.filename() << std::endl;
         for (unsigned int i=0; i<imgout.nbands(); i++) {

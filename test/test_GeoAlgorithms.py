@@ -2,6 +2,7 @@
 
 import os
 import unittest
+from copy import deepcopy
 import numpy as np
 import gippy as gp
 import gippy.algorithms as alg
@@ -11,7 +12,7 @@ import gippy.test as gpt
 class GeoAlgorithmsTests(unittest.TestCase):
 
     def setUp(self):
-        gp.Options.set_verbose(5)
+        gp.Options.set_verbose(1)
 
     def test_rxd(self):
         """ RX anamoly detector """
@@ -55,6 +56,18 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertEqual(ext.y0(), 0.0)
         self.assertEqual(ext.width(), 2.0)
         self.assertEqual(ext.height(), 1.0)
+
+    def test_cookiecutter_gain(self):
+        """ Cookie cutter on int image with floating point gain """
+        bbox = np.array([0.0, 0.0, 1.0, 1.0])
+        geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, bbox=bbox, dtype='int16')
+        geoimg.set_gain(0.0001)
+        arr = np.zeros((1000,1000)) + 0.0001
+        arr[0:500,:] = 0.0002
+        geoimg.write(deepcopy(arr))
+        res = geoimg.resolution()
+        imgout = alg.cookie_cutter([geoimg], xres=res.x(), yres=res.y())
+        np.testing.assert_array_equal(arr, imgout.read())
 
     def test_cookiecutter_real(self):
         """ Cookie cutter on single real image """
