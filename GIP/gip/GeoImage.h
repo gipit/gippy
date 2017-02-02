@@ -248,7 +248,7 @@ namespace gip {
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
         
         //! Add overviews
-        GeoImage& add_overviews(std::vector<int> levels={2, 4, 8}, std::string resampler="NEAREST");
+        GeoImage& add_overviews(std::vector<int> levels=std::vector<int>({2, 4, 8}), std::string resampler="NEAREST");
 
         //! Process band into new file (copy and apply processing functions)
         template<class T> GeoImage save(std::string filename="", std::string dtype="", std::string format="",
