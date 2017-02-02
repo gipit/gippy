@@ -232,7 +232,7 @@ namespace gip {
     }
 
     // Resampler options: "NEAREST", "GAUSS", "CUBIC", "AVERAGE", "MODE", "AVERAGE_MAGPHASE" or "NONE"
-    GeoImage& GeoImage::add_overviews(std::string resampler, std::vector<int> levels) {
+    GeoImage& GeoImage::add_overviews(std::vector<int> levels, std::string resampler) {
         int* _levels = NULL;
         int nlevels = levels.size();
         if (nlevels > 0)
