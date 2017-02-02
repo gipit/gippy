@@ -231,6 +231,16 @@ namespace gip {
         return covariance;
     }
 
+    // Resampler options: "NEAREST", "GAUSS", "CUBIC", "AVERAGE", "MODE", "AVERAGE_MAGPHASE" or "NONE"
+    GeoImage& GeoImage::add_overviews(std::string resampler, std::vector<int> levels) {
+        int* _levels = NULL;
+        int nlevels = levels.size();
+        if (nlevels > 0)
+            _levels = &levels[0]; 
+        _GDALDataset->BuildOverviews(resampler.c_str(), nlevels, _levels, 0, NULL, GDALDummyProgress, NULL);
+        return *this;
+    }
+
     GeoImage GeoImage::warp(std::string filename, GeoFeature feature,
                 bool crop, std::string proj,
                 float xres, float yres, int interpolation) const {

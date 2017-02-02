@@ -246,6 +246,9 @@ namespace gip {
 
         //! Calculate spectral correlation
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
+        
+        //! Add overviews
+        GeoImage& add_overviews(std::string resampler="NEAREST", std::vector<int> levels={2, 4, 8});
 
         //! Process band into new file (copy and apply processing functions)
         template<class T> GeoImage save(std::string filename="", std::string dtype="", std::string format="",
@@ -416,10 +419,8 @@ namespace gip {
         for (unsigned int i=0; i<imgout.nbands(); i++) {
             (*this)[i].save<T>(imgout[i]);
         }
-        if (overviews) {
-            int panOverviewList[3] = { 2, 4, 8 };
-            imgout._GDALDataset->BuildOverviews( "NEAREST", 3, panOverviewList, 0, NULL, GDALDummyProgress, NULL );
-        }
+        if (overviews)
+            imgout.add_overviews();
         return imgout;
     }
 
