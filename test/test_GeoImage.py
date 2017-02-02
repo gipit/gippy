@@ -132,6 +132,23 @@ class GeoImageTests(unittest.TestCase):
             self.assertTrue(band.min() == 1)
             self.assertTrue(band.max() == 255)
 
+    def test_overviews(self):
+        """ Add overviews to an image """
+        fout = 'test-overviews.tif'
+        geoimg = gp.GeoImage.create(filename=fout, xsz=1000, ysz=1000, nb=2)
+        fout = geoimg.filename()
+        # add overviews
+        geoimg.add_overviews() 
+        # clear overviews
+        geoimg.add_overviews(levels=[])
+        self.assertFalse(os.path.exists(fout + '.ovr'))
+        geoimg = None
+        geoimg = gp.GeoImage(fout, False)
+        geoimg.add_overviews()
+        self.assertTrue(os.path.exists(fout + '.ovr'))
+        os.remove(fout)
+        os.remove(fout + '.ovr')
+
     def test_save(self):
         """ Save image as new image with different datatype """
         fout = 'test-byte.tif'

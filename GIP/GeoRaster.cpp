@@ -165,7 +165,7 @@ namespace gip {
         if (normalize)
             hist/=numpixels;
         if (cumulative)
-            for (int i=1;i<bins;i++) hist[i] += hist[i-1];
+            for (unsigned int i=1;i<bins;i++) hist[i] += hist[i-1];
         //if (Options::verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
         return hist;
     }
