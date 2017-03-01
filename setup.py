@@ -166,8 +166,8 @@ class _install(install):
         # this sets te build_dir global for later in the develop class
         build_dir = self.build_lib
         # change rpath to be relative to the current lib dir (same path)
-        if sys.platform != 'darwin':
-            [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
+        #if sys.platform != 'darwin':
+        #    [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
         log.debug('_install run')
