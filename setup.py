@@ -54,7 +54,7 @@ with open('requirements-dev.txt') as fid:
 
 # logging
 logging.basicConfig(level=logging.DEBUG)
-#logging.basicConfig()
+# logging.basicConfig()
 log = logging.getLogger(os.path.basename(__file__))
 
 
@@ -115,9 +115,7 @@ class _build_ext(build_ext):
         # know where to find libgip for linking
         for m in swig_modules:
             m.library_dirs.append(os.path.join(self.build_lib, 'gippy'))
-            if sys.platform == 'darwin':
-                m.runtime_library_dirs.append('@loader_path/libgip.so')
-            else:
+            if sys.platform != 'darwin':
                 m.runtime_library_dirs.append('$ORIGIN')
         # in python3 the created .so files have funny names, see PEP 3147
         libfile = os.path.basename(gip_module._file_name)
@@ -133,28 +131,21 @@ class _build_ext(build_ext):
             os.remove(link)
             os.rename(os.path.join(libpath, libfile), link)
 
+        # for mac update runtime library location. Use otool -S to see shared libs in a .so
+        if sys.platform == 'darwin':
+            for m in swig_modules:
+                fname = os.path.join(os.path.dirname(os.path.abspath(libpath)), m._file_name)
+                cmd = 'install_name_tool -change %s @loader_path/libgip.so %s' % (link, fname)
+                log.debug(cmd)
+                out = subprocess.check_output(cmd.split(' '))
+                log.debug(out)
+
 
 class _develop(develop):
-    # development installation (editable links via pip install -e)
-    # TODO - remove the libs appended by _install which is called
-    # for some reason during the develop.finalize_options(self) call
-    # and which generates a warning (low priority)
-    #def finalize_options(self):
-    #    log.debug('_develop finalize_options')
-    #    develop.finalize_options(self)
-    #    if sys.platform != 'darwin':
-    #        [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
-        # for some reason we must get build_dir this way, which is available
-        # to the install class, but not to the develop class (but install
-        # options are called by develop options so global can be set there)
-        global build_dir
         log.debug('_develop run')
         develop.run(self)
-        #update_lib_path_mac(
-        #    os.path.join(build_dir, gip_module._file_name),
-        #)
         # move lib files into gippy directory
         [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
         # rename libgip if it has crazy python3 extension
@@ -164,73 +155,30 @@ class _develop(develop):
 
 
 class _install(install):
-    #def finalize_options(self):
-    #    log.debug('_install finalize_options')
-    #    global build_dir
-    #    install.finalize_options(self)
-        # this sets te build_dir global for later in the develop class
-    #    build_dir = self.build_lib
-        # change rpath to be relative to the current lib dir (same path)
-        #if sys.platform != 'darwin':
-        #    [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
-
     def run(self):
         log.debug('_install run')
         # ensure extension built before packaging
         self.run_command('build_ext')
         install.run(self)
-        #update_lib_path_mac(
-        #    os.path.join(self.build_lib, gip_module._file_name),
-        #    modpath=self.install_lib
-        #)
 
 
 class _bdist_wheel(bdist_wheel):
     # binary wheel
     def run(self):
-        global build_dir
         log.debug('_bdist_wheel run')
         self.distribution.ext_modules = [gip_module] + swig_modules
         self.run_command('build_ext')
         bdist_wheel.run(self)
-        update_lib_path_mac(
-            os.path.join(build_dir, gip_module._file_name),
-            modpath=build_dir
-        )
 
 # Binary wheel should be used instead, this is unsupported for now
 """
 class _bdist_egg(bdist_egg):
-    # binary egg distribution
+    binary egg distribution
     def run(self):
         log.debug('_bdist_egg run')
         self.run_command('build_ext')
         bdist_egg.run(self)
 """
-
-
-# use 'otool -L filename.so' to see the linked libraries in an
-# extension. This function updates swig .so files with absolute
-# pathnames since clang insists on only using relative (it ignores rpath)
-def update_lib_path_mac(oldpath, modpath=None):
-    """ Change the link path set in the library on mac os """
-    if sys.platform != 'darwin':
-        return
-    newpath = '@loader_path/libgip.so'
-    for m in swig_modules:
-        if modpath is None:
-            fin = os.path.basename(m._file_name)
-        else:
-            fin = os.path.join(modpath, m._file_name)
-        cmd = [
-            'install_name_tool',
-            '-change',
-            oldpath,
-            newpath,
-            fin
-        ]
-        out = subprocess.check_output(cmd)
-        log.debug(out)
 
 
 # GDAL config parameters
@@ -306,10 +254,6 @@ for n in ['gippy', 'algorithms']:
         )
     )
 
-# global so the build dir can be passed from install class options to
-# develop class, which doesn't have access to build dir location normally
-global build_dir
-
 
 setup(
     name='gippy',
@@ -333,7 +277,7 @@ setup(
     cmdclass={
         "build_ext": _build_ext,
         "develop": _develop,
-        #"install": _install,
+        "install": _install,
         #"bdist_wheel": _bdist_wheel,
     }
 )
