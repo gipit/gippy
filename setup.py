@@ -32,6 +32,7 @@ import logging
 import shutil
 from numpy import get_include as numpy_get_include
 from imp import load_source
+from pdb import set_trace
 
 # setup imports
 from setuptools import setup, Extension
@@ -114,6 +115,10 @@ class _build_ext(build_ext):
         # know where to find libgip for linking
         for m in swig_modules:
             m.library_dirs.append(os.path.join(self.build_lib, 'gippy'))
+            if sys.platform == 'darwin':
+                m.runtime_library_dirs.append('@loader_path/libgip.so')
+            else:
+                m.runtime_library_dirs.append('$ORIGIN')
         # in python3 the created .so files have funny names, see PEP 3147
         libfile = os.path.basename(gip_module._file_name)
         link = os.path.join(self.build_lib, gip_module.name + '.so')
@@ -123,7 +128,7 @@ class _build_ext(build_ext):
         if libfile != os.path.basename(link) and not os.path.exists(link):
             os.symlink(libfile, link)
         build_ext.run(self)
-	    # if created, remove the link and rename the libgip file
+        # if created, remove the link and rename the libgip file
         if libfile != os.path.basename(link):
             os.remove(link)
             os.rename(os.path.join(libpath, libfile), link)
@@ -134,11 +139,11 @@ class _develop(develop):
     # TODO - remove the libs appended by _install which is called
     # for some reason during the develop.finalize_options(self) call
     # and which generates a warning (low priority)
-    def finalize_options(self):
-        log.debug('_develop finalize_options')
-        develop.finalize_options(self)
-        if sys.platform != 'darwin':
-            [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
+    #def finalize_options(self):
+    #    log.debug('_develop finalize_options')
+    #    develop.finalize_options(self)
+    #    if sys.platform != 'darwin':
+    #        [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
 
     def run(self):
         # for some reason we must get build_dir this way, which is available
@@ -147,9 +152,9 @@ class _develop(develop):
         global build_dir
         log.debug('_develop run')
         develop.run(self)
-        update_lib_path_mac(
-            os.path.join(build_dir, gip_module._file_name),
-        )
+        #update_lib_path_mac(
+        #    os.path.join(build_dir, gip_module._file_name),
+        #)
         # move lib files into gippy directory
         [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
         # rename libgip if it has crazy python3 extension
@@ -159,12 +164,12 @@ class _develop(develop):
 
 
 class _install(install):
-    def finalize_options(self):
-        log.debug('_install finalize_options')
-        global build_dir
-        install.finalize_options(self)
+    #def finalize_options(self):
+    #    log.debug('_install finalize_options')
+    #    global build_dir
+    #    install.finalize_options(self)
         # this sets te build_dir global for later in the develop class
-        build_dir = self.build_lib
+    #    build_dir = self.build_lib
         # change rpath to be relative to the current lib dir (same path)
         #if sys.platform != 'darwin':
         #    [m.runtime_library_dirs.append('$ORIGIN') for m in swig_modules]
@@ -174,10 +179,10 @@ class _install(install):
         # ensure extension built before packaging
         self.run_command('build_ext')
         install.run(self)
-        update_lib_path_mac(
-            os.path.join(self.build_lib, gip_module._file_name),
-            modpath=self.install_lib
-        )
+        #update_lib_path_mac(
+        #    os.path.join(self.build_lib, gip_module._file_name),
+        #    modpath=self.install_lib
+        #)
 
 
 class _bdist_wheel(bdist_wheel):
@@ -328,7 +333,7 @@ setup(
     cmdclass={
         "build_ext": _build_ext,
         "develop": _develop,
-        "install": _install,
-        "bdist_wheel": _bdist_wheel,
+        #"install": _install,
+        #"bdist_wheel": _bdist_wheel,
     }
 )
