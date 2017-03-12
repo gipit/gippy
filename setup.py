@@ -32,14 +32,12 @@ import logging
 import shutil
 from numpy import get_include as numpy_get_include
 from imp import load_source
-from pdb import set_trace
 
 # setup imports
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools.command.develop import develop
-from setuptools.command.bdist_egg import bdist_egg
 from wheel.bdist_wheel import bdist_wheel
 from distutils import sysconfig
 
@@ -112,46 +110,53 @@ class _build_ext(build_ext):
     # builds the external modules: libgip.so, _gippy.so, _algorithms.so
     def run(self):
         log.debug('_build_ext run')
-        # know where to find libgip for linking
         for m in swig_modules:
+            # know where to find libgip for linking
             m.library_dirs.append(os.path.join(self.build_lib, 'gippy'))
+            # on linux add to rpath
             if sys.platform != 'darwin':
                 m.runtime_library_dirs.append('$ORIGIN')
-        # in python3 the created .so files have funny names, see PEP 3147
-        libfile = os.path.basename(gip_module._file_name)
-        link = os.path.join(self.build_lib, gip_module.name + '.so')
-        libpath = os.path.join(self.build_lib, 'gippy')
-        if not os.path.exists(libpath):
-            os.makedirs(os.path.join(self.build_lib, 'gippy'))
-        if libfile != os.path.basename(link) and not os.path.exists(link):
-            os.symlink(libfile, link)
-        build_ext.run(self)
-        # if created, remove the link and rename the libgip file
-        if libfile != os.path.basename(link):
-            os.remove(link)
-            os.rename(os.path.join(libpath, libfile), link)
 
-        # for mac update runtime library location. Use otool -S to see shared libs in a .so
+        # in python3 the created .so files have funny names, see PEP 3147
+        libpath = os.path.join(self.build_lib, 'gippy')
+        # create links to the as of yet non-existent lib files
+        for mod in [gip_module]:
+            # the module to be created
+            libfile = os.path.basename(mod._file_name)
+            # a new link with the proper name
+            link = os.path.join(self.build_lib, mod.name + '.so')
+            if not os.path.exists(libpath):
+                os.makedirs(os.path.join(self.build_lib, 'gippy'))
+            # only do this if the to be generated names are different than expected
+            if libfile != os.path.basename(link) and not os.path.exists(link):
+                os.symlink(libfile, link)
+
+        # build the extensionss
+        super(_build_ext, self).run()
+
+        # for mac update runtime library location. Use otool -L to see shared libs in a .so
         if sys.platform == 'darwin':
+            old_name = os.path.join(self.build_lib, gip_module._file_name)
+            new_name = '@loader_path/%s' % os.path.basename(gip_module._file_name)
+            cmd0 = 'install_name_tool -change %s %s' % (old_name, new_name)
             for m in swig_modules:
-                fname = os.path.join(os.path.dirname(os.path.abspath(libpath)), m._file_name)
-                cmd = 'install_name_tool -change %s @loader_path/libgip.so %s' % (link, fname)
+                cmd = '%s %s' % (cmd0, os.path.join(os.path.abspath(self.build_lib), m._file_name))
                 log.debug(cmd)
                 out = subprocess.check_output(cmd.split(' '))
+                # also update top level .so files 'develop' likes to create (still not sure why)
+                if os.path.exists(os.path.basename(m._file_name)):
+                    cmd = '%s %s' % (cmd0, os.path.basename(m._file_name))
+                    log.debug(cmd)
+                    out = subprocess.check_output(cmd.split(' '))
                 log.debug(out)
 
 
 class _develop(develop):
-
     def run(self):
         log.debug('_develop run')
         develop.run(self)
         # move lib files into gippy directory
         [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
-        # rename libgip if it has crazy python3 extension
-        f = glob.glob(os.path.join('gippy', 'libgip.*.so'))
-        if len(f) > 0:
-            os.rename(f[0], os.path.join('gippy', 'libgip.so'))
 
 
 class _install(install):
@@ -169,16 +174,6 @@ class _bdist_wheel(bdist_wheel):
         self.distribution.ext_modules = [gip_module] + swig_modules
         self.run_command('build_ext')
         bdist_wheel.run(self)
-
-# Binary wheel should be used instead, this is unsupported for now
-"""
-class _bdist_egg(bdist_egg):
-    binary egg distribution
-    def run(self):
-        log.debug('_bdist_egg run')
-        self.run_command('build_ext')
-        bdist_egg.run(self)
-"""
 
 
 # GDAL config parameters
@@ -278,6 +273,6 @@ setup(
         "build_ext": _build_ext,
         "develop": _develop,
         "install": _install,
-        #"bdist_wheel": _bdist_wheel,
+        "bdist_wheel": _bdist_wheel,
     }
 )
