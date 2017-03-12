@@ -6,22 +6,20 @@ python:
 - '2.7'
 - '3.5'
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - libgdal1h
-      - gdal-bin
-      - libgdal-dev
-      - swig
-      - g++-4.8
-
 matrix:
   include:
+      - os: linux
       # linux gdal2
-      #- os: linux_gdal2
-      # osx
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - libgdal1h
+            - gdal-bin
+            - libgdal-dev
+            - swig
+            - g++-4.8
       - os: osx
         osx_image: xcode8.2
         before_install:
