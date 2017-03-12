@@ -20,13 +20,13 @@ addons:
 matrix:
   include:
       # linux gdal2
-      - os: linux_gdal2
+      #- os: linux_gdal2
       # osx
       - os: osx
         osx_image: xcode8.2
-      before_install:
-        - brew update
-        - brew install swig
+        before_install:
+          - brew update
+          - brew install swig
 
 install:
   - export CXX="g++-4.8" CC="gcc-4.8"
