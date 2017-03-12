@@ -1,30 +1,26 @@
+
+# default job
 language: python
 
 python:
 - '2.7'
 - '3.5'
 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libgdal1h
+      - gdal-bin
+      - libgdal-dev
+      - swig
+      - g++-4.8
+
 matrix:
   include:
-      # linux gdal1
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-        packages:
-          - libgdal1h
-          - gdal-bin
-          - libgdal-dev
-          - swig
-          - g++-4.8
       # linux gdal2
-      #    - os: linux_gdal2
-      #  apt:
-      #    sources:
-      #      - ubuntu-toolchain-r-test
-      #  packages:
-      #    - swig
+      - os: linux_gdal2
       # osx
       #- os: osx
       #osx_image: xcode8.2
