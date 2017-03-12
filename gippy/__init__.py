@@ -22,9 +22,6 @@
 from __future__ import absolute_import
 import os
 
-from ctypes import cdll
-cdll.LoadLibrary(os.path.join(os.path.join(os.path.dirname(__file__), 'libgip.so')))
-
 from .version import __version__
 from .gippy import init, DataType, GeoImage, GeoVector, Options
 
