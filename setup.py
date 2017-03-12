@@ -132,7 +132,7 @@ class _build_ext(build_ext):
                 os.symlink(libfile, link)
 
         # build the extensionss
-        super(_build_ext, self).run()
+        _build_ext.run(self)
 
         # for mac update runtime library location. Use otool -L to see shared libs in a .so
         if sys.platform == 'darwin':
