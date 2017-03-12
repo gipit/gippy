@@ -4,27 +4,42 @@ python:
 - '2.7'
 - '3.5'
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - libgdal1h
-    - gdal-bin
-    - libgdal-dev
-    - swig
-    - g++-4.8
-
-before_install:
-- export CXX="g++-4.8" CC="gcc-4.8"
-- pip install -r requirements.txt
-- pip install -r requirements-dev.txt
+matrix:
+  include:
+      # linux gdal1
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+        packages:
+          - libgdal1h
+          - gdal-bin
+          - libgdal-dev
+          - swig
+          - g++-4.8
+      # linux gdal2
+      #    - os: linux_gdal2
+      #  apt:
+      #    sources:
+      #      - ubuntu-toolchain-r-test
+      #  packages:
+      #    - swig
+      # osx
+      #- os: osx
+      #osx_image: xcode8.2
+      #before_install:
+      #  - brew update
+      #  - brew install swig
 
 install:
-- pip install -e .
+  - export CXX="g++-4.8" CC="gcc-4.8"
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install -e .
 
 script:
-- nosetests -v -s
+    - cd test; nosetests -v -s --with-coverage --cover-package gippy
 
 deploy:
   provider: pypi
