@@ -1,8 +1,14 @@
-language: python
+# default job
 
+os: linux
+#dist: precise
+language: python
 python:
 - '2.7'
+- '3.4'
+- '3.5'
 
+# linux gdal2
 addons:
   apt:
     sources:
@@ -15,15 +21,16 @@ addons:
     - g++-4.8
 
 before_install:
-- export CXX="g++-4.8" CC="gcc-4.8"
-- pip install -r requirements.txt
-- pip install -r requirements-dev.txt
+  - gdalinfo --version
 
 install:
-- pip install -e .
+  - export CXX="g++-4.8" CC="gcc-4.8"
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install -e .
 
 script:
-- nosetests -v -s
+    - cd test; nosetests -v -s --with-coverage --cover-package gippy
 
 deploy:
   provider: pypi

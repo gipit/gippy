@@ -21,8 +21,8 @@
 ################################################################################
 from __future__ import absolute_import
 import os
-from .version import __version__
 
+from .version import __version__
 from .gippy import init, DataType, GeoImage, GeoVector, Options
 
 # register GDAL and OGR formats
