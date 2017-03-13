@@ -32,6 +32,7 @@ import logging
 import shutil
 from numpy import get_include as numpy_get_include
 from imp import load_source
+from pdb import set_trace
 
 # setup imports
 from setuptools import setup, Extension
@@ -117,19 +118,14 @@ class _build_ext(build_ext):
             if sys.platform != 'darwin':
                 m.runtime_library_dirs.append('$ORIGIN')
 
-        # in python3 the created .so files have funny names, see PEP 3147
-        libpath = os.path.join(self.build_lib, 'gippy')
-        # create links to the as of yet non-existent lib files
-        for mod in [gip_module]:
-            # the module to be created
-            libfile = os.path.basename(mod._file_name)
-            # a new link with the proper name
-            link = os.path.join(self.build_lib, mod.name + '.so')
+        # in python3 the created .so files have names tagged to version, see PEP 3147, 3149
+        if sysconfig.get_config_var('SOABI') is not None:
+            # create link
+            libpath = os.path.join(self.build_lib, 'gippy')
             if not os.path.exists(libpath):
-                os.makedirs(os.path.join(self.build_lib, 'gippy'))
-            # only do this if the to be generated names are different than expected
-            if libfile != os.path.basename(link) and not os.path.exists(link):
-                os.symlink(libfile, link)
+                os.makedirs(libpath)
+            link = os.path.join(self.build_lib, gip_module._full_name + '.so')
+            os.symlink(os.path.basename(gip_module._file_name), link)
 
         # build the extensionss
         build_ext.run(self)
@@ -137,7 +133,7 @@ class _build_ext(build_ext):
         # for mac update runtime library location. Use otool -L to see shared libs in a .so
         if sys.platform == 'darwin':
             old_name = os.path.join(self.build_lib, gip_module._file_name)
-            new_name = '@loader_path/%s' % os.path.basename(gip_module._file_name)
+            new_name = '@loader_path/libgip.so'  # %s' % os.path.basename(gip_module._file_name)
             cmd0 = 'install_name_tool -change %s %s' % (old_name, new_name)
             for m in swig_modules:
                 cmd = '%s %s' % (cmd0, os.path.join(os.path.abspath(self.build_lib), m._file_name))
@@ -157,6 +153,9 @@ class _develop(develop):
         develop.run(self)
         # move lib files into gippy directory
         [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
+        if sysconfig.get_config_var('SOABI') is not None:
+            # rename libgip if Python 3.2+
+            os.rename(gip_module._file_name, 'gippy/libgip.so')
 
 
 class _install(install):
@@ -263,6 +262,8 @@ setup(
         'Programming Language :: C++',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
     ],
     ext_modules=[gip_module] + swig_modules,
     packages=['gippy'],
