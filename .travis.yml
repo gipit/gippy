@@ -1,12 +1,8 @@
-
 # default job
 
-dist:
-- trusty
-- xenial
-
+os: linux
+#dist: precise
 language: python
-
 python:
 - '2.7'
 - '3.4'
@@ -15,8 +11,6 @@ python:
 # linux gdal2
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
     packages:
     - libgdal1h
     - gdal-bin
