@@ -167,6 +167,7 @@ class GeoImageTests(unittest.TestCase):
         fout = 'test-savegain.tif'
         imgout = geoimg.save(fout)
         assert_array_equal(imgout.read(), geoimg.read())
+        os.remove(fout)
 
     def test_warp(self):
         """ Warping image into another (blank) image """
