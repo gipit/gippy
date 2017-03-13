@@ -11,6 +11,8 @@ python:
 # linux gdal2
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
     - libgdal1h
     - gdal-bin
