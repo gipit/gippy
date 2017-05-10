@@ -214,8 +214,11 @@ namespace gip {
         }
 
         //! \name Filter functions
-        GeoRaster convolve(const CImg<double> kernel) const {
-            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->nodata()); });
+        GeoRaster convolve(const CImg<double> kernel, const bool boundary=true, const bool nodata=false) const {
+            if (nodata)
+                return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->nodata()); });
+            else
+                return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve(kernel, boundary); });
         }
         GeoRaster laplacian() const {
             return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.laplacian(); });
