@@ -187,6 +187,9 @@ namespace gip {
         GeoRaster erode(const double &w, const double &h) const {
             return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.erode(w, h); });
         }
+        GeoRaster skeletonize() const {
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.skeletonize(); });
+        }
 
         //! \name Processing functions
         // Logical operators

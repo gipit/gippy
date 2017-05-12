@@ -160,8 +160,7 @@ class GeoRasterTests(unittest.TestCase):
 
     def test_convolve(self):
         """ Convolve an image with a 3x3 kernel """
-        fout = os.path.join(os.path.dirname(__file__), 'test_convolve.tif')
-        geoimg = gp.GeoImage.create(fout, xsz=10, ysz=10)
+        geoimg = gp.GeoImage.create(xsz=10, ysz=10)
         arr = geoimg.read() + 1
         geoimg[0].write(arr)
         kernel = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
@@ -169,6 +168,15 @@ class GeoRasterTests(unittest.TestCase):
         self.assertEqual(arrout[0, 0], 4)
         self.assertEqual(arrout[5, 5], 9)
         self.assertEqual(arrout[5, 0], 6)
+
+    def test_skeletonize(self):
+        """ Skeletonize a binary imager """
+        geoimg = gp.GeoImage.create(xsz=10, ysz=10)
+        arr = geoimg.read()
+        arr[3:8, :] = 1
+        geoimg[0].write(arr)
+        arrout = geoimg[0].skeletonize().read()
+        from nose.tools import set_trace; set_trace()
 
     def test_write(self):
         """ Write arrays of different datatype """
