@@ -39,7 +39,7 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools.command.develop import develop
-from wheel.bdist_wheel import bdist_wheel
+#from wheel.bdist_wheel import bdist_wheel
 from distutils import sysconfig
 
 __version__ = load_source('gippy.version', 'gippy/version.py').__version__
@@ -166,13 +166,13 @@ class _install(install):
         install.run(self)
 
 
-class _bdist_wheel(bdist_wheel):
+#class _bdist_wheel(bdist_wheel):
     # binary wheel
-    def run(self):
-        log.debug('_bdist_wheel run')
-        self.distribution.ext_modules = [gip_module] + swig_modules
-        self.run_command('build_ext')
-        bdist_wheel.run(self)
+#    def run(self):
+#        log.debug('_bdist_wheel run')
+#        self.distribution.ext_modules = [gip_module] + swig_modules
+#        self.run_command('build_ext')
+#        bdist_wheel.run(self)
 
 
 # GDAL config parameters
