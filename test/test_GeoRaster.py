@@ -176,7 +176,6 @@ class GeoRasterTests(unittest.TestCase):
         arr[3:8, :] = 1
         geoimg[0].write(arr)
         arrout = geoimg[0].skeletonize().read()
-        from nose.tools import set_trace; set_trace()
 
     def test_write(self):
         """ Write arrays of different datatype """
