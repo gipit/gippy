@@ -274,6 +274,6 @@ setup(
         "build_ext": _build_ext,
         "develop": _develop,
         "install": _install,
-        "bdist_wheel": _bdist_wheel,
+        #"bdist_wheel": _bdist_wheel,
     }
 )
