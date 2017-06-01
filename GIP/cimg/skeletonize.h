@@ -28,15 +28,15 @@
  * Compute skeleton of binary image 
 */
 CImg<T>& skeletonize() {
-	CImg<float> distance = get_distance(0);
-	const CImgList<float> grad = get_gradient("xyz");
-	CImg<float> flux = get_flux(grad, 1, 1);
+  CImg<float> distance = get_distance(0);
+  CImgList<floatT> grad = get_gradient("xyz");
+  CImg<floatT> flux = get_flux(grad, 1, 1);
 
-	// TODO - try Torsello correction of flux
-	float thresh = 1;
-	bool curve = true;
-	skeleton(flux, distance, curve, thresh);
-	return *this;
+  // TODO - try Torsello correction of flux
+  float thresh = 1;
+  bool curve = true;
+  skeleton(flux, distance, curve, thresh);
+  return *this;
 }
 
 #endif // CIMG_PLUGIN_SKELETONIZE
