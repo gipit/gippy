@@ -33,7 +33,7 @@ script:
   - cd test; nosetests -v -s --with-coverage --cover-package gippy;
 
 before_deploy:
-  - cd
+  - cd ../
 
 deploy:
   provider: pypi
