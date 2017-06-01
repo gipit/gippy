@@ -18,6 +18,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v1.0.0:
+- Major restructuring and refactor
+- Function naming changed, breaking backwards compatability
+
 v0.4.0:
 - Compiles and installs on MacOS
 - GDAL data types now replaced with gip DataType class
