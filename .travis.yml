@@ -30,10 +30,14 @@ install:
   - pip install -e .
 
 script:
-    - cd test; nosetests -v -s --with-coverage --cover-package gippy
+  - cd test; nosetests -v -s --with-coverage --cover-package gippy;
+
+before_deploy:
+  - cd ../
 
 deploy:
   provider: pypi
+  skip_cleanup: true
   user: matthewhanson
   password:
     secure: "F9qtOOEA4QT6aD2E3yf/u7uyEhZD/+S9sDclvtx0HDTa2sU50vWoQ6lLubib20FXFJcfnfPTvKEgpoN2GUiRET7YhmBu9RSAQlPKK4L6tuNXCgeuSqFYTNdeZraw52YjbF3n8++ikFUtDoG5Z81Ckk4gzqnJC9L6+BWlsgHt/vMajbD4V7Laoe1z6sY+gRDcgYFK5cOzKgu+9nKpsc0ZM/RNuF9ena7mVpBcfV0/im301P+sD0utpFy9tFZw9gH+YZOfivIaDB8OsGMi7xC9/0D1A2lo6gMkvvLGeJp6ixKIoSR4EP2kH7pIuqoyIJtTfK/9okIY5JeB+ETwCJV4apw9svaPLy2rqr2S9iXdJx6cYm9JThakAPhUGKBOzZyBWswxTtmUcoS46WrjMzRgJSwWMFpcYzXTUorsKnca9xG0bro0WTgc7fJBw3rKOQEYGLJULLWfBqigQ0dh4WhLB0HrYyzFSOdqmsZqtkYmVAv7xN8ZhsOxEhvLBwIWBFpHV5bqZ0zR9O+c/fm/4t0c7CacBUWrhAzKu8gfRZDVL3sr+Tjgw4o2KwJ+Hp5ChKIhe1pzP+j3q0TW9ayu8coeG4I7JMtGWrfOPo5FxBOUI7g65VZZ7E0zn0rO9ca0ulODWSnSI0krknnSveV/lmtqASMeAnG4TnZUlQB9s1oWU18="
