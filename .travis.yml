@@ -30,7 +30,7 @@ install:
   - pip install -e .
 
 script:
-    - cd test; nosetests -v -s --with-coverage --cover-package gippy
+  - cd test; nosetests -v -s --with-coverage --cover-package gippy; cd ~/
 
 deploy:
   provider: pypi
