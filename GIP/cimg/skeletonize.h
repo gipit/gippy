@@ -1,11 +1,10 @@
-#!/usr/bin/env python
-################################################################################
+/*##############################################################################
 #    GIPPY: Geospatial Image Processing library for Python
 #
 #    AUTHOR: Matthew Hanson
 #    EMAIL:  matt.a.hanson@gmail.com
 #
-#    Copyright (C) 2015 Applied Geosolutions
+#    Copyright (C) 2015 Matthew Hanson
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -18,17 +17,26 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-################################################################################
-from __future__ import absolute_import
-import os
+##############################################################################*/
 
-from .version import __version__
-from .gippy import init, DataType, GeoImage, GeoVector, Options
+#ifndef CIMG_PLUGIN_SKELETONIZE
+#define CIMG_PLUGIN_SKELETONIZE
 
-# register GDAL and OGR formats
-init()
+#include <cimg/skeleton.h>
 
-# cleanup functions
-del gippy
-del init
-del os
+/**
+ * Compute skeleton of binary image 
+*/
+CImg<T>& skeletonize() {
+  CImg<float> distance = get_distance(0);
+  CImgList<floatT> grad = get_gradient("xyz");
+  CImg<floatT> flux = get_flux(grad, 1, 1);
+
+  // TODO - try Torsello correction of flux
+  float thresh = 1;
+  bool curve = true;
+  skeleton(flux, distance, curve, thresh);
+  return *this;
+}
+
+#endif // CIMG_PLUGIN_SKELETONIZE

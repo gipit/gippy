@@ -25,13 +25,16 @@
 #include <gdal_priv.h>
 #include <string>
 #include <map>
+#include <queue>
 
 //#define cimg_debug 0
 #define cimg_verbosity 1
 #define cimg_display 0
-#define cimg_plugin "CImg_plugins.h"
+#define cimg_plugin "cimg/convolve.h"
+#define cimg_plugin1 "cimg/skeleton.h"
+#define cimg_plugin2 "cimg/skeletonize.h"
 
-#include <CImg.h>
+#include <cimg/CImg.h>
 
 /*
     Utility functions that are called only from Python (not used internally)

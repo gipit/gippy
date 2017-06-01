@@ -23,7 +23,7 @@
     #include <python2.7/Python.h>
     #include <numpy/arrayobject.h>
     #include <iostream>
-    #include <CImg.h>
+    #include <cimg/CImg.h>
     #include <stdint.h>
 
     using cimg_library::CImg;

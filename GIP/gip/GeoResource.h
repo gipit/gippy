@@ -44,7 +44,7 @@ namespace gip {
         //! Open existing file constructor
         GeoResource(std::string filename, bool update=false, bool temp=false);
         //! Create new file - TODO how specify OGRLayer
-        GeoResource(std::string, int, int, int, std::string, BoundingBox, DataType, std::string, bool);
+        GeoResource(std::string, int, int, int, std::string, BoundingBox, DataType, std::string, bool, dictionary={});
 
         //! Copy constructor
         GeoResource(const GeoResource& resource);
@@ -72,6 +72,8 @@ namespace gip {
         unsigned long size() const { return xsize() * ysize(); }
         //! Geolocated coordinates of a point within the resource
         Point<double> geoloc(float xloc, float yloc) const;
+        //! Lat-lon coordinates of a point within the resource
+        Point<double> latlon(float xloc, float yloc) const;
         //! Coordinates of top left
         //Point<double> TopLeft() const;
         //! Coordinates of lower left
@@ -84,8 +86,14 @@ namespace gip {
         Point<double> minxy() const;
         //! Maximum Coordinates of X and Y
         Point<double> maxxy() const;
-        //! Extent
-        BoundingBox extent() const { return BoundingBox(geoloc(0, ysize()), geoloc(xsize(), 0)); }
+        //! Extent in srs coordinates
+        BoundingBox extent() const { 
+            return BoundingBox(geoloc(0, ysize()), geoloc(xsize(), 0));
+        }
+        //! Extent in lat-lon
+        BoundingBox geo_extent() const {
+            return BoundingBox(latlon(0, ysize()), latlon(xsize(), 0)); 
+        }
         //! Return Spatial Reference system  in Well Known Text format
         std::string srs() const {
             return _GDALDataset->GetProjectionRef();

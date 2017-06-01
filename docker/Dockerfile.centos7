@@ -1,0 +1,15 @@
+FROM centos:centos7
+
+RUN \
+    yum install -y update; \
+    yum install -y epel-release; \
+    yum install -y gcc-c++ python-devel python-pip gdal-devel swig; \
+    pip install --upgrade pip
+
+WORKDIR /work
+COPY ./ /work
+
+RUN \
+    pip install -r requirements-dev.txt; \
+    pip install numpy wheel;
+    #pip install .

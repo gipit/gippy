@@ -82,6 +82,16 @@ class GeoRasterTests(unittest.TestCase):
         self.assertEqual(len(arr[1]), 0)
         os.remove(fout)
 
+    def test_bandmeta(self):
+        """ Set metadata on band and retrieve """
+        fout = 'test-meta.tif'
+        geoimg = gp.GeoImage.create(fout, xsz=100, ysz=100)
+        geoimg[0].add_bandmeta('TESTKEY', 'TESTVALUE')
+        geoimg = None
+        geoimg = gp.GeoImage(fout)
+        self.assertEqual(geoimg[0].bandmeta('TESTKEY'), 'TESTVALUE')
+        os.remove(fout)
+
     # TODO - test masking
 
     def test_stats(self):
@@ -138,6 +148,34 @@ class GeoRasterTests(unittest.TestCase):
             self.assertTrue((vals[mask] == np.sqrt(arr[mask])).any())
 
     # TODO - test processing functions
+    # Test filters
+    def test_laplacian(self):
+        """ Test with laplacian filter """
+        geoimg = gp.GeoImage.create(xsz=10, ysz=10)
+        arr = geoimg.read()
+        arr[:, 0:6] = 1
+        geoimg[0].write(arr)
+        arrout = geoimg[0].laplacian().read()
+        self.assertEqual(arrout[0, 5], 255)
+
+    def test_convolve(self):
+        """ Convolve an image with a 3x3 kernel """
+        geoimg = gp.GeoImage.create(xsz=10, ysz=10)
+        arr = geoimg.read() + 1
+        geoimg[0].write(arr)
+        kernel = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+        arrout = geoimg[0].convolve(kernel, boundary=False).read()
+        self.assertEqual(arrout[0, 0], 4)
+        self.assertEqual(arrout[5, 5], 9)
+        self.assertEqual(arrout[5, 0], 6)
+
+    def test_skeletonize(self):
+        """ Skeletonize a binary imager """
+        geoimg = gp.GeoImage.create(xsz=10, ysz=10)
+        arr = geoimg.read()
+        arr[3:8, :] = 1
+        geoimg[0].write(arr)
+        arrout = geoimg[0].skeletonize().read()
 
     def test_write(self):
         """ Write arrays of different datatype """

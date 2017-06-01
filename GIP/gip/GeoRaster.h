@@ -30,7 +30,7 @@
 #include <functional>
 
 #include <gip/GeoResource.h>
-
+#include <gip/GeoFeature.h>
 
 namespace gip {
     typedef Point<int> iPoint;
@@ -72,13 +72,13 @@ namespace gip {
             return _GDALRasterBand->GetDescription();
         }
         //! Get gain
-        float gain() const { return _GDALRasterBand->GetScale(); }
+        double gain() const { return _GDALRasterBand->GetScale(); }
         //! Get offset
-        float offset() const { return _GDALRasterBand->GetOffset(); }
+        double offset() const { return _GDALRasterBand->GetOffset(); }
         //! Set gain
-        GeoRaster& set_gain(float gain) { _GDALRasterBand->SetScale(gain); return *this; }
+        GeoRaster& set_gain(double gain) { _GDALRasterBand->SetScale(gain); return *this; }
         //! Set offset
-        GeoRaster& set_offset(float offset) { _GDALRasterBand->SetOffset(offset); return *this; }
+        GeoRaster& set_offset(double offset) { _GDALRasterBand->SetOffset(offset); return *this; }
 
         //! Indicates if processing will be done on reads
         bool is_processed() const { 
@@ -87,7 +87,7 @@ namespace gip {
 
         //! Indicates if data should be read as doubles (functions or gain/offset)
         bool is_double() const {
-            return (is_processed() || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
+            return ((!is_processed()) || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
         }
 
         //! Get NoData value
@@ -99,6 +99,17 @@ namespace gip {
             _GDALRasterBand->SetNoDataValue(val);
             return *this;
         }
+
+        //! \name Metadata functions
+        //! Get metadata item
+        std::string bandmeta(std::string key) const;
+        //! Get all metadata
+        dictionary bandmeta() const;
+
+        //! Set metadata item
+        GeoRaster& add_bandmeta(std::string key, std::string item);
+        //! Set multiple metadata items
+        GeoRaster& add_bandmeta(dictionary items);
 
         //! Set Color Interp
         GeoRaster& set_color(std::string col) {
@@ -141,15 +152,20 @@ namespace gip {
             return *this;
         }
 
-        //! \name Calibration functions
-        //! Sets dyanmic range of sensor (min to max digital counts)
-        // TODO - consider this function, there is no get....what does it do?
-        GeoRaster& set_dynamicrange(int min, int max) {
-            _minDC = min;
-            _maxDC = max;
-            return *this;
+        //! \name Masking functions
+         //! Get Saturation mask: 1's where it's saturated
+        CImg<unsigned char> saturation_mask(float maxDC, Chunk chunk=Chunk()) const {
+            switch (type().type()) {
+                case 1: return _Mask<unsigned char>(maxDC, chunk);
+                case 2: return _Mask<unsigned short>(maxDC, chunk);
+                case 3: return _Mask<short>(maxDC, chunk);
+                case 4: return _Mask<unsigned int>(maxDC, chunk);
+                case 5: return _Mask<int>(maxDC, chunk);
+                case 6: return _Mask<float>(maxDC, chunk);
+                case 7: return _Mask<double>(maxDC, chunk);
+                default: return _Mask<double>(maxDC, chunk);
+            }
         }
-
         //! Adds a mask band (1 for valid), applied on read
         const GeoRaster& add_mask(const GeoRaster& band) const {
             _ValidStats = false;
@@ -161,6 +177,18 @@ namespace gip {
             if (!_Masks.empty()) _ValidStats = false;
             _Masks.clear();
             return *this;
+        }
+
+        //! \name Morphological operators
+        GeoRaster dilate(const double &w, const double &h) const {
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.dilate(w, h); });
+        }
+        //! \name Morphological operators
+        GeoRaster erode(const double &w, const double &h) const {
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.erode(w, h); });
+        }
+        GeoRaster skeletonize() const {
+            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.skeletonize(); });
         }
 
         //! \name Processing functions
@@ -189,8 +217,11 @@ namespace gip {
         }
 
         //! \name Filter functions
-        GeoRaster convolve(const CImg<double> kernel) const {
-            return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->nodata()); });
+        GeoRaster convolve(const CImg<double> kernel, const bool boundary=true, const bool nodata=false) const {
+            if (nodata)
+                return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve_nodata(kernel, this->nodata()); });
+            else
+                return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.convolve(kernel, boundary); });
         }
         GeoRaster laplacian() const {
             return GeoRaster(*this, [=] (CImg<double>& img) ->CImg<double>& { return img.laplacian(); });
@@ -302,7 +333,7 @@ namespace gip {
         double stddev() const { return (stats())[3]; }
     
         //! Calculate histogram with provided bins
-        CImg<float> histogram(int bins=100, bool normalize=true, bool cumulative=false) const;
+        CImg<float> histogram(unsigned int bins=100, bool normalize=true, bool cumulative=false) const;
 
         //! Get value for this percentile in the cumulative distribution histogram
         double percentile(const double& p) const;
@@ -328,24 +359,12 @@ namespace gip {
 
         //! \name File I/O
         template<class T> CImg<T> read_raw(Chunk chunk=Chunk()) const;
-        template<class T> CImg<T> read(Chunk chunk=Chunk()) const;
+        template<class T> CImg<T> read(Chunk chunk=Chunk(), bool nogainoff=false) const;
         template<class T> GeoRaster& write_raw(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& write(CImg<T> img, Chunk chunk=Chunk());
         template<class T> GeoRaster& save(GeoRaster& raster) const;
 
-         //! Get Saturation mask: 1's where it's saturated
-        CImg<unsigned char> saturation_mask(Chunk chunk=Chunk()) const {
-            switch (type().type()) {
-                case 1: return _Mask<unsigned char>(_maxDC, chunk);
-                case 2: return _Mask<unsigned short>(_maxDC, chunk);
-                case 3: return _Mask<short>(_maxDC, chunk);
-                case 4: return _Mask<unsigned int>(_maxDC, chunk);
-                case 5: return _Mask<int>(_maxDC, chunk);
-                case 6: return _Mask<float>(_maxDC, chunk);
-                case 7: return _Mask<double>(_maxDC, chunk);
-                default: return _Mask<double>(_maxDC, chunk);
-            }
-        }
+        GeoRaster& warp_into(GeoRaster&, GeoFeature=GeoFeature(), int=0, bool=false) const;
 
         //! NoData mask: 1's where it's bad data
         CImg<unsigned char> nodata_mask(Chunk chunk=Chunk()) const {
@@ -382,10 +401,6 @@ namespace gip {
         //! Statistics
         mutable CImg<double> _Stats;
 
-        // Constants
-        int _minDC;
-        int _maxDC;
-
         //! List of processing functions to apply on reads (in class GeoProcess)
         //std::vector< std::function< CImg<double>& (CImg<double>&) > > _Functions;
         std::vector<func> _Functions;
@@ -397,8 +412,7 @@ namespace gip {
 
         //! Constructor for new band
         GeoRaster(const GeoResource& georesource, int bandnum=1)
-            : GeoResource(georesource), _ValidStats(false),
-            _minDC(1), _maxDC(255) {
+            : GeoResource(georesource), _ValidStats(false) {
             load_band(bandnum);
         }
         //! Copy with a processing function added
@@ -466,7 +480,7 @@ namespace gip {
     }
 
     //! Retrieve a piece of the image as a CImg
-    template<class T> CImg<T> GeoRaster::read(Chunk chunk) const {
+    template<class T> CImg<T> GeoRaster::read(Chunk chunk, bool nogainoff) const {
         auto start = std::chrono::system_clock::now();
 
         CImg<T> img(read_raw<T>(chunk));
@@ -474,8 +488,8 @@ namespace gip {
 
         bool updatenodata = false;
         // Apply gain and offset
-        if (gain() != 1.0 || offset() != 0.0) {
-            img = gain() * (img-_minDC) + offset();
+        if ((gain() != 1.0 || offset() != 0.0) && (!nogainoff)) {
+            img = gain() * img + offset();
             // Update NoData now so applied functions have proper NoData value set (?)
             updatenodata = true;
         }
@@ -557,12 +571,18 @@ namespace gip {
         std::vector<Chunk> _chunks = chunks();
         if (Options::verbose() > 3)
             std::cout << basename() << ": Processing in " << _chunks.size() << " chunks" << std::endl;
+        bool nogainoff = false;
+        if (this->type().string() == raster.type().string()) nogainoff = true;
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-                CImg<T> cimg = read<T>(*iCh);
+                CImg<T> cimg = read<T>(*iCh, nogainoff);
                 if (nodata() != raster.nodata()) {
                     cimg_for(cimg,ptr,T) { if (*ptr == nodata()) *ptr = raster.nodata(); }
                 }
                 raster.write(cimg,*iCh);
+        }
+        if (nogainoff) {
+            raster.set_gain(this->gain());
+            raster.set_offset(this->offset());
         }
         return raster;
     }

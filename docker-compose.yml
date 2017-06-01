@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+
+  build:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.centos7
+    image: 'gippy:develop'
+
+  bash:
+    image: 'gippy:develop'
+    entrypoint: /bin/bash
+    volumes:
+      - './:/work'
+
+  test:
+    image: 'gippy:develop'
+    entrypoint: bash -c 'cd test; nosetests -v -s'
+    working_dir: /work
+    volumes:
+      - './:/work'
