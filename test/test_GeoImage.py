@@ -48,7 +48,7 @@ class GeoImageTests(unittest.TestCase):
     def test_uint16_read(self):
         """ read uint16 makes uint16 array """
         fout = 'test.tif'
-        geoimg = gp.GeoImage.create(fout)
+        geoimg = gp.GeoImage.create(fout, dtype='uint16')
         self.assertTrue(os.path.exists(fout))
         arr = geoimg.read()
         self.assertEqual(str(arr.dtype), geoimg.type().string())
