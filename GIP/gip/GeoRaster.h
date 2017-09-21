@@ -87,7 +87,7 @@ namespace gip {
 
         //! Indicates if data should be read as doubles (functions or gain/offset)
         bool is_double() const {
-            return ((!is_processed()) || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
+            return ((is_processed()) || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
         }
 
         //! Get NoData value

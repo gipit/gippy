@@ -156,7 +156,8 @@ class GeoRasterTests(unittest.TestCase):
         arr[:, 0:6] = 1
         geoimg[0].write(arr)
         arrout = geoimg[0].laplacian().read()
-        self.assertEqual(arrout[0, 5], 255)
+        self.assertEqual(arrout[0, 5], -1.)
+        self.assertEqual(arrout[0, 6], 1.)
 
     def test_convolve(self):
         """ Convolve an image with a 3x3 kernel """
