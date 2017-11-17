@@ -223,7 +223,7 @@ namespace gip {
         - if GeoFeature is provided it will it's SRS. If not, proj parameter will be used (EPSG:4326 default)
     */
     GeoImage cookie_cutter(const std::vector<GeoImage>& geoimgs, string filename,
-            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation) {
+            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation, dictionary options) {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << geoimgs.size() << " files) - " << filename << endl;
 
@@ -261,7 +261,7 @@ namespace gip {
 
         CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
         GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
-                            proj, bbox, geoimgs[0].type().string());
+                            proj, bbox, geoimgs[0].type().string(), "", false, options);
 
         imgout.add_meta(geoimgs[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {

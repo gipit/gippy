@@ -18,6 +18,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v1.0.1:
+- allow dictionary file creation options to be passed to GeoImage.create() and cookie_cutter
+
 v1.0.0:
 - Major restructuring and refactor
 - Function naming changed, breaking backwards compatability

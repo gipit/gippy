@@ -73,13 +73,13 @@ namespace gip {
                 unsigned int xsz=1, unsigned int ysz=1, unsigned int nb=1, 
                 std::string proj="EPSG:4326",
                 CImg<double> bbox=CImg<double>(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0),
-                std::string dtype="uint8", std::string format="", bool temp=false) {
+                std::string dtype="uint8", std::string format="", bool temp=false, dictionary options=dictionary()) {
             if (filename == "") {
                 filename = random_filename();
                 temp = true;
             }
             BoundingBox ext(bbox[0], bbox[1], bbox[2], bbox[3]);
-            return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp);
+            return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp, options);
         }
 
         //! Create new image using footprint of another
