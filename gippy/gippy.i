@@ -217,8 +217,8 @@ namespace gip {
             return GeoImage(image);
         }
         // templated functions that need to be instantiated
-        GeoImage save(std::string filename, std::string dtype="", std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
-            return self->save<double>(filename, dtype, format, temp, overviews, options);
+        GeoImage save(std::string filename, std::string dtype="", float nodata=NAN, std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
+            return self->save<double>(filename, dtype, nodata, format, temp, overviews, options);
         }
         PyObject* read(Chunk chunk=Chunk()) {
             // TODO - look at all bands for gain and offset

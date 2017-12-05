@@ -252,7 +252,7 @@ namespace gip {
         GeoImage& add_overviews(std::vector<int> levels=std::vector<int>({2, 4, 8}), std::string resampler="NEAREST");
 
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string filename="", std::string dtype="", std::string format="",
+        template<class T> GeoImage save(std::string filename="", std::string dtype="", float nodata=NAN, std::string format="",
                                         bool temp=false, bool overviews=false, dictionary options=dictionary()) const;
 
         //! Adds a mask band (1 for valid) to every band in image
@@ -410,11 +410,14 @@ namespace gip {
     */
 
     // Save input file with processing applied into new output file
-    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, 
+    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, float nodata,
                 std::string format, bool temp, bool overviews, dictionary options) const {
         if (dtype == "") dtype = this->type().string();
 
         GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp, options);
+        if (!isnan(nodata)) {
+            imgout.set_nodata(nodata);
+        }
         if (Options::verbose() > 2)
             std::cout << "Saving " << basename() << " into " << imgout.filename() << std::endl;
         for (unsigned int i=0; i<imgout.nbands(); i++) {
