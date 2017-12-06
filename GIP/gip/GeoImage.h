@@ -111,12 +111,14 @@ namespace gip {
         }
 
         //! Open new image
-        static GeoImage open(std::vector<std::string> filenames, bool update=true, float nodata=0,
+        static GeoImage open(std::vector<std::string> filenames, bool update=true, float nodata=NAN,
             std::vector<std::string> bandnames=std::vector<std::string>({}),
             double gain=1.0, double offset=0.0) {
             // open image, then set all these things
             GeoImage geoimg = GeoImage(filenames, update);
-            geoimg.set_nodata(nodata);
+            if (!isnan(nodata)) {
+                geoimg.set_nodata(nodata);
+            }
             geoimg.set_gain(gain);
             geoimg.set_offset(offset);
             if (bandnames.size() > 0) {
