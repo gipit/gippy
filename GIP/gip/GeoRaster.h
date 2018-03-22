@@ -53,7 +53,7 @@ namespace gip {
         ~GeoRaster() {}
 
         //! \name File Information
-        std::string basename() const { return GeoResource::basename() + "[" + description() + "]"; }
+        std::string basename() const { return GeoResource::basename() + "[" + to_string(_GDALRasterBand->GetBand() - 1) + "]"; }
         //! Band X Size
         unsigned int xsize() const { return _GDALRasterBand->GetXSize(); }
         //! Band Y Size
