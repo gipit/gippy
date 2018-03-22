@@ -45,7 +45,7 @@ class GeoRasterTests(unittest.TestCase):
         geoimg.set_bandnames(bandnames)
         for i in range(0, 3):
             self.assertEqual(geoimg[i].description(), bandnames[i])
-            self.assertEqual(geoimg[i].basename(), '%s[%s]' % (bname, bandnames[i]))
+            self.assertEqual(geoimg[i].basename(), '%s[%s]' % (bname, i))
         os.remove(fout)
         # TODO - test color
 
