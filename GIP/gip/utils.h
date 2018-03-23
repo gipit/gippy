@@ -31,7 +31,6 @@
 #include <gdal_priv.h>
 #include <ogrsf_frmts.h>
 #include <gdalwarper.h>
-#include <cimg/CImg.h>
 
 namespace gip {
 
@@ -65,14 +64,6 @@ namespace gip {
         std::string filename = std::tmpnam(nullptr);    
         std::replace( filename.begin(), filename.end(), '.', '_');
         return filename;
-    }
-
-    template<typename T> inline void cimg_print(cimg_library::CImg<T> & img, std::string title="") {
-        for (int i=0; i<img.height(); i++) {
-            std::cout << "\tClass" << " " << i+1 << ": ";
-            cimg_forX(img, x) std::cout << img(x,i) << " ";
-            std::cout << std::endl;
-        }
     }
 
     //! Splits the string s on the given delimiter(s) and returns a list of tokens without the delimiter(s)

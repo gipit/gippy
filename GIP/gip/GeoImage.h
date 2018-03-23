@@ -27,7 +27,6 @@
 #include <gip/GeoRaster.h>
 #include <gip/GeoFeature.h>
 #include <stdint.h>
-#include <gip/utils.h>
 
 namespace gip {
     //using std::string;
