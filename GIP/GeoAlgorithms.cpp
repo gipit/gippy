@@ -609,6 +609,9 @@ namespace gip {
                             C_imgout(x,y) = stats(4)+1;
                         }
                         NumSamples(stats(4))++;
+                        std::cout << "Pixel ";
+                        cimg_forX(Pixel,x) std::cout << " " << Pixel[x];
+                        std::cout << endl;
                         cimg_forY(RunningTotal,iband) RunningTotal(stats(4),iband) += Pixel(iband);
                     } else C_imgout(x,y) = 0;
                 }
