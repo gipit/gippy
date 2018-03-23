@@ -570,6 +570,7 @@ namespace gip {
 
         // Get initial class estimates (uses random pixels)
         CImg<float> ClassMeans = GetPixelClasses<float>(img, classes, num_random);
+        if (Options::verbose() > 1) cimg_print(ClassMeans);
 
         int i;
         CImg<double> Pixel, C_img, DistanceToClass(classes), NumSamples(classes), ThisClass;
@@ -616,9 +617,11 @@ namespace gip {
             // Calculate new Mean class vectors
             for (i=0; i<classes; i++) {
                 if (NumSamples(i) > 0) {
+                    std::cout << "NumSamples = " << NumSamples(i) << std::endl;
                     cimg_forX(ClassMeans,x) {
                         ClassMeans(x,i) = RunningTotal(i,x)/NumSamples(i);
                         RunningTotal(i,x) = 0;
+                        std::cout << "ClassMeans " << x << ", " << i << " : " << ClassMeans(x, i) << std::endl;
                     }
                     NumSamples(i) = 0;
                 }

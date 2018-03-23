@@ -112,7 +112,6 @@ namespace gip {
             T cutoff = DistSort[num_random*i]; //(stats.max-stats.min)/10 + stats.min;
             cimg_forX(Dist,x) if (Dist(x) < cutoff) cimg_forX(RandomPixels,x1) RandomPixels(x1,x) = 0;
         }
-        cimg_print(ClassMeans);
         return ClassMeans;
     }
 
