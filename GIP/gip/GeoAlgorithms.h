@@ -60,7 +60,7 @@ namespace gip {
         float xres=1.0, float yres=1.0, int interpolation=0, dictionary options=dictionary());
 
     //! Kmeans
-    GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);
+    GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0, int num_random=500);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
     GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string filename="");
@@ -83,15 +83,17 @@ namespace gip {
 
     //! Get a number of pixel vectors that are spectrally distant from each other
     // TODO - review this function for generality, maybe specific to kmeans?
-    template<class T> CImg<T> GetPixelClasses(const GeoImage img, int NumClasses) {
-        int RandPixelsPerClass = 500;
+    template<class T> CImg<T> GetPixelClasses(const GeoImage img, int num_classes, int num_random=500) {
+        if (Options::verbose()) {
+            std::cout << img.basename() << ": get " << num_random << " random pixels" << std::endl;
+        }
         CImg<T> stats;
-        CImg<T> ClassMeans(img.nbands(), NumClasses);
+        CImg<T> ClassMeans(img.nbands(), num_classes);
         // Get Random Pixels
-        CImg<T> RandomPixels = img.read_random_pixels<T>(NumClasses * RandPixelsPerClass);
+        CImg<T> RandomPixels = img.read_random_pixels<T>(num_classes * num_random);
         // First pixel becomes first class
         cimg_forX(ClassMeans,x) ClassMeans(x,0) = RandomPixels(x,0);
-        for (int i=1; i<NumClasses; i++) {
+        for (int i=1; i<num_classes; i++) {
             CImg<T> ThisClass = ClassMeans.get_row(i-1);
             long validpixels = 0;
             CImg<T> Dist(RandomPixels.height());
@@ -107,7 +109,7 @@ namespace gip {
             cimg_forX(ClassMeans,x) ClassMeans(x,i) = RandomPixels(x,stats(8));
             // Toss a bunch of pixels away (make zero)
             CImg<T> DistSort = Dist.get_sort();
-            T cutoff = DistSort[RandPixelsPerClass*i]; //(stats.max-stats.min)/10 + stats.min;
+            T cutoff = DistSort[num_random*i]; //(stats.max-stats.min)/10 + stats.min;
             cimg_forX(Dist,x) if (Dist(x) < cutoff) cimg_forX(RandomPixels,x1) RandomPixels(x1,x) = 0;
         }
         return ClassMeans;
