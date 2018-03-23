@@ -289,6 +289,33 @@ namespace gip {
             return images.get_append('z');
         }
 
+        //! Get a number of random pixel vectors (spectral vectors)
+        // TODO - review this function, which is used by k-means, likely too specific
+        // generalize to get spectra of passed in indices maybe?
+        template<class T> CImg<T> read_random_pixels(int NumPixels) const {
+            CImg<T> Pixels(nbands(), NumPixels);
+            srand( time(NULL) );
+            bool badpix;
+            int p = 0;
+            while(p < NumPixels) {
+                int col = (double)rand()/RAND_MAX * (xsize()-1);
+                int row = (double)rand()/RAND_MAX * (ysize()-1);
+                T pix[1];
+                badpix = false;
+                for (unsigned int j=0; j<nbands(); j++) {
+                    DataType dt(typeid(T));
+                    _RasterBands[j]._GDALRasterBand->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.gdal(), 0, 0);
+                    if (_RasterBands[j].nodata() && pix[0] == _RasterBands[j].nodata()) {
+                        badpix = true;
+                    } else {
+                        Pixels(j,p) = pix[0];
+                    }
+                }
+                if (!badpix) p++;
+            }
+            return Pixels;
+        }
+
         //! Write cube across all bands
         template<class T> GeoImage& write(const CImg<T> img, Chunk chunk=Chunk()) {
             typename std::vector< GeoRaster >::iterator iBand;

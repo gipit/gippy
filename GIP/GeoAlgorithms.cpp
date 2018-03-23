@@ -551,6 +551,88 @@ namespace gip {
         return imgout;
     }
 
+
+    //! k-means unsupervised classifier
+    GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterations, float threshold ) {
+        //if (Image.NumBands() < 2) throw GIP::Gexceptions::errInvalidParams("At least two bands must be supplied");
+        if (Options::verbose()) {
+            cout << image.basename() << " - k-means unsupervised classifier:" << endl
+                << "  Classes = " << classes << endl
+                << "  Iterations = " << iterations << endl
+                << "  Pixel Change Threshold = " << threshold << "%" << endl;
+        }
+        // Calculate threshold in # of pixels
+        threshold = threshold/100.0 * image.size();
+
+        GeoImage img(image);
+        // Create new output image
+        GeoImage imgout = GeoImage::create_from(image, filename, 1, "uint8");
+
+        // Get initial class estimates (uses random pixels)
+        CImg<float> ClassMeans = GetPixelClasses<float>(img, classes);
+
+        int i;
+        CImg<double> Pixel, C_img, DistanceToClass(classes), NumSamples(classes), ThisClass;
+        CImg<unsigned char> C_imgout, C_mask;
+        CImg<double> RunningTotal(classes,image.nbands(),1,1,0);
+
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = image.chunks();
+
+        int NumPixelChange, iteration=0;
+        do {
+            NumPixelChange = 0;
+            for (i=0; i<classes; i++) NumSamples(i) = 0;
+            if (Options::verbose()) cout << "  Iteration " << iteration+1 << std::flush;
+
+            for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+                C_img = img.read<float>(*iCh);
+                C_mask = img.nodata_mask(*iCh);
+                C_imgout = imgout[0].read<float>(*iCh);
+
+                CImg<double> stats;
+                cimg_forXY(C_img,x,y) { // Loop through image
+                    // Calculate distance between this pixel and all classes
+                    if (C_mask(x,y)) {
+                        Pixel = C_img.get_crop(x,y,0,0,x,y,0,C_img.spectrum()-1).unroll('x');
+                        cimg_forY(ClassMeans,cls) {
+                            ThisClass = ClassMeans.get_row(cls);
+                            DistanceToClass(cls) = (Pixel - ThisClass).dot(Pixel - ThisClass);
+                        }
+                        // Get closest distance and see if it's changed since last time
+                        stats = DistanceToClass.get_stats();
+                        if (C_imgout(x,y) != (stats(4)+1)) {
+                            NumPixelChange++;
+                            C_imgout(x,y) = stats(4)+1;
+                        }
+                        NumSamples(stats(4))++;
+                        cimg_forY(RunningTotal,iband) RunningTotal(stats(4),iband) += Pixel(iband);
+                    } else C_imgout(x,y) = 0;
+                }
+                imgout[0].write<unsigned int>(C_imgout,*iCh);
+                if (Options::verbose()) cout << "." << std::flush;
+            }
+
+            // Calculate new Mean class vectors
+            for (i=0; i<classes; i++) {
+                if (NumSamples(i) > 0) {
+                    cimg_forX(ClassMeans,x) {
+                        ClassMeans(x,i) = RunningTotal(i,x)/NumSamples(i);
+                        RunningTotal(i,x) = 0;
+                    }
+                    NumSamples(i) = 0;
+                }
+            }
+            if (Options::verbose()) cout << 100.0*((double)NumPixelChange/image.size()) << "% pixels changed class" << endl;
+            //if (Options::verbose()>1) cimg_printclasses(ClassMeans);
+        } while ( (++iteration < iterations) && (NumPixelChange > threshold) );
+
+        imgout.set_bandname("k-means", 1);
+        //imgout.GetGDALDataset()->FlushCache();
+        return imgout;
+    }
+
+
     //! Perform linear transform with given coefficients (e.g., PC transform)
     GeoImage linear_transform(const GeoImage& img, CImg<float> coef, string filename) {
         // Verify size of array
@@ -583,7 +665,7 @@ namespace gip {
     }
 
 
-    //! Calcualte Brovey pansharpening
+    //! Perform Brovey pansharpening
     /*!
         geoimg: red, greem, and blue bands, optionally nir band, in any order
         weights: weights of Red, Green, Blue, and NIR (if provided), in that order
