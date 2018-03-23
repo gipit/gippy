@@ -585,6 +585,9 @@ namespace gip {
             for (unsigned int i=0; i<classes; i++) NumSamples(i) = 0;
             if (Options::verbose()) cout << "  Iteration " << iteration+1 << std::flush;
 
+            // reset running total to zero
+            cimg_forXY(RunningTotal,x,y) RunningTotal(x,y) = 0.0;
+
             for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
                 C_img = img.read<float>(*iCh);
                 C_mask = img.nodata_mask(*iCh);
