@@ -624,7 +624,7 @@ namespace gip {
                 }
             }
             if (Options::verbose()) cout << 100.0*((double)NumPixelChange/image.size()) << "% pixels changed class" << endl;
-            if (Options::verbose() > 1) cimg_printclasses(ClassMeans);
+            if (Options::verbose() > 1) cimg_print(ClassMeans);
         } while ( (++iteration < iterations) && (NumPixelChange > threshold) );
 
         imgout.set_bandname("k-means", 1);
