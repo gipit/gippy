@@ -304,7 +304,7 @@ namespace gip {
                 for (unsigned int j=0; j<nbands(); j++) {
                     DataType dt(typeid(T));
                     _RasterBands[j]._GDALRasterBand->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.gdal(), 0, 0);
-                    if (_RasterBands[j].nodata() && pix[0] == _RasterBands[j].nodata()) {
+                    if (pix[0] == _RasterBands[j].nodata()) {
                         badpix = true;
                     } else {
                         Pixels(j,p) = pix[0];
