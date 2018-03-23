@@ -572,7 +572,6 @@ namespace gip {
         CImg<float> ClassMeans = GetPixelClasses<float>(img, classes, num_random);
         if (Options::verbose() > 1) cimg_print(ClassMeans);
 
-        int i;
         CImg<double> Pixel, C_img, DistanceToClass(classes), NumSamples(classes), ThisClass;
         CImg<unsigned char> C_imgout, C_mask;
         CImg<double> RunningTotal(classes,image.nbands(),1,1,0);
@@ -583,7 +582,7 @@ namespace gip {
         int NumPixelChange, iteration=0;
         do {
             NumPixelChange = 0;
-            for (i=0; i<classes; i++) NumSamples(i) = 0;
+            for (unsigned int i=0; i<classes; i++) NumSamples(i) = 0;
             if (Options::verbose()) cout << "  Iteration " << iteration+1 << std::flush;
 
             for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
@@ -615,15 +614,15 @@ namespace gip {
             }
 
             // Calculate new Mean class vectors
-            for (i=0; i<classes; i++) {
-                if (NumSamples(i) > 0) {
-                    std::cout << "NumSamples = " << NumSamples(i) << std::endl;
+            for (unsigned int c=0; c<classes; c++) {
+                if (NumSamples(c) > 0) {
+                    std::cout << "NumSamples = " << NumSamples(c) << std::endl;
                     cimg_forX(ClassMeans,x) {
-                        ClassMeans(x,i) = RunningTotal(i,x)/NumSamples(i);
-                        RunningTotal(i,x) = 0;
-                        std::cout << "ClassMeans " << x << ", " << i << " : " << ClassMeans(x, i) << std::endl;
+                        std::cout << "RunningTotal " << c << ", " << x << " : " << RunningTotal(c, x) << std::endl;
+                        ClassMeans(x,c) = RunningTotal(c,x)/NumSamples(c);
+                        RunningTotal(c,x) = 0;
                     }
-                    NumSamples(i) = 0;
+                    NumSamples(c) = 0;
                 }
             }
             if (Options::verbose()) cout << 100.0*((double)NumPixelChange/image.size()) << "% pixels changed class" << endl;
