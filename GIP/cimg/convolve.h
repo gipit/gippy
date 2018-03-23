@@ -35,15 +35,8 @@ const CImg<T>& print_elements(std::string title="") {
     cimg_for(*this, ptr, T) std::cerr << *ptr << " ";
     std::cerr << std::endl;
 }
-
-const CImg<T>& print__as_classes(std::string title="") {
-    for (int i=0; i<this->height(); i++) {
-        std::cerr << "\tClass" << " " << i+1 << ": ";
-        cimg_forX(*this, x) std::cerr < (*this)(x,i) << " ";
-        std::cerr << std::endl;
-    }
-}
 */
+
 
 //! Convolve ignoring nodata values
 //template<typename t>
