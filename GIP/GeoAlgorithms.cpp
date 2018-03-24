@@ -553,7 +553,9 @@ namespace gip {
 
 
     //! k-means unsupervised classifier
-    GeoImage kmeans( const GeoImage& image, string filename, int classes, int iterations, float threshold, int num_random) {
+    GeoImage kmeans( const GeoImage& image, string filename,
+                     unsigned int classes, unsigned int iterations, 
+                     float threshold, unsigned int num_random) {
         //if (Image.NumBands() < 2) throw GIP::Gexceptions::errInvalidParams("At least two bands must be supplied");
         if (Options::verbose()) {
             cout << image.basename() << " - k-means unsupervised classifier:" << endl
@@ -612,9 +614,6 @@ namespace gip {
                             C_imgout(x,y) = stats(4)+1;
                         }
                         NumSamples(stats(4))++;
-                        std::cout << "Pixel ";
-                        cimg_forX(Pixel,x) std::cout << " " << Pixel[x];
-                        std::cout << endl;
                         cimg_forY(RunningTotal,iband) RunningTotal(stats(4),iband) += Pixel(iband);
                     } else C_imgout(x,y) = 0;
                 }
