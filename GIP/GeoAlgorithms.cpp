@@ -593,7 +593,8 @@ namespace gip {
                 C_mask = img.nodata_mask(*iCh);
                 C_imgout = imgout[0].read<float>(*iCh);
 
-                c_img.print();
+                C_img.print();
+                Pixel.print();
 
                 CImg<double> stats;
                 cimg_forXY(C_img,x,y) { // Loop through image
