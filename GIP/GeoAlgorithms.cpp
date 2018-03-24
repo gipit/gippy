@@ -602,7 +602,7 @@ namespace gip {
                 cimg_forXY(C_img,x,y) { // Loop through image
                     // Calculate distance between this pixel and all classes
                     if (!C_mask(x,y)) {
-                        Pixel = C_img.get_crop(x,y,0,0,x,y,0,C_img.spectrum()-1).unroll('x');
+                        Pixel = C_img.get_crop(x,y,0,0,x,y,C_img.depth()-1,0).unroll('x');
                         cimg_forY(ClassMeans,cls) {
                             ThisClass = ClassMeans.get_row(cls);
                             DistanceToClass(cls) = (Pixel - ThisClass).dot(Pixel - ThisClass);
