@@ -333,7 +333,7 @@ namespace gip {
         double stddev() const { return (stats())[3]; }
     
         //! Calculate histogram with provided bins
-        CImg<float> histogram(unsigned int bins=100, bool normalize=true, bool cumulative=false) const;
+        CImg<double> histogram(unsigned int bins=100, bool normalize=true, bool cumulative=false) const;
 
         //! Get value for this percentile in the cumulative distribution histogram
         double percentile(const double& p) const;

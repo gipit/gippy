@@ -595,9 +595,6 @@ namespace gip {
                 C_mask = img.nodata_mask(*iCh);
                 C_imgout = imgout[0].read<float>(*iCh);
 
-                C_img.print();
-                Pixel.print();
-
                 CImg<double> stats;
                 cimg_forXY(C_img,x,y) { // Loop through image
                     // Calculate distance between this pixel and all classes
@@ -624,9 +621,7 @@ namespace gip {
             // Calculate new Mean class vectors
             for (unsigned int c=0; c<classes; c++) {
                 if (NumSamples(c) > 0) {
-                    std::cout << "NumSamples = " << NumSamples(c) << std::endl;
                     cimg_forX(ClassMeans,x) {
-                        std::cout << "RunningTotal " << c << ", " << x << " : " << RunningTotal(c, x) << std::endl;
                         ClassMeans(x,c) = RunningTotal(c,x)/NumSamples(c);
                         RunningTotal(c,x) = 0;
                     }
@@ -634,7 +629,7 @@ namespace gip {
                 }
             }
             if (Options::verbose()) cout << 100.0*((double)NumPixelChange/image.size()) << "% pixels changed class" << endl;
-            if (Options::verbose() > 1) cimg_print(ClassMeans);
+            if (Options::verbose() > 2) cimg_print(ClassMeans);
         } while ( (++iteration < iterations) && (NumPixelChange > threshold) );
 
         imgout.set_bandname("k-means", 1);

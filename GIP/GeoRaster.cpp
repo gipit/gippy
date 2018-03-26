@@ -137,11 +137,11 @@ namespace gip {
     }
 
     //! Compute histogram
-    CImg<float> GeoRaster::histogram(unsigned int bins, bool normalize, bool cumulative) const {
+    CImg<double> GeoRaster::histogram(unsigned int bins, bool normalize, bool cumulative) const {
         //CImg<double> cimg;
         CImg<float> st = stats();
-        CImg<float> hist(bins,1,1,1,0);
-        long numpixels(0);
+        CImg<double> hist(bins,1,1,1,0);
+        double numpixels(0);
         float nd = nodata();
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> _chunks = chunks();
@@ -151,13 +151,17 @@ namespace gip {
             cimg_for(cimg,ptr,double) {
                 if (*ptr != nd) {
                     index = floor((*ptr-st(0))/(st(1)-st(0)) * bins);
+                    //std::cout << index << " " << hist[index] << " " << numpixels << std::endl;
                     // this would be due to floating point roundoff error
-                    if (index==bins)
+                    if (index==bins) {
                         index = bins-1;
-                    else if (index > bins)
+                    }
+                    else if (index > bins) {
                         index = 0;
-                    hist[index]++;
+                    }
+                    hist[index] = hist[index]+1;
                     numpixels++;
+                    //std::cout << index << " " << hist[index] << " " << numpixels << std::endl;
                 }
             }
         }
