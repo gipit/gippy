@@ -84,14 +84,14 @@ namespace gip {
 
     //! Get a number of pixel vectors that are spectrally distant from each other
     // TODO - review this function for generality, maybe specific to kmeans?
-    template<class T> CImg<T> GetPixelClasses(const GeoImage img, int num_classes, int num_random=500) {
+    template<class T> CImg<T> get_random_classes(const GeoImage img, int num_classes, int num_random=1000) {
         if (Options::verbose()) {
             std::cout << img.basename() << ": get " << num_random << " random pixels" << std::endl;
         }
         CImg<T> stats;
         CImg<T> ClassMeans(img.nbands(), num_classes);
         // Get Random Pixels
-        CImg<T> RandomPixels = img.read_random_pixels<T>(num_classes * num_random);
+        CImg<T> RandomPixels = img.read_random_pixels<T>(num_random);
         // First pixel becomes first class
         cimg_forX(ClassMeans,x) ClassMeans(x,0) = RandomPixels(x,0);
         for (int i=1; i<num_classes; i++) {

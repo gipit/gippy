@@ -291,12 +291,12 @@ namespace gip {
         //! Get a number of random pixel vectors (spectral vectors)
         // TODO - review this function, which is used by k-means, likely too specific
         // generalize to get spectra of passed in indices maybe?
-        template<class T> CImg<T> read_random_pixels(int NumPixels) const {
-            CImg<T> Pixels(nbands(), NumPixels);
+        template<class T> CImg<T> read_random_pixels(int num_pixels) const {
+            CImg<T> Pixels(nbands(), num_pixels);
             srand( time(NULL) );
             bool badpix;
             int p = 0;
-            while(p < NumPixels) {
+            while(p < num_pixels) {
                 int col = (double)rand()/RAND_MAX * (xsize()-1);
                 int row = (double)rand()/RAND_MAX * (ysize()-1);
                 T pix[1];

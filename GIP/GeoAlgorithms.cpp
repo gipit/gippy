@@ -571,7 +571,7 @@ namespace gip {
         GeoImage imgout = GeoImage::create_from(image, filename, 1, "uint8");
 
         // Get initial class estimates (uses random pixels)
-        CImg<float> ClassMeans = GetPixelClasses<float>(img, classes, num_random);
+        CImg<float> ClassMeans = get_random_classes<float>(img, classes, num_random);
         if (Options::verbose() > 1) cimg_print(ClassMeans);
 
         CImg<double> Pixel, C_img, DistanceToClass(classes), NumSamples(classes), ThisClass;
