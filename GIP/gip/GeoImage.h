@@ -27,7 +27,6 @@
 #include <gip/GeoRaster.h>
 #include <gip/GeoFeature.h>
 #include <stdint.h>
-#include <gip/utils.h>
 
 namespace gip {
     //using std::string;
@@ -287,6 +286,33 @@ namespace gip {
                 images.insert( iBand->read<T>(chunk) );
             }
             return images.get_append('z');
+        }
+
+        //! Get a number of random pixel vectors (spectral vectors)
+        // TODO - review this function, which is used by k-means, likely too specific
+        // generalize to get spectra of passed in indices maybe?
+        template<class T> CImg<T> read_random_pixels(int num_pixels) const {
+            CImg<T> Pixels(nbands(), num_pixels);
+            srand( time(NULL) );
+            bool badpix;
+            int p = 0;
+            while(p < num_pixels) {
+                int col = (double)rand()/RAND_MAX * (xsize()-1);
+                int row = (double)rand()/RAND_MAX * (ysize()-1);
+                T pix[1];
+                badpix = false;
+                for (unsigned int j=0; j<nbands(); j++) {
+                    DataType dt(typeid(T));
+                    _RasterBands[j]._GDALRasterBand->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.gdal(), 0, 0);
+                    if (pix[0] == _RasterBands[j].nodata()) {
+                        badpix = true;
+                    } else {
+                        Pixels(j,p) = pix[0];
+                    }
+                }
+                if (!badpix) p++;
+            }
+            return Pixels;
         }
 
         //! Write cube across all bands

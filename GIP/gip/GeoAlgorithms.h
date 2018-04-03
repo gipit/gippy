@@ -60,7 +60,8 @@ namespace gip {
         float xres=1.0, float yres=1.0, int interpolation=0, dictionary options=dictionary());
 
     //! Kmeans
-    //GeoImage kmeans(const GeoImage&, std::string, int classes=5, int iterations=5, float threshold=1.0);
+    GeoImage kmeans(const GeoImage&, std::string, unsigned int classes=5, unsigned int iterations=5,
+                    float threshold=1.0, unsigned int num_random=500);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
     GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string filename="");
@@ -80,6 +81,41 @@ namespace gip {
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);
+
+    //! Get a number of pixel vectors that are spectrally distant from each other
+    // TODO - review this function for generality, maybe specific to kmeans?
+    template<class T> CImg<T> get_random_classes(const GeoImage img, int num_classes, int num_random=1000) {
+        if (Options::verbose()) {
+            std::cout << img.basename() << ": get " << num_random << " random pixels" << std::endl;
+        }
+        CImg<T> stats;
+        CImg<T> ClassMeans(img.nbands(), num_classes);
+        // Get Random Pixels
+        CImg<T> RandomPixels = img.read_random_pixels<T>(num_random);
+        // First pixel becomes first class
+        cimg_forX(ClassMeans,x) ClassMeans(x,0) = RandomPixels(x,0);
+        for (int i=1; i<num_classes; i++) {
+            CImg<T> ThisClass = ClassMeans.get_row(i-1);
+            long validpixels = 0;
+            CImg<T> Dist(RandomPixels.height());
+            for (long j=0; j<RandomPixels.height(); j++) {
+                // Get current pixel vector
+                CImg<T> ThisPixel = RandomPixels.get_row(j);
+                // Find distance to last class
+                Dist(j) = ThisPixel.sum() ? (ThisPixel-ThisClass).dot( (ThisPixel-ThisClass).transpose() ) : 0;
+                if (Dist(j) != 0) validpixels++;
+            }
+            stats = Dist.get_stats();
+            // The pixel farthest away from last class make the new class
+            cimg_forX(ClassMeans,x) ClassMeans(x,i) = RandomPixels(x,stats(8));
+            // Toss a bunch of pixels away (make zero)
+            CImg<T> DistSort = Dist.get_sort();
+            T cutoff = DistSort[num_random*i]; //(stats.max-stats.min)/10 + stats.min;
+            cimg_forX(Dist,x) if (Dist(x) < cutoff) cimg_forX(RandomPixels,x1) RandomPixels(x1,x) = 0;
+        }
+        return ClassMeans;
+    }
+
 
     }
 } // namespace gip
