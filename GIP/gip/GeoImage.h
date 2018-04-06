@@ -246,6 +246,9 @@ namespace gip {
         //! Calculate spectral covariance
         CImg<double> spectral_covariance() const;
 
+        //! Calculate spectral statistics
+        CImg<double> spectral_statistics(Chunk chunk=Chunk()) const;
+
         //! Calculate spectral correlation
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
         

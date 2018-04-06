@@ -581,7 +581,7 @@ namespace gip {
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> chunks = image.chunks();
 
-        int NumPixelChange, iteration=0;
+        unsigned int NumPixelChange, iteration=0;
         do {
             NumPixelChange = 0;
             for (unsigned int i=0; i<classes; i++) NumSamples(i) = 0;
@@ -757,6 +757,31 @@ namespace gip {
         return imgout;
     }
 
+    //! Calculate spectral statistics and output to new image
+    GeoImage spectral_statistics(const GeoImage& img, string filename) {
+        if (img.nbands() < 2) {
+            throw std::runtime_error("Must have at least 2 bands!");
+        }
+
+        GeoImage imgout = GeoImage::create_from(img, filename, 3, "float64");
+        imgout.set_nodata(-32768);
+        imgout.set_bandname("mean", 1);
+        imgout.set_bandname("stddev", 2);
+        imgout.set_bandname("numpixels", 3);
+
+        CImg<double> stats;
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = img.chunks();
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            stats = img.spectral_statistics(*iCh);
+            imgout[0].write(stats.slice(0), *iCh);
+            imgout[1].write(stats.slice(1), *iCh);
+            imgout[2].write(stats.slice(2), *iCh);
+        }
+        if (Options::verbose())
+            std::cout << "Spectral statistics written to " << imgout.filename() << std::endl;
+        return imgout;
+    }
 
 
 

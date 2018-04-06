@@ -33,40 +33,6 @@ GeoRaster& Mean(GeoRaster& raster) const {
     return raster;
 }
 
-//! Calculate mean, stddev for chunk - must contain data for all bands
-// TODO - review this function
-CImgList<double> SpectralStatistics(iRect chunk=iRect()) const {
-    CImg<unsigned char> mask;
-    CImg<double> band, total, mean;
-    unsigned int iBand;
-    mask = DataMask({}, chunk);
-    double nodata = _RasterBands[0].NoData();
-    for (iBand=0;iBand<NumBands();iBand++) {
-        band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
-        if (iBand == 0) {
-            total = band;
-        } else {
-            total += band;
-        }
-    }
-    mean = total / NumBands();
-    for (iBand=0;iBand<NumBands();iBand++) {
-        band = _RasterBands[iBand].Read<double>(chunk).mul(mask);
-        if (iBand == 0) {
-            total = (band - mean).pow(2);
-        } else {
-            total += (band - mean).pow(2);
-        }
-    }
-    CImgList<double> stats(mean, (total / (NumBands()-1)).sqrt());
-    cimg_forXY(mask,x,y) { 
-        if (mask(x,y) == 0) {
-            stats[0](x,y) = nodata;
-            stats[1](x,y) = nodata; 
-        }
-    }
-    return stats;          
-}
 
 //! Extract, and interpolate, time series (C is time axis)
 // TODO - review this function to be more general extraction over bands
