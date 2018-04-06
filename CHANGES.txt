@@ -21,8 +21,9 @@
 v1.0.1:
 - fixes setting of nodata in GeoImage.open function
 - allow dictionary file creation options to be passed to GeoImage.create() and cookie_cutter
-- add kmeans algorithm
+- added kmeans algorithm
 - fix histogram function, now returns doubles
+- added spectral_statistics algorithm and GeoImage::spectral_statistics function
 
 v1.0.0:
 - Major restructuring and refactor
