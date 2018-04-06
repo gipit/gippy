@@ -64,20 +64,20 @@ namespace gip {
                     float threshold=1.0, unsigned int num_random=500);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
-    GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string="");
+    GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string filename="");
 
     //! Create output based on linear combinations of input
-    GeoImage linear_transform(const GeoImage& geoimg, CImg<float> coef, std::string);
+    GeoImage linear_transform(const GeoImage& geoimg, CImg<float> coef, std::string filename);
 
     //! Pansharpen all bands in a GeoImage with a pan band
     GeoImage pansharp_brovey(const GeoImage& geoimg, const GeoImage& panimg,
-                             CImg<float> weights=CImg<float>(), std::string="");
+                             CImg<float> weights=CImg<float>(), std::string filename="");
 
     //! Runs the RX Detector (RXD) anamoly detection algorithm
-    GeoImage rxd(const GeoImage& geoimg, std::string="");
+    GeoImage rxd(const GeoImage& geoimg, std::string filename="");
 
     //! Calculate spectral statistics and output to new image
-    GeoImage spectral_statistics(const GeoImage&, std::string="");
+    GeoImage spectral_statistics(const GeoImage&, std::string filename="");
 
     //! Spectral Matched Filter
     //GeoImage SMF(const GeoImage& image, std::string, CImg<double>);
