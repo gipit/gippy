@@ -247,11 +247,9 @@ namespace gip {
             mask = _RasterBands[iBand].nodata_mask(chunk)^=1;
             band = _RasterBands[iBand].read<double>(chunk).mul(mask);
             // don't count nodata values
-            std::cout << "loop mask" << std::endl;
             cimg_forXY(mask,x,y) { 
                 if (mask(x,y) == 1) numpixels(x,y)++;
             }
-            std::cout << "sum" << std::endl;
             if (iBand == 0) {
                 total = band;
             } else {

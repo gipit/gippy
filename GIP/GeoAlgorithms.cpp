@@ -774,9 +774,9 @@ namespace gip {
         vector<Chunk> chunks = img.chunks();
         for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
             stats = img.spectral_statistics(*iCh);
-            imgout[0].write(stats.slice(0), *iCh);
-            imgout[1].write(stats.slice(1), *iCh);
-            imgout[2].write(stats.slice(2), *iCh);
+            imgout[0].write(stats.get_slice(0), *iCh);
+            imgout[1].write(stats.get_slice(1), *iCh);
+            imgout[2].write(stats.get_slice(2), *iCh);
         }
         if (Options::verbose())
             std::cout << "Spectral statistics written to " << imgout.filename() << std::endl;
