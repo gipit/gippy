@@ -217,7 +217,7 @@ namespace gip {
             return GeoImage(image);
         }
         // templated functions that need to be instantiated
-        GeoImage save(std::string filename, std::string dtype="", float nodata=NAN, std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
+        GeoImage save(std::string filename="", std::string dtype="", float nodata=NAN, std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
             return self->save<double>(filename, dtype, nodata, format, temp, overviews, options);
         }
         PyObject* read(Chunk chunk=Chunk()) {
