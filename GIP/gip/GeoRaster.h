@@ -84,6 +84,11 @@ namespace gip {
         bool is_processed() const { 
             return (_Functions.size() > 0) ? true : false;
         }
+        //! Clears all functions from queue
+        GeoRaster& clear_functions() {
+            _Function.clear();
+            return *this;
+        }
 
         //! Indicates if data should be read as doubles (functions or gain/offset)
         bool is_double() const {
