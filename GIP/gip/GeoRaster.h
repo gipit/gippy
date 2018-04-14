@@ -86,7 +86,7 @@ namespace gip {
         }
         //! Clears all functions from queue
         GeoRaster& clear_functions() {
-            _Function.clear();
+            _Functions.clear();
             return *this;
         }
 
