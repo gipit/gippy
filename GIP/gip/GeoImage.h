@@ -115,7 +115,7 @@ namespace gip {
             double gain=1.0, double offset=0.0) {
             // open image, then set all these things
             GeoImage geoimg = GeoImage(filenames, update);
-            if (!isnan(nodata)) {
+            if (!std::isnan(nodata)) {
                 geoimg.set_nodata(nodata);
             }
             geoimg.set_gain(gain);
@@ -446,7 +446,7 @@ namespace gip {
         if (dtype == "") dtype = this->type().string();
 
         GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp, options);
-        if (!isnan(nodata)) {
+        if (!std::isnan(nodata)) {
             imgout.set_nodata(nodata);
         }
         if (Options::verbose() > 2)
