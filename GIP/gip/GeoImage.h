@@ -323,7 +323,7 @@ namespace gip {
             typename std::vector< GeoRaster >::iterator iBand;
             int i(0);
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
-                iBand->write(img.get_channel(i++), chunk);
+                iBand->write(img.get_slice(i++), chunk);
             }
             return *this;
         }
