@@ -223,21 +223,21 @@ namespace gip {
         PyObject* read_random_pixels(int num_pixels) {
             return CImgToArr(self->read_random_pixels<double>(num_pixels));
         }
-        PyObject* extract_pixels() {
+        PyObject* extract_classes() {
             // TODO - look at all bands for gain and offset
             if (!(*self)[0].is_double()) {
                 switch(self->type().type()) {
-                    case 1: return CImgToArr(self->extract_pixels<uint8_t>());
-                    case 2: return CImgToArr(self->extract_pixels<uint16_t>());
-                    case 3: return CImgToArr(self->extract_pixels<int16_t>());
-                    case 4: return CImgToArr(self->extract_pixels<uint32_t>());
-                    case 5: return CImgToArr(self->extract_pixels<int32_t>());
-                    case 6: return CImgToArr(self->extract_pixels<float>());
-                    case 7: return CImgToArr(self->extract_pixels<double>());
+                    case 1: return CImgToArr(self->extract_classes<uint8_t>());
+                    case 2: return CImgToArr(self->extract_classes<uint16_t>());
+                    case 3: return CImgToArr(self->extract_classes<int16_t>());
+                    case 4: return CImgToArr(self->extract_classes<uint32_t>());
+                    case 5: return CImgToArr(self->extract_classes<int32_t>());
+                    case 6: return CImgToArr(self->extract_classes<float>());
+                    case 7: return CImgToArr(self->extract_classes<double>());
                     default: throw(std::runtime_error("error reading raster"));
                 }
             }
-            return CImgToArr(self->extract_pixels<double>());
+            return CImgToArr(self->extract_classes<double>());
         } 
         PyObject* read(Chunk chunk=Chunk()) {
             // TODO - look at all bands for gain and offset

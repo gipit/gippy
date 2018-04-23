@@ -320,28 +320,29 @@ namespace gip {
 
 
         //! Extract spectra from pixels where not nodata, return as 2-d array
-        template<class T> CImg<T> extract_pixels() {
+        template<class T> CImg<T> extract_classes(const GeoRaster& classmap) {
             if (Options::verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
             CImg<T> arr;
+            CImg<unsigned char> classes;
             CImg<T> cimg;
             double nodata = _RasterBands[0].nodata();
             long count = 0;
             vector<Chunk>::const_iterator iCh;
             vector<Chunk> _chunks = chunks();
             for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-                cimg = read<T>(*iCh);
+                classes = classmap.read<unsigned char>(*iCh);
                 cimg_for(cimg,ptr,T) if (*ptr != nodata) count++;
             }
-            CImg<T> pixels(count,nbands(),1,1,nodata);
+            CImg<T> pixels(count,nbands()+1,1,1,nodata);
             count = 0;
             unsigned int c;
             for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-                if (Options::verbose() > 3) std::cout << "Extracting from chunk " << *iCh << std::endl;
                 cimg = read<T>(*iCh);
+                classes = classmap.read<unsigned char>(*iCh);
                 cimg_forXY(cimg,x,y) {
-                    if (cimg(x,y) != nodata) {
-                        for (c=0;c<nbands();c++) pixels(count,c) = cimg(x,y,c);
-                        //pixels(count++,0) = cmask(x,y);
+                    if (classes(x,y) != nodata) {
+                        for (c=0;c<nbands();c++) pixels(count,c+1) = cimg(x,y,c);
+                        pixels(count++,0) = classes(x,y);
                     }
                 }
             }
