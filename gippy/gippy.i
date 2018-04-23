@@ -220,6 +220,25 @@ namespace gip {
         GeoImage save(std::string filename="", std::string dtype="", float nodata=NAN, std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
             return self->save<double>(filename, dtype, nodata, format, temp, overviews, options);
         }
+        PyObject* read_random_pixels(int num_pixels) {
+            return CImgToArr(self->read_random_pixels<double>(num_pixels));
+        }
+        PyObject* extract_pixels() {
+            // TODO - look at all bands for gain and offset
+            if (!(*self)[0].is_double()) {
+                switch(self->type().type()) {
+                    case 1: return CImgToArr(self->extract_pixels<uint8_t>());
+                    case 2: return CImgToArr(self->extract_pixels<uint16_t>());
+                    case 3: return CImgToArr(self->extract_pixels<int16_t>());
+                    case 4: return CImgToArr(self->extract_pixels<uint32_t>());
+                    case 5: return CImgToArr(self->extract_pixels<int32_t>());
+                    case 6: return CImgToArr(self->extract_pixels<float>());
+                    case 7: return CImgToArr(self->extract_pixels<double>());
+                    default: throw(std::runtime_error("error reading raster"));
+                }
+            }
+            return CImgToArr(self->extract_pixels<double>());
+        } 
         PyObject* read(Chunk chunk=Chunk()) {
             // TODO - look at all bands for gain and offset
             if (!(*self)[0].is_double()) {

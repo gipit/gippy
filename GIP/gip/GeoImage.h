@@ -318,6 +318,37 @@ namespace gip {
             return Pixels;
         }
 
+
+        //! Extract spectra from pixels where not nodata, return as 2-d array
+        template<class T> CImg<T> extract_pixels() {
+            if (Options::verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
+            CImg<T> arr;
+            CImg<T> cimg;
+            double nodata = _RasterBands[0].nodata();
+            long count = 0;
+            vector<Chunk>::const_iterator iCh;
+            vector<Chunk> _chunks = chunks();
+            for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+                cimg = read<T>(*iCh);
+                cimg_for(cimg,ptr,T) if (*ptr != nodata) count++;
+            }
+            CImg<T> pixels(count,nbands(),1,1,nodata);
+            count = 0;
+            unsigned int c;
+            for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+                if (Options::verbose() > 3) std::cout << "Extracting from chunk " << *iCh << std::endl;
+                cimg = read<T>(*iCh);
+                cimg_forXY(cimg,x,y) {
+                    if (cimg(x,y) != nodata) {
+                        for (c=0;c<nbands();c++) pixels(count,c) = cimg(x,y,c);
+                        //pixels(count++,0) = cmask(x,y);
+                    }
+                }
+            }
+            return pixels;
+        }
+
+
         //! Write cube across all bands
         template<class T> GeoImage& write(const CImg<T> img, Chunk chunk=Chunk()) {
             typename std::vector< GeoRaster >::iterator iBand;
