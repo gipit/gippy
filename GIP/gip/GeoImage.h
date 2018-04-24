@@ -325,7 +325,7 @@ namespace gip {
             CImg<T> arr;
             CImg<unsigned char> classes;
             CImg<T> cimg;
-            double nodata = classmap[0].nodata();
+            double nodata = classmap.nodata();
             long count = 0;
             vector<Chunk>::const_iterator iCh;
             vector<Chunk> _chunks = chunks();
