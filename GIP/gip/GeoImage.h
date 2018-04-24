@@ -331,7 +331,7 @@ namespace gip {
             vector<Chunk> _chunks = chunks();
             for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
                 classes = classmap.read<unsigned char>(*iCh);
-                cimg_for(cimg,ptr,T) if (*ptr != nodata) count++;
+                cimg_for(classes,ptr,T) if (*ptr != nodata) count++;
             }
             CImg<T> pixels(count,nbands()+1,1,1,nodata);
             count = 0;
