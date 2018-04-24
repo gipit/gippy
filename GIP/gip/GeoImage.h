@@ -325,7 +325,7 @@ namespace gip {
             CImg<T> arr;
             CImg<unsigned char> classes;
             CImg<T> cimg;
-            double nodata = _RasterBands[0].nodata();
+            double nodata = classmap[0].nodata();
             long count = 0;
             vector<Chunk>::const_iterator iCh;
             vector<Chunk> _chunks = chunks();
