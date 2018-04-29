@@ -310,7 +310,7 @@ namespace gip {
                     if (pix[0] == _RasterBands[j].nodata()) {
                         badpix = true;
                     } else {
-                        Pixels(j,p) = pix[0];
+                        Pixels(j,p) = pix[0] * _RasterBands[j].gain() + _RasterBands[j].offset();
                     }
                 }
                 if (!badpix) p++;
