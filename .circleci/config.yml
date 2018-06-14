@@ -1,0 +1,118 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+
+# Environment variables required:
+# - PYPI_USER / PYPI_PASS: for publishing package to PyPi
+
+version: 2
+
+
+references:
+
+  container: &container
+    docker:
+      - image: developmentseed/geolambda:1.0.0
+    working_dir: ~/project
+
+  restore_repo: &restore_repo
+    restore_cache:
+      keys:
+        - v1-repo-{{ .Branch }}-{{ .Revision }}
+        - v1-repo-{{ .Branch }}
+        - v1-repo
+
+jobs:
+
+  checkout_code:
+    <<: *container
+    steps:
+      - *restore_repo
+      - checkout
+      - save_cache:
+          key: v1-repo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/project
+
+  install_and_test_27:
+    <<: *container
+    steps:  
+      - *restore_repo
+      - restore_cache:
+          keys: 
+            - v1-dependencies27-{{ checksum "requirements.txt"}}
+            - v1-dependencies27
+      - run: |
+            pip install virtualenv
+            virtualenv ~/venv27
+            . ~/venv27/bin/activate
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+            pytest --cov gippy test/ -v
+      - save_cache:
+          key: v1-dependencies27-{{ checksum "requirements.txt"}}
+          paths:
+            - ~/venv
+
+  install_and_test_36:
+    <<: *container
+    steps:  
+      - *restore_repo
+      - restore_cache:
+          keys: 
+            - v1-dependencies36-{{ checksum "requirements.txt"}}
+            - v1-dependencies36
+      - run: |
+            python3 -m venv ~/venv
+            . ~/venv/bin/activate
+            pwd
+            pip install -r requirements.txt
+            pip install -r requirements-dev.txt
+            pytest --cov gippy test/ -v
+      - save_cache:
+          key: v1-dependencies36-{{ checksum "requirements.txt"}}
+          paths:
+            - ~/venv
+
+  deploy:
+    <<: *container
+    steps:
+      - *restore_repo
+      - restore_cache:
+          keys: 
+            - v1-dependencies36-{{ checksum "requirements.txt"}}
+            - v1-dependencies36
+      - run:
+          name: Deploy
+          command: |
+            . ~/venv/bin/activate
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+            pip install twine
+            python setup.py sdist
+            VERSION=`awk -F\' '{print $2,$4}' gippy/version.py`
+            git tag $VERSION
+            git push origin $VERSION
+            #twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
+
+
+workflows:
+  version: 2
+  build_test_deploy:
+    jobs:
+      - checkout_code
+      - install_and_test_36:
+          requires:
+            - checkout_code
+      - deploy:
+          requires:
+            - install_and_test_36
+          filters:
+            branches:
+              only: master
+  build_test_27:
+    jobs:
+      - checkout_code
+      - install_and_test_27:
+          requires:
+            - checkout_code
