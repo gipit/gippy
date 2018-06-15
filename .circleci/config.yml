@@ -91,16 +91,17 @@ jobs:
       - run:
           name: Deploy
           command: |
-            . ~/venv/bin/activate
+            . ~/venv36/bin/activate
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' gippy/version.py`
+            pip install . --no-cache
             git add gippy/algorithms.py gippy/algorithms_wrap.cpp gippy.py gippy_wrap.cpp
             git commit -a -m 'added swig wrappers'
-            python setup.py sdist
             git tag $VERSION
             git push origin $VERSION
-            pip3 install twine
+            python setup.py sdist
+            pip install twine
             twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 
