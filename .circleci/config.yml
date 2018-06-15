@@ -18,9 +18,9 @@ references:
   restore_repo: &restore_repo
     restore_cache:
       keys:
-        - v1-repo-{{ .Branch }}-{{ .Revision }}
-        - v1-repo-{{ .Branch }}
-        - v1-repo
+        - v2-repo-{{ .Branch }}-{{ .Revision }}
+        - v2-repo-{{ .Branch }}
+        - v2-repo
 
 jobs:
 
@@ -30,7 +30,7 @@ jobs:
       - *restore_repo
       - checkout
       - save_cache:
-          key: v1-repo-{{ .Branch }}-{{ .Revision }}
+          key: v2-repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/project
 
@@ -40,8 +40,8 @@ jobs:
       - *restore_repo
       - restore_cache:
           keys: 
-            - v1-dependencies27-{{ checksum "requirements.txt"}}
-            - v1-dependencies27
+            - v2-dependencies27-{{ checksum "requirements.txt"}}
+            - v2-dependencies27
       - run: |
             yum install -y swig
             pip install virtualenv
@@ -53,7 +53,7 @@ jobs:
             cd test
             pytest --cov gippy
       - save_cache:
-          key: v1-dependencies27-{{ checksum "requirements.txt"}}
+          key: v2-dependencies27-{{ checksum "requirements.txt"}}
           paths:
             - ~/venv27
 
@@ -63,20 +63,19 @@ jobs:
       - *restore_repo
       - restore_cache:
           keys: 
-            - v1-dependencies36-{{ checksum "requirements.txt"}}
-            - v1-dependencies36
+            - v2-dependencies36-{{ checksum "requirements.txt"}}
+            - v2-dependencies36
       - run: |
             yum install -y swig
             python3 -m venv ~/venv36
             . ~/venv36/bin/activate
-            pwd
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
             pip install . --no-cache
             cd test
             pytest --cov gippy
       - save_cache:
-          key: v1-dependencies36-{{ checksum "requirements.txt"}}
+          key: v2-dependencies36-{{ checksum "requirements.txt"}}
           paths:
             - ~/venv36
 
@@ -86,8 +85,8 @@ jobs:
       - *restore_repo
       - restore_cache:
           keys: 
-            - v1-dependencies36-{{ checksum "requirements.txt"}}
-            - v1-dependencies36
+            - v2-dependencies36-{{ checksum "requirements.txt"}}
+            - v2-dependencies36
       - run:
           name: Deploy
           command: |
