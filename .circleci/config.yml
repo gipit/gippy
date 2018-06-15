@@ -88,12 +88,14 @@ jobs:
             . ~/venv/bin/activate
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
-            pip install twine
-            python setup.py sdist
             VERSION=`awk -F\' '{print $2,$4}' gippy/version.py`
+            python setup.py sdist
+            #git add gippy/algorithms.py gippy/algorithms_wrap.cpp gippy.py gippy_wrap.cpp
+            #git commit -a -m 'added swig wrappers'
             git tag $VERSION
             git push origin $VERSION
-            #twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
+            pip3 install twine
+            twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 
 workflows:
