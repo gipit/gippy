@@ -43,6 +43,7 @@ jobs:
             - v1-dependencies27-{{ checksum "requirements.txt"}}
             - v1-dependencies27
       - run: |
+            yum install -y swig
             pip install virtualenv
             virtualenv ~/venv27
             . ~/venv27/bin/activate
@@ -64,6 +65,7 @@ jobs:
             - v1-dependencies36-{{ checksum "requirements.txt"}}
             - v1-dependencies36
       - run: |
+            yum install -y swig
             python3 -m venv ~/venv
             . ~/venv/bin/activate
             pwd
