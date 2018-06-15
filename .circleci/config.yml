@@ -68,6 +68,7 @@ jobs:
             pwd
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
+            pip install .
             pytest --cov gippy test/ -v
       - save_cache:
           key: v1-dependencies36-{{ checksum "requirements.txt"}}
@@ -89,9 +90,9 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' gippy/version.py`
+            git add gippy/algorithms.py gippy/algorithms_wrap.cpp gippy.py gippy_wrap.cpp
+            git commit -a -m 'added swig wrappers'
             python setup.py sdist
-            #git add gippy/algorithms.py gippy/algorithms_wrap.cpp gippy.py gippy_wrap.cpp
-            #git commit -a -m 'added swig wrappers'
             git tag $VERSION
             git push origin $VERSION
             pip3 install twine
