@@ -43,7 +43,6 @@ jobs:
             - v3-dependencies27-{{ checksum "requirements.txt"}}
             - v3-dependencies27
       - run: |
-            yum install -y swig
             pip install virtualenv
             virtualenv ~/venv27
             . ~/venv27/bin/activate
@@ -63,6 +62,7 @@ jobs:
             - v3-dependencies27-{{ checksum "requirements.txt"}}
             - v3-dependencies27
       - run: |
+            yum install -y swig
             . ~/venv27/bin/activate
             pip install .
             cd test
@@ -77,7 +77,6 @@ jobs:
             - v3-dependencies36-{{ checksum "requirements.txt"}}
             - v3-dependencies36
       - run: |
-            yum install -y swig
             python3 -m venv ~/venv36
             . ~/venv36/bin/activate
             pip install -r requirements.txt
@@ -96,6 +95,7 @@ jobs:
             - v3-dependencies36-{{ checksum "requirements.txt"}}
             - v3-dependencies36
       - run: |
+            yum install -y swig
             . ~/venv36/bin/activate
             pip install .
             cd test
