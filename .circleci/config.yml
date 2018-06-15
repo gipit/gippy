@@ -120,8 +120,8 @@ jobs:
             pip install -e .
             git add -f gippy/algorithms.py gippy/algorithms_wrap.cpp gippy/gippy.py gippy/gippy_wrap.cpp
             git commit -a -m 'added swig wrappers for publishing to PyPi'
-            git config user.email "matt.a.hanson@gmail.com"
-            git config user.name "Matthew Hanson"
+            git config --global user.email "matt.a.hanson@gmail.com"
+            git config --global user.name "matthewhanson"
             git tag $VERSION
             git push origin $VERSION
             python setup.py sdist
