@@ -48,6 +48,7 @@ jobs:
             . ~/venv27/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
+            pip install .
             pytest --cov gippy test/ -v
       - save_cache:
           key: v1-dependencies27-{{ checksum "requirements.txt"}}
