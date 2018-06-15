@@ -13,7 +13,7 @@ references:
   container: &container
     docker:
       - image: developmentseed/geolambda:1.0.0b1
-    working_dir: ~/project
+    working_directory: ~/project
 
   restore_repo: &restore_repo
     restore_cache:
@@ -49,7 +49,7 @@ jobs:
             . ~/venv27/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
-            pip install .
+            pip install . --no-cache
             cd test
             pytest --cov gippy
       - save_cache:
@@ -72,7 +72,7 @@ jobs:
             pwd
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
-            pip install .
+            pip install . --no-cache
             cd test
             pytest --cov gippy
       - save_cache:
