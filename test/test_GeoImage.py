@@ -49,7 +49,6 @@ class GeoImageTests(unittest.TestCase):
         """ Read random pixels """
         geoimg = gpt.get_test_image()
         arr = geoimg.read_random_pixels(1000)
-        import pdb; pdb.set_trace()
 
     def test_uint16_read(self):
         """ read uint16 makes uint16 array """
