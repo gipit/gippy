@@ -18,9 +18,9 @@ references:
   restore_repo: &restore_repo
     restore_cache:
       keys:
-        - v2-repo-{{ .Branch }}-{{ .Revision }}
-        - v2-repo-{{ .Branch }}
-        - v2-repo
+        - v3-repo-{{ .Branch }}-{{ .Revision }}
+        - v3-repo-{{ .Branch }}
+        - v3-repo
 
 jobs:
 
@@ -30,18 +30,18 @@ jobs:
       - *restore_repo
       - checkout
       - save_cache:
-          key: v2-repo-{{ .Branch }}-{{ .Revision }}
+          key: v3-repo-{{ .Branch }}-{{ .Revision }}
           paths:
             - ~/project
 
-  install_and_test_27:
+  install_27:
     <<: *container
     steps:  
       - *restore_repo
       - restore_cache:
           keys: 
-            - v2-dependencies27-{{ checksum "requirements.txt"}}
-            - v2-dependencies27
+            - v3-dependencies27-{{ checksum "requirements.txt"}}
+            - v3-dependencies27
       - run: |
             yum install -y swig
             pip install virtualenv
@@ -49,35 +49,57 @@ jobs:
             . ~/venv27/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
-            pip install . --no-cache
-            cd test
-            pytest --cov gippy
       - save_cache:
-          key: v2-dependencies27-{{ checksum "requirements.txt"}}
+          key: v3-dependencies27-{{ checksum "requirements.txt"}}
           paths:
             - ~/venv27
 
-  install_and_test_36:
+  test_27:
+    <<: *container
+    steps:
+      - *restore_repo
+      - restore_cache:
+          keys:
+            - v3-dependencies27-{{ checksum "requirements.txt"}}
+            - v3-dependencies27
+      - run: |
+            . ~/venv27/bin/activate
+            pip install .
+            cd test
+            pytest --cov gippy     
+
+  install_36:
     <<: *container
     steps:  
       - *restore_repo
       - restore_cache:
           keys: 
-            - v2-dependencies36-{{ checksum "requirements.txt"}}
-            - v2-dependencies36
+            - v3-dependencies36-{{ checksum "requirements.txt"}}
+            - v3-dependencies36
       - run: |
             yum install -y swig
             python3 -m venv ~/venv36
             . ~/venv36/bin/activate
             pip install -r requirements.txt
             pip install -r requirements-dev.txt
-            pip install . --no-cache
-            cd test
-            pytest --cov gippy
       - save_cache:
-          key: v2-dependencies36-{{ checksum "requirements.txt"}}
+          key: v3-dependencies36-{{ checksum "requirements.txt"}}
           paths:
             - ~/venv36
+
+  test_36:
+    <<: *container
+    steps:
+      - *restore_repo
+      - restore_cache:
+          keys:
+            - v3-dependencies36-{{ checksum "requirements.txt"}}
+            - v3-dependencies36
+      - run: |
+            . ~/venv36/bin/activate
+            pip install .
+            cd test
+            pytest --cov gippy
 
   deploy:
     <<: *container
@@ -85,8 +107,8 @@ jobs:
       - *restore_repo
       - restore_cache:
           keys: 
-            - v2-dependencies36-{{ checksum "requirements.txt"}}
-            - v2-dependencies36
+            - v3-dependencies36-{{ checksum "requirements.txt"}}
+            - v3-dependencies36
       - run:
           name: Deploy
           command: |
@@ -94,7 +116,7 @@ jobs:
             mkdir -p ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' gippy/version.py`
-            pip install . --no-cache
+            pip install -e .
             git add gippy/algorithms.py gippy/algorithms_wrap.cpp gippy.py gippy_wrap.cpp
             git commit -a -m 'added swig wrappers'
             git tag $VERSION
@@ -109,7 +131,10 @@ workflows:
   build_test_deploy:
     jobs:
       - checkout_code
-      - install_and_test_36:
+      - install_36:
+          requires:
+            - checkout_code
+      - test_36:
           requires:
             - checkout_code
       - deploy:
@@ -121,6 +146,9 @@ workflows:
   build_test_27:
     jobs:
       - checkout_code
-      - install_and_test_27:
+      - install_27:
+          requires:
+            - checkout_code
+      - install_36:
           requires:
             - checkout_code
