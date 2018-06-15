@@ -27,7 +27,6 @@
 #include <gip/GeoRaster.h>
 #include <gip/GeoFeature.h>
 #include <stdint.h>
-#include <gip/utils.h>
 
 namespace gip {
     //using std::string;
@@ -73,13 +72,13 @@ namespace gip {
                 unsigned int xsz=1, unsigned int ysz=1, unsigned int nb=1, 
                 std::string proj="EPSG:4326",
                 CImg<double> bbox=CImg<double>(4, 1, 1, 1, 0.0, 0.0, 1.0, 1.0),
-                std::string dtype="uint8", std::string format="", bool temp=false) {
+                std::string dtype="uint8", std::string format="", bool temp=false, dictionary options=dictionary()) {
             if (filename == "") {
                 filename = random_filename();
                 temp = true;
             }
             BoundingBox ext(bbox[0], bbox[1], bbox[2], bbox[3]);
-            return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp);
+            return GeoImage(filename, xsz, ysz, nb, proj, ext, DataType(dtype), format, temp, options);
         }
 
         //! Create new image using footprint of another
@@ -111,11 +110,14 @@ namespace gip {
         }
 
         //! Open new image
-        static GeoImage open(std::vector<std::string> filenames, bool update=true, float nodata=0,
+        static GeoImage open(std::vector<std::string> filenames, bool update=true, float nodata=NAN,
             std::vector<std::string> bandnames=std::vector<std::string>({}),
             double gain=1.0, double offset=0.0) {
             // open image, then set all these things
             GeoImage geoimg = GeoImage(filenames, update);
+            if (!std::isnan(nodata)) {
+                geoimg.set_nodata(nodata);
+            }
             geoimg.set_gain(gain);
             geoimg.set_offset(offset);
             if (bandnames.size() > 0) {
@@ -244,6 +246,9 @@ namespace gip {
         //! Calculate spectral covariance
         CImg<double> spectral_covariance() const;
 
+        //! Calculate spectral statistics
+        CImg<double> spectral_statistics(Chunk chunk=Chunk()) const;
+
         //! Calculate spectral correlation
         //CImg<double> SpectralCorrelation(const GeoImage&, CImg<double> covariance=CImg<double>() );
         
@@ -251,7 +256,7 @@ namespace gip {
         GeoImage& add_overviews(std::vector<int> levels=std::vector<int>({2, 4, 8}), std::string resampler="NEAREST");
 
         //! Process band into new file (copy and apply processing functions)
-        template<class T> GeoImage save(std::string filename="", std::string dtype="", std::string format="",
+        template<class T> GeoImage save(std::string filename="", std::string dtype="", float nodata=NAN, std::string format="",
                                         bool temp=false, bool overviews=false, dictionary options=dictionary()) const;
 
         //! Adds a mask band (1 for valid) to every band in image
@@ -286,12 +291,71 @@ namespace gip {
             return images.get_append('z');
         }
 
+        //! Get a number of random pixel vectors (spectral vectors)
+        // TODO - review this function, which is used by k-means, likely too specific
+        // generalize to get spectra of passed in indices maybe?
+        template<class T> CImg<T> read_random_pixels(int num_pixels) const {
+            CImg<T> Pixels(nbands(), num_pixels);
+            srand( time(NULL) );
+            bool badpix;
+            int p = 0;
+            while(p < num_pixels) {
+                int col = (double)rand()/RAND_MAX * (xsize()-1);
+                int row = (double)rand()/RAND_MAX * (ysize()-1);
+                T pix[1];
+                badpix = false;
+                for (unsigned int j=0; j<nbands(); j++) {
+                    DataType dt(typeid(T));
+                    _RasterBands[j]._GDALRasterBand->RasterIO(GF_Read, col, row, 1, 1, &pix, 1, 1, dt.gdal(), 0, 0);
+                    if (pix[0] == _RasterBands[j].nodata()) {
+                        badpix = true;
+                    } else {
+                        Pixels(j,p) = pix[0] * _RasterBands[j].gain() + _RasterBands[j].offset();
+                    }
+                }
+                if (!badpix) p++;
+            }
+            return Pixels;
+        }
+
+
+        //! Extract spectra from pixels where not nodata, return as 2-d array
+        template<class T> CImg<T> extract_classes(const GeoRaster& classmap) {
+            if (Options::verbose() > 2 ) std::cout << "Pixel spectral extraction" << std::endl;
+            CImg<T> arr;
+            CImg<unsigned char> classes;
+            CImg<T> cimg;
+            double nodata = classmap.nodata();
+            long count = 0;
+            vector<Chunk>::const_iterator iCh;
+            vector<Chunk> _chunks = chunks();
+            for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+                classes = classmap.read<unsigned char>(*iCh);
+                cimg_for(classes,ptr,unsigned char) if (*ptr != nodata) count++;
+            }
+            CImg<T> pixels(count,nbands()+1,1,1,nodata);
+            count = 0;
+            unsigned int c;
+            for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
+                cimg = read<T>(*iCh);
+                classes = classmap.read<unsigned char>(*iCh);
+                cimg_forXY(cimg,x,y) {
+                    if (classes(x,y) != nodata) {
+                        for (c=0;c<nbands();c++) pixels(count,c+1) = cimg(x,y,c);
+                        pixels(count++,0) = classes(x,y);
+                    }
+                }
+            }
+            return pixels;
+        }
+
+
         //! Write cube across all bands
         template<class T> GeoImage& write(const CImg<T> img, Chunk chunk=Chunk()) {
             typename std::vector< GeoRaster >::iterator iBand;
             int i(0);
             for (iBand=_RasterBands.begin();iBand!=_RasterBands.end();iBand++) {
-                iBand->write(img.get_channel(i++), chunk);
+                iBand->write(img.get_slice(i++), chunk);
             }
             return *this;
         }
@@ -409,11 +473,14 @@ namespace gip {
     */
 
     // Save input file with processing applied into new output file
-    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, 
+    template<class T> GeoImage GeoImage::save(std::string filename, std::string dtype, float nodata,
                 std::string format, bool temp, bool overviews, dictionary options) const {
         if (dtype == "") dtype = this->type().string();
 
         GeoImage imgout = GeoImage::create_from(*this, filename, nbands(), dtype, format, temp, options);
+        if (!std::isnan(nodata)) {
+            imgout.set_nodata(nodata);
+        }
         if (Options::verbose() > 2)
             std::cout << "Saving " << basename() << " into " << imgout.filename() << std::endl;
         for (unsigned int i=0; i<imgout.nbands(); i++) {

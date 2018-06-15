@@ -18,6 +18,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 ################################################################################
+v1.0.1:
+- fixes setting of nodata in GeoImage.open function
+- allow dictionary file creation options to be passed to GeoImage.create() and cookie_cutter
+- added kmeans algorithm
+- fix histogram function, now returns doubles
+- added spectral_statistics algorithm and GeoImage::spectral_statistics function
+
 v1.0.0:
 - Major restructuring and refactor
 - Function naming changed, breaking backwards compatability

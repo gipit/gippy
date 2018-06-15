@@ -23,6 +23,7 @@
 #define GIP_H
 
 #include <gdal_priv.h>
+#include <iostream>
 #include <string>
 #include <map>
 #include <queue>
@@ -47,6 +48,14 @@ namespace gip {
     typedef std::map<std::string, std::string> dictionary;
 
     void init();
+
+    template<typename T> inline void cimg_print(cimg_library::CImg<T> & img, std::string title="") {
+        for (int i=0; i<img.height(); i++) {
+            std::cout << "\tClass" << " " << i+1 << ": ";
+            cimg_forX(img, x) std::cout << img(x,i) << " ";
+            std::cout << std::endl;
+        }
+    }
 
     class Options {
     public:

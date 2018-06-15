@@ -53,7 +53,7 @@ namespace gip {
         ~GeoRaster() {}
 
         //! \name File Information
-        std::string basename() const { return GeoResource::basename() + "[" + description() + "]"; }
+        std::string basename() const { return GeoResource::basename() + "[" + to_string(_GDALRasterBand->GetBand() - 1) + "]"; }
         //! Band X Size
         unsigned int xsize() const { return _GDALRasterBand->GetXSize(); }
         //! Band Y Size
@@ -84,10 +84,15 @@ namespace gip {
         bool is_processed() const { 
             return (_Functions.size() > 0) ? true : false;
         }
+        //! Clears all functions from queue
+        GeoRaster& clear_functions() {
+            _Functions.clear();
+            return *this;
+        }
 
         //! Indicates if data should be read as doubles (functions or gain/offset)
         bool is_double() const {
-            return ((!is_processed()) || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
+            return ((is_processed()) || (gain() != 1.0) || (offset() != 0.0)) ? true : false;
         }
 
         //! Get NoData value
@@ -333,7 +338,7 @@ namespace gip {
         double stddev() const { return (stats())[3]; }
     
         //! Calculate histogram with provided bins
-        CImg<float> histogram(unsigned int bins=100, bool normalize=true, bool cumulative=false) const;
+        CImg<double> histogram(unsigned int bins=100, bool normalize=true, bool cumulative=false) const;
 
         //! Get value for this percentile in the cumulative distribution histogram
         double percentile(const double& p) const;

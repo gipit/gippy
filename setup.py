@@ -32,7 +32,6 @@ import logging
 import shutil
 from numpy import get_include as numpy_get_include
 from imp import load_source
-from pdb import set_trace
 
 # setup imports
 from setuptools import setup, Extension

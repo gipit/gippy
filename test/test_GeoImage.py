@@ -45,6 +45,20 @@ class GeoImageTests(unittest.TestCase):
         # make sure x, y dimensions are same when reading single bands
         self.assertEqual(arr.shape[1:3], geoimg[0].read().shape)
 
+    def test_read_random_pixels(self):
+        """ Read random pixels """
+        geoimg = gpt.get_test_image()
+        arr = geoimg.read_random_pixels(1000)
+
+    def test_uint16_read(self):
+        """ read uint16 makes uint16 array """
+        fout = 'test.tif'
+        geoimg = gp.GeoImage.create(fout, dtype='uint16')
+        self.assertTrue(os.path.exists(fout))
+        arr = geoimg.read()
+        self.assertEqual(str(arr.dtype), geoimg.type().string())
+        os.remove(fout)
+
     def test_loop_through_bands(self):
         """ Check that GeoImage is iterable """
         geoimg = gpt.get_test_image()

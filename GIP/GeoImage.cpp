@@ -231,6 +231,55 @@ namespace gip {
         return covariance;
     }
 
+    //! Calculate mean, stddev for chunk - must contain data for all bands
+    // TODO - review this function
+    CImg<double> GeoImage::spectral_statistics(Chunk chunk) const {
+        if (Options::verbose() > 2) std::cout << basename() << ": calculating spectral statistics" << std::endl;
+        if (!chunk.valid())
+            // default to entire image
+            chunk = Chunk(0,0,xsize(),ysize());
+        CImg<unsigned char> mask;
+        CImg<double> band, total, mean;
+        CImg<int> numpixels(chunk.width(), chunk.height(), 1, 1, 0);
+        double nodata = _RasterBands[0].nodata();
+        // get per pixel totals across bands, counting number of pixels
+        for (unsigned int iBand=0;iBand<nbands();iBand++) {
+            mask = _RasterBands[iBand].nodata_mask(chunk)^=1;
+            band = _RasterBands[iBand].read<double>(chunk).mul(mask);
+            // don't count nodata values
+            cimg_forXY(mask,x,y) { 
+                if (mask(x,y) == 1) numpixels(x,y)++;
+            }
+            if (iBand == 0) {
+                total = band;
+            } else {
+                total += band;
+            }
+        }
+        // calculate mean
+        mean = total.get_div(numpixels);
+        for (unsigned int iBand=0;iBand<nbands();iBand++) {
+            band = _RasterBands[iBand].read<double>(chunk).mul(mask);
+            if (iBand == 0) {
+                total = (band - mean).pow(2);
+            } else {
+                total += (band - mean).pow(2);
+            }
+        }
+        CImgList<double> stats(mean, (total.div(numpixels-1)).sqrt(), numpixels);
+        // check for nodata values
+        cimg_forXY(numpixels,x,y) {
+            if (numpixels(x,y) < 2) {
+                // make stddev nodata
+                stats[1](x,y) = nodata;
+                // make mean nodata
+                if (numpixels(x,y) == 0) stats[0](x,y) = nodata;
+            }
+        }
+        return stats.get_append('z');          
+    }
+
+
     // Resampler options: "NEAREST", "GAUSS", "CUBIC", "AVERAGE", "MODE", "AVERAGE_MAGPHASE" or "NONE"
     GeoImage& GeoImage::add_overviews(std::vector<int> levels, std::string resampler) {
         int* _levels = NULL;

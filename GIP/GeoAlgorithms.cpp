@@ -223,7 +223,7 @@ namespace gip {
         - if GeoFeature is provided it will it's SRS. If not, proj parameter will be used (EPSG:4326 default)
     */
     GeoImage cookie_cutter(const std::vector<GeoImage>& geoimgs, string filename,
-            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation) {
+            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation, dictionary options) {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << geoimgs.size() << " files) - " << filename << endl;
 
@@ -261,7 +261,7 @@ namespace gip {
 
         CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
         GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
-                            proj, bbox, geoimgs[0].type().string());
+                            proj, bbox, geoimgs[0].type().string(), "", false, options);
 
         imgout.add_meta(geoimgs[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {
@@ -551,6 +551,93 @@ namespace gip {
         return imgout;
     }
 
+
+    //! k-means unsupervised classifier
+    GeoImage kmeans( const GeoImage& image, string filename,
+                     unsigned int classes, unsigned int iterations, 
+                     float threshold, unsigned int num_random) {
+        //if (Image.NumBands() < 2) throw GIP::Gexceptions::errInvalidParams("At least two bands must be supplied");
+        if (Options::verbose()) {
+            cout << image.basename() << " - k-means unsupervised classifier:" << endl
+                << "  Classes = " << classes << endl
+                << "  Iterations = " << iterations << endl
+                << "  Pixel Change Threshold = " << threshold << "%" << endl;
+        }
+        // Calculate threshold in # of pixels
+        threshold = threshold/100.0 * image.size();
+
+        GeoImage img(image);
+        // Create new output image
+        GeoImage imgout = GeoImage::create_from(image, filename, 1, "uint8");
+
+        // Get initial class estimates (uses random pixels)
+        CImg<float> ClassMeans = get_random_classes<float>(img, classes, num_random);
+        if (Options::verbose() > 1) cimg_print(ClassMeans);
+
+        CImg<double> Pixel, C_img, DistanceToClass(classes), NumSamples(classes), ThisClass;
+        CImg<unsigned char> C_imgout, C_mask;
+        CImg<double> RunningTotal(classes,image.nbands(),1,1,0);
+
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = image.chunks();
+
+        unsigned int NumPixelChange, iteration=0;
+        do {
+            NumPixelChange = 0;
+            for (unsigned int i=0; i<classes; i++) NumSamples(i) = 0;
+            if (Options::verbose()) cout << "  Iteration " << iteration+1 << std::flush;
+
+            // reset running total to zero
+            cimg_forXY(RunningTotal,x,y) RunningTotal(x,y) = 0.0;
+
+            for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+                C_img = img.read<float>(*iCh);
+                C_mask = img.nodata_mask(*iCh);
+                C_imgout = imgout[0].read<float>(*iCh);
+
+                CImg<double> stats;
+                cimg_forXY(C_img,x,y) { // Loop through image
+                    // Calculate distance between this pixel and all classes
+                    if (!C_mask(x,y)) {
+                        Pixel = C_img.get_crop(x,y,0,0,x,y,C_img.depth()-1,0).unroll('x');
+                        cimg_forY(ClassMeans,cls) {
+                            ThisClass = ClassMeans.get_row(cls);
+                            DistanceToClass(cls) = (Pixel - ThisClass).dot(Pixel - ThisClass);
+                        }
+                        // Get closest distance and see if it's changed since last time
+                        stats = DistanceToClass.get_stats();
+                        if (C_imgout(x,y) != (stats(4)+1)) {
+                            NumPixelChange++;
+                            C_imgout(x,y) = stats(4)+1;
+                        }
+                        NumSamples(stats(4))++;
+                        cimg_forY(RunningTotal,iband) RunningTotal(stats(4),iband) += Pixel(iband);
+                    } else C_imgout(x,y) = 0;
+                }
+                imgout[0].write<unsigned int>(C_imgout,*iCh);
+                if (Options::verbose()) cout << "." << std::flush;
+            }
+
+            // Calculate new Mean class vectors
+            for (unsigned int c=0; c<classes; c++) {
+                if (NumSamples(c) > 0) {
+                    cimg_forX(ClassMeans,x) {
+                        ClassMeans(x,c) = RunningTotal(c,x)/NumSamples(c);
+                        RunningTotal(c,x) = 0;
+                    }
+                    NumSamples(c) = 0;
+                }
+            }
+            if (Options::verbose()) cout << 100.0*((double)NumPixelChange/image.size()) << "% pixels changed class" << endl;
+            if (Options::verbose() > 2) cimg_print(ClassMeans);
+        } while ( (++iteration < iterations) && (NumPixelChange > threshold) );
+
+        imgout.set_bandname("k-means", 1);
+        //imgout.GetGDALDataset()->FlushCache();
+        return imgout;
+    }
+
+
     //! Perform linear transform with given coefficients (e.g., PC transform)
     GeoImage linear_transform(const GeoImage& img, CImg<float> coef, string filename) {
         // Verify size of array
@@ -583,7 +670,7 @@ namespace gip {
     }
 
 
-    //! Calcualte Brovey pansharpening
+    //! Perform Brovey pansharpening
     /*!
         geoimg: red, greem, and blue bands, optionally nir band, in any order
         weights: weights of Red, Green, Blue, and NIR (if provided), in that order
@@ -670,6 +757,31 @@ namespace gip {
         return imgout;
     }
 
+    //! Calculate spectral statistics and output to new image
+    GeoImage spectral_statistics(const GeoImage& img, string filename) {
+        if (img.nbands() < 2) {
+            throw std::runtime_error("Must have at least 2 bands!");
+        }
+
+        GeoImage imgout = GeoImage::create_from(img, filename, 3, "float64");
+        imgout.set_nodata(-32768);
+        imgout.set_bandname("mean", 1);
+        imgout.set_bandname("stddev", 2);
+        imgout.set_bandname("numpixels", 3);
+
+        CImg<double> stats;
+        vector<Chunk>::const_iterator iCh;
+        vector<Chunk> chunks = img.chunks();
+        for (iCh=chunks.begin(); iCh!=chunks.end(); iCh++) {
+            stats = img.spectral_statistics(*iCh);
+            imgout[0].write(stats.get_slice(0), *iCh);
+            imgout[1].write(stats.get_slice(1), *iCh);
+            imgout[2].write(stats.get_slice(2), *iCh);
+        }
+        if (Options::verbose())
+            std::cout << "Spectral statistics written to " << imgout.filename() << std::endl;
+        return imgout;
+    }
 
 
 

@@ -217,9 +217,28 @@ namespace gip {
             return GeoImage(image);
         }
         // templated functions that need to be instantiated
-        GeoImage save(std::string filename, std::string dtype="", std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
-            return self->save<double>(filename, dtype, format, temp, overviews, options);
+        GeoImage save(std::string filename="", std::string dtype="", float nodata=NAN, std::string format="", bool temp=false, bool overviews=false, dictionary options=dictionary()) {
+            return self->save<double>(filename, dtype, nodata, format, temp, overviews, options);
         }
+        PyObject* read_random_pixels(int num_pixels) {
+            return CImgToArr(self->read_random_pixels<double>(num_pixels));
+        }
+        PyObject* extract_classes(GeoRaster raster) {
+            // TODO - look at all bands for gain and offset
+            if (!(*self)[0].is_double()) {
+                switch(self->type().type()) {
+                    case 1: return CImgToArr(self->extract_classes<uint8_t>(raster));
+                    case 2: return CImgToArr(self->extract_classes<uint16_t>(raster));
+                    case 3: return CImgToArr(self->extract_classes<int16_t>(raster));
+                    case 4: return CImgToArr(self->extract_classes<uint32_t>(raster));
+                    case 5: return CImgToArr(self->extract_classes<int32_t>(raster));
+                    case 6: return CImgToArr(self->extract_classes<float>(raster));
+                    case 7: return CImgToArr(self->extract_classes<double>(raster));
+                    default: throw(std::runtime_error("error reading raster"));
+                }
+            }
+            return CImgToArr(self->extract_classes<double>(raster));
+        } 
         PyObject* read(Chunk chunk=Chunk()) {
             // TODO - look at all bands for gain and offset
             if (!(*self)[0].is_double()) {
