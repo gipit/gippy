@@ -64,7 +64,7 @@ jobs:
       - run: |
             yum install -y swig
             . ~/venv27/bin/activate
-            pip install .
+            pip install . --no-cache
             cd test
             pytest --cov gippy     
 
@@ -97,7 +97,7 @@ jobs:
       - run: |
             yum install -y swig
             . ~/venv36/bin/activate
-            pip install .
+            pip install . --no-cache
             cd test
             pytest --cov gippy
 
