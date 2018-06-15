@@ -43,7 +43,6 @@ jobs:
             - v3-dependencies27-{{ checksum "requirements.txt"}}
             - v3-dependencies27
       - run: |
-            yum install -y swig
             pip install virtualenv
             virtualenv ~/venv27
             . ~/venv27/bin/activate
@@ -63,8 +62,9 @@ jobs:
             - v3-dependencies27-{{ checksum "requirements.txt"}}
             - v3-dependencies27
       - run: |
+            yum install -y swig
             . ~/venv27/bin/activate
-            pip install .
+            pip install . --no-cache
             cd test
             pytest --cov gippy     
 
@@ -77,7 +77,6 @@ jobs:
             - v3-dependencies36-{{ checksum "requirements.txt"}}
             - v3-dependencies36
       - run: |
-            yum install -y swig
             python3 -m venv ~/venv36
             . ~/venv36/bin/activate
             pip install -r requirements.txt
@@ -96,8 +95,9 @@ jobs:
             - v3-dependencies36-{{ checksum "requirements.txt"}}
             - v3-dependencies36
       - run: |
+            yum install -y swig
             . ~/venv36/bin/activate
-            pip install .
+            pip install . --no-cache
             cd test
             pytest --cov gippy
 
@@ -136,10 +136,10 @@ workflows:
             - checkout_code
       - test_36:
           requires:
-            - checkout_code
+            - install_36
       - deploy:
           requires:
-            - install_and_test_36
+            - test_36
           filters:
             branches:
               only: master
@@ -149,6 +149,6 @@ workflows:
       - install_27:
           requires:
             - checkout_code
-      - install_36:
+      - test_27:
           requires:
-            - checkout_code
+            - install_27
