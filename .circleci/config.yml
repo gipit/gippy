@@ -118,10 +118,10 @@ jobs:
             ssh-keyscan github.com >> ~/.ssh/known_hosts
             VERSION=`awk -F\' '{print $2,$4}' gippy/version.py`
             pip install -e .
-            git add -f gippy/algorithms.py gippy/algorithms_wrap.cpp gippy/gippy.py gippy/gippy_wrap.cpp
-            git commit -a -m 'added swig wrappers for publishing to PyPi'
             git config --global user.email "matt.a.hanson@gmail.com"
             git config --global user.name "matthewhanson"
+            git add -f gippy/algorithms.py gippy/algorithms_wrap.cpp gippy/gippy.py gippy/gippy_wrap.cpp
+            git commit -a -m 'added swig wrappers for publishing to PyPi'
             git tag $VERSION
             git push origin $VERSION
             python setup.py sdist
