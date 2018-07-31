@@ -12,7 +12,7 @@ references:
 
   container: &container
     docker:
-      - image: developmentseed/geolambda:1.0.0b1
+      - image: developmentseed/geolambda:1.0.0
     working_directory: ~/project
 
   restore_repo: &restore_repo
