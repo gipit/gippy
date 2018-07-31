@@ -123,7 +123,7 @@ jobs:
             git add -f gippy/algorithms.py gippy/algorithms_wrap.cpp gippy/gippy.py gippy/gippy_wrap.cpp
             git commit -a -m 'added swig wrappers for publishing to PyPi'
             git tag v$VERSION
-            git push origin $VERSION
+            git push origin v$VERSION
             python setup.py sdist
             pip install twine
             twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
