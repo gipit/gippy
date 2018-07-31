@@ -12,7 +12,7 @@ references:
 
   container: &container
     docker:
-      - image: developmentseed/geolambda:1.0.0b1
+      - image: developmentseed/geolambda:1.0.0
     working_directory: ~/project
 
   restore_repo: &restore_repo
@@ -122,7 +122,7 @@ jobs:
             git config --global user.name "matthewhanson"
             git add -f gippy/algorithms.py gippy/algorithms_wrap.cpp gippy/gippy.py gippy/gippy_wrap.cpp
             git commit -a -m 'added swig wrappers for publishing to PyPi'
-            git tag $VERSION
+            git tag v$VERSION
             git push origin $VERSION
             python setup.py sdist
             pip install twine

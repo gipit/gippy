@@ -107,9 +107,21 @@ namespace gip {
 
         //! Get geometry in Well Known Text format
         std::string geometry() const {
+            return wkt_geometry();
+        }
+
+        //! Get geometry in Well Known Text format
+        std::string wkt_geometry() const {
             char* wkt(NULL);
             ogr_geometry()->exportToWkt(&wkt);
             return std::string(wkt);
+        }
+
+        //! Get geometry as JSON
+        std::string json_geometry() const {
+            //char* json(NULL);
+            return ogr_geometry()->exportToJson();
+            //return std::string(json);
         }
 
         //! Get feature as geometry, warp to SRS if provided
