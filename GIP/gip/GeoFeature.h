@@ -78,6 +78,13 @@ namespace gip {
             //if (Options::verbose() > 4) use_count("destructor");
         }
 
+        //! Create Feature from GeoJSON factory function
+        //#if (Version(GDAL_MAJOR_VERSION, GDAL_MINOR_VERSION) > Version("2.3"))
+        static GeoFeature create_from_geojson(std::string geojson) {
+            OGRGeometry* feature = OGRGeometryFactory::createFromGeoJson(geojson.c_str());
+            return GeoFeature(GeoVectorResource(), feature);
+        }
+
         bool valid() const {
             return _Feature ? true : false;
         }
