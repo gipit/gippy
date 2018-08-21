@@ -124,6 +124,7 @@ jobs:
             git commit -a -m 'added swig wrappers for publishing to PyPi'
             git tag $VERSION
             git push origin $VERSION
+            git clean -xfd
             python setup.py sdist
             pip install twine
             twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
