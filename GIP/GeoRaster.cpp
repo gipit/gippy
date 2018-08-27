@@ -280,6 +280,7 @@ namespace gip {
             char* wkt;
             site_t->exportToWkt(&wkt);
             psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"CUTLINE", wkt);
+			CPLFree(wkt);
         }
 
         // set options
