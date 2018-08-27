@@ -515,7 +515,7 @@ namespace gip {
         // If processing was applied update NoData values where needed
         if (updatenodata) {
             cimg_forXY(img,x,y) {
-                if (imgorig(x,y) == nodata() || std::isinf(imgorig(x,y)) || std::isnan(imgorig(x,y)))
+                if (imgorig(x,y) == nodata() || (std::is_floating_point<T>::value && (std::isinf(imgorig(x,y)) || std::isnan(imgorig(x,y)))))
                     img(x,y) = nodata();
             }
         }
