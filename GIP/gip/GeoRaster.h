@@ -494,7 +494,8 @@ namespace gip {
         bool updatenodata = false;
         // Apply gain and offset
         if ((gain() != 1.0 || offset() != 0.0) && (!nogainoff)) {
-            img = gain() * img + offset();
+			img *= gain();
+			img += offset();
             // Update NoData now so applied functions have proper NoData value set (?)
             updatenodata = true;
         }
@@ -514,9 +515,11 @@ namespace gip {
 
         // If processing was applied update NoData values where needed
         if (updatenodata) {
+			T noDataVal = static_cast<T>(nodata());
             cimg_forXY(img,x,y) {
-                if (imgorig(x,y) == nodata() || (std::is_floating_point<T>::value && (std::isinf(imgorig(x,y)) || std::isnan(imgorig(x,y)))))
-                    img(x,y) = nodata();
+				T sample = imgorig(x, y);
+                if (sample == noDataVal || (std::is_floating_point<T>::value && (std::isinf(sample) || std::isnan(sample))))
+                    img(x,y) = noDataVal;
             }
         }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);
