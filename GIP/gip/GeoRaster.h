@@ -489,19 +489,26 @@ namespace gip {
         auto start = std::chrono::system_clock::now();
 
         CImg<T> img(read_raw<T>(chunk));
-        CImg<T> imgorig(img);
-
-        bool updatenodata = false;
+        
         // Apply gain and offset
+		// Preserve nodata values.
         if ((gain() != 1.0 || offset() != 0.0) && (!nogainoff)) {
-			img *= gain();
-			img += offset();
-            // Update NoData now so applied functions have proper NoData value set (?)
-            updatenodata = true;
+			double gainVal = gain();
+			double offsetVal = offset();
+			double ndv = nodata();
+			cimg_forXY(img, x, y) {
+				double sample = static_cast<double>(img(x, y));
+				if (sample != ndv) {
+					img(x, y) = static_cast<T>(sample * gainVal + offsetVal);
+				}
+			}
         }
 
         // Apply Processing functions
         if (_Functions.size() > 0) {
+			CImg<T> imgorig(img);
+			bool updatenodata = false;
+
             CImg<double> imgd;
             imgd.assign(img);
             for (std::vector<func>::const_iterator iFunc=_Functions.begin();iFunc!=_Functions.end();iFunc++) {
@@ -511,17 +518,18 @@ namespace gip {
             }
             updatenodata = true;
             img.assign(imgd);
+
+			// If processing was applied update NoData values where needed
+			if (updatenodata) {
+				T noDataVal = static_cast<T>(nodata());
+				cimg_forXY(img, x, y) {
+					T sample = imgorig(x, y);
+					if (sample == noDataVal || (std::is_floating_point<T>::value && (std::isinf(sample) || std::isnan(sample))))
+						img(x, y) = noDataVal;
+				}
+			}
         }
 
-        // If processing was applied update NoData values where needed
-        if (updatenodata) {
-			T noDataVal = static_cast<T>(nodata());
-            cimg_forXY(img,x,y) {
-				T sample = imgorig(x, y);
-                if (sample == noDataVal || (std::is_floating_point<T>::value && (std::isinf(sample) || std::isnan(sample))))
-                    img(x,y) = noDataVal;
-            }
-        }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);
         if (Options::verbose() > 3)
             std::cout << basename() << ": read " << chunk << " in " << elapsed.count() << " seconds" << std::endl;
