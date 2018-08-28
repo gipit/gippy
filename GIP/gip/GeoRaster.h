@@ -558,7 +558,15 @@ namespace gip {
     //! Write a Cimg to the file
     template<class T> GeoRaster& GeoRaster::write(CImg<T> img, Chunk chunk) {
         if (gain() != 1.0 || offset() != 0.0) {
-            cimg_for(img,ptr,T) if (*ptr != nodata()) *ptr = (*ptr-offset())/gain();
+			double noDataVal = nodata(); //virtual call through pointer
+			double offsetVal = offset(); //virtual call through pointer
+			double invGainVal = 1.0 / gain(); //virtual call through pointer
+			cimg_for(img, ptr, T) { 
+				double sample = static_cast<double>(*ptr);
+				if (sample != noDataVal) { 
+					*ptr = static_cast<T>((sample - offsetVal) * invGainVal); 
+				}
+			}
         }
         if (Options::verbose() > 3 && (chunk.p0()==iPoint(0,0)))
             std::cout << basename() << ": Writing (" << gain() << "x + " << offset() << ")" << std::endl;
