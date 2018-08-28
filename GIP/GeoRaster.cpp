@@ -88,10 +88,11 @@ namespace gip {
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> _chunks = chunks();
 
+		double noDataVal = nodata();
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
             cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != nodata()) {
+                if (*ptr != noDataVal) {
                     total += *ptr;
                     count++;
                     if (*ptr > max) max = *ptr;
@@ -105,7 +106,7 @@ namespace gip {
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
             cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
-                if (*ptr != nodata()) {
+                if (*ptr != noDataVal) {
                     val = *ptr-mean;
                     total += (val*val);
                     total3 += (val*val*val);
