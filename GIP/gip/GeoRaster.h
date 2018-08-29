@@ -446,6 +446,7 @@ namespace gip {
         }
 
 		template<class T> CImg<float> stats_impl() const;
+		template<class T> CImg<double> histogram_impl(unsigned int bins, bool normalize, bool cumulative) const;
 
     }; //class GeoImage
 
@@ -657,6 +658,44 @@ namespace gip {
 		_ValidStats = true;
 
 		return _Stats;
+	}
+
+	template<class T>
+	CImg<double> GeoRaster::histogram_impl(unsigned int bins, bool normalize, bool cumulative) const {
+		//CImg<double> cimg;
+		CImg<float> st = stats_impl<T>();
+		CImg<double> hist(bins, 1, 1, 1, 0);
+		double numpixels(0);
+		float nd = nodata();
+		const auto _chunks = chunks();
+		unsigned int index;
+		for (const auto& iCh : _chunks) {
+			CImg<T> cimg = read<T>(iCh);
+			cimg_for(cimg, ptr, T) {
+				float sample = static_cast<float>(*ptr);
+				if (sample != nd) {
+					index = floor((sample - st(0)) / (st(1) - st(0)) * bins);
+					//std::cout << index << " " << hist[index] << " " << numpixels << std::endl;
+					// this would be due to floating point roundoff error
+					if (index == bins) {
+						index = bins - 1;
+					}
+					else if (index > bins) {
+						index = 0;
+					}
+					hist[index] = hist[index] + 1;
+					numpixels++;
+					//std::cout << index << " " << hist[index] << " " << numpixels << std::endl;
+				}
+			}
+		}
+		// normalize
+		if (normalize)
+			hist /= numpixels;
+		if (cumulative)
+			for (unsigned int i = 1; i < bins; i++) hist[i] += hist[i - 1];
+		//if (Options::verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
+		return hist;
 	}
 
 } // namespace GIP
