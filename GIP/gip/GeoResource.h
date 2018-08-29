@@ -106,6 +106,7 @@ namespace gip {
             char* prj;
             oSRS.exportToWkt(&prj);
             _GDALDataset->SetProjection(prj);
+			CPLFree(prj);
             //OGRSpatialReference::DestroySpatialReference(oSRS);
             return *this;
         }

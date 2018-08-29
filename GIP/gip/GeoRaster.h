@@ -445,6 +445,9 @@ namespace gip {
             return mask;
         }
 
+		template<class T> CImg<float> stats_impl() const;
+		template<class T> CImg<double> histogram_impl(unsigned int bins, bool normalize, bool cumulative) const;
+
     }; //class GeoImage
 
     //! \name File I/O
@@ -489,18 +492,26 @@ namespace gip {
         auto start = std::chrono::system_clock::now();
 
         CImg<T> img(read_raw<T>(chunk));
-        CImg<T> imgorig(img);
-
-        bool updatenodata = false;
+        
         // Apply gain and offset
+		// Preserve nodata values.
         if ((gain() != 1.0 || offset() != 0.0) && (!nogainoff)) {
-            img = gain() * img + offset();
-            // Update NoData now so applied functions have proper NoData value set (?)
-            updatenodata = true;
+			double gainVal = gain();
+			double offsetVal = offset();
+			double ndv = nodata();
+			cimg_forXY(img, x, y) {
+				double sample = static_cast<double>(img(x, y));
+				if (sample != ndv) {
+					img(x, y) = static_cast<T>(sample * gainVal + offsetVal);
+				}
+			}
         }
 
         // Apply Processing functions
         if (_Functions.size() > 0) {
+			CImg<T> imgorig(img);
+			bool updatenodata = false;
+
             CImg<double> imgd;
             imgd.assign(img);
             for (std::vector<func>::const_iterator iFunc=_Functions.begin();iFunc!=_Functions.end();iFunc++) {
@@ -510,15 +521,18 @@ namespace gip {
             }
             updatenodata = true;
             img.assign(imgd);
+
+			// If processing was applied update NoData values where needed
+			if (updatenodata) {
+				T noDataVal = static_cast<T>(nodata());
+				cimg_forXY(img, x, y) {
+					T sample = imgorig(x, y);
+					if (sample == noDataVal || (std::is_floating_point<T>::value && (std::isinf(sample) || std::isnan(sample))))
+						img(x, y) = noDataVal;
+				}
+			}
         }
 
-        // If processing was applied update NoData values where needed
-        if (updatenodata) {
-            cimg_forXY(img,x,y) {
-                if (imgorig(x,y) == nodata() || std::isinf(imgorig(x,y)) || std::isnan(imgorig(x,y)))
-                    img(x,y) = nodata();
-            }
-        }
         auto elapsed = std::chrono::duration_cast<std::chrono::duration<float> >(std::chrono::system_clock::now()-start);
         if (Options::verbose() > 3)
             std::cout << basename() << ": read " << chunk << " in " << elapsed.count() << " seconds" << std::endl;
@@ -558,7 +572,15 @@ namespace gip {
     //! Write a Cimg to the file
     template<class T> GeoRaster& GeoRaster::write(CImg<T> img, Chunk chunk) {
         if (gain() != 1.0 || offset() != 0.0) {
-            cimg_for(img,ptr,T) if (*ptr != nodata()) *ptr = (*ptr-offset())/gain();
+			double noDataVal = nodata(); //virtual call through pointer
+			double offsetVal = offset(); //virtual call through pointer
+			double invGainVal = 1.0 / gain(); //virtual call through pointer
+			cimg_for(img, ptr, T) { 
+				double sample = static_cast<double>(*ptr);
+				if (sample != noDataVal) { 
+					*ptr = static_cast<T>((sample - offsetVal) * invGainVal); 
+				}
+			}
         }
         if (Options::verbose() > 3 && (chunk.p0()==iPoint(0,0)))
             std::cout << basename() << ": Writing (" << gain() << "x + " << offset() << ")" << std::endl;
@@ -591,6 +613,90 @@ namespace gip {
         }
         return raster;
     }
+
+	//! Compute stats
+	template<class T>
+	CImg<float> GeoRaster::stats_impl() const {
+		if (_ValidStats) return _Stats;
+
+		CImg<T> cimg;
+		double count(0), total(0), val;
+		double min(type().maxval()), max(type().minval());
+		const auto _chunks = chunks();
+
+		double noDataVal = nodata();
+		for(const auto& iCh : _chunks) {
+			cimg = read<T>(iCh);
+			cimg_for(cimg, ptr, T) {
+				double sample = static_cast<double>(*ptr);
+				if (sample != noDataVal) {
+					total += sample;
+					count++;
+					if (sample > max) max = sample;
+					if (sample < min) min = sample;
+				}
+			}
+		}
+		float mean = total / count;
+		total = 0;
+		double total3(0);
+		for (const auto& iCh : _chunks) {
+			cimg = read<T>(iCh);
+			cimg_for(cimg, ptr, T) {
+				double sample = static_cast<double>(*ptr);
+				if (sample != noDataVal) {
+					val = sample - mean;
+					total += (val*val);
+					total3 += (val*val*val);
+				}
+			}
+		}
+		float var = total / count;
+		float stdev = std::sqrt(var);
+		float skew = (total3 / count) / std::sqrt(var*var*var);
+		_Stats = CImg<float>(6, 1, 1, 1, (float)min, (float)max, mean, stdev, skew, count);
+		_ValidStats = true;
+
+		return _Stats;
+	}
+
+	template<class T>
+	CImg<double> GeoRaster::histogram_impl(unsigned int bins, bool normalize, bool cumulative) const {
+		//CImg<double> cimg;
+		CImg<float> st = stats_impl<T>();
+		CImg<double> hist(bins, 1, 1, 1, 0);
+		double numpixels(0);
+		float nd = nodata();
+		const auto _chunks = chunks();
+		unsigned int index;
+		for (const auto& iCh : _chunks) {
+			CImg<T> cimg = read<T>(iCh);
+			cimg_for(cimg, ptr, T) {
+				float sample = static_cast<float>(*ptr);
+				if (sample != nd) {
+					index = floor((sample - st(0)) / (st(1) - st(0)) * bins);
+					//std::cout << index << " " << hist[index] << " " << numpixels << std::endl;
+					// this would be due to floating point roundoff error
+					if (index == bins) {
+						index = bins - 1;
+					}
+					else if (index > bins) {
+						index = 0;
+					}
+					hist[index] = hist[index] + 1;
+					numpixels++;
+					//std::cout << index << " " << hist[index] << " " << numpixels << std::endl;
+				}
+			}
+		}
+		// normalize
+		if (normalize)
+			hist /= numpixels;
+		if (cumulative)
+			for (unsigned int i = 1; i < bins; i++) hist[i] += hist[i - 1];
+		//if (Options::verbose() > 3) hist.display_graph(0,3,1,"Pixel Value",st(0),stats(1));
+		return hist;
+	}
 
 } // namespace GIP
 
