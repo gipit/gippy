@@ -445,6 +445,8 @@ namespace gip {
             return mask;
         }
 
+		template<class T> CImg<float> stats_impl() const;
+
     }; //class GeoImage
 
     //! \name File I/O
@@ -610,6 +612,52 @@ namespace gip {
         }
         return raster;
     }
+
+	//! Compute stats
+	template<class T>
+	CImg<float> GeoRaster::stats_impl() const {
+		if (_ValidStats) return _Stats;
+
+		CImg<T> cimg;
+		double count(0), total(0), val;
+		double min(type().maxval()), max(type().minval());
+		const auto _chunks = chunks();
+
+		double noDataVal = nodata();
+		for(const auto& iCh : _chunks) {
+			cimg = read<T>(iCh);
+			cimg_for(cimg, ptr, T) {
+				double sample = static_cast<double>(*ptr);
+				if (sample != noDataVal) {
+					total += sample;
+					count++;
+					if (sample > max) max = sample;
+					if (sample < min) min = sample;
+				}
+			}
+		}
+		float mean = total / count;
+		total = 0;
+		double total3(0);
+		for (const auto& iCh : _chunks) {
+			cimg = read<T>(iCh);
+			cimg_for(cimg, ptr, T) {
+				double sample = static_cast<double>(*ptr);
+				if (sample != noDataVal) {
+					val = sample - mean;
+					total += (val*val);
+					total3 += (val*val*val);
+				}
+			}
+		}
+		float var = total / count;
+		float stdev = std::sqrt(var);
+		float skew = (total3 / count) / std::sqrt(var*var*var);
+		_Stats = CImg<float>(6, 1, 1, 1, (float)min, (float)max, mean, stdev, skew, count);
+		_ValidStats = true;
+
+		return _Stats;
+	}
 
 } // namespace GIP
 

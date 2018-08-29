@@ -80,46 +80,19 @@ namespace gip {
 
     //! Compute stats
     CImg<float> GeoRaster::stats() const {
-        if (_ValidStats) return _Stats;
-
-        CImg<double> cimg;
-        double count(0), total(0), val;
-        double min(type().maxval()), max(type().minval());
-        vector<Chunk>::const_iterator iCh;
-        vector<Chunk> _chunks = chunks();
-
-		double noDataVal = nodata();
-        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-            cimg = read<double>(*iCh);
-            cimg_for(cimg,ptr,double) {
-                if (*ptr != noDataVal) {
-                    total += *ptr;
-                    count++;
-                    if (*ptr > max) max = *ptr;
-                    if (*ptr < min) min = *ptr;
-                }
-            }
-        }
-        float mean = total/count;
-        total = 0;
-        double total3(0);
-        for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
-            cimg = read<double>(*iCh);
-            cimg_for(cimg,ptr,double) {
-                if (*ptr != noDataVal) {
-                    val = *ptr-mean;
-                    total += (val*val);
-                    total3 += (val*val*val);
-                }
-            }
-        }
-        float var = total/count;
-        float stdev = std::sqrt(var);
-        float skew = (total3/count)/std::sqrt(var*var*var);
-        _Stats = CImg<float>(6,1,1,1,(float)min,(float)max,mean,stdev,skew,count);
-        _ValidStats = true;
-
-        return _Stats;
+		//Calculations are always done as doubles. 
+		switch (this->type().gdal()) 
+		{
+		case GDT_Byte: return stats_impl<int_least8_t>();
+		case GDT_UInt16: return stats_impl<uint_least16_t>();
+		case GDT_Int16: return stats_impl<int_least16_t>();
+		case GDT_UInt32: return stats_impl<uint_least32_t>();
+		case GDT_Int32: return stats_impl<int_least32_t>();
+		case GDT_Float32: return stats_impl<float>();
+		default:
+			break;
+		}
+		return stats_impl<double>();
     }
 
     double GeoRaster::percentile(const double& p) const {
