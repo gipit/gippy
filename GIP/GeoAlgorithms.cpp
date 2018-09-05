@@ -444,12 +444,12 @@ namespace gip {
         return imgout;
     }
 
-    GeoImage indices(const GeoImage& image, vector<string> products, string filename) {
+    GeoImage indices(const GeoImage& image, vector<string> products, string filename, dictionary options) {
         if (Options::verbose() > 1) std::cout << "GIPPY: Indices" << std::endl;
 
         float nodataout = -32768;
 
-        GeoImage imgout = GeoImage::create_from(image, filename, products.size(), "int16");
+        GeoImage imgout = GeoImage::create_from(image, filename, products.size(), "int16", "", false, options);
         imgout.set_bandnames(products);
         imgout.set_nodata(nodataout);
         imgout.set_gain(0.0001);

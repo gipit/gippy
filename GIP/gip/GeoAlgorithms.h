@@ -64,7 +64,7 @@ namespace gip {
                     float threshold=1.0, unsigned int num_random=500);
 
     //! Create indices in one pass: NDVI, EVI, LSWI, NDSI, BI {product, filename}
-    GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string filename="");
+    GeoImage indices(const GeoImage& geoimg, std::vector<std::string> products, std::string filename="", dictionary options=dictionary());
 
     //! Create output based on linear combinations of input
     GeoImage linear_transform(const GeoImage& geoimg, CImg<float> coef, std::string filename);
