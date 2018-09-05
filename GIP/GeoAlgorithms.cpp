@@ -465,6 +465,16 @@ namespace gip {
         colors["msavi2"] = {"nir","red"};
         colors["vari"] = {"red","green","blue"};
         colors["brgt"] = {"red","green","blue","nir"};
+        // Normalized Difference Built-up Index
+        colors["ndbi"] = {"swir1", "nir"};
+        // New Built-up Index
+        colors["nbi"] = {"red", "swir2", "nir"};
+        // Normalized Built-up Area Index
+        colors["nbai"] = {"swir2", "swir1", "green"};
+        // Band Ratio Built-up Area
+        colors["brba"] = {"red", "swir2"};
+        // Soil Index
+        //colors["si"] = {"lwir", "swir2"};
         // Tillage indices
         colors["ndti"] = {"swir2","swir1"};
         colors["crc"] = {"swir1","swir2","blue"};
@@ -530,6 +540,18 @@ namespace gip {
                     cimgout = (green-red).div(green+red-blue);
                 } else if (prodname == "brgt") {
                     cimgout = (0.3*blue + 0.3*red + 0.1*nir + 0.3*green);
+                // Built-up areas
+                } else if (prodname == "ndbi") {
+                    cimgout = (swir1-nir).div(swir1+nir);
+                } else if (prodname == "nbi") {
+                    cimgout = red.get_mul(swir1).div(nir);
+                } else if (prodname == "nbai") {
+                    tmpimg = swir1.get_div(green);
+                    cimgout = (swir1-tmpimg).div(swir1+tmpimg);
+                } else if (prodname == "brba") {
+                    cimgout = red.get_div(swir1);
+                //} else if (prodname == "si") {
+                //    cimgout = (lwir1 + swir2).div(lwir1 - swir2);
                 // Tillage indices
                 } else if (prodname == "ndti") {
                     cimgout = (swir1-swir2).div(swir1+swir2);
