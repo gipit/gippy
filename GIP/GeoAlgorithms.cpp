@@ -473,6 +473,7 @@ namespace gip {
         colors["nbai"] = {"swir2", "swir1", "green"};
         // Band Ratio Built-up Area
         colors["brba"] = {"red", "swir2"};
+        colors["bsi"] = {"green", "red", "nir"};
         // Soil Index
         //colors["si"] = {"lwir", "swir2"};
         // Tillage indices
@@ -550,6 +551,10 @@ namespace gip {
                     cimgout = (swir2-tmpimg).div(swir2+tmpimg);
                 } else if (prodname == "brba") {
                     cimgout = red.get_div(swir1);
+                // Bare Soil Index
+                } else if (prodname == "bsi") {
+                    tmpimg = nir + green;
+                    cimgout = (tmpimg-red).div(tmpimg+red);
                 //} else if (prodname == "si") {
                 //    cimgout = (lwir1 + swir2).div(lwir1 - swir2);
                 // Tillage indices
