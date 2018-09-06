@@ -547,7 +547,7 @@ namespace gip {
                     cimgout = red.get_mul(swir1).div(nir);
                 } else if (prodname == "nbai") {
                     tmpimg = swir1.get_div(green);
-                    cimgout = (swir1-tmpimg).div(swir1+tmpimg);
+                    cimgout = (swir2-tmpimg).div(swir2+tmpimg);
                 } else if (prodname == "brba") {
                     cimgout = red.get_div(swir1);
                 //} else if (prodname == "si") {
@@ -560,9 +560,9 @@ namespace gip {
                 } else if (prodname == "crcm") {
                     cimgout = (swir1-green).div(swir2+green);
                 } else if (prodname == "isti") {
-                    cimgout = swir2.div(swir1);
+                    cimgout = swir2.get_div(swir1);
                 } else if (prodname == "sti") {
-                    cimgout = swir1.div(swir2);
+                    cimgout = swir1.get_div(swir2);
                 }
                 // TODO don't read mask again...create here
                 cimgmask = image.nodata_mask(colors[prodname], *iCh);
