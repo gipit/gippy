@@ -494,8 +494,8 @@ namespace gip {
         bool updatenodata = false;
         // Apply gain and offset
         if ((gain() != 1.0 || offset() != 0.0) && (!nogainoff)) {
-			img *= gain();
-			img += offset();
+            img *= gain();
+            img += offset();
             // Update NoData now so applied functions have proper NoData value set (?)
             updatenodata = true;
         }
@@ -515,9 +515,9 @@ namespace gip {
 
         // If processing was applied update NoData values where needed
         if (updatenodata) {
-			T noDataVal = static_cast<T>(nodata());
+            T noDataVal = static_cast<T>(nodata());
             cimg_forXY(img,x,y) {
-				T sample = imgorig(x, y);
+                T sample = imgorig(x, y);
                 if (sample == noDataVal || (std::is_floating_point<T>::value && (std::isinf(sample) || std::isnan(sample))))
                     img(x,y) = noDataVal;
             }
@@ -561,15 +561,15 @@ namespace gip {
     //! Write a Cimg to the file
     template<class T> GeoRaster& GeoRaster::write(CImg<T> img, Chunk chunk) {
         if (gain() != 1.0 || offset() != 0.0) {
-			double noDataVal = nodata(); //virtual call through pointer
-			double offsetVal = offset(); //virtual call through pointer
-			double invGainVal = 1.0 / gain(); //virtual call through pointer
-			cimg_for(img, ptr, T) { 
-				double sample = static_cast<double>(*ptr);
-				if (sample != noDataVal) { 
-					*ptr = static_cast<T>((sample - offsetVal) * invGainVal); 
-				}
-			}
+            double noDataVal = nodata(); //virtual call through pointer
+            double offsetVal = offset(); //virtual call through pointer
+            double invGainVal = 1.0 / gain(); //virtual call through pointer
+            cimg_for(img, ptr, T) { 
+                double sample = static_cast<double>(*ptr);
+                if (sample != noDataVal) { 
+                    *ptr = static_cast<T>((sample - offsetVal) * invGainVal); 
+                }
+            }
         }
         if (Options::verbose() > 3 && (chunk.p0()==iPoint(0,0)))
             std::cout << basename() << ": Writing (" << gain() << "x + " << offset() << ")" << std::endl;

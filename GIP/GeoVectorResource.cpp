@@ -95,10 +95,10 @@ namespace gip {
     }*/
 
     std::string GeoVectorResource::srs() const {  
-		auto deleter = [](char* p) {CPLFree(p); };
-		char* wkt(NULL);
+        auto deleter = [](char* p) {CPLFree(p); };
+        char* wkt(NULL);
         _Layer->GetSpatialRef()->exportToWkt(&wkt);
-		std::unique_ptr<char, decltype(deleter)> wktPtr(wkt, deleter); //make sure the char* is freed.
+        std::unique_ptr<char, decltype(deleter)> wktPtr(wkt, deleter); //make sure the char* is freed.
         return std::string(wkt); //char* is copied
     }
 

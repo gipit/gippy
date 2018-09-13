@@ -106,7 +106,7 @@ namespace gip {
             char* prj;
             oSRS.exportToWkt(&prj);
             _GDALDataset->SetProjection(prj);
-			CPLFree(prj);
+            CPLFree(prj);
             //OGRSpatialReference::DestroySpatialReference(oSRS);
             return *this;
         }
@@ -122,7 +122,7 @@ namespace gip {
             _GDALDataset->SetGeoTransform(affine.data());
             return *this;
         }
-	/* remove for now, add back in when required, with tests
+    /* remove for now, add back in when required, with tests
         GeoResource& SetGCPs(CImg<double> gcps, std::string projection) {
             int numgcps(gcps.height());
             GDAL_GCP gdal_gcps[numgcps];

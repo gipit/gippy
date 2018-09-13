@@ -88,7 +88,7 @@ namespace gip {
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> _chunks = chunks();
 
-		double noDataVal = nodata();
+        double noDataVal = nodata();
         for (iCh=_chunks.begin(); iCh!=_chunks.end(); iCh++) {
             cimg = read<double>(*iCh);
             cimg_for(cimg,ptr,double) {
@@ -281,7 +281,7 @@ namespace gip {
             char* wkt;
             site_t->exportToWkt(&wkt);
             psWarpOptions->papszWarpOptions = CSLSetNameValue(psWarpOptions->papszWarpOptions,"CUTLINE", wkt);
-			CPLFree(wkt);
+            CPLFree(wkt);
         }
 
         // set options
