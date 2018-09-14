@@ -103,6 +103,7 @@ namespace gip {
             bbox.y1(), 0.0, -std::abs(bbox.height() / (float)ysz)  
         );
         set_affine(affine);
+        CSLDestroy(papszOptions);
     }
 
     GeoResource::GeoResource(const GeoResource& resource)

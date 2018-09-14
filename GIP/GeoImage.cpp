@@ -50,7 +50,7 @@ namespace gip {
     // Copy constructor
     GeoImage::GeoImage(const GeoImage& image)
         : GeoResource(image) {
-        for (uint i=0;i<image.nbands();i++)
+        for (unsigned int i=0;i<image.nbands();i++)
             _RasterBands.push_back( image[i] );
             _BandNames = image.bandnames();
     }
@@ -61,7 +61,7 @@ namespace gip {
         if (this == &image) return *this;
         GeoResource::operator=(image);
         _RasterBands.clear();
-        for (uint i=0;i<image.nbands();i++) _RasterBands.push_back( image[i] );
+        for (unsigned int i=0;i<image.nbands();i++) _RasterBands.push_back( image[i] );
         _BandNames = image.bandnames();
         return *this;
     }
