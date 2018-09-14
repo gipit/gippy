@@ -473,7 +473,7 @@ namespace gip {
         colors["nbai"] = {"swir2", "swir1", "green"};
         // Band Ratio Built-up Area
         colors["brba"] = {"red", "swir2"};
-        colors["bsi"] = {"green", "red", "nir"};
+        colors["bsi"] = {"swir1", "red", "nir","blue"};
         // Soil Index
         //colors["si"] = {"lwir", "swir2"};
         // Tillage indices
@@ -498,7 +498,7 @@ namespace gip {
             cout << endl;
         }
 
-        CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg;
+        CImg<float> red, green, blue, nir, swir1, swir2, cimgout, cimgmask, tmpimg, tmpimg1;
 
         vector<Chunk>::const_iterator iCh;
         vector<Chunk> chunks = image.chunks();
@@ -553,8 +553,9 @@ namespace gip {
                     cimgout = red.get_div(swir1);
                 // Bare Soil Index
                 } else if (prodname == "bsi") {
-                    tmpimg = nir + green;
-                    cimgout = (tmpimg-red).div(tmpimg+red);
+                    tmpimg = swir1 + red;
+                    tmpimg1 = nir + blue;
+                    cimgout = (tmpimg-tmpimg1).div(tmpimg+tmpimg1);
                 //} else if (prodname == "si") {
                 //    cimgout = (lwir1 + swir2).div(lwir1 - swir2);
                 // Tillage indices
