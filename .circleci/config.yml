@@ -127,7 +127,7 @@ jobs:
             git clean -xfd
             python setup.py sdist
             pip install twine
-            twine --verbose upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
+            twine upload --username "${PYPI_USER}" --password "${PYPI_PASS}" dist/*
 
 
 workflows:
