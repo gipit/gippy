@@ -17,6 +17,8 @@ On OS X (using brew)::
 
 With the dependencies met, gippy can be installed via pip from it's repository on PyPi. If installing to a `virtual environment <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_, activate the environment first. If installing system-wide pip will need to be run as sudo.
 
+.. code::
+
     $ pip install gippy --pre
 
 To install a beta version use the --pre switch. Without --pre, pip will install the last release version, which is currently 0.3.5.
