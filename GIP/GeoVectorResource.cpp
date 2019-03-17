@@ -22,6 +22,7 @@
 #include <gip/GeoVectorResource.h>
 
 #include <iostream>
+#include <functional>
 
 #include <cpl_error.h>
 
@@ -93,10 +94,12 @@ namespace gip {
        return *_Layer->GetSpatialRef();
     }*/
 
-    std::string GeoVectorResource::srs() const {
+    std::string GeoVectorResource::srs() const {  
+        auto deleter = [](char* p) {CPLFree(p); };
         char* wkt(NULL);
         _Layer->GetSpatialRef()->exportToWkt(&wkt);
-        return std::string(wkt); 
+        std::unique_ptr<char, decltype(deleter)> wktPtr(wkt, deleter); //make sure the char* is freed.
+        return std::string(wkt); //char* is copied
     }
 
     BoundingBox GeoVectorResource::extent() const {
