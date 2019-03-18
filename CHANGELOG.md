@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 
-## [v1.0.1] - 2019-03-17
+## [v1.0.3] - 2019-03-18
 - fixes setting of nodata in GeoImage.open function
 - allow dictionary file creation options to be passed to GeoImage.create() and cookie_cutter
 - added kmeans algorithm
@@ -106,7 +106,7 @@ Initial Release
 
 
 [Unreleased]: https://github.com/gipit/gippy/compare/master...develop
-[v1.0.1]: https://github.com/gipit/gippy/compare/1.0.0...1.0.1
+[v1.0.3]: https://github.com/gipit/gippy/compare/1.0.0...1.0.3
 [v1.0.0]: https://github.com/gipit/gippy/compare/0.3.0...1.0.0
 [v0.3.0]: https://github.com/gipit/gippy/compare/0.2.0...0.3.0
 [v0.2.0]: https://github.com/gipit/gippy/tree/0.2.0
