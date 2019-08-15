@@ -115,14 +115,24 @@ class GeoResourceTests(unittest.TestCase):
         self.assertEqual(len(chunks), 1)
         self.assertEqual(chunks[0].width(), geoimg.xsize())
         self.assertEqual(chunks[0].height(), geoimg.ysize())
-        # test with 100 chunks
-        chunks = geoimg.chunks(numchunks=100)
+        # test with 11 chunks
+        chunks = geoimg.chunks(numchunks=11)
         # test height of chunks is the same (except last one)
-        self.assertEqual(len(chunks), 100)
+        self.assertEqual(len(chunks), 11)
         for i in range(1, len(chunks)-1):
             self.assertEqual(chunks[i].height(), chunks[i-1].height())
             self.assertEqual(chunks[i].width(), geoimg.xsize())
             self.assertEqual(chunks[i].y0(), chunks[i-1].y1())
+        self.assertNotEqual(chunks[-1].height(), chunks[-2].height())
+        # test with 10 chunks
+        chunks = geoimg.chunks(numchunks=10)
+        # test height of chunks is the same (including last one)
+        self.assertEqual(len(chunks), 10)
+        for i in range(1, len(chunks)):
+            self.assertEqual(chunks[i].height(), chunks[i-1].height())
+            self.assertEqual(chunks[i].width(), geoimg.xsize())
+            self.assertEqual(chunks[i].y0(), chunks[i-1].y1())
+
 
     def test_meta(self):
         """ Set and retrieve metadata """
