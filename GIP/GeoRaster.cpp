@@ -207,7 +207,7 @@ namespace gip {
         return *this;
     }
 
-    GeoRaster& GeoRaster::warp_into(GeoRaster& imgout, GeoFeature feature, int interpolation, bool noinit) const {
+    GeoRaster& GeoRaster::warp_into(GeoRaster& imgout, GeoFeature feature, int interpolation, bool noinit, bool alltouch) const {
         if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << std::endl;
 
         GeoRaster imgin(*this);
@@ -254,6 +254,8 @@ namespace gip {
             papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST", NULL);
         else
             papszOptions = CSLSetNameValue(papszOptions,"INIT_DEST","NO_DATA");
+        if (alltouch)
+            papszOptions = CSLSetNameValue(papszOptions, "CUTLINE_ALL_TOUCHED", "TRUE");
         papszOptions = CSLSetNameValue(papszOptions,"WRITE_FLUSH","YES");
         papszOptions = CSLSetNameValue(papszOptions,"NUM_THREADS",to_string(Options::cores()).c_str());
         psWarpOptions->papszWarpOptions = papszOptions;
@@ -273,6 +275,7 @@ namespace gip {
             // Create cutline transform to pixel coordinates        
             papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "DST_SRS", imgout.srs().c_str() );
             papszOptionsCutline = CSLSetNameValue( papszOptionsCutline, "INSERT_CENTER_LONG", "FALSE" );
+
             oTransformer.hSrcImageTransformer = GDALCreateGenImgProjTransformer2( srcDS, NULL, papszOptionsCutline );
             site_t = site->clone();
             site_t->transform(&oTransformer);

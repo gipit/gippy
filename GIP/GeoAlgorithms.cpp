@@ -223,7 +223,7 @@ namespace gip {
         - if GeoFeature is provided it will it's SRS. If not, proj parameter will be used (EPSG:4326 default)
     */
     GeoImage cookie_cutter(const std::vector<GeoImage>& geoimgs, string filename,
-            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation, dictionary options) {
+            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation, dictionary options, bool alltouch) {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << geoimgs.size() << " files) - " << filename << endl;
 
@@ -259,9 +259,18 @@ namespace gip {
         int xsz = std::ceil(ext.width() / std::abs(xres));
         int ysz = std::ceil(ext.height() / std::abs(yres));
 
+        double xshift = -0.5 * std::abs(xres);
+        double yshift = 0.5 * std::abs(yres);
+
         CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
         GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
                             proj, bbox, geoimgs[0].type().string(), "", false, options);
+
+        CImg<double> affine(6, 1, 1, 1,
+           ext.x0() + xshift, xres, 0.0,
+           ext.y1() + yshift, 0.0,  -std::abs(yres)
+        );
+        imgout.set_affine(affine);
 
         imgout.add_meta(geoimgs[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {
@@ -278,7 +287,7 @@ namespace gip {
         
         bool noinit(false);
         for (unsigned int i=0; i<geoimgs.size(); i++) {
-            geoimgs[i].warp_into(imgout, feature, interpolation, noinit);
+            geoimgs[i].warp_into(imgout, feature, interpolation, noinit, alltouch);
             noinit = true;
         }
     

@@ -426,7 +426,7 @@ namespace gip {
             bool crop=false, std::string proj="EPSG:4326",
             float xres=1.0, float yres=1.0, int interpolation=0) const;
 
-        GeoImage& warp_into(GeoImage&, GeoFeature=GeoFeature(), int=0, bool=false) const;
+        GeoImage& warp_into(GeoImage&, GeoFeature=GeoFeature(), int=0, bool=false, bool=false) const;
 
     protected:
         //! Vector of raster bands

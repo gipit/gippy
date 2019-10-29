@@ -326,12 +326,12 @@ namespace gip {
     }
 
 
-    GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit) const {
+    GeoImage& GeoImage::warp_into(GeoImage& imgout, GeoFeature feature, int interpolation, bool noinit, bool alltouch) const {
         if (Options::verbose() > 2) std::cout << basename() << " warping into " << imgout.basename() << std::endl;
 
         // Assume that these have the same number of bands
         for (unsigned int b=0; b<this->nbands(); b++) {
-            (*this)[b].warp_into(imgout[b], feature, interpolation, noinit);
+            (*this)[b].warp_into(imgout[b], feature, interpolation, noinit, alltouch);
         }
 
         return imgout;
