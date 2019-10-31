@@ -256,21 +256,15 @@ namespace gip {
 
         // create output
         // convert extent to resolution units
-        int xsz = std::ceil(ext.width() / std::abs(xres));
-        int ysz = std::ceil(ext.height() / std::abs(yres));
+        int xsz = std::ceil((ext.width() + std::abs(xres)) / std::abs(xres));
+        int ysz = std::ceil((ext.height()+ std::abs(yres))/ std::abs(yres));
 
         double xshift = -0.5 * std::abs(xres);
-        double yshift = 0.5 * std::abs(yres);
+        double yshift = 0.5  * std::abs(yres);
 
-        CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
-        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
+        CImg<double> bbox(4,1,1,1, ext.x0() + xshift, ext.y0() - yshift, xsz * std::abs(xres), ysz * std::abs(yres));
+	GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(),
                             proj, bbox, geoimgs[0].type().string(), "", false, options);
-
-        CImg<double> affine(6, 1, 1, 1,
-           ext.x0() + xshift, xres, 0.0,
-           ext.y1() + yshift, 0.0,  -std::abs(yres)
-        );
-        imgout.set_affine(affine);
 
         imgout.add_meta(geoimgs[0].meta());
         for (unsigned int b=0;b<imgout.nbands();b++) {
@@ -284,13 +278,13 @@ namespace gip {
         //metadata["SourceFiles"] = to_string(geoimgs.basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
         imgout.add_meta(metadata);
-        
+      
         bool noinit(false);
         for (unsigned int i=0; i<geoimgs.size(); i++) {
             geoimgs[i].warp_into(imgout, feature, interpolation, noinit, alltouch);
             noinit = true;
         }
-    
+
         return imgout;
     }
 
