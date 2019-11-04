@@ -64,7 +64,7 @@ jobs:
       - run: |
             yum install -y swig
             . ~/venv27/bin/activate
-            pip install . --no-cache
+            pip install -e . --no-cache
             cd test
             pytest --cov gippy     
 
