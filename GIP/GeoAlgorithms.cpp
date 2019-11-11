@@ -263,7 +263,7 @@ namespace gip {
         double yshift = 0.5  * std::abs(yres);
 
         CImg<double> bbox(4,1,1,1, ext.x0() + xshift, ext.y0() - yshift, xsz * std::abs(xres), ysz * std::abs(yres));
-	GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(),
+        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(),
                             proj, bbox, geoimgs[0].type().string(), "", false, options);
 
         imgout.add_meta(geoimgs[0].meta());
