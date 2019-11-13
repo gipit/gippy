@@ -202,7 +202,7 @@ namespace gip {
             rows = rows > ysize() ? ysize() : rows;
             numchunks = ceil( ysize()/(float)rows );
         } else {
-            rows = int(ysize() / numchunks);
+            rows = ceil(ysize() / (float)numchunks);
         }
 
         _Chunks.clear();
