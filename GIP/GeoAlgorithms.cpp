@@ -256,18 +256,19 @@ namespace gip {
 
         // create output
         // convert extent to resolution units
-        int xsz = std::ceil((ext.width() + std::abs(xres)) / std::abs(xres));
-        int ysz = std::ceil((ext.height()+ std::abs(yres))/ std::abs(yres));
+	// one pixel is added for transition from vector to raster space
+        int xsz = std::ceil(ext.width() / std::abs(xres)) + 1;
+        int ysz = std::ceil(ext.height() / std::abs(yres)) + 1;
 
         double xshift = -0.5 * std::abs(xres);
-        double yshift = 0.5  * std::abs(yres);
+        double yshift = -0.5 * std::abs(yres);
 
         /* Multiply the x and y size by the desired resolution to force the output
            image to have a size evenly divisible by the res. xsz and ysz above have
            been increased by one pixel to avoid the infamous "lost pixel"
            when cutting a raster with a vector. Finally, to minimize pixel drift
            amongst all of this, the whole image is shifted NW a half pixel. */
-        CImg<double> bbox(4,1,1,1, ext.x0() + xshift, ext.y0() - yshift, xsz * std::abs(xres), ysz * std::abs(yres));
+        CImg<double> bbox(4,1,1,1, ext.x0() + xshift, ext.y0() + yshift, xsz * std::abs(xres), ysz * std::abs(yres));
         GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(),
                             proj, bbox, geoimgs[0].type().string(), "", false, options);
 
