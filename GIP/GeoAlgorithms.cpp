@@ -227,19 +227,19 @@ namespace gip {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << geoimgs.size() << " files) - " << filename << endl;
 
-        // calculate union of all image extents
-        vector<BoundingBox> extents;
-        for (vector<GeoImage>::const_iterator i=geoimgs.begin(); i!=geoimgs.end(); i++) {
-            extents.push_back(i->extent());
-        }
-        BoundingBox ext = union_all(extents);
-
+        BoundingBox ext ;
         // if valid feature provided use that extent
         if (feature.valid()) {
             if (proj == "")
                 proj = feature.srs();
-            // transform extent to desired srs
-            ext.transform(geoimgs[0].srs(), proj);
+
+            // calculate union of all image extents
+            vector<BoundingBox> extents;
+            for (vector<GeoImage>::const_iterator i=geoimgs.begin(); i!=geoimgs.end(); i++) {
+                extents.push_back(i->extent().transform(i->srs(), proj));
+            }
+            ext = union_all(extents);
+
             if (crop) {
                 BoundingBox fext = feature.extent();
                 // limit to feature extent
