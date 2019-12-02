@@ -14,3 +14,4 @@ gippy/gippy_wrap.cpp
 gippy/algorithms.py
 gippy/algorithms_wrap.cpp
 /.vs
+.venv*
