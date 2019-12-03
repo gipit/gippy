@@ -63,13 +63,12 @@ class GeoAlgorithmsTests(unittest.TestCase):
         self.assertAlmostEqual(imgout.resolution().x(), res.x())
         self.assertAlmostEqual(imgout.resolution().y(), res.y())
 
-    @pytest.mark.skip(reason="cookie cutter half pixel shift makes this hard to test")
     def test_cookiecutter_gain(self):
         """ Cookie cutter on int image with floating point gain """
         bbox = np.array([0.0, 0.0, 1.0, 1.0])
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, bbox=bbox, dtype='int16')
         geoimg.set_gain(0.0001)
-        arr = np.zeros((1001,1001)) + 0.0001  # extra pixel
+        arr = np.zeros((1000,1000))
         arr[0:500,:] = 0.0002
         geoimg.write(deepcopy(arr))
         res = geoimg.resolution()
