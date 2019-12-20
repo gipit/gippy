@@ -8,8 +8,6 @@ import gippy as gp
 import gippy.algorithms as alg
 import gippy.test as gpt
 
-import pytest
-
 
 class GeoAlgorithmsTests(unittest.TestCase):
 
@@ -56,10 +54,10 @@ class GeoAlgorithmsTests(unittest.TestCase):
         ext = imgout.extent()
         # This appears to be accurate to 7 decimal places.
         # Is something getting converted from a double to a float somewhere?
-        self.assertAlmostEqual(ext.x0(), -0.0005)    # shift one half pixel northwest
-        self.assertAlmostEqual(ext.y0(), -0.0005)    # ''
-        self.assertAlmostEqual(ext.width(), 2.001, places=6)   # extra pixel
-        self.assertAlmostEqual(ext.height(), 1.001)  # ''
+        self.assertAlmostEqual(ext.x0(), 0.0)
+        self.assertAlmostEqual(ext.y0(), 0.0)
+        self.assertAlmostEqual(ext.width(), 2.0, places=6)
+        self.assertAlmostEqual(ext.height(), 1.0)  # ''
         self.assertAlmostEqual(imgout.resolution().x(), res.x())
         self.assertAlmostEqual(imgout.resolution().y(), res.y())
 
