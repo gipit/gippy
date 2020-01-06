@@ -259,10 +259,11 @@ namespace gip {
 
         // create output
         // convert extent to resolution units
-	// one pixel is added IFF transition from vector to raster space
+        // one pixel is added IFF transition from vector to raster space
         int xsz = std::ceil(ext.width() / std::abs(xres)) + vector2raster;
         int ysz = std::ceil(ext.height() / std::abs(yres)) + vector2raster;
 
+        // shift lower left corner IFF transition from vector to raster space
         double xshift = -0.5 * vector2raster * std::abs(xres);
         double yshift = -0.5 * vector2raster * std::abs(yres);
 
