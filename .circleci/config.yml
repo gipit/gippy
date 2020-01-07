@@ -34,40 +34,6 @@ jobs:
           paths:
             - ~/project
 
-  install_27:
-    <<: *container
-    steps:  
-      - *restore_repo
-      - restore_cache:
-          keys: 
-            - v3-dependencies27-{{ checksum "requirements.txt"}}
-            - v3-dependencies27
-      - run: |
-            pip install virtualenv
-            virtualenv ~/venv27
-            . ~/venv27/bin/activate
-            pip install -r requirements.txt
-            pip install -r requirements-dev.txt
-      - save_cache:
-          key: v3-dependencies27-{{ checksum "requirements.txt"}}
-          paths:
-            - ~/venv27
-
-  test_27:
-    <<: *container
-    steps:
-      - *restore_repo
-      - restore_cache:
-          keys:
-            - v3-dependencies27-{{ checksum "requirements.txt"}}
-            - v3-dependencies27
-      - run: |
-            yum install -y swig
-            . ~/venv27/bin/activate
-            pip install -e . --no-cache
-            cd test
-            pytest --cov gippy     
-
   install_36:
     <<: *container
     steps:  
@@ -147,12 +113,3 @@ workflows:
           filters:
             branches:
               only: master
-  build_test_27:
-    jobs:
-      - checkout_code
-      - install_27:
-          requires:
-            - checkout_code
-      - test_27:
-          requires:
-            - install_27

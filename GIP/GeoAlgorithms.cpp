@@ -223,7 +223,7 @@ namespace gip {
         - if GeoFeature is provided it will it's SRS. If not, proj parameter will be used (EPSG:4326 default)
     */
     GeoImage cookie_cutter(const std::vector<GeoImage>& geoimgs, string filename,
-            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation, dictionary options) {
+            GeoFeature feature, bool crop, string proj, float xres, float yres, int interpolation, dictionary options, bool alltouch) {
         if (Options::verbose() > 1)
             cout << "GIPPY: cookie_cutter (" << geoimgs.size() << " files) - " << filename << endl;
 
@@ -233,9 +233,12 @@ namespace gip {
             extents.push_back(i->extent());
         }
         BoundingBox ext = union_all(extents);
+        // Control special handling of extents if vector is provided
+        int vector2raster = 0 ;
 
         // if valid feature provided use that extent
         if (feature.valid()) {
+            vector2raster = 1 ;
             if (proj == "")
                 proj = feature.srs();
             // transform extent to desired srs
@@ -256,11 +259,21 @@ namespace gip {
 
         // create output
         // convert extent to resolution units
-        int xsz = std::ceil(ext.width() / std::abs(xres));
-        int ysz = std::ceil(ext.height() / std::abs(yres));
+        // one pixel is added IFF transition from vector to raster space
+        int xsz = std::ceil(ext.width() / std::abs(xres)) + vector2raster;
+        int ysz = std::ceil(ext.height() / std::abs(yres)) + vector2raster;
 
-        CImg<double> bbox(4,1,1,1, ext.x0(), ext.y0(), ext.width(), ext.height());
-        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(), 
+        // shift lower left corner IFF transition from vector to raster space
+        double xshift = -0.5 * vector2raster * std::abs(xres);
+        double yshift = -0.5 * vector2raster * std::abs(yres);
+
+        /* Multiply the x and y size by the desired resolution to force the output
+           image to have a size evenly divisible by the res. xsz and ysz above have
+           been increased by one pixel to avoid the infamous "lost pixel"
+           when cutting a raster with a vector. Finally, to minimize pixel drift
+           amongst all of this, the whole image is shifted NW a half pixel. */
+        CImg<double> bbox(4,1,1,1, ext.x0() + xshift, ext.y0() + yshift, xsz * std::abs(xres), ysz * std::abs(yres));
+        GeoImage imgout = GeoImage::create(filename, xsz, ysz, geoimgs[0].nbands(),
                             proj, bbox, geoimgs[0].type().string(), "", false, options);
 
         imgout.add_meta(geoimgs[0].meta());
@@ -275,13 +288,13 @@ namespace gip {
         //metadata["SourceFiles"] = to_string(geoimgs.basenames());
         if (interpolation > 1) metadata["Interpolation"] = to_string(interpolation);
         imgout.add_meta(metadata);
-        
+      
         bool noinit(false);
         for (unsigned int i=0; i<geoimgs.size(); i++) {
-            geoimgs[i].warp_into(imgout, feature, interpolation, noinit);
+            geoimgs[i].warp_into(imgout, feature, interpolation, noinit, alltouch);
             noinit = true;
         }
-    
+
         return imgout;
     }
 

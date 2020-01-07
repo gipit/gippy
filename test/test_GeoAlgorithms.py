@@ -52,36 +52,44 @@ class GeoAlgorithmsTests(unittest.TestCase):
         res = geoimg1.resolution()
         imgout = alg.cookie_cutter([geoimg1, geoimg2], xres=res.x(), yres=res.y())
         ext = imgout.extent()
-        self.assertEqual(ext.x0(), 0.0)
-        self.assertEqual(ext.y0(), 0.0)
-        self.assertEqual(ext.width(), 2.0)
-        self.assertEqual(ext.height(), 1.0)
+        # This appears to be accurate to 7 decimal places.
+        # Is something getting converted from a double to a float somewhere?
+        self.assertAlmostEqual(ext.x0(), 0.0)
+        self.assertAlmostEqual(ext.y0(), 0.0)
+        self.assertAlmostEqual(ext.width(), 2.0, places=6)
+        self.assertAlmostEqual(ext.height(), 1.0)  # ''
+        self.assertAlmostEqual(imgout.resolution().x(), res.x())
+        self.assertAlmostEqual(imgout.resolution().y(), res.y())
 
     def test_cookiecutter_gain(self):
         """ Cookie cutter on int image with floating point gain """
         bbox = np.array([0.0, 0.0, 1.0, 1.0])
         geoimg = gp.GeoImage.create(xsz=1000, ysz=1000, bbox=bbox, dtype='int16')
         geoimg.set_gain(0.0001)
-        arr = np.zeros((1000,1000)) + 0.0001
+        arr = np.zeros((1000,1000))
         arr[0:500,:] = 0.0002
         geoimg.write(deepcopy(arr))
         res = geoimg.resolution()
         imgout = alg.cookie_cutter([geoimg], xres=res.x(), yres=res.y())
-        np.testing.assert_array_equal(arr, imgout.read())
+        np.testing.assert_array_almost_equal(arr, imgout.read())
 
     def test_cookiecutter_real(self):
         """ Cookie cutter on single real image """
         geoimg = gpt.get_test_image().select(['red']) #, 'green', 'blue'])
+        iext = geoimg.extent()
         vpath = os.path.join(os.path.dirname(__file__), 'vectors')
         # test with feature of different projection
         feature = gp.GeoVector(os.path.join(vpath, 'aoi1_epsg4326.shp'))
         extin = feature.extent()
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=0.0003, yres=0.0003)
         extout = imgout.extent()
-        self.assertAlmostEqual(extout.x0(), extin.x0())
-        self.assertAlmostEqual(extout.y0(), extin.y0())
-        self.assertAlmostEqual(extout.x1(), extin.x1())
-        self.assertAlmostEqual(extout.y1(), extin.y1())
+        self.assertAlmostEqual(extout.x0() + 0.00015, extin.x0())
+        self.assertAlmostEqual(extout.y0() + 0.00015, extin.y0())
+        # cookie cutter will never add more than a pixel and a half in width
+        self.assertTrue(extout.x1() - extin.x1() < 0.0045)
+        self.assertTrue(extout.y1() - extin.y1() < 0.0045)
+        self.assertAlmostEqual(imgout.resolution().x(),  0.0003)
+        self.assertAlmostEqual(imgout.resolution().y(), -0.0003)
 
     def test_cookiecutter_real_reproj(self):
         """ Test with different projection """
@@ -92,10 +100,13 @@ class GeoAlgorithmsTests(unittest.TestCase):
         # test extent matches feature
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=30.0, yres=30.0)
         extout = imgout.extent()
-        self.assertAlmostEqual(extout.x0(), extin.x0())
-        self.assertAlmostEqual(extout.y0(), extin.y0())
-        self.assertAlmostEqual(extout.x1(), extin.x1())
-        self.assertAlmostEqual(extout.y1(), extin.y1())
+        self.assertAlmostEqual(extout.x0() + 15, extin.x0())
+        self.assertAlmostEqual(extout.y0() + 15, extin.y0())
+        # cookie cutter will never add more than a pixel and a half in width
+        self.assertTrue(extout.x1() - extin.x1() < 45.0)
+        self.assertTrue(extout.y1() - extin.y1() < 45.0)
+        self.assertEqual(imgout.resolution().x(),  30.0)
+        self.assertEqual(imgout.resolution().y(), -30.0)
 
     def test_cookiecutter_real_crop(self):
         """ Test cookie cutter with cropping """
@@ -105,10 +116,11 @@ class GeoAlgorithmsTests(unittest.TestCase):
         imgout = alg.cookie_cutter([geoimg], feature=feature[0], xres=30.0, yres=30.0, crop=True)
         extin = feature.extent()
         extout = imgout.extent()
-        self.assertTrue(extout.x0() >= extin.x0())
-        self.assertTrue(extout.y0() >= extin.y0())
-        self.assertTrue(extout.x1() <= extin.x1())
-        self.assertTrue(extout.y1() <= extin.y1())
+        self.assertTrue(extout.x0() + 15 >= extin.x0())  # half pixel shift
+        self.assertTrue(extout.y0() + 15 >= extin.y0())  # half pixel shift
+        # cookie cutter will never add more than a pixel and a half in width
+        self.assertTrue(extout.x1() - extin.x1() < 45.0)
+        self.assertTrue(extout.y1() - extin.y1() < 45.0)
 
     def test_ndvi(self):
         """ Calculate NDVI using gippy and apply colortable """

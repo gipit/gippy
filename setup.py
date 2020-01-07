@@ -38,6 +38,8 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools.command.develop import develop
+from setuptools.command.build_py import build_py
+
 #from wheel.bdist_wheel import bdist_wheel
 from distutils import sysconfig
 
@@ -127,7 +129,7 @@ class _build_ext(build_ext):
             os.symlink(os.path.basename(gip_module._file_name), link)
 
         # build the extensionss
-        build_ext.run(self)
+        super().run()
 
         # for mac update runtime library location. Use otool -L to see shared libs in a .so
         if sys.platform == 'darwin':
@@ -149,7 +151,7 @@ class _build_ext(build_ext):
 class _develop(develop):
     def run(self):
         log.debug('_develop run')
-        develop.run(self)
+        super().run()
         # move lib files into gippy directory
         [shutil.move(f, 'gippy/') for f in glob.glob('*.so')]
         if sysconfig.get_config_var('SOABI') is not None:
@@ -157,12 +159,11 @@ class _develop(develop):
             os.rename(gip_module._file_name, 'gippy/libgip.so')
 
 
-class _install(install):
+class _build_py(build_py):
     def run(self):
-        log.debug('_install run')
-        # ensure extension built before packaging
-        self.run_command('build_ext')
-        install.run(self)
+        log.debug('_build_py run')
+        self.run_command("build_ext")
+        return super().run()
 
 
 #class _bdist_wheel(bdist_wheel):
@@ -272,7 +273,6 @@ setup(
     cmdclass={
         "build_ext": _build_ext,
         "develop": _develop,
-        "install": _install,
-        #"bdist_wheel": _bdist_wheel,
+        "build_py": _build_py,
     }
 )
